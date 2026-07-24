@@ -1,0 +1,11 @@
+node_modules
+.env
+uploads
+npm-debug.log
+.git
+*.log
+dist
+coverage
+/.github
+/.vscode
+*.local

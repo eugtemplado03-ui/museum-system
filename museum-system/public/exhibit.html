@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exhibit — Museo Sang Bata sa Negros</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="topbar">
+    <a class="brand" href="/">
+      <div class="brand-mark">M</div>
+      <div class="brand-text">
+        <div class="name">Museo Sang Bata sa Negros</div>
+        <div class="tagline">Exhibit Guide</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a class="nav-btn" href="/">Scan &amp; Browse</a>
+      <a class="nav-btn" href="/programs.html">Programs</a>
+      <a class="nav-btn" href="/gallery.html">Gallery</a>
+      <a class="nav-btn" href="/events.html">Events</a>
+      <a class="nav-btn" href="/admin.html">Admin</a>
+    </div>
+  </div>
+
+  <main><div class="wrap">
+    <a class="detail-back" href="/">&larr; Back to gallery</a>
+    <div id="content">Loading exhibit…</div>
+  </div></main>
+  <footer>
+    Museo Sang Bata sa Negros · Exhibit Guide<br>
+    Barangay Old Sagay, Sagay City, Negros Occidental, Philippines 6122 ·
+    Open Mon–Fri 8:00 AM–5:00 PM (weekends by booked tour only) ·
+    +63 917 798 7420
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/chatbot.js"></script>
+  <script src="/js/image-enhance.js"></script>
+  <script src="/js/lightbox.js"></script>
+  <script>
+    function escapeHtml(str){
+      return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+    const CATEGORY_ICON = {
+      'Marine & Nature':'&#128031;','Touch & Play':'&#9995;','Toys & Collections':'&#129692;',
+      'Character & Heritage':'&#127942;','Environmental':'&#9851;','Reading & Learning':'&#128214;','Other':'&#10022;'
+    };
+
+    async function load(){
+      const params = new URLSearchParams(location.search);
+      const code = params.get('code');
+      const src = params.get('src') === 'scan' ? 'scan' : 'view';
+      const content = document.getElementById('content');
+      if(!code){
+        content.innerHTML = `<div class="empty-state"><h2>No exhibit specified</h2><p>Scan a tag or choose an exhibit from the gallery.</p><a class="btn btn-primary" href="/">Browse all exhibits</a></div>`;
+        return;
+      }
+      try{
+        const { exhibit } = await Api.getExhibit(code);
+        document.title = exhibit.title + ' — Museo Sang Bata sa Negros';
+        Api.trackView(code, src);
+
+        content.innerHTML = `
+          <div class="plaque">
+            <div class="plaque-media">
+              ${exhibit.optimizedImagePath || exhibit.imagePath
+                ? `<a class="img-link" href="${escapeHtml(exhibit.optimizedImagePath || exhibit.imagePath)}" target="_blank" rel="noopener">`+
+                    `<img src="${escapeHtml(exhibit.optimizedImagePath || exhibit.imagePath)}" alt="${escapeHtml(exhibit.title)}" onerror="this.parentElement.innerHTML='<div class=&quot;placeholder-icon&quot;>${CATEGORY_ICON[exhibit.category]||CATEGORY_ICON.Other}</div>'">`+
+                  `</a>`
+                : `<div class="placeholder-icon">${CATEGORY_ICON[exhibit.category]||CATEGORY_ICON.Other}</div>`}
+            </div>
+            <div class="plaque-body">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+                <div class="plaque-cat">${escapeHtml(exhibit.category)}</div>
+                <button class="fav-btn-plaque" id="favToggleBtn" aria-label="Toggle favorite">♡</button>
+              </div>
+              <h1>${escapeHtml(exhibit.title)}</h1>
+              <div class="plaque-meta-row">
+                <div><span>Origin</span><b>${escapeHtml(exhibit.origin||'—')}</b></div>
+                <div><span>Date</span><b>${escapeHtml(exhibit.year||'—')}</b></div>
+                <div><span>Location</span><b>${escapeHtml(exhibit.location||'—')}</b></div>
+              </div>
+              <div style="display:flex; gap:8px; align-items:center; margin-top:6px;">
+                <label for="langSelect" style="font-size:13px; color:var(--ink-soft);">Language:</label>
+                <select id="langSelect" style="padding:6px 8px; font-size:14px;">
+                  <option value="original">Original</option>
+                  <option value="tl">Tagalog</option>
+                  <option value="cb">Bisaya</option>
+                </select>
+              </div>
+              <div class="plaque-desc" id="plaqueDesc" data-desc-original="${escapeHtml(exhibit.description||'')||''}" data-desc-tl="${escapeHtml(exhibit.description_tl||'')||''}" data-desc-cb="${escapeHtml(exhibit.description_cb||'')||''}">
+                ${escapeHtml(exhibit.description||'No description on file yet.')}
+              </div>
+              <div class="tts-controls" style="margin-top:10px; display:flex; gap:8px; align-items:center;">
+                <button class="btn btn-secondary" id="ttsPlayBtn" aria-label="Play description">🔊 Listen</button>
+                <button class="btn btn-secondary" id="ttsStopBtn" aria-label="Stop description">■ Stop</button>
+                <div id="ttsStatus" style="font-size:13px; color:var(--ink-soft);"></div>
+              </div>
+              <div class="plaque-accession mono">Accession No. ${exhibit.code}</div>
+
+              <div id="ratingSummary" class="rating-summary"></div>
+              <div class="rating-form">
+                <div style="font-size:13px; font-weight:600; color:var(--ink);">Rate this exhibit</div>
+                <div class="stars-input" id="starsInput">
+                  ${[1,2,3,4,5].map(n=>`<span class="star" data-star="${n}">★</span>`).join('')}
+                </div>
+                <textarea id="ratingComment" placeholder="Optional: tell us what you thought — other visitors will see this"></textarea>
+                <button class="btn btn-primary btn-small" id="submitRatingBtn" style="margin-top:10px;">Submit rating</button>
+                <div id="ratingMsg" style="font-size:12px; color:var(--ink-soft); margin-top:6px;"></div>
+              </div>
+              <div class="rating-list" id="ratingList"></div>
+            </div>
+          </div>`;
+
+        wireFavorite(exhibit);
+        wireRatings(exhibit, code);
+        wireTTS(exhibit);
+      }catch(e){
+        content.innerHTML = `<div class="empty-state"><h2>Tag not recognized</h2><p>No exhibit matches code "${escapeHtml(code)}". It may have been moved or retired.</p><a class="btn btn-primary" href="/">Browse all exhibits</a></div>`;
+      }
+    }
+
+    // Client-side Text-to-Speech for exhibit descriptions
+    function wireTTS(exhibit){
+      const playBtn = document.getElementById('ttsPlayBtn');
+      const stopBtn = document.getElementById('ttsStopBtn');
+      const status = document.getElementById('ttsStatus');
+      const descEl = document.getElementById('plaqueDesc');
+      const langSelect = document.getElementById('langSelect');
+      if(!('speechSynthesis' in window) || !playBtn || !stopBtn || !descEl) return;
+
+      let utter = null;
+
+      function speakText(){
+        if(window.speechSynthesis.speaking){
+          window.speechSynthesis.cancel();
+        }
+        const lang = (langSelect && langSelect.value) || 'original';
+        let text = descEl.textContent.trim() || exhibit.title || 'No description available.';
+        if(lang === 'tl' && descEl.dataset.descTl) text = descEl.dataset.descTl;
+        if(lang === 'cb' && descEl.dataset.descCb) text = descEl.dataset.descCb;
+        utter = new SpeechSynthesisUtterance(text);
+        // set language hint for better TTS voice selection
+        utter.lang = (lang === 'tl') ? 'tl-PH' : (lang === 'cb' ? 'ceb-PH' : document.documentElement.lang || 'en-US');
+        utter.rate = 1.0;
+        utter.pitch = 1.0;
+        utter.onstart = ()=>{ status.textContent = 'Playing…'; playBtn.disabled = true; };
+        utter.onend = ()=>{ status.textContent = ''; playBtn.disabled = false; };
+        utter.onerror = ()=>{ status.textContent = 'Playback error'; playBtn.disabled = false; };
+        window.speechSynthesis.speak(utter);
+      }
+
+      playBtn.addEventListener('click', ()=>{ speakText(); });
+      // switch displayed text when language changes
+      if(langSelect){
+        langSelect.addEventListener('change', ()=>{
+          const v = langSelect.value;
+          if(v === 'tl' && descEl.dataset.descTl) descEl.textContent = descEl.dataset.descTl;
+          else if(v === 'cb' && descEl.dataset.descCb) descEl.textContent = descEl.dataset.descCb;
+          else descEl.textContent = descEl.dataset.descOriginal || 'No description on file yet.';
+        });
+      }
+      stopBtn.addEventListener('click', ()=>{ if(window.speechSynthesis.speaking) window.speechSynthesis.cancel(); status.textContent = ''; playBtn.disabled = false; });
+
+      // stop when navigating away
+      window.addEventListener('pagehide', ()=>{ if(window.speechSynthesis.speaking) window.speechSynthesis.cancel(); });
+    }
+
+    async function wireFavorite(exhibit){
+      const btn = document.getElementById('favToggleBtn');
+      let isFav = false;
+      try{
+        const { exhibits } = await Api.listFavorites();
+        isFav = exhibits.some(e => e.id === exhibit.id);
+        btn.textContent = isFav ? '♥' : '♡';
+        btn.classList.toggle('active', isFav);
+      }catch(e){ /* ignore */ }
+      btn.addEventListener('click', async ()=>{
+        try{
+          if(isFav){ await Api.removeFavorite(exhibit.id); isFav = false; }
+          else { await Api.addFavorite(exhibit.id); isFav = true; }
+          btn.textContent = isFav ? '♥' : '♡';
+          btn.classList.toggle('active', isFav);
+        }catch(e){ /* ignore */ }
+      });
+    }
+
+    function starString(avg){
+      const rounded = Math.round(avg);
+      return '★'.repeat(rounded) + '☆'.repeat(5 - rounded);
+    }
+
+    function renderRatingSummary(summary){
+      const el = document.getElementById('ratingSummary');
+      if(!summary.count){
+        el.innerHTML = `<span style="font-size:13px; color:var(--ink-soft);">No ratings yet — be the first!</span>`;
+        return;
+      }
+      el.innerHTML = `
+        <span class="avg">${summary.average}</span>
+        <span class="stars">${starString(summary.average)}</span>
+        <span class="count">${summary.count} rating${summary.count===1?'':'s'}</span>`;
+    }
+
+    function renderRatingList(ratings){
+      const el = document.getElementById('ratingList');
+      const withComments = ratings.filter(r => r.comment);
+      if(withComments.length === 0){ el.innerHTML = ''; return; }
+      el.innerHTML = withComments.slice(0, 10).map(r => `
+        <div class="rating-item">
+          <span class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
+          <div class="comment">${escapeHtml(r.comment)}</div>
+          <div class="when">${new Date(r.createdAt).toLocaleDateString()}</div>
+        </div>
+      `).join('');
+    }
+
+    async function wireRatings(exhibit, code){
+      let selected = 0;
+      const starsInput = document.getElementById('starsInput');
+      const msg = document.getElementById('ratingMsg');
+
+      function paintStars(){
+        starsInput.querySelectorAll('.star').forEach(s=>{
+          s.classList.toggle('filled', Number(s.dataset.star) <= selected);
+        });
+      }
+      starsInput.querySelectorAll('.star').forEach(s=>{
+        s.addEventListener('click', ()=>{ selected = Number(s.dataset.star); paintStars(); });
+      });
+
+      try{
+        const { summary, ratings } = await Api.getRatings(code);
+        renderRatingSummary(summary);
+        renderRatingList(ratings);
+      }catch(e){ /* ignore */ }
+
+      document.getElementById('submitRatingBtn').addEventListener('click', async ()=>{
+        if(!selected){ msg.textContent = 'Tap a star to choose a rating first.'; return; }
+        const comment = document.getElementById('ratingComment').value.trim();
+        msg.textContent = 'Submitting…';
+        try{
+          const { summary } = await Api.submitRating(code, selected, comment);
+          renderRatingSummary(summary);
+          const { ratings } = await Api.getRatings(code);
+          renderRatingList(ratings);
+          msg.textContent = 'Thanks for your feedback!';
+          document.getElementById('ratingComment').value = '';
+        }catch(e){
+          msg.textContent = e.message;
+        }
+      });
+    }
+
+    load();
+  </script>
+</body>
+</html>

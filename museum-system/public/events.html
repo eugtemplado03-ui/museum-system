@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>News &amp; Events — Museo Sang Bata sa Negros</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="topbar">
+    <a class="brand" href="/">
+      <div class="brand-mark">M</div>
+      <div class="brand-text">
+        <div class="name">Museo Sang Bata sa Negros</div>
+        <div class="tagline">Exhibit Guide</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a class="nav-btn" href="/">Scan &amp; Browse</a>
+      <a class="nav-btn" href="/programs.html">Programs</a>
+      <a class="nav-btn" href="/gallery.html">Gallery</a>
+      <a class="nav-btn active" href="/events.html">Events</a>
+      <a class="nav-btn" href="/admin.html">Admin</a>
+    </div>
+  </div>
+
+  <main><div class="wrap">
+    <div class="page-hero">
+      <h1>News &amp; events</h1>
+      <p>Recent happenings at the museum — anniversaries, workshops, training programs, and community outreach.</p>
+    </div>
+    <div class="content-grid" id="eventGrid"></div>
+    <div id="emptyState" style="display:none;" class="empty-state">
+      <h2>No events listed yet</h2>
+      <p>Events added from the admin dashboard will appear here.</p>
+    </div>
+  </div></main>
+  <footer>
+    Museo Sang Bata sa Negros<br>
+    Barangay Old Sagay, Sagay City, Negros Occidental, Philippines 6122 ·
+    Open Mon–Fri 8:00 AM–5:00 PM (weekends by booked tour only) ·
+    +63 917 798 7420
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/chatbot.js"></script>
+  <script src="/js/image-enhance.js"></script>
+  <script src="/js/lightbox.js"></script>
+  <script>
+    function escapeHtml(str){
+      return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function formatDate(d){
+      if(!d) return '';
+      const parsed = new Date(d);
+      if(isNaN(parsed.getTime())) return d;
+      return parsed.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    function eventCard(e){
+      return `
+      <div class="content-card">
+        <div class="media">
+          ${e.optimizedImagePath || e.imagePath ? `<a class="img-link" href="${escapeHtml(e.optimizedImagePath || e.imagePath)}" target="_blank" rel="noopener">`+
+              `<img class="img-enhance" src="${escapeHtml(e.optimizedImagePath || e.imagePath)}" alt="${escapeHtml(e.title)}" onerror="this.parentElement.innerHTML='<span class=&quot;icon&quot;>📅</span>'">`+
+            `</a>` : `<span class="icon">📅</span>`}
+        </div>
+        <div class="body">
+          ${e.date ? `<div class="tag">${escapeHtml(formatDate(e.date))}</div>` : ''}
+          <h3>${escapeHtml(e.title)}</h3>
+          ${e.location ? `<div class="meta">${escapeHtml(e.location)}</div>` : ''}
+          <p class="desc">${escapeHtml(e.description || '')}</p>
+        </div>
+      </div>`;
+    }
+
+    async function load(){
+      const grid = document.getElementById('eventGrid');
+      try{
+        const { events } = await Api.listEvents();
+        if(events.length === 0){
+          document.getElementById('emptyState').style.display = 'block';
+        } else {
+          grid.innerHTML = events.map(eventCard).join('');
+        }
+      }catch(e){
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><p>${escapeHtml(e.message)}</p></div>`;
+      }
+    }
+    load();
+  </script>
+</body>
+</html>

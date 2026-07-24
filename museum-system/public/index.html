@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Museo Sang Bata sa Negros — Exhibit Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
+</head>
+<body>
+  <div class="topbar">
+    <a class="brand" href="/">
+      <div class="brand-mark">M</div>
+      <div class="brand-text">
+        <div class="name">Museo Sang Bata sa Negros</div>
+        <div class="tagline">Exhibit Guide</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a class="nav-btn active" href="/">Scan &amp; Browse</a>
+      <a class="nav-btn" href="/programs.html">Programs</a>
+      <a class="nav-btn" href="/gallery.html">Gallery</a>
+      <a class="nav-btn" href="/events.html">Events</a>
+      <a class="nav-btn" href="/admin.html">Admin</a>
+    </div>
+  </div>
+
+  <main>
+    <div class="wrap">
+      <div class="scan-hero">
+        <div>
+          <div class="eyebrow">Self-guided tour</div>
+          <h1>Point your camera at any exhibit tag.</h1>
+          <p>Every exhibit at Museo Sang Bata sa Negros carries its own tag. Scan it here to learn what you're looking at and where to find it in the museum — no app to install.</p>
+          <div class="scan-cta">
+            <button class="btn btn-primary" id="openScannerBtn">&#128247; Open scanner</button>
+            <a class="btn btn-ghost" href="#gallery-section">Browse all tags</a>
+          </div>
+        </div>
+        <div class="scanner-frame">
+          <div class="viewport" id="viewport">
+            <div class="viewport-placeholder" id="viewportPlaceholder">Tap "Open scanner" to activate your camera, or enter a catalog code below.</div>
+            <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+          </div>
+          <div class="scan-status" id="scanStatus"></div>
+          <div class="manual-row">
+            <input type="text" id="manualCode" placeholder="e.g. EX-001" class="mono">
+            <button class="btn btn-ghost dark btn-small" id="manualGoBtn">Go</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="gallery-section">
+        <div class="section-head">
+          <h2>Exhibit tags on the floor</h2>
+          <div class="count" id="exhibitCount">Loading…</div>
+        </div>
+        <div class="gallery-filters">
+          <button class="filter-chip active" id="filterAll">All exhibits</button>
+          <button class="filter-chip" id="filterFavorites">♥ My favorites</button>
+        </div>
+        <div class="tag-grid" id="tagGrid"></div>
+        <div id="emptyState" style="display:none;" class="empty-state">
+          <h2>No exhibits yet</h2>
+          <p>Add your first exhibit from the admin dashboard.</p>
+          <a class="btn btn-primary" href="/admin.html">Go to admin</a>
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer>
+    Museo Sang Bata sa Negros · Exhibit Guide<br>
+    Barangay Old Sagay, Sagay City, Negros Occidental, Philippines 6122 ·
+    Open Mon–Fri 8:00 AM–5:00 PM (weekends by booked tour only) ·
+    +63 917 798 7420
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/chatbot.js"></script>
+  <script>
+    function escapeHtml(str){
+      return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function starString(avg){
+      if(avg == null) return '';
+      const rounded = Math.round(avg);
+      return '★'.repeat(rounded) + '☆'.repeat(5 - rounded);
+    }
+
+    function tagCard(ex){
+      const isFav = favoriteIds.has(ex.id);
+      return `
+      <div class="tag-card" data-id="${ex.id}">
+        <div class="tag-hole"></div>
+        <button class="fav-btn ${isFav ? 'active' : ''}" data-fav-toggle="${ex.id}" aria-label="Toggle favorite">${isFav ? '♥' : '♡'}</button>
+        <div class="tag-cat">${escapeHtml(ex.category)}</div>
+        <h3>${escapeHtml(ex.title)}</h3>
+        <div class="meta">${escapeHtml(ex.origin)} · ${escapeHtml(ex.year)}</div>
+        ${ex.ratingCount ? `<div class="rating-badge"><span class="stars">${starString(ex.ratingAverage)}</span> ${ex.ratingAverage} (${ex.ratingCount})</div>` : `<div class="rating-badge">No ratings yet</div>`}
+        <div class="tag-qr"><img src="${Api.qrUrl(ex.code)}" alt="QR tag for ${escapeHtml(ex.code)}" loading="lazy"></div>
+        <div class="tag-id mono">${ex.code}</div>
+        <div class="tag-foot">
+          <a class="btn btn-ghost dark btn-small" href="/exhibit.html?code=${encodeURIComponent(ex.code)}">View label</a>
+        </div>
+      </div>`;
+    }
+
+    let allExhibits = [];
+    let favoriteIds = new Set();
+    let showFavoritesOnly = false;
+
+    function renderGrid(){
+      const grid = document.getElementById('tagGrid');
+      const list = showFavoritesOnly ? allExhibits.filter(e => favoriteIds.has(e.id)) : allExhibits;
+      if(list.length === 0){
+        grid.innerHTML = showFavoritesOnly
+          ? `<div class="empty-state" style="grid-column:1/-1;"><h2>No favorites yet</h2><p>Tap the heart on any exhibit to save it here.</p></div>`
+          : '';
+        if(!showFavoritesOnly) document.getElementById('emptyState').style.display = 'block';
+      } else {
+        document.getElementById('emptyState').style.display = 'none';
+        grid.innerHTML = list.map(tagCard).join('');
+      }
+      grid.querySelectorAll('[data-fav-toggle]').forEach(btn=>{
+        btn.addEventListener('click', (e)=>{ e.preventDefault(); toggleFavorite(btn.dataset.favToggle); });
+      });
+    }
+
+    async function toggleFavorite(exhibitId){
+      const isFav = favoriteIds.has(exhibitId);
+      try{
+        if(isFav){ favoriteIds.delete(exhibitId); await Api.removeFavorite(exhibitId); }
+        else { favoriteIds.add(exhibitId); await Api.addFavorite(exhibitId); }
+        renderGrid();
+      }catch(e){ /* silently ignore — favorites are a nice-to-have */ }
+    }
+
+    async function loadGallery(){
+      const grid = document.getElementById('tagGrid');
+      const countEl = document.getElementById('exhibitCount');
+      try{
+        const [{ exhibits }, favResult] = await Promise.all([
+          Api.listExhibits(),
+          Api.listFavorites().catch(()=>({ exhibits: [] }))
+        ]);
+        allExhibits = exhibits;
+        favoriteIds = new Set(favResult.exhibits.map(e => e.id));
+        countEl.textContent = `${exhibits.length} exhibits catalogued`;
+        renderGrid();
+      }catch(e){
+        countEl.textContent = 'Could not load exhibits';
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><p>${escapeHtml(e.message)}</p></div>`;
+      }
+    }
+    loadGallery();
+
+    document.getElementById('filterAll').addEventListener('click', ()=>{
+      showFavoritesOnly = false;
+      document.getElementById('filterAll').classList.add('active');
+      document.getElementById('filterFavorites').classList.remove('active');
+      renderGrid();
+    });
+    document.getElementById('filterFavorites').addEventListener('click', ()=>{
+      showFavoritesOnly = true;
+      document.getElementById('filterFavorites').classList.add('active');
+      document.getElementById('filterAll').classList.remove('active');
+      renderGrid();
+    });
+
+    document.getElementById('manualGoBtn').addEventListener('click', ()=>{
+      const v = document.getElementById('manualCode').value.trim().toUpperCase();
+      if(v) location.href = '/exhibit.html?code=' + encodeURIComponent(v);
+    });
+    document.getElementById('manualCode').addEventListener('keydown', e=>{
+      if(e.key==='Enter') document.getElementById('manualGoBtn').click();
+    });
+
+    let scanStream = null, scanRAF = null;
+    function stopScanner(){
+      if(scanRAF) cancelAnimationFrame(scanRAF);
+      if(scanStream){ scanStream.getTracks().forEach(t=>t.stop()); scanStream = null; }
+    }
+    window.addEventListener('beforeunload', stopScanner);
+
+    async function startScanner(){
+      const viewport = document.getElementById('viewport');
+      const placeholder = document.getElementById('viewportPlaceholder');
+      const status = document.getElementById('scanStatus');
+      if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+        status.textContent = 'Camera not available in this browser — use the code field below.';
+        return;
+      }
+      try{
+        status.textContent = 'Requesting camera access…';
+        scanStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+        if(placeholder) placeholder.remove();
+        const video = document.createElement('video');
+        video.setAttribute('playsinline','');
+        video.srcObject = scanStream;
+        viewport.prepend(video);
+        await video.play();
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        status.textContent = 'Scanning… hold the tag steady in frame.';
+        const tick = ()=>{
+          if(video.readyState === video.HAVE_ENOUGH_DATA){
+            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
+            const code = jsQR(imgData.data, imgData.width, imgData.height);
+            if(code && code.data){
+              status.textContent = 'Tag recognized.';
+              stopScanner();
+              try {
+                const url = new URL(code.data);
+                url.searchParams.set('src', 'scan');
+                location.href = url.pathname + url.search;
+              } catch(e) {
+                location.href = '/exhibit.html?code=' + encodeURIComponent(code.data.trim()) + '&src=scan';
+              }
+              return;
+            }
+          }
+          scanRAF = requestAnimationFrame(tick);
+        };
+        scanRAF = requestAnimationFrame(tick);
+      }catch(err){
+        status.textContent = 'Camera access denied — use the code field below instead.';
+      }
+    }
+    document.getElementById('openScannerBtn').addEventListener('click', startScanner);
+  </script>
+</body>
+</html>
