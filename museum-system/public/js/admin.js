@@ -31,6 +31,62 @@ function closeModal(){
   if(el) el.remove();
 }
 
+function renderImagePreviewList(paths, containerId){
+  const container = document.getElementById(containerId);
+  if(!container) return;
+  if(!paths || paths.length === 0){
+    container.innerHTML = `<div class="image-preview-empty">No photos uploaded yet.</div>`;
+    return;
+  }
+  container.innerHTML = paths.map((src,index)=>`
+    <div class="image-thumb" data-index="${index}">
+      <img src="${escapeHtml(src)}" alt="Photo ${index + 1}">
+      <div class="image-thumb-actions">
+        <button type="button" class="btn btn-secondary btn-small replace-photo" data-index="${index}">Replace</button>
+        <button type="button" class="btn btn-danger btn-small remove-photo" data-index="${index}">Remove</button>
+      </div>
+    </div>
+  `).join('');
+  container.querySelectorAll('.remove-photo').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const idx = Number(btn.dataset.index);
+      if(Number.isFinite(idx)){
+        paths.splice(idx, 1);
+        renderImagePreviewList(paths, containerId);
+      }
+    });
+  });
+  container.querySelectorAll('.replace-photo').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const idx = Number(btn.dataset.index);
+      if(!Number.isFinite(idx)) return;
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/png,image/jpeg,image/webp,image/gif';
+      fileInput.addEventListener('change', async (e)=>{
+        const file = e.target.files[0];
+        if(!file) return;
+        const status = container.closest('.form-field')?.querySelector('[id$="UploadStatus"]');
+        if(status) status.textContent = 'Uploading…';
+        try{
+          const { path } = await Api.uploadImage(file);
+          paths[idx] = path;
+          renderImagePreviewList(paths, containerId);
+          if(status) status.textContent = 'Photo replaced.';
+        }catch(err){
+          if(status) status.textContent = 'Upload failed: ' + err.message;
+        }
+      });
+      fileInput.click();
+    });
+  });
+}
+
+function ensureMultipleInput(id){
+  const input = document.getElementById(id);
+  if(input) input.multiple = true;
+}
+
 const app = document.getElementById('app');
 let exhibitsCache = [];
 
@@ -304,7 +360,7 @@ function openTagModal(code){
 
 function openEditModal(id){
   const ex = id ? exhibitsCache.find(e=>e.id===id) : null;
-  let pendingImagePath = ex ? ex.imagePath : '';
+  let pendingImagePaths = ex ? (Array.isArray(ex.imagePaths) ? [...ex.imagePaths] : (ex.imagePath ? [ex.imagePath] : [])) : [];
 
   openModal(`
     <h2>${ex ? 'Edit exhibit' : 'Add exhibit'}</h2>
@@ -332,10 +388,12 @@ function openEditModal(id){
         <input type="text" id="f-location" value="${ex ? escapeHtml(ex.location) : ''}" placeholder="e.g. Hall 1 — Navigation Wing">
       </div>
       <div class="form-field full">
-        <label>Image</label>
-        <input type="file" id="f-image-file" accept="image/png,image/jpeg,image/webp,image/gif">
-        <img class="image-preview" id="imagePreview" style="${pendingImagePath ? '' : 'display:none;'}" src="${pendingImagePath || ''}">
-        <div id="uploadStatus" style="font-size:12px; color:var(--ink-soft);"></div>
+        <label>Photos</label>
+          <input type="file" id="f-image-file" accept="image/png,image/jpeg,image/webp,image/gif" multiple="multiple" style="display:none;">
+          <div class="file-drop" id="f-drop">Click or drop photos here (Ctrl/Cmd or Shift to select multiple)</div>
+          <div class="file-hint">Tip: you can also hold Ctrl/Cmd or Shift to select multiple files.</div>
+          <div class="image-preview-list" id="imagePreviewList"></div>
+          <div id="uploadStatus" style="font-size:12px; color:var(--ink-soft);"></div>
       </div>
       <div class="form-field full">
         <label>Description</label>
@@ -348,18 +406,43 @@ function openEditModal(id){
       <button class="btn btn-primary" id="saveEdit">${ex ? 'Save changes' : 'Add exhibit'}</button>
     </div>`);
 
-  document.getElementById('f-image-file').addEventListener('change', async (e)=>{
-    const file = e.target.files[0];
-    if(!file) return;
+  ensureMultipleInput('f-image-file');
+  renderImagePreviewList(pendingImagePaths, 'imagePreviewList');
+    const fInput = document.getElementById('f-image-file');
+    const fDrop = document.getElementById('f-drop');
+  if(fDrop){
+    fDrop.addEventListener('click', ()=>fInput.click());
+    fDrop.addEventListener('dragover', (ev)=>{ ev.preventDefault(); fDrop.classList.add('dragover'); });
+    fDrop.addEventListener('dragleave', ()=>fDrop.classList.remove('dragover'));
+    fDrop.addEventListener('drop', async (ev)=>{
+      ev.preventDefault(); fDrop.classList.remove('dragover');
+      const files = Array.from(ev.dataTransfer.files || []);
+      if(files.length === 0) return;
+      const status = document.getElementById('uploadStatus');
+      status.textContent = 'Uploading…';
+      try{
+        for(const file of files){
+          const { path } = await Api.uploadImage(file);
+          pendingImagePaths.push(path);
+        }
+        renderImagePreviewList(pendingImagePaths, 'imagePreviewList');
+        status.textContent = `${pendingImagePaths.length} photo${pendingImagePaths.length === 1 ? '' : 's'} uploaded.`;
+      }catch(err){ status.textContent = 'Upload failed: ' + err.message; }
+    });
+  }
+  fInput.addEventListener('change', async (e)=>{
+    const files = Array.from(e.target.files || []);
+    if(files.length === 0) return;
     const status = document.getElementById('uploadStatus');
     status.textContent = 'Uploading…';
     try{
-      const { path } = await Api.uploadImage(file);
-      pendingImagePath = path;
-      const preview = document.getElementById('imagePreview');
-      preview.src = path;
-      preview.style.display = 'block';
-      status.textContent = 'Image uploaded.';
+      for(const file of files){
+        const { path } = await Api.uploadImage(file);
+        pendingImagePaths.push(path);
+      }
+      renderImagePreviewList(pendingImagePaths, 'imagePreviewList');
+      status.textContent = `${pendingImagePaths.length} photo${pendingImagePaths.length === 1 ? '' : 's'} uploaded.`;
+      e.target.value = '';
     }catch(err){
       status.textContent = 'Upload failed: ' + err.message;
     }
@@ -377,7 +460,7 @@ function openEditModal(id){
       year: document.getElementById('f-year').value.trim(),
       origin: document.getElementById('f-origin').value.trim(),
       location: document.getElementById('f-location').value.trim(),
-      imagePath: pendingImagePath,
+      imagePaths: pendingImagePaths,
       description: document.getElementById('f-desc').value.trim()
     };
     const btn = document.getElementById('saveEdit');
@@ -447,7 +530,7 @@ async function renderProgramsTab(contentEl){
 
 function openProgramModal(id){
   const p = id ? programsCache.find(x=>x.id===id) : null;
-  let pendingImage = p ? p.imagePath : '';
+  let pendingImagePaths = p ? (Array.isArray(p.imagePaths) ? [...p.imagePaths] : (p.imagePath ? [p.imagePath] : [])) : [];
   openModal(`
     <h2>${p ? 'Edit program' : 'Add program'}</h2>
     <div class="form-grid">
@@ -455,9 +538,11 @@ function openProgramModal(id){
       <div class="form-field"><label>Age range</label><input type="text" id="pf-age" value="${p?escapeHtml(p.ageRange):''}" placeholder="e.g. 7–12"></div>
       <div class="form-field"><label>Schedule</label><input type="text" id="pf-schedule" value="${p?escapeHtml(p.schedule):''}" placeholder="e.g. Ongoing cohorts"></div>
       <div class="form-field full">
-        <label>Image</label>
-        <input type="file" id="pf-image-file" accept="image/png,image/jpeg,image/webp,image/gif">
-        <img class="image-preview" id="pfImagePreview" style="${pendingImage?'':'display:none;'}" src="${pendingImage||''}">
+        <label>Photos</label>
+        <input type="file" id="pf-image-file" accept="image/png,image/jpeg,image/webp,image/gif" multiple="multiple" style="display:none;">
+        <div class="file-drop" id="pf-drop">Click or drop photos here (Ctrl/Cmd or Shift to select multiple)</div>
+        <div class="file-hint">Tip: you can also hold Ctrl/Cmd or Shift to select multiple files.</div>
+        <div class="image-preview-list" id="pfImagePreviewList"></div>
         <div id="pfUploadStatus" style="font-size:12px; color:var(--ink-soft);"></div>
       </div>
       <div class="form-field full"><label>Description</label><textarea id="pf-desc" placeholder="What this program is about…">${p?escapeHtml(p.description):''}</textarea></div>
@@ -467,16 +552,43 @@ function openProgramModal(id){
       <button class="btn btn-ghost dark" id="pfCancel">Cancel</button>
       <button class="btn btn-primary" id="pfSave">${p?'Save changes':'Add program'}</button>
     </div>`);
-  document.getElementById('pf-image-file').addEventListener('change', async (e)=>{
-    const file = e.target.files[0]; if(!file) return;
+  ensureMultipleInput('pf-image-file');
+  renderImagePreviewList(pendingImagePaths, 'pfImagePreviewList');
+  const pfInput = document.getElementById('pf-image-file');
+  const pfDrop = document.getElementById('pf-drop');
+  if(pfDrop){
+    pfDrop.addEventListener('click', ()=>pfInput.click());
+    pfDrop.addEventListener('dragover', (ev)=>{ ev.preventDefault(); pfDrop.classList.add('dragover'); });
+    pfDrop.addEventListener('dragleave', ()=>pfDrop.classList.remove('dragover'));
+    pfDrop.addEventListener('drop', async (ev)=>{
+      ev.preventDefault(); pfDrop.classList.remove('dragover');
+      const files = Array.from(ev.dataTransfer.files || []);
+      if(files.length === 0) return;
+      const status = document.getElementById('pfUploadStatus');
+      status.textContent = 'Uploading…';
+      try{
+        for(const file of files){
+          const { path } = await Api.uploadImage(file);
+          pendingImagePaths.push(path);
+        }
+        renderImagePreviewList(pendingImagePaths, 'pfImagePreviewList');
+        status.textContent = `${pendingImagePaths.length} photo${pendingImagePaths.length === 1 ? '' : 's'} uploaded.`;
+      }catch(err){ status.textContent = 'Upload failed: ' + err.message; }
+    });
+  }
+  pfInput.addEventListener('change', async (e)=>{
+    const files = Array.from(e.target.files || []);
+    if(files.length === 0) return;
     const status = document.getElementById('pfUploadStatus');
     status.textContent = 'Uploading…';
     try{
-      const { path } = await Api.uploadImage(file);
-      pendingImage = path;
-      const preview = document.getElementById('pfImagePreview');
-      preview.src = path; preview.style.display = 'block';
-      status.textContent = 'Image uploaded.';
+      for(const file of files){
+        const { path } = await Api.uploadImage(file);
+        pendingImagePaths.push(path);
+      }
+      renderImagePreviewList(pendingImagePaths, 'pfImagePreviewList');
+      status.textContent = `${pendingImagePaths.length} photo${pendingImagePaths.length === 1 ? '' : 's'} uploaded.`;
+      e.target.value = '';
     }catch(err){ status.textContent = 'Upload failed: ' + err.message; }
   });
   document.getElementById('pfCancel').addEventListener('click', closeModal);
@@ -488,7 +600,7 @@ function openProgramModal(id){
       title,
       ageRange: document.getElementById('pf-age').value.trim(),
       schedule: document.getElementById('pf-schedule').value.trim(),
-      imagePath: pendingImage,
+      imagePaths: pendingImagePaths,
       description: document.getElementById('pf-desc').value.trim()
     };
     try{
@@ -548,7 +660,7 @@ async function renderEventsTab(contentEl){
 
 function openEventModal(id){
   const ev = id ? eventsCache.find(x=>x.id===id) : null;
-  let pendingImage = ev ? ev.imagePath : '';
+  let pendingImagePaths = ev ? (Array.isArray(ev.imagePaths) ? [...ev.imagePaths] : (ev.imagePath ? [ev.imagePath] : [])) : [];
   openModal(`
     <h2>${ev ? 'Edit event' : 'Add event'}</h2>
     <div class="form-grid">
@@ -556,9 +668,11 @@ function openEventModal(id){
       <div class="form-field"><label>Date</label><input type="date" id="ef-date" value="${ev&&ev.date?escapeHtml(ev.date):''}"></div>
       <div class="form-field"><label>Location</label><input type="text" id="ef-location" value="${ev?escapeHtml(ev.location):''}" placeholder="e.g. Museo Sang Bata sa Negros"></div>
       <div class="form-field full">
-        <label>Image</label>
-        <input type="file" id="ef-image-file" accept="image/png,image/jpeg,image/webp,image/gif">
-        <img class="image-preview" id="efImagePreview" style="${pendingImage?'':'display:none;'}" src="${pendingImage||''}">
+        <label>Photos</label>
+        <input type="file" id="ef-image-file" accept="image/png,image/jpeg,image/webp,image/gif" multiple="multiple" style="display:none;">
+        <div class="file-drop" id="ef-drop">Click or drop photos here (Ctrl/Cmd or Shift to select multiple)</div>
+        <div class="file-hint">Tip: you can also hold Ctrl/Cmd or Shift to select multiple files.</div>
+        <div class="image-preview-list" id="efImagePreviewList"></div>
         <div id="efUploadStatus" style="font-size:12px; color:var(--ink-soft);"></div>
       </div>
       <div class="form-field full"><label>Description</label><textarea id="ef-desc" placeholder="What happened / what to expect…">${ev?escapeHtml(ev.description):''}</textarea></div>
@@ -568,16 +682,43 @@ function openEventModal(id){
       <button class="btn btn-ghost dark" id="efCancel">Cancel</button>
       <button class="btn btn-primary" id="efSave">${ev?'Save changes':'Add event'}</button>
     </div>`);
-  document.getElementById('ef-image-file').addEventListener('change', async (e)=>{
-    const file = e.target.files[0]; if(!file) return;
+  ensureMultipleInput('ef-image-file');
+  renderImagePreviewList(pendingImagePaths, 'efImagePreviewList');
+  const efInput = document.getElementById('ef-image-file');
+  const efDrop = document.getElementById('ef-drop');
+  if(efDrop){
+    efDrop.addEventListener('click', ()=>efInput.click());
+    efDrop.addEventListener('dragover', (ev)=>{ ev.preventDefault(); efDrop.classList.add('dragover'); });
+    efDrop.addEventListener('dragleave', ()=>efDrop.classList.remove('dragover'));
+    efDrop.addEventListener('drop', async (ev)=>{
+      ev.preventDefault(); efDrop.classList.remove('dragover');
+      const files = Array.from(ev.dataTransfer.files || []);
+      if(files.length === 0) return;
+      const status = document.getElementById('efUploadStatus');
+      status.textContent = 'Uploading…';
+      try{
+        for(const file of files){
+          const { path } = await Api.uploadImage(file);
+          pendingImagePaths.push(path);
+        }
+        renderImagePreviewList(pendingImagePaths, 'efImagePreviewList');
+        status.textContent = `${pendingImagePaths.length} photo${pendingImagePaths.length === 1 ? '' : 's'} uploaded.`;
+      }catch(err){ status.textContent = 'Upload failed: ' + err.message; }
+    });
+  }
+  efInput.addEventListener('change', async (e)=>{
+    const files = Array.from(e.target.files || []);
+    if(files.length === 0) return;
     const status = document.getElementById('efUploadStatus');
     status.textContent = 'Uploading…';
     try{
-      const { path } = await Api.uploadImage(file);
-      pendingImage = path;
-      const preview = document.getElementById('efImagePreview');
-      preview.src = path; preview.style.display = 'block';
-      status.textContent = 'Image uploaded.';
+      for(const file of files){
+        const { path } = await Api.uploadImage(file);
+        pendingImagePaths.push(path);
+      }
+      renderImagePreviewList(pendingImagePaths, 'efImagePreviewList');
+      status.textContent = `${pendingImagePaths.length} photo${pendingImagePaths.length === 1 ? '' : 's'} uploaded.`;
+      e.target.value = '';
     }catch(err){ status.textContent = 'Upload failed: ' + err.message; }
   });
   document.getElementById('efCancel').addEventListener('click', closeModal);
@@ -589,7 +730,7 @@ function openEventModal(id){
       title,
       date: document.getElementById('ef-date').value,
       location: document.getElementById('ef-location').value.trim(),
-      imagePath: pendingImage,
+      imagePaths: pendingImagePaths,
       description: document.getElementById('ef-desc').value.trim()
     };
     try{
@@ -603,28 +744,53 @@ function openEventModal(id){
 
 // ---------------- Gallery ----------------
 let galleryCache = [];
+let gallerySelection = new Set();
 
 async function renderGalleryTab(contentEl){
   contentEl.innerHTML = `<div class="empty-state" style="color:var(--ink-soft);"><p>Loading gallery…</p></div>`;
   try{
     const { gallery } = await Api.listGallery();
     galleryCache = gallery;
+    gallerySelection.clear();
   }catch(e){
     contentEl.innerHTML = `<div class="empty-state"><h2>Could not load gallery</h2><p>${escapeHtml(e.message)}</p></div>`;
     return;
   }
   contentEl.innerHTML = `
-    <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 26px;">
-      <span style="font-size:13px; color:var(--ink-soft);">${galleryCache.length} photos</span>
-      <button class="btn btn-primary btn-small" id="addGalleryBtn">+ Add photo</button>
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 26px; gap:16px; flex-wrap:wrap;">
+      <div style="display:flex; gap:12px; align-items:center;">
+        <span id="gallerySelectionCount" style="font-size:13px; color:var(--ink-soft);">Select photos to delete</span>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <button class="btn btn-danger btn-small" id="deleteSelectedGalleryBtn" disabled>Delete selected</button>
+        <button class="btn btn-primary btn-small" id="addGalleryBtn">+ Add photos</button>
+      </div>
     </div>
     <div class="gallery-grid" style="padding:0 26px 26px;" id="galleryAdminGrid"></div>
     ${galleryCache.length===0 ? `<div class="empty-state"><h2>No photos yet</h2><p>Upload the first gallery photo.</p></div>` : ''}
   `;
   document.getElementById('addGalleryBtn').addEventListener('click', ()=>openGalleryModal(null));
+  document.getElementById('deleteSelectedGalleryBtn').addEventListener('click', async ()=>{
+    if(gallerySelection.size === 0) return;
+    if(!confirm(`Delete ${gallerySelection.size} selected photo${gallerySelection.size === 1 ? '' : 's'}?`)) return;
+    try{
+      for(const id of [...gallerySelection]){
+        await Api.deleteGalleryItem(id);
+      }
+      toast(`${gallerySelection.size} photo${gallerySelection.size === 1 ? '' : 's'} deleted`);
+      gallerySelection.clear();
+      renderDashboard();
+    }catch(e){
+      toast(e.message, true);
+    }
+  });
+
   const grid = document.getElementById('galleryAdminGrid');
   grid.innerHTML = galleryCache.map(g => `
     <div class="gallery-item">
+      <label class="gallery-item-checkbox">
+        <input type="checkbox" class="gallery-select" data-id="${g.id}">
+      </label>
       <img src="${escapeHtml(g.imagePath)}" alt="${escapeHtml(g.title)}">
       <div class="caption">
         ${g.title ? `<b>${escapeHtml(g.title)}</b>` : ''}
@@ -635,24 +801,38 @@ async function renderGalleryTab(contentEl){
       </div>
     </div>
   `).join('');
+  grid.querySelectorAll('.gallery-select').forEach(chk=>chk.addEventListener('change', e=>{
+    const id = e.target.dataset.id;
+    if(!id) return;
+    if(e.target.checked) gallerySelection.add(id);
+    else gallerySelection.delete(id);
+    updateGallerySelectionControls();
+  }));
   grid.querySelectorAll('[data-edit-gallery]').forEach(b=>b.addEventListener('click', ()=>openGalleryModal(b.dataset.editGallery)));
   grid.querySelectorAll('[data-delete-gallery]').forEach(b=>b.addEventListener('click', async ()=>{
     if(!confirm('Delete this photo?')) return;
     try{ await Api.deleteGalleryItem(b.dataset.deleteGallery); toast('Photo deleted'); renderDashboard(); }
     catch(e){ toast(e.message, true); }
   }));
+
+  function updateGallerySelectionControls(){
+    const deleteSelectedBtn = document.getElementById('deleteSelectedGalleryBtn');
+    const selectionCountEl = document.getElementById('gallerySelectionCount');
+    if(deleteSelectedBtn) deleteSelectedBtn.disabled = gallerySelection.size === 0;
+    if(selectionCountEl) selectionCountEl.textContent = gallerySelection.size > 0 ? `${gallerySelection.size} selected` : 'Select photos to delete';
+  }
 }
 
 function openGalleryModal(id){
   const g = id ? galleryCache.find(x=>x.id===id) : null;
-  let pendingImage = g ? g.imagePath : '';
+  let pendingImagePaths = g ? [g.imagePath] : [];
   openModal(`
-    <h2>${g ? 'Edit photo' : 'Add photo'}</h2>
+    <h2>${g ? 'Edit photo' : 'Add photos'}</h2>
     <div class="form-grid">
       <div class="form-field full">
         <label>Image</label>
-        <input type="file" id="gf-image-file" accept="image/png,image/jpeg,image/webp,image/gif">
-        <img class="image-preview" id="gfImagePreview" style="${pendingImage?'':'display:none;'}" src="${pendingImage||''}">
+        <input type="file" id="gf-image-file" ${g ? '' : 'multiple'} accept="image/png,image/jpeg,image/webp,image/gif">
+        <div id="gfImagePreviewList"></div>
         <div id="gfUploadStatus" style="font-size:12px; color:var(--ink-soft);"></div>
       </div>
       <div class="form-field full"><label>Title</label><input type="text" id="gf-title" value="${g?escapeHtml(g.title):''}" placeholder="e.g. Carnival Exhibit"></div>
@@ -661,32 +841,45 @@ function openGalleryModal(id){
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost dark" id="gfCancel">Cancel</button>
-      <button class="btn btn-primary" id="gfSave">${g?'Save changes':'Add photo'}</button>
+      <button class="btn btn-primary" id="gfSave">${g?'Save changes':'Add photos'}</button>
     </div>`);
+  renderImagePreviewList(pendingImagePaths, 'gfImagePreviewList');
   document.getElementById('gf-image-file').addEventListener('change', async (e)=>{
-    const file = e.target.files[0]; if(!file) return;
+    const files = Array.from(e.target.files || []);
+    if(!files.length) return;
+    if(g && files.length > 1){
+      document.getElementById('gfUploadStatus').textContent = 'Please choose only one image when editing a single gallery item.';
+      return;
+    }
     const status = document.getElementById('gfUploadStatus');
     status.textContent = 'Uploading…';
     try{
-      const { path } = await Api.uploadImage(file);
-      pendingImage = path;
-      const preview = document.getElementById('gfImagePreview');
-      preview.src = path; preview.style.display = 'block';
-      status.textContent = 'Image uploaded.';
+      for(const file of files){
+        const { path } = await Api.uploadImage(file);
+        if(g){ pendingImagePaths = [path]; }
+        else { pendingImagePaths.push(path); }
+      }
+      renderImagePreviewList(pendingImagePaths, 'gfImagePreviewList');
+      status.textContent = `${pendingImagePaths.length} photo${pendingImagePaths.length === 1 ? '' : 's'} ready.`;
     }catch(err){ status.textContent = 'Upload failed: ' + err.message; }
   });
   document.getElementById('gfCancel').addEventListener('click', closeModal);
   document.getElementById('gfSave').addEventListener('click', async ()=>{
     const errorEl = document.getElementById('gfError');
-    if(!pendingImage){ errorEl.textContent = 'Please upload an image.'; return; }
-    const payload = {
-      imagePath: pendingImage,
-      title: document.getElementById('gf-title').value.trim(),
-      caption: document.getElementById('gf-caption').value.trim()
-    };
+    if(!pendingImagePaths.length){ errorEl.textContent = 'Please upload at least one image.'; return; }
+    const title = document.getElementById('gf-title').value.trim();
+    const caption = document.getElementById('gf-caption').value.trim();
     try{
-      if(g) await Api.updateGalleryItem(g.id, payload); else await Api.createGalleryItem(payload);
-      toast(g ? 'Photo updated' : 'Photo added');
+      if(g){
+        const payload = { imagePath: pendingImagePaths[0], title, caption };
+        await Api.updateGalleryItem(g.id, payload);
+        toast('Photo updated');
+      } else {
+        for(const path of pendingImagePaths){
+          await Api.createGalleryItem({ imagePath: path, title, caption });
+        }
+        toast(`${pendingImagePaths.length} photo${pendingImagePaths.length === 1 ? '' : 's'} added`);
+      }
       closeModal();
       renderDashboard();
     }catch(err){ errorEl.textContent = err.message; }

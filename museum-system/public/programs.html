@@ -22,6 +22,9 @@
       <a class="nav-btn active" href="/programs.html">Programs</a>
       <a class="nav-btn" href="/gallery.html">Gallery</a>
       <a class="nav-btn" href="/events.html">Events</a>
+      <a class="nav-btn" href="/about.html">About</a>
+      <a class="nav-btn" href="/contact.html">Contact</a>
+      <a class="nav-btn" href="/donate.html">Donate</a>
       <a class="nav-btn" href="/admin.html">Admin</a>
     </div>
   </div>
@@ -53,14 +56,28 @@
       return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
     }
 
+    function getFirstImage(item){
+      return (Array.isArray(item.optimizedImagePaths) && item.optimizedImagePaths[0]) || item.optimizedImagePath || (Array.isArray(item.imagePaths) && item.imagePaths[0]) || item.imagePath || '';
+    }
+
+    function renderExtraPhotos(item){
+      const paths = (Array.isArray(item.optimizedImagePaths) ? item.optimizedImagePaths : Array.isArray(item.imagePaths) ? item.imagePaths : []).slice(1);
+      if(paths.length === 0) return '';
+      return `<div class="extra-photos">${paths.map(src=>`<a class="photo-thumb" href="${escapeHtml(src)}" target="_blank" rel="noopener">`+
+          `<img src="${escapeHtml(src)}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.closest('.photo-thumb').style.display='none'">`+
+        `</a>`).join('')}</div>`;
+    }
+
     function programCard(p){
+      const primaryImage = getFirstImage(p);
       return `
       <div class="content-card">
         <div class="media">
-          ${p.optimizedImagePath || p.imagePath ? `<a class="img-link" href="${escapeHtml(p.optimizedImagePath || p.imagePath)}" target="_blank" rel="noopener">`+
-              `<img class="img-enhance" src="${escapeHtml(p.optimizedImagePath || p.imagePath)}" alt="${escapeHtml(p.title)}" onerror="this.parentElement.innerHTML='<span class=&quot;icon&quot;>🌱</span>'">`+
+          ${primaryImage ? `<a class="img-link" href="${escapeHtml(primaryImage)}" target="_blank" rel="noopener">`+
+              `<img class="img-enhance" src="${escapeHtml(primaryImage)}" alt="${escapeHtml(p.title)}" onerror="this.parentElement.innerHTML='<span class=&quot;icon&quot;>🌱</span>'">`+
             `</a>` : `<span class="icon">🌱</span>`}
         </div>
+        ${renderExtraPhotos(p)}
         <div class="body">
           ${p.ageRange ? `<div class="tag">Ages ${escapeHtml(p.ageRange)}</div>` : ''}
           <h3>${escapeHtml(p.title)}</h3>

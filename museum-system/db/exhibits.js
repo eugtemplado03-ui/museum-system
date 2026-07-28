@@ -1,4 +1,4 @@
-const { load, save } = require('./store');
+const { load, save, normalizeImagePaths } = require('./store');
 const { nanoid } = require('nanoid');
 
 function nextCode(exhibits) {
@@ -24,6 +24,7 @@ function findById(id) {
 
 function create(payload) {
   const data = load();
+  const paths = normalizeImagePaths(payload.imagePaths ?? payload.imagePath);
   const exhibit = {
     id: nanoid(10),
     code: nextCode(data.exhibits),
@@ -32,7 +33,8 @@ function create(payload) {
     origin: payload.origin || '',
     year: payload.year || '',
     location: payload.location || '',
-    imagePath: payload.imagePath || '',
+    imagePaths: paths,
+    imagePath: paths[0] || '',
     description: payload.description || '',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -47,6 +49,8 @@ function update(id, payload) {
   const idx = data.exhibits.findIndex(e => e.id === id);
   if (idx === -1) return null;
   const existing = data.exhibits[idx];
+  const providedPaths = payload.imagePaths !== undefined ? normalizeImagePaths(payload.imagePaths) : normalizeImagePaths(payload.imagePath ?? existing.imagePath);
+  const imagePaths = payload.imagePaths !== undefined ? providedPaths : normalizeImagePaths(existing.imagePaths || existing.imagePath || '');
   const updated = {
     ...existing,
     title: payload.title ?? existing.title,
@@ -54,7 +58,8 @@ function update(id, payload) {
     origin: payload.origin ?? existing.origin,
     year: payload.year ?? existing.year,
     location: payload.location ?? existing.location,
-    imagePath: payload.imagePath ?? existing.imagePath,
+    imagePaths,
+    imagePath: imagePaths[0] || '',
     description: payload.description ?? existing.description,
     updatedAt: new Date().toISOString()
   };

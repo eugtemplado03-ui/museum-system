@@ -43,4 +43,19 @@ function save(data) {
   fs.renameSync(tmp, DB_FILE);
 }
 
-module.exports = { load, save, DB_FILE };
+function normalizeImagePaths(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.filter(Boolean).map(String);
+  if (typeof value === 'string') return value.trim() ? [value.trim()] : [];
+  return [];
+}
+
+function getPrimaryImagePath(item) {
+  if (!item) return '';
+  if (Array.isArray(item.optimizedImagePaths) && item.optimizedImagePaths.length) return item.optimizedImagePaths[0];
+  if (Array.isArray(item.imagePaths) && item.imagePaths.length) return item.imagePaths[0];
+  if (item.optimizedImagePath) return item.optimizedImagePath;
+  return item.imagePath || '';
+}
+
+module.exports = { load, save, DB_FILE, normalizeImagePaths, getPrimaryImagePath };

@@ -23,6 +23,9 @@
       <a class="nav-btn" href="/programs.html">Programs</a>
       <a class="nav-btn" href="/gallery.html">Gallery</a>
       <a class="nav-btn" href="/events.html">Events</a>
+      <a class="nav-btn" href="/about.html">About</a>
+      <a class="nav-btn" href="/contact.html">Contact</a>
+      <a class="nav-btn" href="/donate.html">Donate</a>
       <a class="nav-btn" href="/admin.html">Admin</a>
     </div>
   </div>
@@ -195,22 +198,32 @@
       }
       try{
         status.textContent = 'Requesting camera access…';
-        scanStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+        scanStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: 'environment',
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        });
         if(placeholder) placeholder.remove();
         const video = document.createElement('video');
         video.setAttribute('playsinline','');
+        video.setAttribute('autoplay','');
+        video.muted = true;
         video.srcObject = scanStream;
         viewport.prepend(video);
         await video.play();
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         status.textContent = 'Scanning… hold the tag steady in frame.';
+        let lastFrameTime = performance.now();
         const tick = ()=>{
-          if(video.readyState === video.HAVE_ENOUGH_DATA){
-            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+          if(video.readyState >= video.HAVE_ENOUGH_DATA && video.videoWidth > 0 && video.videoHeight > 0){
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
-            const code = jsQR(imgData.data, imgData.width, imgData.height);
+            const code = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts: 'attemptBoth' });
             if(code && code.data){
               status.textContent = 'Tag recognized.';
               stopScanner();
@@ -223,6 +236,8 @@
               }
               return;
             }
+          } else if(performance.now() - lastFrameTime > 2500) {
+            status.textContent = 'Waiting for camera frames… please allow access and center the tag.';
           }
           scanRAF = requestAnimationFrame(tick);
         };

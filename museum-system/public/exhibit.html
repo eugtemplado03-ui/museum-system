@@ -22,6 +22,9 @@
       <a class="nav-btn" href="/programs.html">Programs</a>
       <a class="nav-btn" href="/gallery.html">Gallery</a>
       <a class="nav-btn" href="/events.html">Events</a>
+      <a class="nav-btn" href="/about.html">About</a>
+      <a class="nav-btn" href="/contact.html">Contact</a>
+      <a class="nav-btn" href="/donate.html">Donate</a>
       <a class="nav-btn" href="/admin.html">Admin</a>
     </div>
   </div>
@@ -50,6 +53,18 @@
       'Character & Heritage':'&#127942;','Environmental':'&#9851;','Reading & Learning':'&#128214;','Other':'&#10022;'
     };
 
+    function getFirstImage(item){
+      return (Array.isArray(item.optimizedImagePaths) && item.optimizedImagePaths[0]) || item.optimizedImagePath || (Array.isArray(item.imagePaths) && item.imagePaths[0]) || item.imagePath || '';
+    }
+
+    function renderExtraPhotos(item){
+      const paths = Array.isArray(item.optimizedImagePaths) ? item.optimizedImagePaths : Array.isArray(item.imagePaths) ? item.imagePaths : [];
+      if(paths.length <= 1) return '';
+      return `<div class="multi-photo-grid">${paths.slice(1).map(src=>`<a class="img-link" href="${escapeHtml(src)}" target="_blank" rel="noopener">`+
+          `<img class="img-enhance" src="${escapeHtml(src)}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.closest('.img-link').style.display='none'">`+
+        `</a>`).join('')}</div>`;
+    }
+
     async function load(){
       const params = new URLSearchParams(location.search);
       const code = params.get('code');
@@ -63,15 +78,17 @@
         const { exhibit } = await Api.getExhibit(code);
         document.title = exhibit.title + ' — Museo Sang Bata sa Negros';
         Api.trackView(code, src);
+        const primaryImage = getFirstImage(exhibit);
 
         content.innerHTML = `
           <div class="plaque">
             <div class="plaque-media">
-              ${exhibit.optimizedImagePath || exhibit.imagePath
-                ? `<a class="img-link" href="${escapeHtml(exhibit.optimizedImagePath || exhibit.imagePath)}" target="_blank" rel="noopener">`+
-                    `<img src="${escapeHtml(exhibit.optimizedImagePath || exhibit.imagePath)}" alt="${escapeHtml(exhibit.title)}" onerror="this.parentElement.innerHTML='<div class=&quot;placeholder-icon&quot;>${CATEGORY_ICON[exhibit.category]||CATEGORY_ICON.Other}</div>'">`+
+              ${primaryImage
+                ? `<a class="img-link" href="${escapeHtml(primaryImage)}" target="_blank" rel="noopener">`+
+                    `<img src="${escapeHtml(primaryImage)}" alt="${escapeHtml(exhibit.title)}" onerror="this.parentElement.innerHTML='<div class=&quot;placeholder-icon&quot;>${CATEGORY_ICON[exhibit.category]||CATEGORY_ICON.Other}</div>'">`+
                   `</a>`
                 : `<div class="placeholder-icon">${CATEGORY_ICON[exhibit.category]||CATEGORY_ICON.Other}</div>`}
+              ${renderExtraPhotos(exhibit)}
             </div>
             <div class="plaque-body">
               <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
