@@ -26,6 +26,7 @@ function create(payload) {
     location: payload.location || '',
     imagePaths: paths,
     imagePath: paths[0] || '',
+    videoUrl: (payload.videoUrl || '').trim(),
     description: payload.description || '',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -49,6 +50,7 @@ function update(id, payload) {
     location: payload.location ?? existing.location,
     imagePaths,
     imagePath: imagePaths[0] || '',
+    videoUrl: payload.videoUrl !== undefined ? (payload.videoUrl || '').trim() : existing.videoUrl || '',
     description: payload.description ?? existing.description,
     updatedAt: new Date().toISOString()
   };

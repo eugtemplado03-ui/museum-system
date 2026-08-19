@@ -10,8 +10,6 @@ const { upload } = require('../middleware/upload');
 
 const router = express.Router();
 
-const CATEGORIES = ['Marine & Nature', 'Touch & Play', 'Toys & Collections', 'Character & Heritage', 'Environmental', 'Reading & Learning', 'Other'];
-
 function publicUrlForExhibit(req, code) {
   const base = `${req.protocol}://${req.get('host')}`;
   return `${base}/exhibit.html?code=${encodeURIComponent(code)}`;
@@ -20,7 +18,13 @@ function publicUrlForExhibit(req, code) {
 function validatePayload(body) {
   const errors = [];
   if (!body.title || !body.title.trim()) errors.push('Title is required.');
-  if (body.category && !CATEGORIES.includes(body.category)) errors.push('Invalid category.');
+  if (body.category && typeof body.category === 'string' && body.category.trim()) {
+    const trimmedCat = body.category.trim();
+    const categories = exhibits.categories();
+    if (!categories.some(c => c.toLowerCase() === trimmedCat.toLowerCase())) {
+      exhibits.addCategory(trimmedCat);
+    }
+  }
   return errors;
 }
 
@@ -32,6 +36,10 @@ function enrich(ex) {
 // ---- Public ----
 router.get('/', (req, res) => {
   res.json({ exhibits: exhibits.all().map(enrich) });
+});
+
+router.get('/categories', (req, res) => {
+  res.json({ categories: exhibits.categories() });
 });
 
 router.get('/:code/ratings', (req, res) => {
@@ -94,6 +102,42 @@ router.post('/', requireAuth, (req, res) => {
   res.status(201).json({ exhibit: created });
 });
 
+router.put('/categories/:oldCategory', requireAuth, (req, res) => {
+  let oldCategory = req.params.oldCategory;
+  try { oldCategory = decodeURIComponent(oldCategory); } catch (e) {}
+  const newCategory = req.body && req.body.category;
+  if (!newCategory || !String(newCategory).trim()) return res.status(400).json({ error: 'New category name is required.' });
+  const updated = exhibits.updateCategory(oldCategory, String(newCategory).trim());
+  if (!updated) return res.status(404).json({ error: 'Category not found.' });
+  res.json({ category: updated, categories: exhibits.categories() });
+});
+
+router.post('/categories', requireAuth, (req, res) => {
+  const category = req.body && req.body.category;
+  if (!category || !String(category).trim()) return res.status(400).json({ error: 'Category name is required.' });
+  const created = exhibits.addCategory(String(category).trim());
+  if (!created) return res.status(409).json({ error: 'Category already exists or invalid.' });
+  res.status(201).json({ category: created, categories: exhibits.categories() });
+});
+
+router.delete('/categories/:category', requireAuth, (req, res) => {
+  let category = req.params.category;
+  try { category = decodeURIComponent(category); } catch (e) {}
+  const deleted = exhibits.deleteCategory(category);
+  if (!deleted) return res.status(404).json({ error: 'Category not found.' });
+  res.json({ success: true, categories: exhibits.categories() });
+});
+
+router.post('/categories/:category/assign', requireAuth, (req, res) => {
+  let category = req.params.category;
+  try { category = decodeURIComponent(category); } catch (e) {}
+  const { exhibitIds } = req.body || {};
+  if (!Array.isArray(exhibitIds)) return res.status(400).json({ error: 'exhibitIds array is required.' });
+  const ok = exhibits.assignExhibitsToCategory(category, exhibitIds);
+  if (!ok) return res.status(400).json({ error: 'Could not assign exhibits.' });
+  res.json({ success: true, exhibits: exhibits.all(), categories: exhibits.categories() });
+});
+
 router.put('/:id', requireAuth, (req, res) => {
   const errors = validatePayload(req.body || {});
   if (errors.length) return res.status(400).json({ error: errors.join(' ') });
@@ -113,6 +157,15 @@ router.post('/upload-image', requireAuth, (req, res) => {
     if (err) return res.status(400).json({ error: err.message });
     if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
     res.json({ path: `/uploads/${req.file.filename}` });
+  });
+});
+
+router.post('/upload-media', requireAuth, (req, res) => {
+  upload.single('file')(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
+    const isVideo = req.file.mimetype.startsWith('video/');
+    res.json({ path: `/uploads/${req.file.filename}`, isVideo, mimetype: req.file.mimetype });
   });
 });
 

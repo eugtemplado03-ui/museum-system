@@ -9,8 +9,9 @@ router.get('/', (req, res) => {
 });
 
 router.post('/', requireAuth, (req, res) => {
-  if (!req.body || !req.body.imagePath) {
-    return res.status(400).json({ error: 'An uploaded image is required.' });
+  const hasMedia = (req.body && (req.body.imagePath || (Array.isArray(req.body.imagePaths) && req.body.imagePaths.length > 0) || (req.body.videoUrl && String(req.body.videoUrl).trim())));
+  if (!hasMedia) {
+    return res.status(400).json({ error: 'An uploaded photo or video is required.' });
   }
   res.status(201).json({ item: gallery.create(req.body) });
 });

@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Exhibit — Museo Sang Bata sa Negros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -14,11 +14,12 @@
       <div class="brand-mark">M</div>
       <div class="brand-text">
         <div class="name">Museo Sang Bata sa Negros</div>
-        <div class="tagline">Exhibit Guide</div>
+        <div class="tagline">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
       </div>
     </a>
     <div class="nav-links">
-      <a class="nav-btn" href="/">Scan &amp; Browse</a>
+      <a class="nav-btn" href="/">Home</a>
+      <a class="nav-btn active" href="/exhibits.html">Exhibits</a>
       <a class="nav-btn" href="/programs.html">Programs</a>
       <a class="nav-btn" href="/gallery.html">Gallery</a>
       <a class="nav-btn" href="/events.html">Events</a>
@@ -26,7 +27,7 @@
     </div>
   </div>
 
-  <main><div class="wrap">
+  <main><div class="wrap" style="max-width: 680px;">
     <a class="detail-back" href="/">&larr; Back to gallery</a>
     <div id="content">Loading exhibit…</div>
   </div></main>
@@ -39,6 +40,7 @@
 
   <script src="/js/api.js"></script>
   <script src="/js/chatbot.js"></script>
+  <script src="/js/carousel.js"></script>
   <script src="/js/image-enhance.js"></script>
   <script src="/js/lightbox.js"></script>
   <script>
@@ -50,16 +52,12 @@
       'Character & Heritage':'&#127942;','Environmental':'&#9851;','Reading & Learning':'&#128214;','Other':'&#10022;'
     };
 
-    function getFirstImage(item){
-      return (Array.isArray(item.optimizedImagePaths) && item.optimizedImagePaths[0]) || item.optimizedImagePath || (Array.isArray(item.imagePaths) && item.imagePaths[0]) || item.imagePath || '';
-    }
-
-    function renderExtraPhotos(item){
-      const paths = Array.isArray(item.optimizedImagePaths) ? item.optimizedImagePaths : Array.isArray(item.imagePaths) ? item.imagePaths : [];
-      if(paths.length <= 1) return '';
-      return `<div class="multi-photo-grid">${paths.slice(1).map(src=>`<a class="img-link" href="${escapeHtml(src)}" target="_blank" rel="noopener">`+
-          `<img class="img-enhance" src="${escapeHtml(src)}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.closest('.img-link').style.display='none'">`+
-        `</a>`).join('')}</div>`;
+    function getAllImages(item){
+      if (Array.isArray(item.optimizedImagePaths) && item.optimizedImagePaths.length) return item.optimizedImagePaths;
+      if (Array.isArray(item.imagePaths) && item.imagePaths.length) return item.imagePaths;
+      if (item.optimizedImagePath) return [item.optimizedImagePath];
+      if (item.imagePath) return [item.imagePath];
+      return [];
     }
 
     async function load(){
@@ -75,17 +73,12 @@
         const { exhibit } = await Api.getExhibit(code);
         document.title = exhibit.title + ' — Museo Sang Bata sa Negros';
         Api.trackView(code, src);
-        const primaryImage = getFirstImage(exhibit);
+        const images = getAllImages(exhibit);
 
         content.innerHTML = `
           <div class="plaque">
             <div class="plaque-media">
-              ${primaryImage
-                ? `<a class="img-link" href="${escapeHtml(primaryImage)}" target="_blank" rel="noopener">`+
-                    `<img src="${escapeHtml(primaryImage)}" alt="${escapeHtml(exhibit.title)}" onerror="this.parentElement.innerHTML='<div class=&quot;placeholder-icon&quot;>${CATEGORY_ICON[exhibit.category]||CATEGORY_ICON.Other}</div>'">`+
-                  `</a>`
-                : `<div class="placeholder-icon">${CATEGORY_ICON[exhibit.category]||CATEGORY_ICON.Other}</div>`}
-              ${renderExtraPhotos(exhibit)}
+              ${renderPhotoCarousel(images, exhibit.title, CATEGORY_ICON[exhibit.category] || CATEGORY_ICON.Other)}
             </div>
             <div class="plaque-body">
               <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
@@ -106,6 +99,7 @@
                   <option value="cb">Bisaya</option>
                 </select>
               </div>
+              <div class="plaque-cat-detail">Category: <strong>${escapeHtml(exhibit.category)}</strong></div>
               <div class="plaque-desc" id="plaqueDesc" data-desc-original="${escapeHtml(exhibit.description||'')||''}" data-desc-tl="${escapeHtml(exhibit.description_tl||'')||''}" data-desc-cb="${escapeHtml(exhibit.description_cb||'')||''}">
                 ${escapeHtml(exhibit.description||'No description on file yet.')}
               </div>
@@ -115,6 +109,19 @@
                 <div id="ttsStatus" style="font-size:13px; color:var(--ink-soft);"></div>
               </div>
               <div class="plaque-accession mono">Accession No. ${exhibit.code}</div>
+
+              <!-- ── QR Code Section under Information ── -->
+              <div class="plaque-qr-section">
+                <div class="plaque-qr-image">
+                  <img src="${Api.qrUrl(exhibit.code)}" alt="QR tag for ${escapeHtml(exhibit.code)}" width="90" height="90" loading="lazy">
+                </div>
+                <div class="plaque-qr-details">
+                  <div class="plaque-qr-badge">Exhibit QR Tag</div>
+                  <div class="plaque-qr-code mono">${exhibit.code}</div>
+                  <div class="plaque-qr-hint">Scan with camera to open this guide directly on-site</div>
+                </div>
+                <a class="btn btn-secondary btn-small plaque-qr-dl" href="${Api.qrUrl(exhibit.code)}" download="${exhibit.code}-tag.png">&#8595; Download QR</a>
+              </div>
 
               <div id="ratingSummary" class="rating-summary"></div>
               <div class="rating-form">
@@ -130,6 +137,7 @@
             </div>
           </div>`;
 
+        initPhotoCarousels(content);
         wireFavorite(exhibit);
         wireRatings(exhibit, code);
         wireTTS(exhibit);
@@ -138,51 +146,110 @@
       }
     }
 
-    // Client-side Text-to-Speech for exhibit descriptions
-    function wireTTS(exhibit){
-      const playBtn = document.getElementById('ttsPlayBtn');
-      const stopBtn = document.getElementById('ttsStopBtn');
-      const status = document.getElementById('ttsStatus');
-      const descEl = document.getElementById('plaqueDesc');
+    // ── AI-powered voice (OpenRouter TTS-1 nova → MP3 audio) ────────
+    function wireTTS(exhibit) {
+      const playBtn    = document.getElementById('ttsPlayBtn');
+      const stopBtn    = document.getElementById('ttsStopBtn');
+      const statusEl   = document.getElementById('ttsStatus');
+      const descEl     = document.getElementById('plaqueDesc');
       const langSelect = document.getElementById('langSelect');
-      if(!('speechSynthesis' in window) || !playBtn || !stopBtn || !descEl) return;
+      if (!playBtn || !stopBtn || !descEl) return;
 
-      let utter = null;
+      // Cache translated texts so we don't re-call the API repeatedly
+      const _cache = { original: descEl.dataset.descOriginal || exhibit.description || '' };
+      let _currentText = _cache.original;
+      let _audioEl = null;   // currently playing <audio> element
 
-      function speakText(){
-        if(window.speechSynthesis.speaking){
-          window.speechSynthesis.cancel();
-        }
-        const lang = (langSelect && langSelect.value) || 'original';
-        let text = descEl.textContent.trim() || exhibit.title || 'No description available.';
-        if(lang === 'tl' && descEl.dataset.descTl) text = descEl.dataset.descTl;
-        if(lang === 'cb' && descEl.dataset.descCb) text = descEl.dataset.descCb;
-        utter = new SpeechSynthesisUtterance(text);
-        // set language hint for better TTS voice selection
-        utter.lang = (lang === 'tl') ? 'tl-PH' : (lang === 'cb' ? 'ceb-PH' : document.documentElement.lang || 'en-US');
-        utter.rate = 1.0;
-        utter.pitch = 1.0;
-        utter.onstart = ()=>{ status.textContent = 'Playing…'; playBtn.disabled = true; };
-        utter.onend = ()=>{ status.textContent = ''; playBtn.disabled = false; };
-        utter.onerror = ()=>{ status.textContent = 'Playback error'; playBtn.disabled = false; };
-        window.speechSynthesis.speak(utter);
+      function setStatus(msg, isLoading) {
+        statusEl.textContent = msg;
+        playBtn.disabled  = isLoading || false;
+        stopBtn.disabled  = !isLoading;
       }
 
-      playBtn.addEventListener('click', ()=>{ speakText(); });
-      // switch displayed text when language changes
-      if(langSelect){
-        langSelect.addEventListener('change', ()=>{
+      function stopAudio() {
+        if (_audioEl) {
+          _audioEl.pause();
+          _audioEl.src = '';
+          _audioEl = null;
+        }
+        setStatus('', false);
+      }
+
+      // ── Translate via OpenRouter ──────────────────────────────────
+      async function fetchTranslation(targetLang) {
+        if (_cache[targetLang]) return _cache[targetLang];
+        const originalText = _cache.original || exhibit.description || '';
+        if (!originalText.trim()) return originalText;
+        setStatus('Translating…', true);
+        try {
+          const resp = await fetch('/api/tts/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: originalText, targetLang }),
+          });
+          if (!resp.ok) throw new Error('API error');
+          const { translatedText } = await resp.json();
+          _cache[targetLang] = translatedText;
+          setStatus('', false);
+          return translatedText;
+        } catch (e) {
+          setStatus('Translation failed — using original.', false);
+          return originalText;
+        }
+      }
+
+      // ── Speak text using OpenAI TTS-1 (nova) via server ──────────
+      async function speakCurrent() {
+        stopAudio();
+        const textToSpeak = _currentText || _cache.original;
+        if (!textToSpeak || !textToSpeak.trim()) {
+          setStatus('No description to read.', false);
+          return;
+        }
+        setStatus('⏳ Generating audio…', true);
+        try {
+          const resp = await fetch('/api/tts/speak', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: textToSpeak }),
+          });
+          if (!resp.ok) throw new Error('TTS API error ' + resp.status);
+
+          const blob = await resp.blob();
+          const url  = URL.createObjectURL(blob);
+          _audioEl   = new Audio(url);
+          _audioEl.onplay  = () => setStatus('🔊 Playing…', true);
+          _audioEl.onended = () => { URL.revokeObjectURL(url); _audioEl = null; setStatus('', false); };
+          _audioEl.onerror = () => { URL.revokeObjectURL(url); _audioEl = null; setStatus('Playback error.', false); };
+          await _audioEl.play();
+        } catch (e) {
+          console.error('[TTS speak]', e);
+          setStatus('Audio unavailable — check connection.', false);
+        }
+      }
+
+      // ── Language select handler ───────────────────────────────────
+      if (langSelect) {
+        langSelect.addEventListener('change', async () => {
+          stopAudio();
           const v = langSelect.value;
-          if(v === 'tl' && descEl.dataset.descTl) descEl.textContent = descEl.dataset.descTl;
-          else if(v === 'cb' && descEl.dataset.descCb) descEl.textContent = descEl.dataset.descCb;
-          else descEl.textContent = descEl.dataset.descOriginal || 'No description on file yet.';
+          if (v === 'original') {
+            _currentText = _cache.original;
+            descEl.textContent = _currentText || 'No description on file yet.';
+            setStatus('', false);
+          } else {
+            const translated = await fetchTranslation(v);
+            _currentText = translated;
+            descEl.textContent = translated;
+          }
         });
       }
-      stopBtn.addEventListener('click', ()=>{ if(window.speechSynthesis.speaking) window.speechSynthesis.cancel(); status.textContent = ''; playBtn.disabled = false; });
 
-      // stop when navigating away
-      window.addEventListener('pagehide', ()=>{ if(window.speechSynthesis.speaking) window.speechSynthesis.cancel(); });
+      playBtn.addEventListener('click', speakCurrent);
+      stopBtn.addEventListener('click', stopAudio);
+      window.addEventListener('pagehide', stopAudio);
     }
+
 
     async function wireFavorite(exhibit){
       const btn = document.getElementById('favToggleBtn');

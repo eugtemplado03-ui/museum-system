@@ -1,4 +1,4 @@
-const { load, save } = require('./store');
+const { load, save, normalizeImagePaths } = require('./store');
 const { nanoid } = require('nanoid');
 
 function all() {
@@ -11,11 +11,14 @@ function findById(id) {
 
 function create(payload) {
   const data = load();
+  const paths = normalizeImagePaths(payload.imagePaths ?? payload.imagePath);
   const item = {
     id: nanoid(10),
     title: payload.title || '',
     caption: payload.caption || '',
-    imagePath: payload.imagePath || '',
+    imagePaths: paths,
+    imagePath: paths[0] || '',
+    videoUrl: (payload.videoUrl || '').trim(),
     createdAt: new Date().toISOString()
   };
   data.gallery.push(item);
@@ -28,11 +31,15 @@ function update(id, payload) {
   const idx = data.gallery.findIndex(g => g.id === id);
   if (idx === -1) return null;
   const existing = data.gallery[idx];
+  const providedPaths = payload.imagePaths !== undefined ? normalizeImagePaths(payload.imagePaths) : normalizeImagePaths(payload.imagePath ?? existing.imagePath);
+  const imagePaths = payload.imagePaths !== undefined ? providedPaths : normalizeImagePaths(existing.imagePaths || existing.imagePath || '');
   const updated = {
     ...existing,
     title: payload.title ?? existing.title,
     caption: payload.caption ?? existing.caption,
-    imagePath: payload.imagePath ?? existing.imagePath
+    imagePaths,
+    imagePath: imagePaths[0] || '',
+    videoUrl: payload.videoUrl !== undefined ? (payload.videoUrl || '').trim() : existing.videoUrl || ''
   };
   data.gallery[idx] = updated;
   save(data);

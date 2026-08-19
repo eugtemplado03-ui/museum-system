@@ -48,6 +48,11 @@ const Api = (() => {
       fd.append('image', file);
       return request('/api/exhibits/upload-image', { method: 'POST', body: fd });
     },
+    uploadMedia: (file) => {
+      const fd = new FormData();
+      fd.append('file', file);
+      return request('/api/exhibits/upload-media', { method: 'POST', body: fd });
+    },
     qrUrl: (code) => `/api/exhibits/${encodeURIComponent(code)}/qr`,
 
     trackView: (code, source) => request(`/api/exhibits/${encodeURIComponent(code)}/track`, { method: 'POST', body: JSON.stringify({ source }) }).catch(()=>{}),
@@ -66,18 +71,40 @@ const Api = (() => {
     adminDeleteRating: (id) => request('/api/admin/ratings/' + id, { method: 'DELETE' }),
 
     listPrograms: () => request('/api/programs'),
+    getProgram: (id) => request('/api/programs/' + encodeURIComponent(id)),
     createProgram: (payload) => request('/api/programs', { method: 'POST', body: JSON.stringify(payload) }),
     updateProgram: (id, payload) => request('/api/programs/' + id, { method: 'PUT', body: JSON.stringify(payload) }),
     deleteProgram: (id) => request('/api/programs/' + id, { method: 'DELETE' }),
 
     listEvents: () => request('/api/events'),
+    getEvent: (id) => request('/api/events/' + encodeURIComponent(id)),
     createEvent: (payload) => request('/api/events', { method: 'POST', body: JSON.stringify(payload) }),
     updateEvent: (id, payload) => request('/api/events/' + id, { method: 'PUT', body: JSON.stringify(payload) }),
     deleteEvent: (id) => request('/api/events/' + id, { method: 'DELETE' }),
 
+    listCategories: () => request('/api/exhibits/categories'),
+    createCategory: (category) => request('/api/exhibits/categories', { method: 'POST', body: JSON.stringify({ category }) }),
+    renameCategory: (oldCategory, newCategory) => request('/api/exhibits/categories/' + encodeURIComponent(oldCategory), { method: 'PUT', body: JSON.stringify({ category: newCategory }) }),
+    deleteCategory: (category) => request('/api/exhibits/categories/' + encodeURIComponent(category), { method: 'DELETE' }),
+    assignExhibitsToCategory: (category, exhibitIds) => request('/api/exhibits/categories/' + encodeURIComponent(category) + '/assign', { method: 'POST', body: JSON.stringify({ exhibitIds }) }),
+
     listGallery: () => request('/api/gallery'),
     createGalleryItem: (payload) => request('/api/gallery', { method: 'POST', body: JSON.stringify(payload) }),
     updateGalleryItem: (id, payload) => request('/api/gallery/' + id, { method: 'PUT', body: JSON.stringify(payload) }),
-    deleteGalleryItem: (id) => request('/api/gallery/' + id, { method: 'DELETE' })
+    deleteGalleryItem: (id) => request('/api/gallery/' + id, { method: 'DELETE' }),
+
+    listVisitors: (query = '') => request('/api/visitors' + (query ? (query.startsWith('?') ? query : '?' + query) : '')),
+    getVisitorStats: () => request('/api/visitors/stats'),
+    getVisitor: (id) => request('/api/visitors/' + encodeURIComponent(id)),
+    createVisitor: (payload) => request('/api/visitors', { method: 'POST', body: JSON.stringify(payload) }),
+    updateVisitor: (id, payload) => request('/api/visitors/' + id, { method: 'PUT', body: JSON.stringify(payload) }),
+    deleteVisitor: (id) => request('/api/visitors/' + id, { method: 'DELETE' }),
+
+    listArtifactLogs: (query = '') => request('/api/artifact-logs' + (query ? (query.startsWith('?') ? query : '?' + query) : '')),
+    getArtifactLogStats: () => request('/api/artifact-logs/stats'),
+    getArtifactLog: (id) => request('/api/artifact-logs/' + encodeURIComponent(id)),
+    createArtifactLog: (payload) => request('/api/artifact-logs', { method: 'POST', body: JSON.stringify(payload) }),
+    updateArtifactLog: (id, payload) => request('/api/artifact-logs/' + id, { method: 'PUT', body: JSON.stringify(payload) }),
+    deleteArtifactLog: (id) => request('/api/artifact-logs/' + id, { method: 'DELETE' })
   };
 })();

@@ -3,23 +3,237 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Museo Sang Bata sa Negros — Exhibit Guide</title>
+<title>Home — Museo Sang Bata sa Negros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
+<style>
+/* ── Featured Video Section ── */
+.featured-video-wrap {
+  margin-bottom: 48px;
+}
+
+/* ── Browse Sidebar Layout ── */
+.browse-layout {
+  display: flex;
+  gap: 0;
+  align-items: flex-start;
+  margin-top: 0;
+}
+.browse-sidebar {
+  width: 190px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 80px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: 16px;
+  background: var(--white);
+  border: 1.5px solid var(--grey-100);
+  box-shadow: var(--shadow-sm);
+  padding: 14px 10px;
+  margin-right: 24px;
+}
+.browse-sidebar-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 10.5px;
+  font-weight: 800;
+  color: var(--grey-400);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 4px 8px 10px;
+  border-bottom: 1.5px solid var(--grey-100);
+  margin-bottom: 8px;
+}
+.cat-sidebar-btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--grey-700);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cat-sidebar-btn:hover {
+  background: var(--teal-light);
+  color: var(--teal-dark);
+}
+.cat-sidebar-btn.active {
+  background: var(--teal);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,174,189,0.28);
+}
+.cat-sidebar-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+  opacity: 0.55;
+}
+.cat-sidebar-btn.active .cat-sidebar-dot { opacity: 1; background: rgba(255,255,255,0.8); }
+.cat-sidebar-count {
+  margin-left: auto;
+  font-size: 10.5px;
+  font-weight: 700;
+  background: rgba(0,0,0,0.07);
+  color: inherit;
+  padding: 1px 6px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+.cat-sidebar-btn.active .cat-sidebar-count { background: rgba(255,255,255,0.2); }
+
+.browse-main { flex: 1; min-width: 0; }
+
+@media (max-width: 760px) {
+  .browse-layout { flex-direction: column; }
+  .browse-sidebar {
+    width: 100%;
+    position: static;
+    max-height: none;
+    border-radius: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    padding: 10px 8px;
+    margin-right: 0;
+    margin-bottom: 16px;
+    overflow-x: auto;
+  }
+  .browse-sidebar-title { width: 100%; margin-bottom: 6px; }
+  .cat-sidebar-btn {
+    width: auto;
+    padding: 7px 12px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .cat-sidebar-count { display: none; }
+}
+.featured-video-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.featured-video-label h2 {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--ink);
+  margin: 0;
+}
+.yt-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #FF0000;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.featured-video-box {
+  position: relative;
+  width: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0,174,189,0.18);
+  background: #000;
+  border: 2px solid var(--teal-light);
+  aspect-ratio: 16/9;
+}
+.featured-video-box iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+.unmute-btn {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.3);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+  font-family: 'Nunito', sans-serif;
+}
+.unmute-btn:hover {
+  background: rgba(0,174,189,0.8);
+  transform: scale(1.04);
+}
+</style>
+<script src="/js/jsQR.js"></script>
+<style>
+/* ── Scanner Video Display ── */
+#viewport video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  display: block;
+}
+.scan-line {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0,174,189,0.95), transparent);
+  box-shadow: 0 0 8px rgba(0,174,189,0.8);
+  animation: scanMove 2s linear infinite;
+  z-index: 4;
+  border-radius: 2px;
+}
+@keyframes scanMove {
+  0%   { top: 15%; }
+  50%  { top: 82%; }
+  100% { top: 15%; }
+}
+</style>
 </head>
 <body>
+  <!-- ── Top Navigation Bar ─────────────────────────────────────── -->
   <div class="topbar">
     <a class="brand" href="/">
       <div class="brand-mark">M</div>
       <div class="brand-text">
         <div class="name">Museo Sang Bata sa Negros</div>
-        <div class="tagline">Exhibit Guide</div>
+        <div class="tagline">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
       </div>
     </a>
     <div class="nav-links">
-      <a class="nav-btn active" href="/">Scan &amp; Browse</a>
+      <a class="nav-btn active" href="/">Home</a>
+      <a class="nav-btn" href="/exhibits.html">Exhibits</a>
       <a class="nav-btn" href="/programs.html">Programs</a>
       <a class="nav-btn" href="/gallery.html">Gallery</a>
       <a class="nav-btn" href="/events.html">Events</a>
@@ -27,148 +241,386 @@
     </div>
   </div>
 
-  <main>
-    <div class="wrap">
-      <div class="scan-hero">
-        <div>
-          <div class="eyebrow">Self-guided tour</div>
-          <h1>Point your camera at any exhibit tag.</h1>
-          <p>Every exhibit at Museo Sang Bata sa Negros carries its own tag. Scan it here to learn what you're looking at and where to find it in the museum — no app to install.</p>
-          <div class="scan-cta">
-            <button class="btn btn-primary" id="openScannerBtn">&#128247; Open scanner</button>
-            <a class="btn btn-ghost" href="#gallery-section">Browse all tags</a>
-          </div>
-        </div>
-        <div class="scanner-frame">
-          <div class="viewport" id="viewport">
-            <div class="viewport-placeholder" id="viewportPlaceholder">Tap "Open scanner" to activate your camera, or enter a catalog code below.</div>
-            <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
-          </div>
-          <div class="scan-status" id="scanStatus"></div>
-          <div class="manual-row">
-            <input type="text" id="manualCode" placeholder="e.g. EX-001" class="mono">
-            <button class="btn btn-ghost dark btn-small" id="manualGoBtn">Go</button>
-          </div>
-        </div>
+  <div class="user-layout">
+    <!-- ── User Sidebar ─────────────────────────────────────────── -->
+    <aside class="user-sidebar">
+      <div class="user-sidebar-brand">
+        <div class="user-sidebar-logo">🏛️</div>
+        <div class="user-sidebar-title">Explore Museo<br><span>Dashboard</span></div>
       </div>
 
-      <div id="gallery-section">
-        <div class="section-head">
-          <h2>Exhibit tags on the floor</h2>
-          <div class="count" id="exhibitCount">Loading…</div>
+      <nav class="user-sidebar-nav">
+        <div class="user-sidebar-section-title">Navigation</div>
+        <a class="user-sidebar-btn active" href="/">
+          <span class="user-sidebar-icon">🏠</span>
+          <span class="user-sidebar-label">Home</span>
+          <span class="user-sidebar-indicator"></span>
+        </a>
+        <a class="user-sidebar-btn" href="/exhibits.html">
+          <span class="user-sidebar-icon">🏛️</span>
+          <span class="user-sidebar-label">Exhibits</span>
+        </a>
+        <a class="user-sidebar-btn" href="/programs.html">
+          <span class="user-sidebar-icon">🌱</span>
+          <span class="user-sidebar-label">Programs</span>
+        </a>
+        <a class="user-sidebar-btn" href="/gallery.html">
+          <span class="user-sidebar-icon">🖼️</span>
+          <span class="user-sidebar-label">Gallery</span>
+        </a>
+        <a class="user-sidebar-btn" href="/events.html">
+          <span class="user-sidebar-icon">📅</span>
+          <span class="user-sidebar-label">Events</span>
+        </a>
+
+        <div class="user-sidebar-section-title" style="margin-top:10px;">Quick Jump</div>
+        <a class="user-sidebar-btn" href="#scannerSection">
+          <span class="user-sidebar-icon">📷</span>
+          <span class="user-sidebar-label">Tag Scanner</span>
+        </a>
+        <a class="user-sidebar-btn" href="#featuredVideoSection">
+          <span class="user-sidebar-icon">▶️</span>
+          <span class="user-sidebar-label">Featured Video</span>
+        </a>
+        <a class="user-sidebar-btn" href="#homeExhibitsBlock">
+          <span class="user-sidebar-icon">🏷️</span>
+          <span class="user-sidebar-label">Featured Exhibits</span>
+        </a>
+
+        <div class="user-sidebar-section-title" style="margin-top:10px;">Exhibit Categories</div>
+        <div id="homeSidebarCategories" style="display:flex; flex-direction:column; gap:2px;">
+          <!-- Dynamically populated categories -->
         </div>
-        <div class="gallery-filters">
-          <button class="filter-chip active" id="filterAll">All exhibits</button>
-          <button class="filter-chip" id="filterFavorites">♥ My favorites</button>
-        </div>
-        <div class="tag-grid" id="tagGrid"></div>
-        <div id="emptyState" style="display:none;" class="empty-state">
-          <h2>No exhibits yet</h2>
-          <p>Add your first exhibit from the admin dashboard.</p>
-          <a class="btn btn-primary" href="/admin.html">Go to admin</a>
-        </div>
+      </nav>
+
+      <div class="user-sidebar-footer">
+        <a class="user-sidebar-sublink" href="/donate.html">
+          <span>💖</span> Support Us
+        </a>
+        <a class="user-sidebar-sublink" href="/admin.html">
+          <span>⚙️</span> Staff Admin
+        </a>
       </div>
+    </aside>
+
+    <!-- ── Main Content Area ────────────────────────────────────── -->
+    <div class="user-main">
+      <main style="padding: clamp(16px, 3vw, 36px); flex: 1;">
+        <div class="wrap" style="max-width: 1100px; margin: 0 auto;">
+          <div class="scan-hero" id="scannerSection">
+            <div>
+              <div class="eyebrow">Self-guided tour</div>
+              <h1>Point your camera at any exhibit tag.</h1>
+              <p>Every exhibit at Museo Sang Bata sa Negros carries its own tag. Scan it here to learn what you're looking at and where to find it in the museum — no app to install.</p>
+              <div class="scan-cta">
+                <button class="btn btn-primary" id="openScannerBtn">&#128247; Open scanner</button>
+                <a class="btn btn-ghost" href="/exhibits.html">Browse all exhibits</a>
+              </div>
+            </div>
+            <div class="scanner-frame">
+              <div class="viewport" id="viewport">
+                <div class="viewport-placeholder" id="viewportPlaceholder">Tap "Open scanner" to activate your camera, or enter a catalog code below.</div>
+                <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+              </div>
+              <div class="scan-status" id="scanStatus"></div>
+              <div class="manual-row">
+                <input type="text" id="manualCode" placeholder="e.g. EX-001" class="mono">
+                <button class="btn btn-ghost dark btn-small" id="manualGoBtn">Go</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Featured Video ──────────────────────────────────── -->
+          <div class="featured-video-wrap">
+            <div class="featured-video-label">
+              <h2>&#127916; Featured Video</h2>
+              <span class="yt-badge">&#9654; YouTube</span>
+            </div>
+            <div class="featured-video-box" id="featuredVideoBox">
+              <iframe
+                id="featuredYT"
+                src="https://www.youtube.com/embed/fAkjwVlPhvA?autoplay=1&mute=1&loop=1&playlist=fAkjwVlPhvA&rel=0&modestbranding=1&playsinline=1"
+                allow="autoplay; encrypted-media; picture-in-picture"
+                allowfullscreen
+                title="Museo Sang Bata sa Negros — Featured Video"
+              ></iframe>
+              <button class="unmute-btn" id="unmuteBtn" onclick="toggleMute()">
+                <span class="icon">&#128263;</span><span id="unmuteBtnLabel">Tap to unmute</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- ── Minimal Previews: Exhibits, Programs, Events & Gallery ──── -->
+          <div class="home-previews-container">
+            <!-- Minimal Exhibits Preview -->
+            <section class="home-preview-block" id="homeExhibitsBlock">
+              <div class="home-preview-head">
+                <div class="home-preview-title-group">
+                  <div class="home-preview-icon">🏛️</div>
+                  <div>
+                    <h3 class="home-preview-title">Featured Exhibits</h3>
+                    <p class="home-preview-sub">A curated selection from the museum floor</p>
+                  </div>
+                </div>
+                <a href="/exhibits.html" class="home-preview-viewall">Browse all exhibits &rarr;</a>
+              </div>
+              <div class="home-minimal-grid" id="homeExhibitsGrid">
+                <div style="color:var(--ink-soft); font-size:13px; grid-column:1/-1;">Loading exhibits&hellip;</div>
+              </div>
+            </section>
+
+            <!-- Minimal Programs Preview -->
+            <section class="home-preview-block" id="homeProgramsBlock">
+              <div class="home-preview-head">
+                <div class="home-preview-title-group">
+                  <div class="home-preview-icon">🌱</div>
+                  <div>
+                    <h3 class="home-preview-title">Museum Programs</h3>
+                    <p class="home-preview-sub">Interactive youth, student &amp; community cohorts</p>
+                  </div>
+                </div>
+                <a href="/programs.html" class="home-preview-viewall">Explore all programs &rarr;</a>
+              </div>
+              <div class="home-minimal-grid" id="homeProgramsGrid">
+                <div style="color:var(--ink-soft); font-size:13px; grid-column:1/-1;">Loading programs…</div>
+              </div>
+            </section>
+
+            <!-- Minimal Events Preview -->
+            <section class="home-preview-block" id="homeEventsBlock">
+              <div class="home-preview-head">
+                <div class="home-preview-title-group">
+                  <div class="home-preview-icon">📅</div>
+                  <div>
+                    <h3 class="home-preview-title">Upcoming Events</h3>
+                    <p class="home-preview-sub">Workshops, outreach, and community events</p>
+                  </div>
+                </div>
+                <a href="/events.html" class="home-preview-viewall">View all events &rarr;</a>
+              </div>
+              <div class="home-minimal-grid" id="homeEventsGrid">
+                <div style="color:var(--ink-soft); font-size:13px; grid-column:1/-1;">Loading events…</div>
+              </div>
+            </section>
+
+            <!-- Minimal Gallery Preview -->
+            <section class="home-preview-block" id="homeGalleryBlock">
+              <div class="home-preview-head">
+                <div class="home-preview-title-group">
+                  <div class="home-preview-icon">🖼️</div>
+                  <div>
+                    <h3 class="home-preview-title">Gallery Highlights</h3>
+                    <p class="home-preview-sub">Recent photos, albums, and video captures</p>
+                  </div>
+                </div>
+                <a href="/gallery.html" class="home-preview-viewall">Open full gallery &rarr;</a>
+              </div>
+              <div class="home-gallery-mini-grid" id="homeGalleryGrid">
+                <div style="color:var(--ink-soft); font-size:13px; grid-column:1/-1;">Loading gallery…</div>
+              </div>
+            </section>
+          </div>
+
+        </div>
+      </main>
     </div>
-  </main>
-  <footer>
-    Museo Sang Bata sa Negros · Exhibit Guide<br>
-    Barangay Old Sagay, Sagay City, Negros Occidental, Philippines 6122 ·
-    Open Mon–Fri 8:00 AM–5:00 PM (weekends by booked tour only) ·
-    +63 917 798 7420
-  </footer>
+  </div>
 
   <script src="/js/api.js"></script>
   <script src="/js/chatbot.js"></script>
+  <script src="/js/carousel.js"></script>
+  <script src="/js/image-enhance.js"></script>
+  <script src="/js/lightbox.js"></script>
   <script>
+    // ── Featured video mute toggle ────────────────────────────────
+    let _ytMuted = true;
+    function toggleMute() {
+      const iframe = document.getElementById('featuredYT');
+      const label  = document.getElementById('unmuteBtnLabel');
+      const btn    = document.getElementById('unmuteBtn');
+      _ytMuted = !_ytMuted;
+      const base = 'https://www.youtube.com/embed/fAkjwVlPhvA?autoplay=1&loop=1&playlist=fAkjwVlPhvA&rel=0&modestbranding=1&playsinline=1';
+      iframe.src = base + (_ytMuted ? '&mute=1' : '&mute=0');
+      btn.querySelector('.icon').textContent = _ytMuted ? '🔇' : '🔊';
+      label.textContent = _ytMuted ? 'Tap to unmute' : 'Mute';
+    }
+
     function escapeHtml(str){
       return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
     }
 
-    function starString(avg){
-      if(avg == null) return '';
-      const rounded = Math.round(avg);
-      return '★'.repeat(rounded) + '☆'.repeat(5 - rounded);
-    }
-
-    function tagCard(ex){
-      const isFav = favoriteIds.has(ex.id);
-      return `
-      <div class="tag-card" data-id="${ex.id}">
-        <div class="tag-hole"></div>
-        <button class="fav-btn ${isFav ? 'active' : ''}" data-fav-toggle="${ex.id}" aria-label="Toggle favorite">${isFav ? '♥' : '♡'}</button>
-        <div class="tag-cat">${escapeHtml(ex.category)}</div>
-        <h3>${escapeHtml(ex.title)}</h3>
-        <div class="meta">${escapeHtml(ex.origin)} · ${escapeHtml(ex.year)}</div>
-        ${ex.ratingCount ? `<div class="rating-badge"><span class="stars">${starString(ex.ratingAverage)}</span> ${ex.ratingAverage} (${ex.ratingCount})</div>` : `<div class="rating-badge">No ratings yet</div>`}
-        <div class="tag-qr"><img src="${Api.qrUrl(ex.code)}" alt="QR tag for ${escapeHtml(ex.code)}" loading="lazy"></div>
-        <div class="tag-id mono">${ex.code}</div>
-        <div class="tag-foot">
-          <a class="btn btn-ghost dark btn-small" href="/exhibit.html?code=${encodeURIComponent(ex.code)}">View label</a>
-        </div>
-      </div>`;
-    }
-
-    let allExhibits = [];
-    let favoriteIds = new Set();
-    let showFavoritesOnly = false;
-
-    function renderGrid(){
-      const grid = document.getElementById('tagGrid');
-      const list = showFavoritesOnly ? allExhibits.filter(e => favoriteIds.has(e.id)) : allExhibits;
-      if(list.length === 0){
-        grid.innerHTML = showFavoritesOnly
-          ? `<div class="empty-state" style="grid-column:1/-1;"><h2>No favorites yet</h2><p>Tap the heart on any exhibit to save it here.</p></div>`
-          : '';
-        if(!showFavoritesOnly) document.getElementById('emptyState').style.display = 'block';
-      } else {
-        document.getElementById('emptyState').style.display = 'none';
-        grid.innerHTML = list.map(tagCard).join('');
-      }
-      grid.querySelectorAll('[data-fav-toggle]').forEach(btn=>{
-        btn.addEventListener('click', (e)=>{ e.preventDefault(); toggleFavorite(btn.dataset.favToggle); });
-      });
-    }
-
-    async function toggleFavorite(exhibitId){
-      const isFav = favoriteIds.has(exhibitId);
-      try{
-        if(isFav){ favoriteIds.delete(exhibitId); await Api.removeFavorite(exhibitId); }
-        else { favoriteIds.add(exhibitId); await Api.addFavorite(exhibitId); }
-        renderGrid();
-      }catch(e){ /* silently ignore — favorites are a nice-to-have */ }
-    }
-
-    async function loadGallery(){
-      const grid = document.getElementById('tagGrid');
-      const countEl = document.getElementById('exhibitCount');
-      try{
-        const [{ exhibits }, favResult] = await Promise.all([
-          Api.listExhibits(),
-          Api.listFavorites().catch(()=>({ exhibits: [] }))
+    // ── Minimal Previews Loader (Exhibits, Programs, Events, Gallery) ────
+    async function loadHomePreviews(){
+      try {
+        const [exhibitRes, progRes, eventRes, galleryRes] = await Promise.all([
+          Api.listExhibits().catch(()=>({ exhibits: [] })),
+          Api.listPrograms().catch(()=>({ programs: [] })),
+          Api.listEvents().catch(()=>({ events: [] })),
+          Api.listGallery().catch(()=>({ gallery: [] }))
         ]);
-        allExhibits = exhibits;
-        favoriteIds = new Set(favResult.exhibits.map(e => e.id));
-        countEl.textContent = `${exhibits.length} exhibits catalogued`;
-        renderGrid();
-      }catch(e){
-        countEl.textContent = 'Could not load exhibits';
-        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><p>${escapeHtml(e.message)}</p></div>`;
+
+        // 0. Exhibits (curated subset preview, exactly 3 — not all exhibits)
+        const exhibits = (exhibitRes && Array.isArray(exhibitRes.exhibits)) ? exhibitRes.exhibits : [];
+        const exGrid = document.getElementById('homeExhibitsGrid');
+        const ICONS = {'Marine & Nature':'🐟','Touch & Play':'✋','Toys & Collections':'🧸','Character & Heritage':'🏆','Environmental':'♻️','Reading & Learning':'📖','Other':'🏛️'};
+
+        if(exGrid){
+          if(exhibits.length === 0){
+            exGrid.innerHTML = `<div style="color:var(--ink-soft); font-size:13px; grid-column:1/-1;">No exhibits catalogued yet.</div>`;
+          } else {
+            const previewEx = exhibits.slice(0, 3);
+            exGrid.innerHTML = previewEx.map(ex => {
+              const imgs = Array.isArray(ex.optimizedImagePaths) && ex.optimizedImagePaths.length ? ex.optimizedImagePaths
+                         : Array.isArray(ex.imagePaths) && ex.imagePaths.length ? ex.imagePaths
+                         : ex.imagePath ? [ex.imagePath] : [];
+              const img = imgs[0] || '';
+              const icon = ICONS[ex.category] || '🏛️';
+              return `
+                <a href="/exhibit.html?code=${encodeURIComponent(ex.code)}" class="home-mini-card home-exhibit-card">
+                  <div class="home-mini-card-top">
+                    ${img
+                      ? `<div class="home-exhibit-media"><img src="${escapeHtml(img)}" alt="${escapeHtml(ex.title)}" loading="lazy"></div>`
+                      : `<div class="home-exhibit-media placeholder">${icon}</div>`
+                    }
+                    <div class="home-mini-badges">
+                      ${ex.category ? `<span class="home-mini-badge">${escapeHtml(ex.category)}</span>` : ''}
+                      ${ex.code ? `<span class="home-mini-badge" style="font-family:'IBM Plex Mono',monospace; background:rgba(0,0,0,0.07); color:var(--ink);">${escapeHtml(ex.code)}</span>` : ''}
+                    </div>
+                    <h4 class="home-mini-title">${escapeHtml(ex.title)}</h4>
+                    <div class="home-mini-snippet">${escapeHtml(ex.summary || ex.description || 'Interactive museum exhibit at Museo Sang Bata sa Negros.')}</div>
+                  </div>
+                  <div class="home-mini-foot">
+                    <span>${escapeHtml(ex.room || ex.location || 'Museum floor')}</span>
+                    <span class="home-mini-link">View exhibit &rarr;</span>
+                  </div>
+                </a>`;
+            }).join('');
+          }
+        }
+
+        // Populate Home Sidebar Categories
+        const catContainer = document.getElementById('homeSidebarCategories');
+        if(catContainer && exhibits.length > 0){
+          const uniqueCats = Array.from(new Set(exhibits.map(e => String(e.category || 'Other').trim()).filter(Boolean)));
+          catContainer.innerHTML = uniqueCats.map(cat => {
+            const count = exhibits.filter(e => String(e.category || 'Other').trim().toLowerCase() === cat.toLowerCase()).length;
+            const icon = ICONS[cat] || '✨';
+            return `
+              <a class="user-sidebar-btn" href="/exhibits.html?cat=${encodeURIComponent(cat)}" style="font-size:12.5px; padding:7px 10px;">
+                <span class="user-sidebar-icon" style="font-size:14px;">${icon}</span>
+                <span class="user-sidebar-label">${escapeHtml(cat)}</span>
+                <span class="user-sidebar-count">${count}</span>
+              </a>
+            `;
+          }).join('');
+        }
+
+        // 1. Programs (max 3 — with visible photo thumbnails)
+        const programs = (progRes && Array.isArray(progRes.programs)) ? progRes.programs : [];
+        const progGrid = document.getElementById('homeProgramsGrid');
+        if(progGrid){
+          if(programs.length === 0){
+            progGrid.innerHTML = `<div style="color:var(--ink-soft); font-size:13px; grid-column:1/-1;">No programs published yet.</div>`;
+          } else {
+            const previewProgs = programs.slice(0, 3);
+            progGrid.innerHTML = previewProgs.map(p => {
+              const imgs = Array.isArray(p.optimizedImagePaths) && p.optimizedImagePaths.length ? p.optimizedImagePaths
+                         : Array.isArray(p.imagePaths) && p.imagePaths.length ? p.imagePaths
+                         : (p.imagePath ? [p.imagePath] : []);
+              const img = imgs[0] || '';
+              return `
+              <a href="/program.html?id=${encodeURIComponent(p.id)}" class="home-mini-card home-exhibit-card">
+                <div class="home-mini-card-top">
+                  ${img
+                    ? `<div class="home-exhibit-media"><img src="${escapeHtml(img)}" alt="${escapeHtml(p.title)}" loading="lazy"></div>`
+                    : (p.videoUrl
+                      ? `<div class="home-exhibit-media placeholder" style="background:#1a2b38; color:#fff; font-size:32px;">▶️</div>`
+                      : `<div class="home-exhibit-media placeholder" style="background:#e8f5e9; color:#2e7d32; font-size:36px;">🌱</div>`)
+                  }
+                  <div class="home-mini-badges">
+                    ${p.ageRange ? `<span class="home-mini-badge">${escapeHtml(p.ageRange)}</span>` : ''}
+                    ${p.schedule ? `<span class="home-mini-badge date">${escapeHtml(p.schedule)}</span>` : ''}
+                    ${p.videoUrl ? `<span class="home-mini-badge video">▶ Video</span>` : ''}
+                  </div>
+                  <h4 class="home-mini-title">${escapeHtml(p.title)}</h4>
+                  <div class="home-mini-snippet">${escapeHtml(p.description || 'Interactive museum program for children and community.')}</div>
+                </div>
+                <div class="home-mini-foot">
+                  <span>${escapeHtml(p.schedule || 'Ongoing cohort')}</span>
+                  <span class="home-mini-link">View program &rarr;</span>
+                </div>
+              </a>`;
+            }).join('');
+          }
+        }
+
+        // 2. Events (max 3 — with visible photo thumbnails)
+        const events = (eventRes && Array.isArray(eventRes.events)) ? eventRes.events : [];
+        const eventGrid = document.getElementById('homeEventsGrid');
+        if(eventGrid){
+          if(events.length === 0){
+            eventGrid.innerHTML = `<div style="color:var(--ink-soft); font-size:13px; grid-column:1/-1;">No upcoming events at this time.</div>`;
+          } else {
+            const previewEvents = events.slice(0, 3);
+            eventGrid.innerHTML = previewEvents.map(ev => {
+              const imgs = Array.isArray(ev.optimizedImagePaths) && ev.optimizedImagePaths.length ? ev.optimizedImagePaths
+                         : Array.isArray(ev.imagePaths) && ev.imagePaths.length ? ev.imagePaths
+                         : (ev.imagePath ? [ev.imagePath] : []);
+              const img = imgs[0] || '';
+              return `
+              <a href="/event.html?id=${encodeURIComponent(ev.id)}" class="home-mini-card home-exhibit-card">
+                <div class="home-mini-card-top">
+                  ${img
+                    ? `<div class="home-exhibit-media"><img src="${escapeHtml(img)}" alt="${escapeHtml(ev.title)}" loading="lazy"></div>`
+                    : (ev.videoUrl
+                      ? `<div class="home-exhibit-media placeholder" style="background:#1a2b38; color:#fff; font-size:32px;">▶️</div>`
+                      : `<div class="home-exhibit-media placeholder" style="background:#fff3e6; color:var(--orange); font-size:36px;">📅</div>`)
+                  }
+                  <div class="home-mini-badges">
+                    ${ev.date ? `<span class="home-mini-badge date">📅 ${escapeHtml(ev.date)}</span>` : ''}
+                    ${ev.location ? `<span class="home-mini-badge">📍 ${escapeHtml(ev.location)}</span>` : ''}
+                    ${ev.videoUrl ? `<span class="home-mini-badge video">▶ Video</span>` : ''}
+                  </div>
+                  <h4 class="home-mini-title">${escapeHtml(ev.title)}</h4>
+                  <div class="home-mini-snippet">${escapeHtml(ev.description || 'Special event and activity at Museo Sang Bata sa Negros.')}</div>
+                </div>
+                <div class="home-mini-foot">
+                  <span>${escapeHtml(ev.location || 'Museum grounds')}</span>
+                  <span class="home-mini-link">Event details &rarr;</span>
+                </div>
+              </a>`;
+            }).join('');
+          }
+        }
+
+        // 3. Gallery (max 3 — exactly 3 items)
+        const gallery = (galleryRes && Array.isArray(galleryRes.gallery)) ? galleryRes.gallery : [];
+        const galleryGrid = document.getElementById('homeGalleryGrid');
+        if(galleryGrid){
+          if(gallery.length === 0){
+            galleryGrid.innerHTML = `<div style="color:var(--ink-soft); font-size:13px; grid-column:1/-1;">No photos or media uploaded yet.</div>`;
+          } else {
+            const previewGallery = gallery.slice(0, 3);
+            galleryGrid.innerHTML = previewGallery.map(g => {
+              const paths = Array.isArray(g.imagePaths) && g.imagePaths.length ? g.imagePaths : (g.imagePath ? [g.imagePath] : []);
+              const primary = paths[0] || '';
+              return `
+                <a href="/gallery.html" class="home-gallery-mini-item">
+                  ${primary ? `<img src="${escapeHtml(primary)}" alt="${escapeHtml(g.title || 'Museum gallery')}" loading="lazy">` : (g.videoUrl ? `<div style="width:100%; height:100%; background:#101d27; display:flex; align-items:center; justify-content:center; color:#fff; font-size:32px;">▶</div>` : `<div style="width:100%; height:100%; background:var(--teal-light); display:flex; align-items:center; justify-content:center; font-size:32px;">📷</div>`)}
+                  <div class="home-gallery-mini-overlay">
+                    ${g.videoUrl ? `<div style="font-size:10px; font-weight:800; background:rgba(217,79,61,0.9); display:inline-block; align-self:flex-start; padding:1px 6px; border-radius:4px; margin-bottom:4px;">▶ Video</div>` : (paths.length > 1 ? `<div style="font-size:10px; font-weight:800; background:rgba(0,174,189,0.9); display:inline-block; align-self:flex-start; padding:1px 6px; border-radius:4px; margin-bottom:4px;">📷 ${paths.length} photos</div>` : '')}
+                    <div class="home-gallery-mini-caption">${escapeHtml(g.title || g.caption || 'Museum snapshot')}</div>
+                  </div>
+                </a>
+              `;
+            }).join('');
+          }
+        }
+      } catch(err){
+        console.warn('Could not load home preview items', err);
       }
     }
-    loadGallery();
-
-    document.getElementById('filterAll').addEventListener('click', ()=>{
-      showFavoritesOnly = false;
-      document.getElementById('filterAll').classList.add('active');
-      document.getElementById('filterFavorites').classList.remove('active');
-      renderGrid();
-    });
-    document.getElementById('filterFavorites').addEventListener('click', ()=>{
-      showFavoritesOnly = true;
-      document.getElementById('filterFavorites').classList.add('active');
-      document.getElementById('filterAll').classList.remove('active');
-      renderGrid();
-    });
+    loadHomePreviews();
 
     document.getElementById('manualGoBtn').addEventListener('click', ()=>{
       const v = document.getElementById('manualCode').value.trim().toUpperCase();
@@ -178,63 +630,121 @@
       if(e.key==='Enter') document.getElementById('manualGoBtn').click();
     });
 
-    let scanStream = null, scanRAF = null;
+    let scanStream = null, scanRAF = null, scanLine = null;
+
     function stopScanner(){
-      if(scanRAF) cancelAnimationFrame(scanRAF);
-      if(scanStream){ scanStream.getTracks().forEach(t=>t.stop()); scanStream = null; }
+      if(scanRAF){ cancelAnimationFrame(scanRAF); scanRAF = null; }
+      if(scanStream){ scanStream.getTracks().forEach(t => t.stop()); scanStream = null; }
+      if(scanLine && scanLine.parentNode){ scanLine.parentNode.removeChild(scanLine); scanLine = null; }
     }
     window.addEventListener('beforeunload', stopScanner);
 
     async function startScanner(){
-      const viewport = document.getElementById('viewport');
+      // If already scanning, stop
+      if(scanStream){ stopScanner(); return; }
+
+      const viewport   = document.getElementById('viewport');
       const placeholder = document.getElementById('viewportPlaceholder');
-      const status = document.getElementById('scanStatus');
+      const status     = document.getElementById('scanStatus');
+      const btn        = document.getElementById('openScannerBtn');
+
+      // Check camera API exists
       if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-        status.textContent = 'Camera not available in this browser — use the code field below.';
+        status.textContent = '⚠️ Camera not available — use the code field below.';
         return;
       }
+
       try{
+        btn.textContent  = '⏳ Opening camera…';
+        btn.disabled     = true;
         status.textContent = 'Requesting camera access…';
+
         scanStream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: 'environment',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          }
+          video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
         });
-        if(placeholder) placeholder.remove();
+
+        // Hide placeholder and insert video
+        if(placeholder) placeholder.style.display = 'none';
+
         const video = document.createElement('video');
-        video.setAttribute('playsinline','');
-        video.setAttribute('autoplay','');
+        video.setAttribute('playsinline', '');
+        video.setAttribute('autoplay', '');
         video.muted = true;
         video.srcObject = scanStream;
-        viewport.prepend(video);
+        viewport.style.position = 'relative';
+        viewport.appendChild(video);
+
+        // Add animated scan line
+        scanLine = document.createElement('div');
+        scanLine.className = 'scan-line';
+        viewport.appendChild(scanLine);
+
         await video.play();
+
+        btn.textContent = '⏹ Stop scanner';
+        btn.disabled    = false;
+        btn.onclick     = () => { stopScanner(); btn.textContent = '📷 Open scanner'; btn.onclick = startScanner; status.textContent = 'Scanner stopped.'; };
+
+        status.textContent = '🔍 Scanning… hold the QR tag steady in the frame.';
+
+        // Prefer native BarcodeDetector (Chrome/Edge/Android WebView) for speed
+        const useNative = typeof BarcodeDetector !== 'undefined';
+        let detector;
+        if(useNative){
+          try { detector = new BarcodeDetector({ formats: ['qr_code'] }); } catch(e){ /* fall through */ }
+        }
+
         const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        status.textContent = 'Scanning… hold the tag steady in frame.';
-        let lastFrameTime = performance.now();
-        const tick = ()=>{
-          if(video.readyState >= video.HAVE_ENOUGH_DATA && video.videoWidth > 0 && video.videoHeight > 0){
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
+        const ctx    = canvas.getContext('2d', { willReadFrequently: true });
+        let scanning  = true;
+        let debounce  = false;
+
+        const tick = async () => {
+          if(!scanning) return;
+
+          if(video.readyState >= video.HAVE_ENOUGH_DATA && video.videoWidth > 0){
+            // Decode at half resolution for speed
+            const scale = Math.min(1, 640 / video.videoWidth);
+            canvas.width  = Math.round(video.videoWidth  * scale);
+            canvas.height = Math.round(video.videoHeight * scale);
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
-            const code = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts: 'attemptBoth' });
-            if(code && code.data){
-              status.textContent = 'Tag recognized.';
-              stopScanner();
-              try {
-                const url = new URL(code.data);
-                url.searchParams.set('src', 'scan');
-                location.href = url.pathname + url.search;
-              } catch(e) {
-                location.href = '/exhibit.html?code=' + encodeURIComponent(code.data.trim()) + '&src=scan';
-              }
-              return;
+
+            if(!debounce){
+              debounce = true;
+              try{
+                let result = null;
+
+                if(detector){
+                  // Native path
+                  const codes = await detector.detect(canvas);
+                  if(codes && codes.length > 0) result = codes[0].rawValue;
+                } else if(typeof jsQR === 'function'){
+                  // jsQR fallback
+                  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                  const code    = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts: 'attemptBoth' });
+                  if(code && code.data) result = code.data;
+                }
+
+                if(result){
+                  scanning = false;
+                  status.textContent = '✅ QR code detected! Loading exhibit…';
+                  stopScanner();
+                  btn.textContent = '📷 Open scanner';
+                  btn.onclick     = startScanner;
+
+                  // Navigate: if full URL redirect, else treat as exhibit code
+                  try{
+                    const url = new URL(result);
+                    url.searchParams.set('src', 'scan');
+                    location.href = url.pathname + url.search;
+                  } catch(e){
+                    location.href = '/exhibit.html?code=' + encodeURIComponent(result.trim()) + '&src=scan';
+                  }
+                  return;
+                }
+              } catch(e){ /* decode error, skip frame */ }
+              setTimeout(() => { debounce = false; }, 100); // throttle to ~10fps decode
             }
-          } else if(performance.now() - lastFrameTime > 2500) {
-            status.textContent = 'Waiting for camera frames… please allow access and center the tag.';
           }
           scanRAF = requestAnimationFrame(tick);
         };

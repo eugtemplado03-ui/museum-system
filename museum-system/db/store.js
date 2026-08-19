@@ -9,7 +9,7 @@ const path = require('path');
 const DB_FILE = path.join(__dirname, 'data.json');
 
 function defaultData() {
-  return { users: [], exhibits: [], favorites: [], ratings: [], scanEvents: [], programs: [], events: [], gallery: [] };
+  return { users: [], exhibits: [], categories: [], favorites: [], ratings: [], scanEvents: [], programs: [], events: [], gallery: [], visitors: [], artifactLogs: [] };
 }
 
 function load() {
@@ -52,6 +52,7 @@ function normalizeImagePaths(value) {
 
 function getPrimaryImagePath(item) {
   if (!item) return '';
+  if (Array.isArray(item)) return item[0] || '';
   if (Array.isArray(item.optimizedImagePaths) && item.optimizedImagePaths.length) return item.optimizedImagePaths[0];
   if (Array.isArray(item.imagePaths) && item.imagePaths.length) return item.imagePaths[0];
   if (item.optimizedImagePath) return item.optimizedImagePath;

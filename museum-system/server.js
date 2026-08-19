@@ -11,6 +11,9 @@ const adminRoutes = require('./routes/admin');
 const programsRoutes = require('./routes/programs');
 const eventsRoutes = require('./routes/events');
 const galleryRoutes = require('./routes/gallery');
+const visitorsRoutes = require('./routes/visitors');
+const artifactLogsRoutes = require('./routes/artifact-logs');
+const ttsRoutes     = require('./routes/tts');
 const { UPLOAD_DIR } = require('./middleware/upload');
 
 const app = express();
@@ -29,6 +32,9 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/programs', programsRoutes);
 app.use('/api/events', eventsRoutes);
 app.use('/api/gallery', galleryRoutes);
+app.use('/api/visitors', visitorsRoutes);
+app.use('/api/artifact-logs', artifactLogsRoutes);
+app.use('/api/tts',     ttsRoutes);
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 

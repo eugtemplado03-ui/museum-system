@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exhibits — Museo Sang Bata sa Negros</title>
+<meta name="description" content="Browse all exhibit tags at Museo Sang Bata sa Negros. Search, filter by category and rating, and discover every artifact on the floor.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<style>
+/* ── Category Sidebar ── */
+.browse-layout {
+  display: flex;
+  gap: 0;
+  align-items: flex-start;
+  margin-top: 0;
+}
+.browse-sidebar {
+  width: 190px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 80px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: 16px;
+  background: var(--white);
+  border: 1.5px solid var(--grey-100);
+  box-shadow: var(--shadow-sm);
+  padding: 14px 10px;
+  margin-right: 24px;
+}
+.browse-sidebar-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 10.5px;
+  font-weight: 800;
+  color: var(--grey-400);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 4px 8px 10px;
+  border-bottom: 1.5px solid var(--grey-100);
+  margin-bottom: 8px;
+}
+.cat-sidebar-btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--grey-700);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cat-sidebar-btn:hover { background: var(--teal-light); color: var(--teal-dark); }
+.cat-sidebar-btn.active { background: var(--teal); color: #fff; box-shadow: 0 2px 8px rgba(0,174,189,0.28); }
+.cat-sidebar-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink: 0; opacity: 0.55; }
+.cat-sidebar-btn.active .cat-sidebar-dot { opacity: 1; background: rgba(255,255,255,0.8); }
+.cat-sidebar-count {
+  margin-left: auto;
+  font-size: 10.5px;
+  font-weight: 700;
+  background: rgba(0,0,0,0.07);
+  color: inherit;
+  padding: 1px 6px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+.cat-sidebar-btn.active .cat-sidebar-count { background: rgba(255,255,255,0.2); }
+.browse-main { flex: 1; min-width: 0; }
+
+/* ── Exhibits Page Hero ── */
+.exhibits-hero {
+  background: linear-gradient(135deg, var(--teal-dark) 0%, #0ea3b5 60%, #22c5d8 100%);
+  border-radius: 20px;
+  padding: 40px 44px;
+  margin-bottom: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  box-shadow: 0 8px 32px rgba(0,174,189,0.22);
+  overflow: hidden;
+  position: relative;
+}
+.exhibits-hero::before {
+  content: '';
+  position: absolute;
+  right: -40px;
+  top: -40px;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.07);
+  pointer-events: none;
+}
+.exhibits-hero::after {
+  content: '';
+  position: absolute;
+  right: 80px;
+  bottom: -60px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  pointer-events: none;
+}
+.exhibits-hero-text { position: relative; z-index: 1; }
+.exhibits-hero-eyebrow {
+  font-family: 'Nunito', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.75);
+  margin-bottom: 8px;
+}
+.exhibits-hero h1 {
+  font-family: 'Nunito', sans-serif;
+  font-size: clamp(22px, 3vw, 34px);
+  font-weight: 900;
+  color: #fff;
+  margin: 0 0 10px;
+  line-height: 1.15;
+}
+.exhibits-hero p {
+  font-size: 14px;
+  color: rgba(255,255,255,0.85);
+  margin: 0;
+  max-width: 460px;
+  line-height: 1.6;
+}
+.exhibits-hero-icon {
+  font-size: 72px;
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.18));
+}
+
+@media (max-width: 760px) {
+  .browse-layout { flex-direction: column; }
+  .browse-sidebar {
+    width: 100%;
+    position: static;
+    max-height: none;
+    border-radius: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    padding: 10px 8px;
+    margin-right: 0;
+    margin-bottom: 16px;
+    overflow-x: auto;
+  }
+  .browse-sidebar-title { width: 100%; margin-bottom: 6px; }
+  .cat-sidebar-btn { width: auto; padding: 7px 12px; font-size: 12px; white-space: nowrap; }
+  .cat-sidebar-count { display: none; }
+  .exhibits-hero { padding: 28px 22px; flex-direction: column; align-items: flex-start; }
+  .exhibits-hero-icon { display: none; }
+}
+</style>
+</head>
+<body>
+  <!-- ── Top Navigation Bar ─────────────────────────────────────── -->
+  <div class="topbar">
+    <a class="brand" href="/">
+      <div class="brand-mark">M</div>
+      <div class="brand-text">
+        <div class="name">Museo Sang Bata sa Negros</div>
+        <div class="tagline">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a class="nav-btn" href="/">Home</a>
+      <a class="nav-btn active" href="/exhibits.html">Exhibits</a>
+      <a class="nav-btn" href="/programs.html">Programs</a>
+      <a class="nav-btn" href="/gallery.html">Gallery</a>
+      <a class="nav-btn" href="/events.html">Events</a>
+      <a class="nav-btn" href="/admin.html">Admin</a>
+    </div>
+  </div>
+
+  <div class="user-layout">
+    <!-- ── Categories Sidebar ───────────────────────────────────── -->
+    <aside class="user-sidebar">
+      <div class="admin-sidebar-brand" style="padding: 16px 14px 12px;">
+        <div class="admin-sidebar-logo" style="width:32px; height:32px; font-size:14px;">🏷️</div>
+        <div class="admin-sidebar-title" style="font-size:13px;">Categories<br><span style="font-size:9px;">Filter exhibits</span></div>
+      </div>
+
+      <nav class="user-sidebar-nav">
+        <div id="sidebarCategoryNav" style="display:flex; flex-direction:column; gap:2px;">
+          <!-- Dynamically populated -->
+        </div>
+
+        <div class="user-sidebar-section-title" style="margin-top:8px;">Saved</div>
+        <button class="user-sidebar-btn" id="sidebarFavoritesBtn" type="button">
+          <span class="user-sidebar-icon" style="color:var(--danger);">♥</span>
+          <span class="user-sidebar-label">My Favorites</span>
+          <span class="user-sidebar-count" id="sidebarFavCount">0</span>
+        </button>
+      </nav>
+
+      <div class="user-sidebar-footer">
+        <a class="user-sidebar-sublink" href="/admin.html">
+          <span>⚙️</span> Staff Admin
+        </a>
+      </div>
+    </aside>
+
+    <!-- ── Main Content ─────────────────────────────────────────── -->
+    <div class="user-main">
+      <main style="padding: clamp(16px, 3vw, 36px); flex: 1;">
+        <div class="wrap" style="max-width: 1100px; margin: 0 auto;">
+
+          <!-- Hero Banner -->
+          <div class="exhibits-hero">
+            <div class="exhibits-hero-text">
+              <div class="exhibits-hero-eyebrow">Self-guided tour</div>
+              <h1>All Exhibits</h1>
+              <p>Browse, search and filter every exhibit catalogued at Museo Sang Bata sa Negros. Tap any card to read its full label, or scan the QR tag on the floor.</p>
+            </div>
+            <div class="exhibits-hero-icon">🏛️</div>
+          </div>
+
+          <!-- Section head -->
+          <div class="section-head">
+            <h2 id="gallerySectionTitle">Exhibit tags on the floor</h2>
+            <div class="count" id="exhibitCount">Loading…</div>
+          </div>
+
+          <!-- Search & Filter Toolbar -->
+          <div class="filter-toolbar" id="exhibitFilterToolbar">
+            <div class="filter-toolbar-top">
+              <div class="search-box-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="exhibitSearchInput" class="search-input" placeholder="Search by name, code, origin, era, location, notes…" autocomplete="off">
+                <button type="button" id="exhibitSearchClear" class="search-clear-btn" style="display:none;" title="Clear search">✕</button>
+              </div>
+              <div class="filter-controls-group">
+                <select id="exhibitSortSelect" class="filter-select" title="Sort exhibits">
+                  <option value="code-asc">Sort: Code (Default)</option>
+                  <option value="title-asc">Sort: Title (A–Z)</option>
+                  <option value="title-desc">Sort: Title (Z–A)</option>
+                  <option value="rating-desc">Sort: Highest Rated</option>
+                  <option value="favs-desc">Sort: Most Favorited</option>
+                </select>
+                <select id="exhibitRatingFilter" class="filter-select" title="Filter by minimum rating">
+                  <option value="all">All Ratings</option>
+                  <option value="4">★ 4.0 &amp; up</option>
+                  <option value="4.5">★ 4.5 &amp; up</option>
+                  <option value="5">★ 5.0 only</option>
+                  <option value="rated">Has ratings</option>
+                </select>
+              </div>
+            </div>
+            <div class="filter-stats-bar" id="exhibitStatsBar">
+              <div class="filter-stats-text" id="exhibitFilterStats">Showing exhibits</div>
+              <button type="button" class="filter-reset-link" id="exhibitResetFilters" style="display:none;">Reset search &amp; filters</button>
+            </div>
+          </div>
+
+          <div class="tag-grid" id="tagGrid"></div>
+          <div id="emptyState" style="display:none;" class="empty-state">
+            <h2>No exhibits yet</h2>
+            <p>Add your first exhibit from the admin dashboard.</p>
+            <a class="btn btn-primary" href="/admin.html">Go to admin</a>
+          </div>
+
+        </div>
+      </main>
+      <footer>
+        Museo Sang Bata sa Negros · Exhibit Guide<br>
+        Barangay Old Sagay, Sagay City, Negros Occidental, Philippines 6122 ·
+        Open Mon–Fri 8:00 AM–5:00 PM (weekends by booked tour only) ·
+        +63 917 798 7420
+      </footer>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/chatbot.js"></script>
+  <script src="/js/image-enhance.js"></script>
+  <script src="/js/lightbox.js"></script>
+  <script>
+    function escapeHtml(str){
+      return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function starString(avg){
+      if(avg == null) return '';
+      const rounded = Math.round(avg);
+      return '★'.repeat(rounded) + '☆'.repeat(5 - rounded);
+    }
+
+    function getAllExhibitImages(ex){
+      if (Array.isArray(ex.optimizedImagePaths) && ex.optimizedImagePaths.length) return ex.optimizedImagePaths;
+      if (Array.isArray(ex.imagePaths) && ex.imagePaths.length) return ex.imagePaths;
+      if (ex.optimizedImagePath) return [ex.optimizedImagePath];
+      if (ex.imagePath) return [ex.imagePath];
+      return [];
+    }
+
+    const CATEGORY_ICONS = {
+      'All': '🏛️',
+      'Marine & Nature': '🐟',
+      'Touch & Play': '✋',
+      'Toys & Collections': '🧸',
+      'Character & Heritage': '🏆',
+      'Environmental': '♻️',
+      'Reading & Learning': '📖',
+      'Other': '✨'
+    };
+
+    let allExhibits = [];
+    let allCategories = [];
+    let favoriteIds = new Set();
+    let showFavoritesOnly = false;
+    let activeCategory = 'All';
+    let searchQuery = '';
+    let sortOption = 'code-asc';
+    let minRatingFilter = 'all';
+
+    function tagCard(ex){
+      const isFav = favoriteIds.has(ex.id);
+      const images = getAllExhibitImages(ex);
+      const firstImage = images[0] || '';
+      const photoCount = images.length;
+      const icon = (CATEGORY_ICONS[ex.category]) ? CATEGORY_ICONS[ex.category] : '🏛️';
+
+      const photoHtml = firstImage ? `
+        <div class="tag-photo">
+          <img src="${escapeHtml(firstImage)}" alt="${escapeHtml(ex.title)}" loading="lazy">
+          ${photoCount > 1 ? `<div class="tag-photo-badge">📷 ${photoCount}</div>` : ''}
+        </div>` : `
+        <div class="tag-photo">
+          <div class="tag-photo-placeholder">
+            <div class="icon">${icon}</div>
+            <span>${escapeHtml(ex.category || 'Exhibit')}</span>
+          </div>
+        </div>`;
+
+      return `
+      <div class="tag-card" data-id="${ex.id}">
+        <div class="tag-hole"></div>
+        <button class="fav-btn ${isFav ? 'active' : ''}" data-fav-toggle="${ex.id}" aria-label="Toggle favorite">${isFav ? '♥' : '♡'}</button>
+        ${photoHtml}
+        <div class="tag-cat">${escapeHtml(ex.category)}</div>
+        <h3>${escapeHtml(ex.title)}</h3>
+        <div class="meta">${escapeHtml(ex.origin || '')}${ex.origin && ex.year ? ' · ' : ''}${escapeHtml(ex.year || '')}</div>
+        ${ex.ratingCount ? `<div class="rating-badge"><span class="stars">${starString(ex.ratingAverage)}</span> ${ex.ratingAverage} (${ex.ratingCount})</div>` : `<div class="rating-badge">No ratings yet</div>`}
+        <div class="tag-foot">
+          <span class="tag-id mono">${ex.code}</span>
+          <a class="btn btn-ghost dark btn-small" href="/exhibit.html?code=${encodeURIComponent(ex.code)}">View label &rarr;</a>
+        </div>
+      </div>`;
+    }
+
+    function getCatCount(cat){
+      let base = showFavoritesOnly ? allExhibits.filter(e => favoriteIds.has(e.id)) : allExhibits;
+      if(searchQuery){
+        const q = searchQuery.toLowerCase();
+        base = base.filter(e =>
+          (e.title || '').toLowerCase().includes(q) ||
+          (e.code || '').toLowerCase().includes(q) ||
+          (e.origin || '').toLowerCase().includes(q) ||
+          (e.year || '').toLowerCase().includes(q) ||
+          (e.location || '').toLowerCase().includes(q) ||
+          (e.description || '').toLowerCase().includes(q) ||
+          (e.category || '').toLowerCase().includes(q)
+        );
+      }
+      if(cat === 'All') return base.length;
+      return base.filter(e => String(e.category||'Other').trim().toLowerCase() === cat.trim().toLowerCase()).length;
+    }
+
+    function renderCategoryFilters(){
+      const container = document.getElementById('sidebarCategoryNav');
+      if(!container) return;
+      const exhibitCategories = allExhibits.map(e => String(e.category || 'Other').trim()).filter(Boolean);
+      const combined = Array.from(new Set([
+        ...allCategories.map(c => String(c).trim()).filter(Boolean),
+        ...exhibitCategories
+      ]));
+      const categories = ['All', ...combined];
+
+      container.innerHTML = categories.map(cat => {
+        const isActive = !showFavoritesOnly && (activeCategory.toLowerCase() === cat.toLowerCase());
+        const count = getCatCount(cat);
+        const icon = CATEGORY_ICONS[cat] || '✨';
+        return `<button class="user-sidebar-btn ${isActive ? 'active' : ''}" data-category="${escapeHtml(cat)}" type="button">
+          <span class="user-sidebar-icon">${icon}</span>
+          <span class="user-sidebar-label">${escapeHtml(cat)}</span>
+          <span class="user-sidebar-count">${count}</span>
+          ${isActive ? '<span class="user-sidebar-indicator"></span>' : ''}
+        </button>`;
+      }).join('');
+
+      const favBtn = document.getElementById('sidebarFavoritesBtn');
+      const favCount = document.getElementById('sidebarFavCount');
+      if(favCount) favCount.textContent = favoriteIds.size;
+      if(favBtn){
+        if(showFavoritesOnly){
+          favBtn.classList.add('active');
+          if(!favBtn.querySelector('.user-sidebar-indicator')){
+            const ind = document.createElement('span');
+            ind.className = 'user-sidebar-indicator';
+            favBtn.appendChild(ind);
+          }
+        } else {
+          favBtn.classList.remove('active');
+          favBtn.querySelector('.user-sidebar-indicator')?.remove();
+        }
+      }
+
+      container.querySelectorAll('[data-category]').forEach(btn => {
+        btn.addEventListener('click', ()=>{
+          showFavoritesOnly = false;
+          activeCategory = btn.dataset.category;
+          renderCategoryFilters();
+          renderGrid();
+        });
+      });
+    }
+
+    function renderGrid(){
+      const grid = document.getElementById('tagGrid');
+      const emptyState = document.getElementById('emptyState');
+      const titleEl = document.getElementById('gallerySectionTitle');
+      const statsEl = document.getElementById('exhibitFilterStats');
+      const resetBtn = document.getElementById('exhibitResetFilters');
+      const clearBtn = document.getElementById('exhibitSearchClear');
+
+      if(clearBtn) clearBtn.style.display = searchQuery ? 'flex' : 'none';
+
+      let list = showFavoritesOnly ? allExhibits.filter(e => favoriteIds.has(e.id)) : allExhibits;
+
+      if(titleEl){
+        if(showFavoritesOnly) titleEl.textContent = 'My favorite exhibits';
+        else if(activeCategory !== 'All') titleEl.textContent = `${activeCategory} exhibits`;
+        else titleEl.textContent = 'Exhibit tags on the floor';
+      }
+
+      if(activeCategory !== 'All'){
+        list = list.filter(e => String(e.category || 'Other').trim().toLowerCase() === activeCategory.trim().toLowerCase());
+      }
+
+      if(searchQuery){
+        const q = searchQuery.toLowerCase();
+        list = list.filter(e =>
+          (e.title || '').toLowerCase().includes(q) ||
+          (e.code || '').toLowerCase().includes(q) ||
+          (e.origin || '').toLowerCase().includes(q) ||
+          (e.year || '').toLowerCase().includes(q) ||
+          (e.location || '').toLowerCase().includes(q) ||
+          (e.description || '').toLowerCase().includes(q) ||
+          (e.category || '').toLowerCase().includes(q)
+        );
+      }
+
+      if(minRatingFilter !== 'all'){
+        if(minRatingFilter === 'rated'){
+          list = list.filter(e => (e.ratingCount || 0) > 0);
+        } else {
+          const minR = parseFloat(minRatingFilter);
+          list = list.filter(e => (e.ratingAverage || 0) >= minR);
+        }
+      }
+
+      list.sort((a, b) => {
+        if(sortOption === 'title-asc') return (a.title || '').localeCompare(b.title || '');
+        if(sortOption === 'title-desc') return (b.title || '').localeCompare(a.title || '');
+        if(sortOption === 'rating-desc'){
+          const rA = a.ratingAverage || 0, rB = b.ratingAverage || 0;
+          if(rB !== rA) return rB - rA;
+          return (b.ratingCount || 0) - (a.ratingCount || 0);
+        }
+        if(sortOption === 'favs-desc') return (b.favoriteCount || 0) - (a.favoriteCount || 0);
+        return (a.code || '').localeCompare(b.code || '', undefined, { numeric: true });
+      });
+
+      const isFiltered = Boolean(searchQuery || minRatingFilter !== 'all' || activeCategory !== 'All' || showFavoritesOnly);
+      if(statsEl){
+        statsEl.innerHTML = `Showing <span>${list.length}</span> of <span>${allExhibits.length}</span> exhibits${searchQuery ? ` matching "<em>${escapeHtml(searchQuery)}</em>"` : ''}`;
+      }
+      if(resetBtn) resetBtn.style.display = isFiltered ? 'inline-block' : 'none';
+
+      if(list.length === 0){
+        if(searchQuery || minRatingFilter !== 'all'){
+          grid.innerHTML = `
+            <div class="empty-state" style="grid-column:1/-1;">
+              <h2>No matching exhibits</h2>
+              <p>No exhibits match your search or filter criteria.</p>
+              <button class="btn btn-primary btn-small" style="margin-top:10px;" onclick="resetAllExhibitFilters()">Clear search &amp; filters</button>
+            </div>`;
+          emptyState.style.display = 'none';
+        } else if(showFavoritesOnly){
+          grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><h2>No favorites yet</h2><p>Tap the heart on any exhibit to save it here.</p></div>`;
+          emptyState.style.display = 'none';
+        } else if(activeCategory !== 'All'){
+          grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><h2>No exhibits in "${escapeHtml(activeCategory)}"</h2><p>Exhibits assigned to this category will appear here.</p></div>`;
+          emptyState.style.display = 'none';
+        } else {
+          grid.innerHTML = '';
+          emptyState.style.display = 'block';
+        }
+      } else {
+        emptyState.style.display = 'none';
+        grid.innerHTML = list.map(tagCard).join('');
+      }
+      grid.querySelectorAll('[data-fav-toggle]').forEach(btn => {
+        btn.addEventListener('click', (e) => { e.preventDefault(); toggleFavorite(btn.dataset.favToggle); });
+      });
+    }
+
+    function resetAllExhibitFilters(){
+      searchQuery = '';
+      minRatingFilter = 'all';
+      activeCategory = 'All';
+      showFavoritesOnly = false;
+      sortOption = 'code-asc';
+      const searchInput = document.getElementById('exhibitSearchInput');
+      const sortSelect = document.getElementById('exhibitSortSelect');
+      const ratingFilter = document.getElementById('exhibitRatingFilter');
+      if(searchInput) searchInput.value = '';
+      if(sortSelect) sortSelect.value = 'code-asc';
+      if(ratingFilter) ratingFilter.value = 'all';
+      renderCategoryFilters();
+      renderGrid();
+    }
+
+    function initToolbarEvents(){
+      const searchInput = document.getElementById('exhibitSearchInput');
+      const searchClear = document.getElementById('exhibitSearchClear');
+      const sortSelect = document.getElementById('exhibitSortSelect');
+      const ratingFilter = document.getElementById('exhibitRatingFilter');
+      const resetBtn = document.getElementById('exhibitResetFilters');
+      if(searchInput){
+        searchInput.addEventListener('input', e => {
+          searchQuery = e.target.value.trim();
+          renderCategoryFilters();
+          renderGrid();
+        });
+      }
+      if(searchClear){
+        searchClear.addEventListener('click', () => {
+          searchQuery = '';
+          if(searchInput){ searchInput.value = ''; searchInput.focus(); }
+          renderCategoryFilters();
+          renderGrid();
+        });
+      }
+      if(sortSelect) sortSelect.addEventListener('change', e => { sortOption = e.target.value; renderGrid(); });
+      if(ratingFilter) ratingFilter.addEventListener('change', e => { minRatingFilter = e.target.value; renderGrid(); });
+      if(resetBtn) resetBtn.addEventListener('click', resetAllExhibitFilters);
+    }
+
+    async function toggleFavorite(exhibitId){
+      const isFav = favoriteIds.has(exhibitId);
+      try{
+        if(isFav){ favoriteIds.delete(exhibitId); await Api.removeFavorite(exhibitId); }
+        else { favoriteIds.add(exhibitId); await Api.addFavorite(exhibitId); }
+        renderCategoryFilters();
+        renderGrid();
+      }catch(e){ /* ignore */ }
+    }
+
+    async function loadExhibits(){
+      const grid = document.getElementById('tagGrid');
+      const countEl = document.getElementById('exhibitCount');
+      initToolbarEvents();
+      try{
+        const [{ exhibits }, favResult, catResult] = await Promise.all([
+          Api.listExhibits(),
+          Api.listFavorites().catch(() => ({ exhibits: [] })),
+          Api.listCategories().catch(() => ({ categories: [] }))
+        ]);
+        allExhibits = exhibits || [];
+        allCategories = (catResult && Array.isArray(catResult.categories)) ? catResult.categories : [];
+        favoriteIds = new Set((favResult && favResult.exhibits ? favResult.exhibits : []).map(e => e.id));
+        const urlParams = new URLSearchParams(window.location.search);
+        const catParam = urlParams.get('cat');
+        if(catParam){
+          activeCategory = catParam;
+        }
+        countEl.textContent = `${allExhibits.length} exhibits catalogued`;
+        renderCategoryFilters();
+        renderGrid();
+      }catch(e){
+        countEl.textContent = 'Could not load exhibits';
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><p>${escapeHtml(e.message)}</p></div>`;
+      }
+    }
+    loadExhibits();
+
+    const favBtn = document.getElementById('sidebarFavoritesBtn');
+    if(favBtn){
+      favBtn.addEventListener('click', () => {
+        showFavoritesOnly = !showFavoritesOnly;
+        renderCategoryFilters();
+        renderGrid();
+      });
+    }
+  </script>
+  <footer id="siteFooter"></footer>
+  <script src="/js/footer.js"></script>
+</body>
+</html>

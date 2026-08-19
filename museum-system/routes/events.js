@@ -14,6 +14,12 @@ router.get('/', (req, res) => {
   res.json({ events: events.all() });
 });
 
+router.get('/:id', (req, res) => {
+  const event = events.findById(req.params.id);
+  if (!event) return res.status(404).json({ error: 'Event not found.' });
+  res.json({ event });
+});
+
 router.post('/', requireAuth, (req, res) => {
   const errors = validate(req.body || {});
   if (errors.length) return res.status(400).json({ error: errors.join(' ') });

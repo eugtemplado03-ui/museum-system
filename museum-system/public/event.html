@@ -1,0 +1,220 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Details — Museo Sang Bata sa Negros</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="topbar">
+    <a class="brand" href="/">
+      <div class="brand-mark">M</div>
+      <div class="brand-text">
+        <div class="name">Museo Sang Bata sa Negros</div>
+        <div class="tagline">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a class="nav-btn" href="/">Home</a>
+      <a class="nav-btn" href="/exhibits.html">Exhibits</a>
+      <a class="nav-btn" href="/programs.html">Programs</a>
+      <a class="nav-btn" href="/gallery.html">Gallery</a>
+      <a class="nav-btn active" href="/events.html">Events</a>
+      <a class="nav-btn" href="/admin.html">Admin</a>
+    </div>
+  </div>
+
+  <main><div class="wrap" style="max-width: 680px;">
+    <a class="detail-back" href="/events.html">&larr; Back to events</a>
+    <div id="content">Loading event details…</div>
+  </div></main>
+
+  <footer>
+    Museo Sang Bata sa Negros · News &amp; Events<br>
+    Barangay Old Sagay, Sagay City, Negros Occidental, Philippines 6122 ·
+    Open Mon–Fri 8:00 AM–5:00 PM (weekends by booked tour only) ·
+    +63 917 798 7420
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/chatbot.js"></script>
+  <script src="/js/carousel.js"></script>
+  <script src="/js/image-enhance.js"></script>
+  <script src="/js/lightbox.js"></script>
+  <script>
+    function escapeHtml(str){
+      return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function getAllImages(item){
+      if (Array.isArray(item.optimizedImagePaths) && item.optimizedImagePaths.length) return item.optimizedImagePaths;
+      if (Array.isArray(item.imagePaths) && item.imagePaths.length) return item.imagePaths;
+      if (item.optimizedImagePath) return [item.optimizedImagePath];
+      if (item.imagePath) return [item.imagePath];
+      return [];
+    }
+
+    function formatDate(d){
+      if(!d) return '';
+      const parsed = new Date(d);
+      if(isNaN(parsed.getTime())) return d;
+      return parsed.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    async function load(){
+      const params = new URLSearchParams(location.search);
+      const id = params.get('id');
+      const content = document.getElementById('content');
+      if(!id){
+        content.innerHTML = `<div class="empty-state"><h2>No event selected</h2><p>Please select an event from the list.</p><a class="btn btn-primary" href="/events.html">View all events</a></div>`;
+        return;
+      }
+      try{
+        const { event } = await Api.getEvent(id);
+        document.title = event.title + ' — News & Events — Museo Sang Bata sa Negros';
+        const images = getAllImages(event);
+
+        content.innerHTML = `
+          <div class="plaque">
+            <div class="plaque-media">
+              ${renderMediaBox(images, event.videoUrl, event.title, '📅')}
+            </div>
+            <div class="plaque-body">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+                ${event.date ? `<div class="plaque-cat">${escapeHtml(formatDate(event.date))}</div>` : `<div class="plaque-cat">Event</div>`}
+              </div>
+              <h1>${escapeHtml(event.title)}</h1>
+              
+              <div class="plaque-meta-row">
+                ${event.date ? `<div><span>Event Date</span><b>${escapeHtml(formatDate(event.date))}</b></div>` : ''}
+                ${event.location ? `<div><span>Location</span><b>${escapeHtml(event.location)}</b></div>` : ''}
+              </div>
+
+              <div style="display:flex; gap:8px; align-items:center; margin-top:2px;">
+                <label for="langSelect" style="font-size:12.5px; color:var(--grey-400); font-weight:600;">Language:</label>
+                <select id="langSelect" style="padding:5px 10px; font-size:13px; border-radius:8px; border:1px solid var(--grey-200); background:#fff; font-family:inherit; color:var(--ink); cursor:pointer;">
+                  <option value="original">Original (English)</option>
+                  <option value="tl">Tagalog (Filipino)</option>
+                  <option value="cb">Bisaya (Cebuano)</option>
+                </select>
+              </div>
+
+              <div class="plaque-desc" id="plaqueDesc">
+                ${escapeHtml(event.description || 'No detailed description available for this event.')}
+              </div>
+
+              <div class="tts-controls">
+                <button class="btn btn-secondary btn-small" id="ttsPlayBtn">🔊 Listen to announcement</button>
+                <button class="btn btn-secondary btn-small" id="ttsStopBtn">■ Stop</button>
+                <div id="ttsStatus" style="font-size:12px; color:var(--grey-400);"></div>
+              </div>
+            </div>
+          </div>`;
+
+        initPhotoCarousels(content);
+        wireTranslationAndTTS(event);
+      }catch(e){
+        content.innerHTML = `<div class="empty-state"><h2>Event not found</h2><p>The event you are looking for may have concluded or been updated.</p><a class="btn btn-primary" href="/events.html">Back to all events</a></div>`;
+      }
+    }
+
+    function wireTranslationAndTTS(event){
+      const playBtn    = document.getElementById('ttsPlayBtn');
+      const stopBtn    = document.getElementById('ttsStopBtn');
+      const statusEl   = document.getElementById('ttsStatus');
+      const descEl     = document.getElementById('plaqueDesc');
+      const langSelect = document.getElementById('langSelect');
+      if (!playBtn || !stopBtn || !descEl) return;
+
+      const _cache = { original: event.description || '' };
+      let _currentText = _cache.original;
+      const LANG_CODE = { original: 'en-US', tl: 'fil-PH', cb: 'fil-PH' };
+
+      function setStatus(msg, isLoading) {
+        statusEl.textContent = msg;
+        playBtn.disabled = isLoading || false;
+      }
+
+      async function fetchTranslation(targetLang) {
+        if (_cache[targetLang]) return _cache[targetLang];
+        const originalText = _cache.original || '';
+        if (!originalText.trim()) return originalText;
+
+        setStatus('Translating…', true);
+        try {
+          const resp = await fetch('/api/tts/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: originalText, targetLang }),
+          });
+          if (!resp.ok) throw new Error('Translation error');
+          const { translatedText } = await resp.json();
+          _cache[targetLang] = translatedText;
+          setStatus('', false);
+          return translatedText;
+        } catch (e) {
+          setStatus('Translation unavailable — using original text.', false);
+          return originalText;
+        }
+      }
+
+      let _audioEl = null;
+      function stopAudio() {
+        if (_audioEl) { _audioEl.pause(); _audioEl.src = ''; _audioEl = null; }
+        setStatus('', false);
+      }
+
+      if (langSelect) {
+        langSelect.addEventListener('change', async () => {
+          stopAudio();
+          const v = langSelect.value;
+          if (v === 'original') {
+            _currentText = _cache.original;
+            descEl.textContent = _currentText || 'No detailed description available for this event.';
+            setStatus('', false);
+          } else {
+            const translated = await fetchTranslation(v);
+            _currentText = translated;
+            descEl.textContent = translated || 'No detailed description available for this event.';
+          }
+        });
+      }
+
+      playBtn.addEventListener('click', async () => {
+        stopAudio();
+        const textToSpeak = _currentText || ev.title || '';
+        if (!textToSpeak.trim()) { setStatus('Nothing to read.', false); return; }
+        setStatus('⏳ Generating audio…', true);
+        try {
+          const resp = await fetch('/api/tts/speak', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: textToSpeak }),
+          });
+          if (!resp.ok) throw new Error('TTS error ' + resp.status);
+          const blob = await resp.blob();
+          const url = URL.createObjectURL(blob);
+          _audioEl = new Audio(url);
+          _audioEl.onplay  = () => setStatus('🔊 Playing…', true);
+          _audioEl.onended = () => { URL.revokeObjectURL(url); _audioEl = null; setStatus('', false); };
+          _audioEl.onerror = () => { URL.revokeObjectURL(url); _audioEl = null; setStatus('Playback error.', false); };
+          await _audioEl.play();
+        } catch(e) {
+          console.error('[TTS speak]', e);
+          setStatus('Audio unavailable — check connection.', false);
+        }
+      });
+
+      stopBtn.addEventListener('click', stopAudio);
+      window.addEventListener('pagehide', stopAudio);
+    }
+
+    load();
+  </script>
+  <footer id="siteFooter"></footer>
+  <script src="/js/footer.js"></script>
+</body>
+</html>

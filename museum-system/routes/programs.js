@@ -14,6 +14,12 @@ router.get('/', (req, res) => {
   res.json({ programs: programs.all() });
 });
 
+router.get('/:id', (req, res) => {
+  const program = programs.findById(req.params.id);
+  if (!program) return res.status(404).json({ error: 'Program not found.' });
+  res.json({ program });
+});
+
 router.post('/', requireAuth, (req, res) => {
   const errors = validate(req.body || {});
   if (errors.length) return res.status(400).json({ error: errors.join(' ') });

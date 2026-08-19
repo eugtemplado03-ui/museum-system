@@ -1,6 +1,11 @@
 const { load, save, normalizeImagePaths } = require('./store');
 const { nanoid } = require('nanoid');
 
+const DEFAULT_CATEGORIES = [
+  'Marine & Nature', 'Touch & Play', 'Toys & Collections',
+  'Character & Heritage', 'Environmental', 'Reading & Learning', 'Other'
+];
+
 function nextCode(exhibits) {
   let max = 0;
   exhibits.forEach(e => {
@@ -8,6 +13,20 @@ function nextCode(exhibits) {
     if (!isNaN(n) && n > max) max = n;
   });
   return 'EX-' + String(max + 1).padStart(3, '0');
+}
+
+function ensureCategories(data) {
+  if (!Array.isArray(data.categories) || data.categories.length === 0) {
+    const existing = Array.from(new Set(
+      (Array.isArray(data.exhibits) ? data.exhibits : [])
+        .map(e => String(e.category || '').trim())
+        .filter(Boolean)
+    ));
+    const combined = Array.from(new Set([...DEFAULT_CATEGORIES, ...existing]));
+    data.categories = combined;
+    save(data);
+  }
+  return data.categories;
 }
 
 function all() {
@@ -36,6 +55,8 @@ function create(payload) {
     imagePaths: paths,
     imagePath: paths[0] || '',
     description: payload.description || '',
+    description_tl: payload.description_tl || '',
+    description_cb: payload.description_cb || '',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
@@ -61,6 +82,8 @@ function update(id, payload) {
     imagePaths,
     imagePath: imagePaths[0] || '',
     description: payload.description ?? existing.description,
+    description_tl: payload.description_tl ?? existing.description_tl,
+    description_cb: payload.description_cb ?? existing.description_cb,
     updatedAt: new Date().toISOString()
   };
   data.exhibits[idx] = updated;
@@ -76,4 +99,103 @@ function remove(id) {
   return data.exhibits.length < before;
 }
 
-module.exports = { all, findByCode, findById, create, update, remove };
+function categories() {
+  const data = load();
+  ensureCategories(data);
+  const exhibitCats = Array.from(new Set(
+    (Array.isArray(data.exhibits) ? data.exhibits : [])
+      .map(e => String(e.category || '').trim())
+      .filter(Boolean)
+  ));
+  return Array.from(new Set([...(data.categories || []), ...exhibitCats]));
+}
+
+function addCategory(category) {
+  const value = String(category || '').trim();
+  if (!value) return null;
+  const data = load();
+  ensureCategories(data);
+  if (data.categories.some(c => c.toLowerCase() === value.toLowerCase())) return null;
+  data.categories.push(value);
+  save(data);
+  return value;
+}
+
+function updateCategory(oldCategory, newCategory) {
+  const oldValue = String(oldCategory || '').trim();
+  const newValue = String(newCategory || '').trim();
+  if (!oldValue || !newValue) return null;
+  if (oldValue === newValue) return oldValue;
+
+  const data = load();
+  ensureCategories(data);
+  const oldIndex = data.categories.findIndex(c => c.toLowerCase() === oldValue.toLowerCase());
+  if (oldIndex === -1) return null;
+
+  const duplicateIndex = data.categories.findIndex(c => c.toLowerCase() === newValue.toLowerCase());
+  if (duplicateIndex !== -1 && duplicateIndex !== oldIndex) {
+    // Merge: remove old category entry
+    data.categories.splice(oldIndex, 1);
+  } else {
+    data.categories[oldIndex] = newValue;
+  }
+
+  data.exhibits = data.exhibits.map(e => {
+    if (e.category && e.category.toLowerCase() === oldValue.toLowerCase()) {
+      return { ...e, category: newValue };
+    }
+    return e;
+  });
+  save(data);
+  return newValue;
+}
+
+function deleteCategory(category) {
+  const value = String(category || '').trim();
+  if (!value) return false;
+  const data = load();
+  ensureCategories(data);
+  const index = data.categories.findIndex(c => c.toLowerCase() === value.toLowerCase());
+  if (index === -1) return false;
+
+  const deletedName = data.categories[index];
+  data.categories.splice(index, 1);
+
+  let fallback = 'Other';
+  if (data.categories.length > 0) {
+    fallback = data.categories.includes('Other') ? 'Other' : data.categories[0];
+  } else {
+    data.categories.push('Other');
+    fallback = 'Other';
+  }
+
+  data.exhibits = data.exhibits.map(e => {
+    if (e.category && e.category.toLowerCase() === deletedName.toLowerCase()) {
+      return { ...e, category: fallback };
+    }
+    return e;
+  });
+  save(data);
+  return true;
+}
+
+function assignExhibitsToCategory(category, exhibitIds) {
+  const catName = String(category || '').trim();
+  if (!catName) return false;
+  const data = load();
+  ensureCategories(data);
+  if (!data.categories.some(c => c.toLowerCase() === catName.toLowerCase())) {
+    data.categories.push(catName);
+  }
+  const idSet = new Set(Array.isArray(exhibitIds) ? exhibitIds : []);
+  data.exhibits = data.exhibits.map(e => {
+    if (idSet.has(e.id)) {
+      return { ...e, category: catName, updatedAt: new Date().toISOString() };
+    }
+    return e;
+  });
+  save(data);
+  return true;
+}
+
+module.exports = { all, findByCode, findById, create, update, remove, categories, addCategory, updateCategory, deleteCategory, assignExhibitsToCategory };

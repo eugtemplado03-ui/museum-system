@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>News &amp; Events — Museo Sang Bata sa Negros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -14,11 +14,12 @@
       <div class="brand-mark">M</div>
       <div class="brand-text">
         <div class="name">Museo Sang Bata sa Negros</div>
-        <div class="tagline">Exhibit Guide</div>
+        <div class="tagline">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
       </div>
     </a>
     <div class="nav-links">
-      <a class="nav-btn" href="/">Scan &amp; Browse</a>
+      <a class="nav-btn" href="/">Home</a>
+      <a class="nav-btn" href="/exhibits.html">Exhibits</a>
       <a class="nav-btn" href="/programs.html">Programs</a>
       <a class="nav-btn" href="/gallery.html">Gallery</a>
       <a class="nav-btn active" href="/events.html">Events</a>
@@ -31,21 +32,51 @@
       <h1>News &amp; events</h1>
       <p>Recent happenings at the museum — anniversaries, workshops, training programs, and community outreach.</p>
     </div>
+
+    <!-- Search & Filter Toolbar -->
+    <div class="filter-toolbar" id="eventFilterToolbar">
+      <div class="filter-toolbar-top">
+        <div class="search-box-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="eventSearchInput" class="search-input" placeholder="Search events by title, date, location, description…" autocomplete="off">
+          <button type="button" id="eventSearchClear" class="search-clear-btn" style="display:none;" title="Clear search">✕</button>
+        </div>
+        <div class="filter-controls-group">
+          <select id="eventMediaFilter" class="filter-select" title="Filter by media">
+            <option value="all">All Media</option>
+            <option value="video">Has Video ▶</option>
+            <option value="photo">Has Photos 📷</option>
+          </select>
+          <select id="eventSortSelect" class="filter-select" title="Sort events">
+            <option value="date-desc">Sort: Date (Newest first)</option>
+            <option value="date-asc">Sort: Date (Oldest first)</option>
+            <option value="title-asc">Sort: Title (A–Z)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filter-chips-row" id="eventTimeChips">
+        <button type="button" class="filter-chip-btn active" data-time="all">All Events</button>
+        <button type="button" class="filter-chip-btn" data-time="upcoming">Upcoming 📅</button>
+        <button type="button" class="filter-chip-btn" data-time="past">Past Events 🏛️</button>
+      </div>
+
+      <div class="filter-stats-bar" id="eventStatsBar">
+        <div class="filter-stats-text" id="eventFilterStats">Showing events</div>
+        <button type="button" class="filter-reset-link" id="eventResetFilters" style="display:none;">Reset search &amp; filters</button>
+      </div>
+    </div>
+
     <div class="content-grid" id="eventGrid"></div>
     <div id="emptyState" style="display:none;" class="empty-state">
       <h2>No events listed yet</h2>
       <p>Events added from the admin dashboard will appear here.</p>
     </div>
   </div></main>
-  <footer>
-    Museo Sang Bata sa Negros<br>
-    Barangay Old Sagay, Sagay City, Negros Occidental, Philippines 6122 ·
-    Open Mon–Fri 8:00 AM–5:00 PM (weekends by booked tour only) ·
-    +63 917 798 7420
-  </footer>
 
   <script src="/js/api.js"></script>
   <script src="/js/chatbot.js"></script>
+  <script src="/js/carousel.js"></script>
   <script src="/js/image-enhance.js"></script>
   <script src="/js/lightbox.js"></script>
   <script>
@@ -53,16 +84,12 @@
       return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
     }
 
-    function getFirstImage(item){
-      return (Array.isArray(item.optimizedImagePaths) && item.optimizedImagePaths[0]) || item.optimizedImagePath || (Array.isArray(item.imagePaths) && item.imagePaths[0]) || item.imagePath || '';
-    }
-
-    function renderExtraPhotos(item){
-      const paths = (Array.isArray(item.optimizedImagePaths) ? item.optimizedImagePaths : Array.isArray(item.imagePaths) ? item.imagePaths : []).slice(1);
-      if(paths.length === 0) return '';
-      return `<div class="extra-photos">${paths.map(src=>`<a class="photo-thumb" href="${escapeHtml(src)}" target="_blank" rel="noopener">`+
-          `<img src="${escapeHtml(src)}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.closest('.photo-thumb').style.display='none'">`+
-        `</a>`).join('')}</div>`;
+    function getAllImages(item){
+      if (Array.isArray(item.optimizedImagePaths) && item.optimizedImagePaths.length) return item.optimizedImagePaths;
+      if (Array.isArray(item.imagePaths) && item.imagePaths.length) return item.imagePaths;
+      if (item.optimizedImagePath) return [item.optimizedImagePath];
+      if (item.imagePath) return [item.imagePath];
+      return [];
     }
 
     function formatDate(d){
@@ -73,32 +100,194 @@
     }
 
     function eventCard(e){
-      const primaryImage = getFirstImage(e);
+      const images = getAllImages(e);
+      const detailUrl = `/event.html?id=${encodeURIComponent(e.id)}`;
       return `
       <div class="content-card">
         <div class="media">
-          ${primaryImage ? `<a class="img-link" href="${escapeHtml(primaryImage)}" target="_blank" rel="noopener">`+
-              `<img class="img-enhance" src="${escapeHtml(primaryImage)}" alt="${escapeHtml(e.title)}" onerror="this.parentElement.innerHTML='<span class=&quot;icon&quot;>📅</span>'">`+
-            `</a>` : `<span class="icon">📅</span>`}
+          ${renderMediaBox(images, e.videoUrl, e.title, '📅')}
         </div>
-        ${renderExtraPhotos(e)}
         <div class="body">
           ${e.date ? `<div class="tag">${escapeHtml(formatDate(e.date))}</div>` : ''}
-          <h3>${escapeHtml(e.title)}</h3>
+          <h3><a href="${detailUrl}" style="color:inherit; text-decoration:none;">${escapeHtml(e.title)}</a></h3>
           ${e.location ? `<div class="meta">${escapeHtml(e.location)}</div>` : ''}
           <p class="desc">${escapeHtml(e.description || '')}</p>
+          <div style="margin-top:auto; padding-top:12px;">
+            <a class="btn btn-ghost dark btn-small" href="${detailUrl}">View details &rarr;</a>
+          </div>
         </div>
       </div>`;
     }
 
+    let allEvents = [];
+    let searchQuery = '';
+    let timeFilter = 'all';
+    let mediaFilter = 'all';
+    let sortOption = 'date-desc';
+
+    function renderEvents(){
+      const grid = document.getElementById('eventGrid');
+      const emptyState = document.getElementById('emptyState');
+      const statsEl = document.getElementById('eventFilterStats');
+      const resetBtn = document.getElementById('eventResetFilters');
+      const clearBtn = document.getElementById('eventSearchClear');
+
+      if(clearBtn) clearBtn.style.display = searchQuery ? 'flex' : 'none';
+
+      let list = [...allEvents];
+      const today = new Date();
+      today.setHours(0,0,0,0);
+
+      // Text search
+      if(searchQuery){
+        const q = searchQuery.toLowerCase();
+        list = list.filter(ev =>
+          (ev.title || '').toLowerCase().includes(q) ||
+          (ev.description || '').toLowerCase().includes(q) ||
+          (ev.location || '').toLowerCase().includes(q) ||
+          (ev.date || '').toLowerCase().includes(q) ||
+          formatDate(ev.date).toLowerCase().includes(q)
+        );
+      }
+
+      // Time filter (upcoming vs past)
+      if(timeFilter !== 'all'){
+        if(timeFilter === 'upcoming'){
+          list = list.filter(ev => {
+            if(!ev.date) return false;
+            const d = new Date(ev.date);
+            return !isNaN(d.getTime()) && d >= today;
+          });
+        } else if(timeFilter === 'past'){
+          list = list.filter(ev => {
+            if(!ev.date) return true; // Undated or past
+            const d = new Date(ev.date);
+            return !isNaN(d.getTime()) && d < today;
+          });
+        }
+      }
+
+      // Media filter
+      if(mediaFilter === 'video'){
+        list = list.filter(ev => Boolean(ev.videoUrl));
+      } else if(mediaFilter === 'photo'){
+        list = list.filter(ev => getAllImages(ev).length > 0);
+      }
+
+      // Sort
+      list.sort((a, b) => {
+        if(sortOption === 'title-asc') return (a.title || '').localeCompare(b.title || '');
+        const dateA = a.date ? new Date(a.date).getTime() : 0;
+        const dateB = b.date ? new Date(b.date).getTime() : 0;
+        if(sortOption === 'date-asc') return (isNaN(dateA) ? 0 : dateA) - (isNaN(dateB) ? 0 : dateB);
+        // date-desc (default)
+        return (isNaN(dateB) ? 0 : dateB) - (isNaN(dateA) ? 0 : dateA);
+      });
+
+      const isFiltered = Boolean(searchQuery || timeFilter !== 'all' || mediaFilter !== 'all');
+      if(statsEl){
+        statsEl.innerHTML = `Showing <span>${list.length}</span> of <span>${allEvents.length}</span> events${searchQuery ? ` matching "<em>${escapeHtml(searchQuery)}</em>"` : ''}`;
+      }
+      if(resetBtn){
+        resetBtn.style.display = isFiltered ? 'inline-block' : 'none';
+      }
+
+      if(list.length === 0){
+        if(isFiltered){
+          grid.innerHTML = `
+            <div class="empty-state" style="grid-column:1/-1;">
+              <h2>No matching events</h2>
+              <p>No events found matching your search and filter criteria.</p>
+              <button class="btn btn-primary btn-small" style="margin-top:10px;" onclick="resetEventFilters()">Clear search &amp; filters</button>
+            </div>`;
+          emptyState.style.display = 'none';
+        } else {
+          grid.innerHTML = '';
+          emptyState.style.display = 'block';
+        }
+      } else {
+        emptyState.style.display = 'none';
+        grid.innerHTML = list.map(eventCard).join('');
+        initPhotoCarousels(grid);
+      }
+    }
+
+    function resetEventFilters(){
+      searchQuery = '';
+      timeFilter = 'all';
+      mediaFilter = 'all';
+      sortOption = 'date-desc';
+
+      const searchInput = document.getElementById('eventSearchInput');
+      const sortSelect = document.getElementById('eventSortSelect');
+      const mediaSelect = document.getElementById('eventMediaFilter');
+      if(searchInput) searchInput.value = '';
+      if(sortSelect) sortSelect.value = 'date-desc';
+      if(mediaSelect) mediaSelect.value = 'all';
+
+      document.querySelectorAll('#eventTimeChips [data-time]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.time === 'all');
+      });
+
+      renderEvents();
+    }
+
+    function initEventToolbar(){
+      const searchInput = document.getElementById('eventSearchInput');
+      const searchClear = document.getElementById('eventSearchClear');
+      const mediaSelect = document.getElementById('eventMediaFilter');
+      const sortSelect = document.getElementById('eventSortSelect');
+      const resetBtn = document.getElementById('eventResetFilters');
+
+      if(searchInput){
+        searchInput.addEventListener('input', (e)=>{
+          searchQuery = e.target.value.trim();
+          renderEvents();
+        });
+      }
+      if(searchClear){
+        searchClear.addEventListener('click', ()=>{
+          searchQuery = '';
+          if(searchInput){ searchInput.value = ''; searchInput.focus(); }
+          renderEvents();
+        });
+      }
+      if(mediaSelect){
+        mediaSelect.addEventListener('change', (e)=>{
+          mediaFilter = e.target.value;
+          renderEvents();
+        });
+      }
+      if(sortSelect){
+        sortSelect.addEventListener('change', (e)=>{
+          sortOption = e.target.value;
+          renderEvents();
+        });
+      }
+      if(resetBtn){
+        resetBtn.addEventListener('click', resetEventFilters);
+      }
+
+      document.querySelectorAll('#eventTimeChips [data-time]').forEach(btn => {
+        btn.addEventListener('click', ()=>{
+          timeFilter = btn.dataset.time;
+          document.querySelectorAll('#eventTimeChips [data-time]').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          renderEvents();
+        });
+      });
+    }
+
     async function load(){
       const grid = document.getElementById('eventGrid');
+      initEventToolbar();
       try{
         const { events } = await Api.listEvents();
-        if(events.length === 0){
+        allEvents = events || [];
+        if(allEvents.length === 0){
           document.getElementById('emptyState').style.display = 'block';
         } else {
-          grid.innerHTML = events.map(eventCard).join('');
+          renderEvents();
         }
       }catch(e){
         grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><p>${escapeHtml(e.message)}</p></div>`;

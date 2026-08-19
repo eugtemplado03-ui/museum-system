@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gallery — Museo Sang Bata sa Negros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -14,11 +14,12 @@
       <div class="brand-mark">M</div>
       <div class="brand-text">
         <div class="name">Museo Sang Bata sa Negros</div>
-        <div class="tagline">Exhibit Guide</div>
+        <div class="tagline">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
       </div>
     </a>
     <div class="nav-links">
-      <a class="nav-btn" href="/">Scan &amp; Browse</a>
+      <a class="nav-btn" href="/">Home</a>
+      <a class="nav-btn" href="/exhibits.html">Exhibits</a>
       <a class="nav-btn" href="/programs.html">Programs</a>
       <a class="nav-btn active" href="/gallery.html">Gallery</a>
       <a class="nav-btn" href="/events.html">Events</a>
@@ -31,6 +32,37 @@
       <h1>Photo gallery</h1>
       <p>A look around the museum — exhibits, workshops, and community activities.</p>
     </div>
+
+    <!-- Search & Filter Toolbar -->
+    <div class="filter-toolbar" id="galleryFilterToolbar">
+      <div class="filter-toolbar-top">
+        <div class="search-box-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="gallerySearchInput" class="search-input" placeholder="Search gallery by title, caption, keyword…" autocomplete="off">
+          <button type="button" id="gallerySearchClear" class="search-clear-btn" style="display:none;" title="Clear search">✕</button>
+        </div>
+        <div class="filter-controls-group">
+          <select id="gallerySortSelect" class="filter-select" title="Sort gallery">
+            <option value="default">Sort: Default Order</option>
+            <option value="title-asc">Sort: Title (A–Z)</option>
+            <option value="photos-desc">Sort: Most Photos</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filter-chips-row" id="galleryTypeChips">
+        <button type="button" class="filter-chip-btn active" data-type="all">All Posts</button>
+        <button type="button" class="filter-chip-btn" data-type="photo">Single Photos 📷</button>
+        <button type="button" class="filter-chip-btn" data-type="album">Photo Albums 📚</button>
+        <button type="button" class="filter-chip-btn" data-type="video">Videos ▶</button>
+      </div>
+
+      <div class="filter-stats-bar" id="galleryStatsBar">
+        <div class="filter-stats-text" id="galleryFilterStats">Showing gallery posts</div>
+        <button type="button" class="filter-reset-link" id="galleryResetFilters" style="display:none;">Reset search &amp; filters</button>
+      </div>
+    </div>
+
     <div class="gallery-grid" id="galleryGrid"></div>
     <div id="emptyState" style="display:none;" class="empty-state">
       <h2>No photos yet</h2>
@@ -41,6 +73,7 @@
 
   <script src="/js/api.js"></script>
   <script src="/js/chatbot.js"></script>
+  <script src="/js/carousel.js"></script>
   <script src="/js/image-enhance.js"></script>
   <script src="/js/lightbox.js"></script>
   <script src="/js/footer.js"></script>
@@ -49,24 +82,160 @@
       return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
     }
 
+    function getAllImages(item){
+      if (Array.isArray(item.optimizedImagePaths) && item.optimizedImagePaths.length) return item.optimizedImagePaths;
+      if (Array.isArray(item.imagePaths) && item.imagePaths.length) return item.imagePaths;
+      if (item.optimizedImagePath) return [item.optimizedImagePath];
+      if (item.imagePath) return [item.imagePath];
+      return [];
+    }
+
     function galleryItem(g){
+      const images = getAllImages(g);
       return `
       <div class="gallery-item">
-        <a class="img-link" href="${escapeHtml(g.optimizedImagePath || g.imagePath)}" target="_blank" rel="noopener">
-          <img class="img-enhance" src="${escapeHtml(g.optimizedImagePath || g.imagePath)}" alt="${escapeHtml(g.title)}" loading="lazy" onerror="this.closest('.gallery-item').style.display='none'">
-        </a>
+        ${renderMediaBox(images, g.videoUrl, g.title || g.caption || 'Gallery photo', '📷')}
         ${(g.title || g.caption) ? `<div class="caption">${g.title ? `<b>${escapeHtml(g.title)}</b>` : ''}${g.caption ? escapeHtml(g.caption) : ''}</div>` : ''}
       </div>`;
     }
 
+    let allGallery = [];
+    let searchQuery = '';
+    let typeFilter = 'all';
+    let sortOption = 'default';
+
+    function renderGallery(){
+      const grid = document.getElementById('galleryGrid');
+      const emptyState = document.getElementById('emptyState');
+      const statsEl = document.getElementById('galleryFilterStats');
+      const resetBtn = document.getElementById('galleryResetFilters');
+      const clearBtn = document.getElementById('gallerySearchClear');
+
+      if(clearBtn) clearBtn.style.display = searchQuery ? 'flex' : 'none';
+
+      let list = [...allGallery];
+
+      // Text search
+      if(searchQuery){
+        const q = searchQuery.toLowerCase();
+        list = list.filter(g =>
+          (g.title || '').toLowerCase().includes(q) ||
+          (g.caption || '').toLowerCase().includes(q)
+        );
+      }
+
+      // Type filter
+      if(typeFilter !== 'all'){
+        if(typeFilter === 'video'){
+          list = list.filter(g => Boolean(g.videoUrl));
+        } else if(typeFilter === 'album'){
+          list = list.filter(g => getAllImages(g).length > 1);
+        } else if(typeFilter === 'photo'){
+          list = list.filter(g => !g.videoUrl && getAllImages(g).length === 1);
+        }
+      }
+
+      // Sort
+      if(sortOption === 'title-asc'){
+        list.sort((a, b) => (a.title || a.caption || '').localeCompare(b.title || b.caption || ''));
+      } else if(sortOption === 'photos-desc'){
+        list.sort((a, b) => getAllImages(b).length - getAllImages(a).length);
+      }
+
+      const isFiltered = Boolean(searchQuery || typeFilter !== 'all');
+      if(statsEl){
+        statsEl.innerHTML = `Showing <span>${list.length}</span> of <span>${allGallery.length}</span> gallery posts${searchQuery ? ` matching "<em>${escapeHtml(searchQuery)}</em>"` : ''}`;
+      }
+      if(resetBtn){
+        resetBtn.style.display = isFiltered ? 'inline-block' : 'none';
+      }
+
+      if(list.length === 0){
+        if(isFiltered){
+          grid.innerHTML = `
+            <div class="empty-state" style="grid-column:1/-1;">
+              <h2>No matching media</h2>
+              <p>No gallery items match your search or filter selection.</p>
+              <button class="btn btn-primary btn-small" style="margin-top:10px;" onclick="resetGalleryFilters()">Clear search &amp; filters</button>
+            </div>`;
+          emptyState.style.display = 'none';
+        } else {
+          grid.innerHTML = '';
+          emptyState.style.display = 'block';
+        }
+      } else {
+        emptyState.style.display = 'none';
+        grid.innerHTML = list.map(galleryItem).join('');
+        initPhotoCarousels(grid);
+      }
+    }
+
+    function resetGalleryFilters(){
+      searchQuery = '';
+      typeFilter = 'all';
+      sortOption = 'default';
+
+      const searchInput = document.getElementById('gallerySearchInput');
+      const sortSelect = document.getElementById('gallerySortSelect');
+      if(searchInput) searchInput.value = '';
+      if(sortSelect) sortSelect.value = 'default';
+
+      document.querySelectorAll('#galleryTypeChips [data-type]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.type === 'all');
+      });
+
+      renderGallery();
+    }
+
+    function initGalleryToolbar(){
+      const searchInput = document.getElementById('gallerySearchInput');
+      const searchClear = document.getElementById('gallerySearchClear');
+      const sortSelect = document.getElementById('gallerySortSelect');
+      const resetBtn = document.getElementById('galleryResetFilters');
+
+      if(searchInput){
+        searchInput.addEventListener('input', (e)=>{
+          searchQuery = e.target.value.trim();
+          renderGallery();
+        });
+      }
+      if(searchClear){
+        searchClear.addEventListener('click', ()=>{
+          searchQuery = '';
+          if(searchInput){ searchInput.value = ''; searchInput.focus(); }
+          renderGallery();
+        });
+      }
+      if(sortSelect){
+        sortSelect.addEventListener('change', (e)=>{
+          sortOption = e.target.value;
+          renderGallery();
+        });
+      }
+      if(resetBtn){
+        resetBtn.addEventListener('click', resetGalleryFilters);
+      }
+
+      document.querySelectorAll('#galleryTypeChips [data-type]').forEach(btn => {
+        btn.addEventListener('click', ()=>{
+          typeFilter = btn.dataset.type;
+          document.querySelectorAll('#galleryTypeChips [data-type]').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          renderGallery();
+        });
+      });
+    }
+
     async function load(){
       const grid = document.getElementById('galleryGrid');
+      initGalleryToolbar();
       try{
         const { gallery } = await Api.listGallery();
-        if(gallery.length === 0){
+        allGallery = gallery || [];
+        if(allGallery.length === 0){
           document.getElementById('emptyState').style.display = 'block';
         } else {
-          grid.innerHTML = gallery.map(galleryItem).join('');
+          renderGallery();
         }
       }catch(e){
         grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><p>${escapeHtml(e.message)}</p></div>`;
