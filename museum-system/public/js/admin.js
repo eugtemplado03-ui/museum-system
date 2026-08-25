@@ -324,7 +324,7 @@ async function renderDashboardHomeTab(contentEl){
           <div class="info-card" style="padding:14px 16px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
               <h3 style="margin:0; font-family:'Nunito',sans-serif; font-weight:800; font-size:15px; color:#ffffff; text-shadow:0 1px 3px rgba(0,0,0,0.5);">Exhibits by Category</h3>
-              <a href="/exhibits.html" class="view-all-btn" target="_blank">View All →</a>
+              <a href="#" class="view-all-btn" data-tab="catalog">View All →</a>
             </div>
             ${Object.entries(categoryCounts).length ? `
               <ul style="margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px;">
@@ -366,7 +366,7 @@ async function renderDashboardHomeTab(contentEl){
           <div class="info-card" style="padding:14px 16px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
               <h3 style="margin:0; font-family:'Nunito',sans-serif; font-weight:800; font-size:15px; color:#ffffff; text-shadow:0 1px 3px rgba(0,0,0,0.5);">Upcoming Events</h3>
-              <a href="/events.html" class="view-all-btn" target="_blank">View All →</a>
+              <a href="#" class="view-all-btn" data-tab="events">View All →</a>
             </div>
             ${upcomingEvents.length ? `
               <ul style="margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px;">
@@ -387,7 +387,7 @@ async function renderDashboardHomeTab(contentEl){
           <div class="info-card" style="padding:14px 16px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
               <h3 style="margin:0; font-family:'Nunito',sans-serif; font-weight:800; font-size:15px; color:#ffffff; text-shadow:0 1px 3px rgba(0,0,0,0.5);">Recent Gallery</h3>
-              <a href="/gallery.html" class="view-all-btn" target="_blank">View All →</a>
+              <a href="#" class="view-all-btn" data-tab="gallery">View All →</a>
             </div>
             ${recentGallery.length ? `
               <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px;">
@@ -395,7 +395,7 @@ async function renderDashboardHomeTab(contentEl){
                   const paths = Array.isArray(g.imagePaths) && g.imagePaths.length ? g.imagePaths : (g.imagePath ? [g.imagePath] : []);
                   const img = paths[0] || '';
                   return `
-                    <a href="/gallery.html" class="home-gallery-mini-item" target="_blank" style="border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,0.18);">
+                    <a href="#" data-tab="gallery" class="home-gallery-mini-item" style="border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,0.18);">
                       ${img ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(g.title || 'Gallery')}" loading="lazy" style="width:100%; height:100%; object-fit:cover; display:block;">` : `<div style="width:100%; height:100%; background:rgba(0,42,54,0.85); display:flex; align-items:center; justify-content:center; font-size:24px;">🖼️</div>`}
                       <div class="home-gallery-mini-overlay">
                         <div class="home-gallery-mini-caption">${escapeHtml(g.title || g.caption || 'Museum snapshot')}</div>
