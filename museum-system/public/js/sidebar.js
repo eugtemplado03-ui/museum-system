@@ -129,13 +129,14 @@
         </nav>
 
         <div class="user-sidebar-footer">
-          <a class="user-sidebar-sublink" href="/checkin.html">
-            <span>📋</span> Visitor Check-in
-          </a>
+          <div style="font-size:11.5px; color:rgba(255,255,255,0.75); margin-bottom:8px; padding:4px 6px; background:rgba(0,0,0,0.25); border-radius:8px; display:flex; align-items:center; justify-content:space-between;">
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">${localStorage.getItem('museum_visitor_name') ? '👤 ' + String(localStorage.getItem('museum_visitor_name')).replace(/[&<>"']/g, '') : '🟢 Verified Visitor'}</span>
+            <a href="#" onclick="event.preventDefault(); localStorage.removeItem('museum_visitor_checked_in'); localStorage.removeItem('museum_visitor_name'); window.location.href='/checkin.html';" style="color:#f87171; text-decoration:none; font-weight:700; font-size:11px; margin-left:6px;">Switch</a>
+          </div>
           <a class="user-sidebar-sublink" href="/donate.html">
             <span>💖</span> Support Us
           </a>
-          <a class="user-sidebar-sublink" href="/admin.html">
+          <a class="user-sidebar-sublink" href="/checkin.html?tab=admin">
             <span>⚙️</span> Staff Admin
           </a>
         </div>

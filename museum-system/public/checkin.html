@@ -3,63 +3,69 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Visitor Check-in — Museo Sang Bata sa Negros</title>
+<title>Museum Access Portal — Museo Sang Bata sa Negros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
 <style>
-.checkin-container {
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 24px 16px 40px;
+body {
+  background: linear-gradient(145deg, rgba(6, 28, 38, 0.94) 0%, rgba(0, 36, 48, 0.90) 100%), url('/uploads/header-bg.webp') center / cover fixed no-repeat;
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
 }
-.checkin-header {
-  text-align: center;
-  margin-bottom: 32px;
+.portal-card {
+  background: var(--white);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  border-radius: 22px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  width: 100%;
 }
-.checkin-header .logo {
-  width: 72px;
-  height: 72px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
-  display: inline-flex;
+.portal-tabs {
+  display: flex;
+  background: #002b36;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+.portal-tab-btn {
+  flex: 1;
+  padding: 15px 12px;
+  border: none;
+  background: none;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Nunito', sans-serif;
-  font-weight: 800;
-  font-size: 28px;
-  color: #fff;
-  margin-bottom: 16px;
-  box-shadow: 0 8px 24px rgba(0,174,189,0.35);
+  gap: 7px;
+  transition: all 0.2s ease;
+  border-bottom: 3px solid transparent;
 }
-.checkin-header h1 {
-  font-family: 'Nunito', sans-serif;
-  font-weight: 800;
-  font-size: 24px;
-  color: var(--ink);
-  margin: 0 0 8px;
+.portal-tab-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
 }
-.checkin-header p {
-  font-size: 15px;
-  color: var(--grey-400);
-  margin: 0;
+.portal-tab-btn.active {
+  color: #ffffff;
+  background: rgba(0, 174, 189, 0.15);
+  border-bottom-color: var(--teal);
 }
-.checkin-form {
-  background: var(--white);
-  border: 1.5px solid var(--grey-100);
-  border-radius: 20px;
-  padding: 24px;
-  box-shadow: var(--shadow-md);
+.portal-tab-body {
+  padding: 26px 22px;
 }
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 .form-group label {
   display: block;
   font-size: 13px;
   font-weight: 700;
   color: var(--ink);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 .form-group label .required {
   color: var(--danger);
@@ -73,7 +79,7 @@
   border-radius: 10px;
   border: 1.5px solid var(--grey-200);
   font-family: inherit;
-  font-size: 15px;
+  font-size: 14.5px;
   color: var(--ink);
   background: var(--white);
   transition: border-color 0.15s, box-shadow 0.15s;
@@ -87,27 +93,31 @@
   box-shadow: 0 0 0 3px rgba(0,174,189,0.15);
 }
 .form-group textarea {
-  min-height: 80px;
+  min-height: 70px;
   resize: vertical;
 }
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  gap: 12px;
 }
 .btn-submit {
   width: 100%;
-  padding: 14px;
+  padding: 13px 18px;
   border-radius: 10px;
   border: none;
   background: var(--teal);
   color: var(--white);
-  font-size: 16px;
-  font-weight: 700;
-  font-family: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  font-family: 'Nunito', sans-serif;
   cursor: pointer;
   transition: background 0.15s, transform 0.15s;
-  margin-top: 8px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 .btn-submit:hover:not(:disabled) {
   background: var(--teal-dark);
@@ -123,14 +133,14 @@
   color: var(--danger);
   padding: 12px 14px;
   border-radius: 10px;
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 600;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
   display: none;
 }
 .error-message.visible { display: block; }
 .success-message {
-  background: rgba(6, 28, 38, 0.92);
+  background: rgba(6, 28, 38, 0.95);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1.5px solid rgba(255, 255, 255, 0.22);
@@ -164,7 +174,7 @@
   margin: 0 0 10px;
 }
 .success-message p {
-  font-size: 15px;
+  font-size: 14.5px;
   color: #f1f5f9;
   line-height: 1.6;
   margin: 0 0 20px;
@@ -176,105 +186,191 @@
 }
 @media (max-width: 480px) {
   .form-row { grid-template-columns: 1fr; }
-  .checkin-header h1 { font-size: 20px; }
-  .checkin-form { padding: 20px 16px; }
+  .portal-tab-body { padding: 20px 16px; }
   .success-message { padding: 26px 16px; }
 }
 </style>
 </head>
 <body>
   <main style="flex:1; display:flex; align-items:center; justify-content:center; padding: clamp(20px, 4vw, 48px) 16px; min-height:100vh; min-height:100dvh; box-sizing:border-box;">
-    <div class="checkin-container" style="width:100%; max-width:480px; margin:0 auto; padding:0;">
-      <form class="checkin-form" id="checkinForm" novalidate>
-        <div style="text-align:center; margin-bottom:22px; padding-bottom:14px; border-bottom:1px solid var(--grey-100);">
-          <div style="font-size:32px; margin-bottom:6px;">🏛️</div>
-          <h1 style="font-family:'Nunito',sans-serif; font-weight:800; font-size:22px; color:var(--ink); margin:0 0 4px;">Visitor Check-in</h1>
-          <p style="margin:0; font-size:13px; color:var(--grey-400);">Please fill in your details to log your museum visit</p>
+    <div style="width:100%; max-width:480px; margin:0 auto;">
+      
+      <div class="portal-card">
+        <!-- Portal Tabs -->
+        <div class="portal-tabs" role="tablist">
+          <button type="button" class="portal-tab-btn active" id="tabVisitorBtn" role="tab" aria-selected="true">
+            <span>🎫</span> Visitor Access
+          </button>
+          <button type="button" class="portal-tab-btn" id="tabAdminBtn" role="tab" aria-selected="false">
+            <span>🔐</span> Staff Sign-In
+          </button>
         </div>
 
-        <div class="error-message" id="errorMessage"></div>
-
-        <div class="form-group">
-          <label>Full Name <span class="required">*</span></label>
-          <input type="text" id="visitorName" name="visitorName" placeholder="Enter your full name" required autocomplete="name">
-        </div>
-
-        <div class="form-group">
-          <label>Address <span class="required">*</span></label>
-          <textarea id="address" name="address" placeholder="Enter your complete address" required></textarea>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Sex <span class="required">*</span></label>
-            <select id="sex" name="sex" required>
-              <option value="">Select sex</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-              <option value="Prefer not to say">Prefer not to say</option>
-            </select>
+        <!-- 1. Visitor Check-in Form Tab -->
+        <div class="portal-tab-body" id="visitorTabContent">
+          <div style="text-align:center; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid var(--grey-100);">
+            <div style="font-size:32px; margin-bottom:4px;">🏛️</div>
+            <h1 style="font-family:'Nunito',sans-serif; font-weight:800; font-size:21px; color:var(--ink); margin:0 0 4px;">Visitor Check-in</h1>
+            <p style="margin:0; font-size:13px; color:var(--grey-400);">Please log your visit to unlock full museum access and scanned exhibits</p>
           </div>
-          <div class="form-group">
-            <label>Age <span class="required">*</span></label>
-            <input type="number" id="age" name="age" placeholder="Age" min="1" max="120" required>
+
+          <form id="checkinForm" novalidate>
+            <div class="error-message" id="errorMessage"></div>
+
+            <div class="form-group">
+              <label>Full Name <span class="required">*</span></label>
+              <input type="text" id="visitorName" name="visitorName" placeholder="Enter your full name" required autocomplete="name">
+            </div>
+
+            <div class="form-group">
+              <label>Address <span class="required">*</span></label>
+              <textarea id="address" name="address" placeholder="Enter your complete address" required></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Sex <span class="required">*</span></label>
+                <select id="sex" name="sex" required>
+                  <option value="">Select sex</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                  <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Age <span class="required">*</span></label>
+                <input type="number" id="age" name="age" placeholder="Age" min="1" max="120" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Contact Number</label>
+              <input type="tel" id="contactNumber" name="contactNumber" placeholder="+63 9XX XXX XXXX" autocomplete="tel">
+            </div>
+
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email">
+            </div>
+
+            <div class="form-group">
+              <label>Group / Organization (optional)</label>
+              <input type="text" id="groupName" name="groupName" placeholder="e.g. School name, Company, etc.">
+            </div>
+
+            <div class="form-group">
+              <label>Notes (optional)</label>
+              <textarea id="notes" name="notes" placeholder="Any special notes or comments..."></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">
+              <span>Check In &amp; Enter</span> <span>&rarr;</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- 2. Staff Admin Login Tab -->
+        <div class="portal-tab-body" id="adminTabContent" style="display:none;">
+          <div style="text-align:center; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid var(--grey-100);">
+            <div style="font-size:32px; margin-bottom:4px;">🔐</div>
+            <h1 style="font-family:'Nunito',sans-serif; font-weight:800; font-size:21px; color:var(--ink); margin:0 0 4px;">Staff Admin Sign-in</h1>
+            <p style="margin:0; font-size:13px; color:var(--grey-400);">Enter your curator/administrator credentials</p>
           </div>
+
+          <form id="adminLoginForm" novalidate>
+            <div class="error-message" id="adminErrorMessage"></div>
+
+            <div class="form-group">
+              <label>Username <span class="required">*</span></label>
+              <input type="text" id="adminUsername" placeholder="e.g. admin" required autocomplete="username">
+            </div>
+
+            <div class="form-group">
+              <label>Password <span class="required">*</span></label>
+              <input type="password" id="adminPassword" placeholder="Enter your password" required autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="btn-submit" id="adminSubmitBtn">
+              <span>Sign In to Dashboard</span> <span>&rarr;</span>
+            </button>
+          </form>
         </div>
 
-        <div class="form-group">
-          <label>Contact Number</label>
-          <input type="tel" id="contactNumber" name="contactNumber" placeholder="+63 9XX XXX XXXX" autocomplete="tel">
-        </div>
+      </div>
 
-        <div class="form-group">
-          <label>Email Address</label>
-          <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email">
-        </div>
-
-        <div class="form-group">
-          <label>Group / Organization (optional)</label>
-          <input type="text" id="groupName" name="groupName" placeholder="e.g. School name, Company, etc.">
-        </div>
-
-        <div class="form-group">
-          <label>Notes (optional)</label>
-          <textarea id="notes" name="notes" placeholder="Any special notes or comments..."></textarea>
-        </div>
-
-        <button type="submit" class="btn-submit" id="submitBtn">Check In</button>
-        <a href="/" style="display:block; text-align:center; margin-top:14px; font-size:13px; color:var(--teal); text-decoration:none; font-weight:600;">← Return to Museum Home</a>
-      </form>
-
-      <div class="success-message" id="successMessage">
+      <!-- Success Card (Hidden by default) -->
+      <div class="success-message" id="successMessage" style="margin-top:16px;">
         <div class="icon">✅</div>
-        <h2>Check-in Successful!</h2>
+        <h2>Check-in Verified!</h2>
         <p id="successDetails">Thank you for visiting Museo Sang Bata sa Negros. Your visit has been logged.</p>
         <div style="display:flex; flex-direction:column; gap:10px; width:100%; margin-top:20px;">
+          <a class="btn btn-primary" id="continueToDestBtn" href="/" style="width:100%; justify-content:center; padding:13px 18px; font-size:14px; font-weight:700; border-radius:10px;">Enter Museum Dashboard &rarr;</a>
           <button type="button" class="btn btn-secondary" id="checkinAnotherBtn" style="width:100%; justify-content:center; padding:13px 18px; font-size:14px; font-weight:700; background:#ffffff; color:#061c26; border:none; border-radius:10px;">➕ Check in another visitor</button>
-          <a class="btn btn-primary" href="/exhibits.html" style="width:100%; justify-content:center; padding:13px 18px; font-size:14px; font-weight:700; border-radius:10px;">Explore Exhibits →</a>
         </div>
       </div>
+
     </div>
   </main>
 
+  <script src="/js/api.js"></script>
+  <script src="/js/gate.js"></script>
   <script>
     function escapeHtml(str) {
       return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
     }
 
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectUrl = urlParams.get('redirect') ? decodeURIComponent(urlParams.get('redirect')) : '';
+    const initialTab = urlParams.get('tab') || 'visitor';
+
+    // Tabs
+    const tabVisitorBtn = document.getElementById('tabVisitorBtn');
+    const tabAdminBtn = document.getElementById('tabAdminBtn');
+    const visitorTabContent = document.getElementById('visitorTabContent');
+    const adminTabContent = document.getElementById('adminTabContent');
+
+    function switchTab(tab) {
+      if (tab === 'admin') {
+        tabAdminBtn.classList.add('active');
+        tabAdminBtn.setAttribute('aria-selected', 'true');
+        tabVisitorBtn.classList.remove('active');
+        tabVisitorBtn.setAttribute('aria-selected', 'false');
+        visitorTabContent.style.display = 'none';
+        adminTabContent.style.display = 'block';
+        document.getElementById('adminUsername').focus();
+      } else {
+        tabVisitorBtn.classList.add('active');
+        tabVisitorBtn.setAttribute('aria-selected', 'true');
+        tabAdminBtn.classList.remove('active');
+        tabAdminBtn.setAttribute('aria-selected', 'false');
+        adminTabContent.style.display = 'none';
+        visitorTabContent.style.display = 'block';
+        document.getElementById('visitorName').focus();
+      }
+    }
+
+    tabVisitorBtn.addEventListener('click', () => switchTab('visitor'));
+    tabAdminBtn.addEventListener('click', () => switchTab('admin'));
+
+    if (initialTab === 'admin') {
+      switchTab('admin');
+    }
+
+    // 1. Visitor Check-in Submission
     const form = document.getElementById('checkinForm');
     const submitBtn = document.getElementById('submitBtn');
     const errorMessage = document.getElementById('errorMessage');
     const successMessage = document.getElementById('successMessage');
     const successDetails = document.getElementById('successDetails');
     const checkinAnotherBtn = document.getElementById('checkinAnotherBtn');
+    const continueToDestBtn = document.getElementById('continueToDestBtn');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
       errorMessage.classList.remove('visible');
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Checking in...';
+      submitBtn.innerHTML = '<span>Verifying &amp; Logging Visit...</span>';
 
       const payload = {
         visitorName: document.getElementById('visitorName').value,
@@ -298,27 +394,72 @@
         if (!res.ok) {
           throw new Error(data.error || 'Check-in failed');
         }
-        
-        form.style.display = 'none';
+
         const v = data.visitor || {};
-        successDetails.innerHTML = `Welcome, <strong>${escapeHtml(v.visitorName || payload.visitorName)}</strong>! Your visit on <strong>${escapeHtml(v.visitDate || '')} at ${escapeHtml(v.visitTime || '')}</strong> has been logged in the museum records.`;
+        const visitorName = v.visitorName || payload.visitorName;
+        Gate.setVisitorCheckedIn(visitorName);
+
+        // If a redirect URL was preserved (e.g. scanned an exhibit tag)
+        if (redirectUrl && redirectUrl !== '/checkin.html') {
+          submitBtn.innerHTML = '<span>Check-in Verified! Redirecting...</span>';
+          setTimeout(() => {
+            window.location.replace(redirectUrl);
+          }, 400);
+          return;
+        }
+
+        document.querySelector('.portal-card').style.display = 'none';
+        successDetails.innerHTML = `Welcome, <strong>${escapeHtml(visitorName)}</strong>! Your visit on <strong>${escapeHtml(v.visitDate || '')} at ${escapeHtml(v.visitTime || '')}</strong> has been verified. You now have full access to all museum features.`;
+        if (continueToDestBtn) {
+          continueToDestBtn.href = '/';
+          continueToDestBtn.textContent = 'Explore Museum Exhibits →';
+        }
         successMessage.classList.add('visible');
         
       } catch (err) {
         errorMessage.textContent = err.message;
         errorMessage.classList.add('visible');
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Check In';
+        submitBtn.innerHTML = '<span>Check In &amp; Enter</span> <span>&rarr;</span>';
       }
     });
 
     checkinAnotherBtn?.addEventListener('click', () => {
       form.reset();
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Check In';
+      submitBtn.innerHTML = '<span>Check In &amp; Enter</span> <span>&rarr;</span>';
       successMessage.classList.remove('visible');
-      form.style.display = 'block';
+      document.querySelector('.portal-card').style.display = 'block';
       document.getElementById('visitorName').focus();
+    });
+
+    // 2. Staff Admin Sign-In Submission
+    const adminForm = document.getElementById('adminLoginForm');
+    const adminSubmitBtn = document.getElementById('adminSubmitBtn');
+    const adminErrorMessage = document.getElementById('adminErrorMessage');
+
+    adminForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      adminErrorMessage.classList.remove('visible');
+      adminSubmitBtn.disabled = true;
+      adminSubmitBtn.innerHTML = '<span>Signing In...</span>';
+
+      const username = document.getElementById('adminUsername').value.trim();
+      const password = document.getElementById('adminPassword').value;
+
+      try {
+        const { token } = await Api.login(username, password);
+        Api.setToken(token);
+        Gate.setVisitorCheckedIn(username);
+
+        const target = (redirectUrl && redirectUrl.startsWith('/admin')) ? redirectUrl : '/admin.html';
+        window.location.replace(target);
+      } catch (err) {
+        adminErrorMessage.textContent = err.message || 'Invalid username or password';
+        adminErrorMessage.classList.add('visible');
+        adminSubmitBtn.disabled = false;
+        adminSubmitBtn.innerHTML = '<span>Sign In to Dashboard</span> <span>&rarr;</span>';
+      }
     });
   </script>
 </body>
