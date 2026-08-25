@@ -3,24 +3,17 @@ services:
     name: museo-sang-bata-sa-negros
     runtime: node
     plan: free
+    region: singapore
     buildCommand: npm install
-    startCommand: npm run seed && npm start
+    startCommand: npm start
     envVars:
-      - key: NODE_ENV
-        value: production
+      - key: NODE_VERSION
+        value: 20.18.0
       - key: JWT_SECRET
         generateValue: true
+      - key: OPENROUTER_API_KEY
+        sync: false
       - key: SEED_ADMIN_USER
         value: admin
       - key: SEED_ADMIN_PASS
         value: museum-admin-2026
-      - key: SITE_NAME
-        value: Museo Sang Bata sa Negros
-      - key: OPENROUTER_API_KEY
-        sync: false
-      - key: TRANSLATION_API_KEY
-        sync: false
-      - key: OPENROUTER_MODEL
-        value: openai/gpt-4o-mini
-      - key: FISH_AUDIO_MODEL
-        value: s2.1-pro-free
