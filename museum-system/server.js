@@ -24,6 +24,8 @@ app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(UPLOAD_DIR));
+app.get(['/login', '/login.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'checkin.html')));
+app.get(['/checkin', '/checkin.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'checkin.html')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api/auth', authRoutes);
