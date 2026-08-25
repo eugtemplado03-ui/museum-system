@@ -130,33 +130,55 @@
 }
 .error-message.visible { display: block; }
 .success-message {
-  background: var(--green-pill-bg);
-  border: 1px solid rgba(0,137,107,0.25);
-  color: var(--green-pill);
-  padding: 16px;
-  border-radius: 12px;
+  background: rgba(6, 28, 38, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  padding: 32px 22px;
+  border-radius: 20px;
   text-align: center;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.50);
   display: none;
 }
 .success-message.visible { display: block; }
 .success-message .icon {
-  font-size: 32px;
-  margin-bottom: 8px;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.20);
+  border: 2px solid #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
 }
 .success-message h2 {
   font-family: 'Nunito', sans-serif;
   font-weight: 800;
-  font-size: 20px;
-  margin: 0 0 8px;
+  font-size: 23px;
+  color: #ffffff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  margin: 0 0 10px;
 }
 .success-message p {
-  font-size: 14px;
-  margin: 0;
+  font-size: 15px;
+  color: #f1f5f9;
+  line-height: 1.6;
+  margin: 0 0 20px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+.success-message p strong {
+  color: #5eead4;
+  font-weight: 700;
 }
 @media (max-width: 480px) {
   .form-row { grid-template-columns: 1fr; }
   .checkin-header h1 { font-size: 20px; }
   .checkin-form { padding: 20px 16px; }
+  .success-message { padding: 26px 16px; }
 }
 </style>
 </head>
@@ -250,10 +272,10 @@
       <div class="success-message" id="successMessage">
         <div class="icon">✅</div>
         <h2>Check-in Successful!</h2>
-        <p id="successDetails" style="font-size:14.5px; margin: 0 0 16px; color:var(--ink);">Thank you for visiting Museo Sang Bata sa Negros. Your visit has been logged.</p>
-        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:14px;">
-          <button type="button" class="btn btn-secondary btn-small" id="checkinAnotherBtn">➕ Check in another visitor</button>
-          <a class="btn btn-primary btn-small" href="/exhibits.html">Explore Exhibits →</a>
+        <p id="successDetails">Thank you for visiting Museo Sang Bata sa Negros. Your visit has been logged.</p>
+        <div style="display:flex; flex-direction:column; gap:10px; width:100%; margin-top:20px;">
+          <button type="button" class="btn btn-secondary" id="checkinAnotherBtn" style="width:100%; justify-content:center; padding:13px 18px; font-size:14px; font-weight:700; background:#ffffff; color:#061c26; border:none; border-radius:10px;">➕ Check in another visitor</button>
+          <a class="btn btn-primary" href="/exhibits.html" style="width:100%; justify-content:center; padding:13px 18px; font-size:14px; font-weight:700; border-radius:10px;">Explore Exhibits →</a>
         </div>
       </div>
     </div>
