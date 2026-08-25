@@ -6,6 +6,7 @@ const path = require('path');
 const authRoutes = require('./routes/auth');
 const exhibitRoutes = require('./routes/exhibits');
 const chatRoutes = require('./routes/chat');
+const ttsRoutes = require('./routes/tts');
 const favoritesRoutes = require('./routes/favorites');
 const adminRoutes = require('./routes/admin');
 const programsRoutes = require('./routes/programs');
@@ -13,7 +14,7 @@ const eventsRoutes = require('./routes/events');
 const galleryRoutes = require('./routes/gallery');
 const visitorsRoutes = require('./routes/visitors');
 const artifactLogsRoutes = require('./routes/artifact-logs');
-const ttsRoutes     = require('./routes/tts');
+const museumInfoRoutes = require('./routes/museum-info');
 const { UPLOAD_DIR } = require('./middleware/upload');
 
 const app = express();
@@ -27,6 +28,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/auth', authRoutes);
 app.use('/api/exhibits', exhibitRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/tts', ttsRoutes);
 app.use('/api/favorites', favoritesRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/programs', programsRoutes);
@@ -34,7 +36,7 @@ app.use('/api/events', eventsRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/visitors', visitorsRoutes);
 app.use('/api/artifact-logs', artifactLogsRoutes);
-app.use('/api/tts',     ttsRoutes);
+app.use('/api/museum-info', museumInfoRoutes);
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 

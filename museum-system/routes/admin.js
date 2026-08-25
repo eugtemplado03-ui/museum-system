@@ -16,7 +16,13 @@ router.get('/analytics', (req, res) => {
   const totals = analytics.totals();
   const byExhibit = analytics.summaryByExhibit().map(row => ({ ...row, ...withExhibitInfo(row.exhibitId) }));
   const recent = analytics.recent(30).map(ev => ({ ...ev, ...withExhibitInfo(ev.exhibitId) }));
-  res.json({ totals, byExhibit, recent });
+  const daily = analytics.dailyStats(30);
+  res.json({ totals, byExhibit, recent, daily });
+});
+
+router.get('/analytics/daily', (req, res) => {
+  const days = parseInt(req.query.days) || 30;
+  res.json({ daily: analytics.dailyStats(days) });
 });
 
 router.get('/ratings', (req, res) => {

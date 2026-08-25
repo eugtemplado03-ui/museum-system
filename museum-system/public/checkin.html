@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visitor Check-in — Museo Sang Bata sa Negros</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<style>
+.checkin-container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+.checkin-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.checkin-header .logo {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 28px;
+  color: #fff;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 24px rgba(0,174,189,0.35);
+}
+.checkin-header h1 {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 24px;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+.checkin-header p {
+  font-size: 15px;
+  color: var(--grey-400);
+  margin: 0;
+}
+.checkin-form {
+  background: var(--white);
+  border: 1.5px solid var(--grey-100);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+}
+.form-group {
+  margin-bottom: 20px;
+}
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.form-group label .required {
+  color: var(--danger);
+  margin-left: 2px;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--grey-200);
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--white);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(0,174,189,0.15);
+}
+.form-group textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.btn-submit {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  background: var(--teal);
+  color: var(--white);
+  font-size: 16px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+  margin-top: 8px;
+}
+.btn-submit:hover:not(:disabled) {
+  background: var(--teal-dark);
+  transform: translateY(-1px);
+}
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.error-message {
+  background: var(--danger-light);
+  border: 1px solid rgba(217,79,61,0.25);
+  color: var(--danger);
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  display: none;
+}
+.error-message.visible { display: block; }
+.success-message {
+  background: var(--green-pill-bg);
+  border: 1px solid rgba(0,137,107,0.25);
+  color: var(--green-pill);
+  padding: 16px;
+  border-radius: 12px;
+  text-align: center;
+  display: none;
+}
+.success-message.visible { display: block; }
+.success-message .icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+.success-message h2 {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  margin: 0 0 8px;
+}
+.success-message p {
+  font-size: 14px;
+  margin: 0;
+}
+@media (max-width: 480px) {
+  .form-row { grid-template-columns: 1fr; }
+  .checkin-header h1 { font-size: 20px; }
+  .checkin-form { padding: 20px 16px; }
+}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <a class="brand" href="/">
+      <div class="brand-mark">M</div>
+      <div class="brand-text">
+        <div class="name">Museo Sang Bata sa Negros</div>
+        <div class="tagline" style="font-size: 9px; max-width: 400px;">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a class="nav-btn" href="/">Home</a>
+      <a class="nav-btn" href="/exhibits.html">Exhibits</a>
+      <a class="nav-btn" href="/programs.html">Programs</a>
+      <a class="nav-btn" href="/gallery.html">Gallery</a>
+      <a class="nav-btn" href="/events.html">Events</a>
+      <a class="nav-btn" href="/admin.html">Admin</a>
+    </div>
+  </div>
+
+  <main style="flex:1; padding: clamp(16px, 3vw, 36px) 16px;">
+    <div class="checkin-container">
+      <div class="checkin-header">
+        <div class="logo">🏛️</div>
+        <h1>Visitor Check-in</h1>
+        <p>Please provide your information to log your visit</p>
+      </div>
+
+      <form class="checkin-form" id="checkinForm" novalidate>
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="form-group">
+          <label>Full Name <span class="required">*</span></label>
+          <input type="text" id="visitorName" name="visitorName" placeholder="Enter your full name" required autocomplete="name">
+        </div>
+
+        <div class="form-group">
+          <label>Address <span class="required">*</span></label>
+          <textarea id="address" name="address" placeholder="Enter your complete address" required></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Sex <span class="required">*</span></label>
+            <select id="sex" name="sex" required>
+              <option value="">Select</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+              <option value="Prefer not to say">Prefer not to say</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Age <span class="required">*</span></label>
+            <input type="number" id="age" name="age" placeholder="e.g. 25" min="0" max="120" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Contact Number</label>
+          <input type="tel" id="contactNumber" name="contactNumber" placeholder="+63 9XX XXX XXXX" autocomplete="tel">
+        </div>
+
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label>Group / Organization (optional)</label>
+          <input type="text" id="groupName" name="groupName" placeholder="e.g. School name, Company, etc.">
+        </div>
+
+        <div class="form-group">
+          <label>Notes (optional)</label>
+          <textarea id="notes" name="notes" placeholder="Any special notes or comments..."></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitBtn">Check In</button>
+      </form>
+
+      <div class="success-message" id="successMessage">
+        <div class="icon">✅</div>
+        <h2>Check-in Successful!</h2>
+        <p>Thank you for visiting Museo Sang Bata sa Negros. Your visit has been logged.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer style="text-align:center; padding:24px; color:rgba(255,255,255,0.7); font-size:13px; line-height:1.7; background:#003642; margin-top:auto;">
+    Museo Sang Bata sa Negros · Barangay Old Sagay, Sagay City, Negros Occidental, Philippines 6122
+  </footer>
+
+  <script>
+    function escapeHtml(str) {
+      return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&','<':'<','>':'>','"':'"',"'":'''}[m]));
+    }
+
+    const form = document.getElementById('checkinForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      errorMessage.classList.remove('visible');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Checking in...';
+
+      const payload = {
+        visitorName: document.getElementById('visitorName').value,
+        address: document.getElementById('address').value,
+        sex: document.getElementById('sex').value,
+        age: document.getElementById('age').value,
+        contactNumber: document.getElementById('contactNumber').value,
+        email: document.getElementById('email').value,
+        groupName: document.getElementById('groupName').value,
+        notes: document.getElementById('notes').value
+      };
+
+      try {
+        const res = await fetch('/api/visitors/checkin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        
+        if (!res.ok) {
+          throw new Error(data.error || 'Check-in failed');
+        }
+        
+        form.style.display = 'none';
+        successMessage.classList.add('visible');
+        
+      } catch (err) {
+        errorMessage.textContent = err.message;
+        errorMessage.classList.add('visible');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Check In';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -54,6 +54,7 @@ const Api = (() => {
       return request('/api/exhibits/upload-media', { method: 'POST', body: fd });
     },
     qrUrl: (code) => `/api/exhibits/${encodeURIComponent(code)}/qr`,
+    visitorCheckinQrUrl: () => `/api/visitors/checkin/qr`,
 
     trackView: (code, source) => request(`/api/exhibits/${encodeURIComponent(code)}/track`, { method: 'POST', body: JSON.stringify({ source }) }).catch(()=>{}),
 
@@ -69,6 +70,7 @@ const Api = (() => {
     adminAnalytics: () => request('/api/admin/analytics'),
     adminRatings: () => request('/api/admin/ratings'),
     adminDeleteRating: (id) => request('/api/admin/ratings/' + id, { method: 'DELETE' }),
+    adminDailyStats: (days = 30) => request('/api/admin/analytics/daily?days=' + days),
 
     listPrograms: () => request('/api/programs'),
     getProgram: (id) => request('/api/programs/' + encodeURIComponent(id)),
@@ -105,6 +107,9 @@ const Api = (() => {
     getArtifactLog: (id) => request('/api/artifact-logs/' + encodeURIComponent(id)),
     createArtifactLog: (payload) => request('/api/artifact-logs', { method: 'POST', body: JSON.stringify(payload) }),
     updateArtifactLog: (id, payload) => request('/api/artifact-logs/' + id, { method: 'PUT', body: JSON.stringify(payload) }),
-    deleteArtifactLog: (id) => request('/api/artifact-logs/' + id, { method: 'DELETE' })
+    deleteArtifactLog: (id) => request('/api/artifact-logs/' + id, { method: 'DELETE' }),
+
+    getMuseumInfo: () => request('/api/museum-info'),
+    updateMuseumInfo: (payload) => request('/api/museum-info', { method: 'PUT', body: JSON.stringify(payload) })
   };
 })();

@@ -148,18 +148,20 @@ function renderLogin(){
   document.getElementById('loginPass').addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); });
 }
 
-let activeTab = 'catalog';
+let activeTab = 'dashboard';
 
 const SIDEBAR_ITEMS = [
-  { id: 'catalog',    label: 'Catalog',       icon: '🏛️' },
-  { id: 'categories', label: 'Categories',    icon: '🏷️' },
-  { id: 'visitors',   label: 'Visitor Log',   icon: '📋' },
-  { id: 'artifacts',  label: 'Artifacts Log', icon: '🏺' },
-  { id: 'programs',   label: 'Programs',      icon: '🌱' },
-  { id: 'events',     label: 'Events',        icon: '📅' },
-  { id: 'gallery',    label: 'Gallery',       icon: '🖼️' },
-  { id: 'analytics',  label: 'Analytics',     icon: '📊' },
-  { id: 'feedback',   label: 'Feedback',      icon: '💬' },
+  { id: 'dashboard',    label: 'Dashboard',     icon: '📊' },
+  { id: 'catalog',      label: 'Catalog',       icon: '🏛️' },
+  { id: 'categories',   label: 'Categories',    icon: '🏷️' },
+  { id: 'visitors',     label: 'Visitor Log',   icon: '📋' },
+  { id: 'artifacts',    label: 'Artifacts Log', icon: '🏺' },
+  { id: 'programs',     label: 'Programs',      icon: '🌱' },
+  { id: 'events',       label: 'Events',        icon: '📅' },
+  { id: 'gallery',      label: 'Gallery',       icon: '🖼️' },
+  { id: 'analytics',    label: 'Analytics',     icon: '📈' },
+  { id: 'feedback',     label: 'Feedback',      icon: '💬' },
+  { id: 'museumInfo',   label: 'Museum Info',   icon: '🏛️' },
 ];
 
 async function renderDashboard(){
@@ -205,7 +207,7 @@ async function renderDashboard(){
     </div>`;
 
   document.getElementById('signOutBtn').addEventListener('click', ()=>{ Api.clearToken(); renderLogin(); });
-  const mobileSignOut = document.getElementById('signOutBtnMobile');
+const mobileSignOut = document.getElementById('signOutBtnMobile');
   if(mobileSignOut) mobileSignOut.addEventListener('click', ()=>{ Api.clearToken(); renderLogin(); });
 
   app.querySelectorAll('[data-tab]').forEach(btn=>{
@@ -214,7 +216,8 @@ async function renderDashboard(){
 
   await loadCategories();
   const contentEl = document.getElementById('tabContent');
-  if(activeTab === 'catalog') await renderCatalogTab(contentEl);
+  if(activeTab === 'dashboard') await renderDashboardHomeTab(contentEl);
+  else if(activeTab === 'catalog') await renderCatalogTab(contentEl);
   else if(activeTab === 'categories') await renderCategoriesTab(contentEl);
   else if(activeTab === 'visitors') await renderVisitorsTab(contentEl);
   else if(activeTab === 'artifacts') await renderArtifactsTab(contentEl);
@@ -222,13 +225,202 @@ async function renderDashboard(){
   else if(activeTab === 'events') await renderEventsTab(contentEl);
   else if(activeTab === 'gallery') await renderGalleryTab(contentEl);
   else if(activeTab === 'analytics') await renderAnalyticsTab(contentEl);
-  else await renderFeedbackTab(contentEl);
+  else if(activeTab === 'feedback') await renderFeedbackTab(contentEl);
+  else if(activeTab === 'museumInfo') await renderMuseumInfoTab(contentEl);
 };
 
 let adminCatalogCategory = 'All';
 let adminCatalogSearch = '';
 let adminCatalogSort = 'code-asc';
 let adminCategorySearch = '';
+
+async function renderDashboardHomeTab(contentEl){
+  contentEl.innerHTML = `<div class="empty-state" style="color:var(--ink-soft);"><p>Loading dashboard…</p></div>`;
+  try{
+    const [exhibitRes, progRes, eventRes, galleryRes, visitorRes, artifactRes, analyticsRes] = await Promise.all([
+      Api.listExhibits().catch(()=>({ exhibits: [] })),
+      Api.listPrograms().catch(()=>({ programs: [] })),
+      Api.listEvents().catch(()=>({ events: [] })),
+      Api.listGallery().catch(()=>({ gallery: [] })),
+      Api.listVisitors().catch(()=>({ visitors: [] })),
+      Api.listArtifactLogs().catch(()=>({ logs: [] })),
+      Api.adminAnalytics().catch(()=>({ totals: { allTime: 0, last7Days: 0, last24Hours: 0 } }))
+    ]);
+
+    const exhibits = (exhibitRes && Array.isArray(exhibitRes.exhibits)) ? exhibitRes.exhibits : [];
+    const programs = (progRes && Array.isArray(progRes.programs)) ? progRes.programs : [];
+    const events = (eventRes && Array.isArray(eventRes.events)) ? eventRes.events : [];
+    const gallery = (galleryRes && Array.isArray(galleryRes.gallery)) ? galleryRes.gallery : [];
+    const visitors = (visitorRes && Array.isArray(visitorRes.visitors)) ? visitorRes.visitors : [];
+    const artifacts = (artifactRes && Array.isArray(artifactRes.logs)) ? artifactRes.logs : [];
+    const totals = analyticsRes?.totals || { allTime: 0, last7Days: 0, last24Hours: 0 };
+
+    // Count by category
+    const categoryCounts = {};
+    exhibits.forEach(e => { const c = e.category || 'Other'; categoryCounts[c] = (categoryCounts[c] || 0) + 1; });
+
+    // Recent visitors (last 5)
+    const recentVisitors = [...visitors].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+
+    // Upcoming events (next 3)
+    const now = new Date();
+    const upcomingEvents = events
+      .filter(e => e.date && new Date(e.date) >= now)
+      .sort((a,b) => new Date(a.date) - new Date(b.date))
+      .slice(0, 3);
+
+    // Recent gallery
+    const recentGallery = [...gallery].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 3);
+
+    contentEl.innerHTML = `
+      <div style="padding:16px 20px; display:flex; flex-direction:column; gap:16px;">
+        <!-- Stats Overview -->
+        <div class="kpi-cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:10px;">
+          <div class="kpi-stat-card" style="padding:10px 12px;">
+            <div class="kpi-stat-icon" style="width:28px; height:28px; font-size:14px;">🏛️</div>
+            <div class="kpi-stat-info">
+              <div class="kpi-stat-value" style="font-size:18px;">${exhibits.length}</div>
+              <div class="kpi-stat-label" style="font-size:10px;">Total Exhibits</div>
+            </div>
+          </div>
+          <div class="kpi-stat-card" style="padding:10px 12px;">
+            <div class="kpi-stat-icon green" style="width:28px; height:28px; font-size:14px;">🌱</div>
+            <div class="kpi-stat-info">
+              <div class="kpi-stat-value" style="font-size:18px;">${programs.length}</div>
+              <div class="kpi-stat-label" style="font-size:10px;">Active Programs</div>
+            </div>
+          </div>
+          <div class="kpi-stat-card" style="padding:10px 12px;">
+            <div class="kpi-stat-icon orange" style="width:28px; height:28px; font-size:14px;">📅</div>
+            <div class="kpi-stat-info">
+              <div class="kpi-stat-value" style="font-size:18px;">${events.length}</div>
+              <div class="kpi-stat-label" style="font-size:10px;">Events</div>
+            </div>
+          </div>
+          <div class="kpi-stat-card" style="padding:10px 12px;">
+            <div class="kpi-stat-icon purple" style="width:28px; height:28px; font-size:14px;">🖼️</div>
+            <div class="kpi-stat-info">
+              <div class="kpi-stat-value" style="font-size:18px;">${gallery.length}</div>
+              <div class="kpi-stat-label" style="font-size:10px;">Gallery Items</div>
+            </div>
+          </div>
+          <div class="kpi-stat-card" style="padding:10px 12px;">
+            <div class="kpi-stat-icon blue" style="width:28px; height:28px; font-size:14px;">👥</div>
+            <div class="kpi-stat-info">
+              <div class="kpi-stat-value" style="font-size:18px;">${visitors.length}</div>
+              <div class="kpi-stat-label" style="font-size:10px;">Visitor Logs</div>
+            </div>
+          </div>
+          <div class="kpi-stat-card" style="padding:10px 12px;">
+            <div class="kpi-stat-icon" style="width:28px; height:28px; font-size:14px;">🏺</div>
+            <div class="kpi-stat-info">
+              <div class="kpi-stat-value" style="font-size:18px;">${artifacts.length}</div>
+              <div class="kpi-stat-label" style="font-size:10px;">Artifacts</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analytics Summary -->
+        <div class="stat-cards" style="gap:8px;">
+          <div class="stat-card" style="padding:10px 12px;"><div class="num" style="font-size:16px;">${totals.allTime}</div><div class="label" style="font-size:10px;">All-time Views</div></div>
+          <div class="stat-card" style="padding:10px 12px;"><div class="num" style="font-size:16px;">${totals.last7Days}</div><div class="label" style="font-size:10px;">Last 7 Days</div></div>
+          <div class="stat-card" style="padding:10px 12px;"><div class="num" style="font-size:16px;">${totals.last24Hours}</div><div class="label" style="font-size:10px;">Last 24 Hours</div></div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:12px;">
+          <!-- Exhibits by Category -->
+          <div class="info-card" style="padding:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <h3 style="margin:0; font-family:'Fraunces',serif; font-size:14px;">Exhibits by Category</h3>
+              <a href="/exhibits.html" class="btn btn-ghost dark btn-small" target="_blank" style="font-size:10px; padding:3px 8px;">View All</a>
+            </div>
+            ${Object.entries(categoryCounts).length ? `
+              <ul style="margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px;">
+                ${Object.entries(categoryCounts).sort((a,b)=>b[1]-a[1]).map(([cat, count]) => `
+                  <li style="display:flex; justify-content:space-between; align-items:center; padding:6px 10px; background:var(--grey-50); border-radius:6px;">
+                    <span style="display:flex; align-items:center; gap:6px; font-size:12px;">
+                      <span style="width:8px; height:8px; border-radius:50%; background:var(--teal);"></span>
+                      ${escapeHtml(cat)}
+                    </span>
+                    <span style="font-weight:700; color:var(--ink); font-size:12px;">${count}</span>
+                  </li>
+                `).join('')}
+              </ul>
+            ` : `<p style="color:var(--ink-soft); font-size:11px;">No exhibits yet</p>`}
+          </div>
+
+          <!-- Recent Visitors -->
+          <div class="info-card" style="padding:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <h3 style="margin:0; font-family:'Fraunces',serif; font-size:14px;">Recent Visitors</h3>
+              <a href="#" class="btn btn-ghost dark btn-small" data-tab="visitors" style="font-size:10px; padding:3px 8px;">View All</a>
+            </div>
+            ${recentVisitors.length ? `
+              <ul style="margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px;">
+                ${recentVisitors.map(v => `
+                  <li style="display:flex; justify-content:space-between; align-items:center; padding:6px 10px; background:var(--grey-50); border-radius:6px;">
+                    <div>
+                      <div style="font-weight:600; color:var(--ink); font-size:12px;">${escapeHtml(v.visitorName)}</div>
+                      <div style="font-size:10px; color:var(--ink-soft);">${escapeHtml(v.visitDate)} · ${v.pax || 1} pax</div>
+                    </div>
+                    <span class="status-badge ${(v.status || '').toLowerCase().replace(/[^a-z0-9]/g, '-')}" style="font-size:9px; padding:1px 6px;">${escapeHtml(v.status || 'Checked-in')}</span>
+                  </li>
+                `).join('')}
+              </ul>
+            ` : `<p style="color:var(--ink-soft); font-size:11px;">No visitors logged yet</p>`}
+          </div>
+
+          <!-- Upcoming Events -->
+          <div class="info-card" style="padding:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <h3 style="margin:0; font-family:'Fraunces',serif; font-size:14px;">Upcoming Events</h3>
+              <a href="/events.html" class="btn btn-ghost dark btn-small" target="_blank" style="font-size:10px; padding:3px 8px;">View All</a>
+            </div>
+            ${upcomingEvents.length ? `
+              <ul style="margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px;">
+                ${upcomingEvents.map(e => `
+                  <li style="display:flex; flex-direction:column; gap:2px; padding:8px 10px; background:var(--grey-50); border-radius:6px;">
+                    <div style="font-weight:600; color:var(--ink); font-size:12px;">${escapeHtml(e.title)}</div>
+                    <div style="font-size:10px; color:var(--ink-soft); display:flex; gap:10px; flex-wrap:wrap;">
+                      <span>📅 ${escapeHtml(e.date)}</span>
+                      <span>📍 ${escapeHtml(e.location || 'TBD')}</span>
+                    </div>
+                  </li>
+                `).join('')}
+              </ul>
+            ` : `<p style="color:var(--ink-soft); font-size:11px;">No upcoming events</p>`}
+          </div>
+
+          <!-- Recent Gallery -->
+          <div class="info-card" style="padding:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <h3 style="margin:0; font-family:'Fraunces',serif; font-size:14px;">Recent Gallery</h3>
+              <a href="/gallery.html" class="btn btn-ghost dark btn-small" target="_blank" style="font-size:10px; padding:3px 8px;">View All</a>
+            </div>
+            ${recentGallery.length ? `
+              <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:6px;">
+                ${recentGallery.map(g => {
+                  const paths = Array.isArray(g.imagePaths) && g.imagePaths.length ? g.imagePaths : (g.imagePath ? [g.imagePath] : []);
+                  const img = paths[0] || '';
+                  return `
+                    <a href="/gallery.html" class="home-gallery-mini-item" target="_blank">
+                      ${img ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(g.title || 'Gallery')}" loading="lazy">` : `<div style="width:100%; height:100%; background:var(--teal-light); display:flex; align-items:center; justify-content:center; font-size:24px;">🖼️</div>`}
+                      <div class="home-gallery-mini-overlay">
+                        <div class="home-gallery-mini-caption">${escapeHtml(g.title || g.caption || 'Museum snapshot')}</div>
+                      </div>
+                    </a>
+                  `;
+                }).join('')}
+              </div>
+            ` : `<p style="color:var(--ink-soft); font-size:11px;">No gallery items yet</p>`}
+          </div>
+        </div>
+      </div>
+    `;
+  }catch(e){
+    contentEl.innerHTML = `<div class="empty-state"><h2>Could not load dashboard</h2><p>${escapeHtml(e.message)}</p></div>`;
+  }
+}
 
 async function renderCatalogTab(contentEl){
   contentEl.innerHTML = `<div class="empty-state" style="color:var(--ink-soft);"><p>Loading catalog…</p></div>`;
@@ -338,16 +530,16 @@ async function renderCatalogTab(contentEl){
   const tbody = document.getElementById('ledgerBody');
   tbody.innerHTML = filteredExhibits.map(ex => `
     <tr>
-      <td><div class="thumb">${ex.optimizedImagePath || ex.imagePath ? `<a href="${escapeHtml(ex.optimizedImagePath || ex.imagePath)}" target="_blank" rel="noopener">`+
+      <td data-label="Tag"><div class="thumb">${ex.optimizedImagePath || ex.imagePath ? `<a href="${escapeHtml(ex.optimizedImagePath || ex.imagePath)}" target="_blank" rel="noopener">`+
           `<img class="img-enhance" src="${escapeHtml(ex.optimizedImagePath || ex.imagePath)}" onerror="this.parentElement.innerHTML='${CATEGORY_ICON[ex.category]||CATEGORY_ICON.Other}'">`+
         `</a>` : (CATEGORY_ICON[ex.category]||CATEGORY_ICON.Other)}</div></td>
-      <td class="id-cell">${ex.code}</td>
-      <td class="title-cell">${escapeHtml(ex.title)}</td>
-      <td><span class="cat-pill">${escapeHtml(ex.category)}</span></td>
-      <td style="font-size:12.5px; color:var(--ink-soft);">${ex.ratingCount ? `★ ${ex.ratingAverage} (${ex.ratingCount})` : '—'}</td>
-      <td style="font-size:12.5px; color:var(--ink-soft);">${ex.favoriteCount || 0}</td>
-      <td style="font-size:12.5px; color:var(--ink-soft);">${escapeHtml(ex.location||'—')}</td>
-      <td>
+      <td class="id-cell" data-label="Code">${ex.code}</td>
+      <td class="title-cell" data-label="Title">${escapeHtml(ex.title)}</td>
+      <td data-label="Category"><span class="cat-pill">${escapeHtml(ex.category)}</span></td>
+      <td data-label="Rating" style="font-size:12.5px; color:var(--ink-soft);">${ex.ratingCount ? `★ ${ex.ratingAverage} (${ex.ratingCount})` : '—'}</td>
+      <td data-label="Favorites" style="font-size:12.5px; color:var(--ink-soft);">${ex.favoriteCount || 0}</td>
+      <td data-label="Location" style="font-size:12.5px; color:var(--ink-soft);">${escapeHtml(ex.location||'—')}</td>
+      <td data-label="Actions">
         <div class="row-actions">
           <button class="btn btn-ghost dark btn-small" data-edit="${ex.id}">Edit</button>
           <button class="btn btn-ghost dark btn-small" data-tag="${ex.code}">Tag</button>
@@ -361,6 +553,216 @@ async function renderCatalogTab(contentEl){
   tbody.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click', ()=>openEditModal(b.dataset.edit)));
   tbody.querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click', ()=>confirmDelete(b.dataset.delete)));
   tbody.querySelectorAll('[data-tag]').forEach(b=>b.addEventListener('click', ()=>openTagModal(b.dataset.tag)));
+}
+
+function confirmDelete(id){
+  if(!confirm('Delete this exhibit? This cannot be undone.')) return;
+  Api.deleteExhibit(id)
+    .then(()=>{ toast('Exhibit deleted'); renderDashboard(); })
+    .catch(err=>toast(err.message, true));
+}
+
+// ─── Exhibit Edit/Create Modal (with map coordinates) ───
+function openEditModal(id, defaultCategory){
+  const ex = id ? exhibitsCache.find(x=>x.id===id) : null;
+  const isEdit = Boolean(ex);
+  let pendingImagePaths = ex ? (Array.isArray(ex.imagePaths) ? [...ex.imagePaths] : (ex.imagePath ? [ex.imagePath] : [])) : [];
+  let pendingMapImagePath = ex ? (ex.mapImagePath || '') : '';
+
+  openModal(`
+    <h2>${isEdit ? 'Edit exhibit' : 'Add exhibit'}</h2>
+    <div class="form-grid">
+      <div class="form-field full"><label>Title *</label><input type="text" id="ex-title" value="${ex?escapeHtml(ex.title):''}" placeholder="e.g. Giant Clam Shell" required></div>
+      <div class="form-field"><label>Category *</label><select id="ex-category"><option value="">Select</option>${categoriesCache.map(c=>`<option value="${escapeHtml(c)}" ${ex && ex.category===c?'selected':''} ${defaultCategory && !ex && c===defaultCategory?'selected':''}>${escapeHtml(c)}</option>`).join('')}</select></div>
+      <div class="form-field"><label>Origin</label><input type="text" id="ex-origin" value="${ex?escapeHtml(ex.origin):''}" placeholder="e.g. Philippines"></div>
+      <div class="form-field"><label>Year</label><input type="text" id="ex-year" value="${ex?escapeHtml(ex.year):''}" placeholder="e.g. 2020"></div>
+      <div class="form-field"><label>Location (display name + directions)</label><input type="text" id="ex-location" value="${ex?escapeHtml(ex.location):''}" placeholder="e.g. Gallery A, Shelf 3 — Right corner, 2nd floor near the windows"></div>
+      <div class="form-field"><label>Latitude (map)</label><input type="number" step="0.000001" id="ex-lat" value="${ex && ex.lat !== null && ex.lat !== undefined ? ex.lat : ''}" placeholder="e.g. 10.945678"></div>
+      <div class="form-field"><label>Longitude (map)</label><input type="number" step="0.000001" id="ex-lng" value="${ex && ex.lng !== null && ex.lng !== undefined ? ex.lng : ''}" placeholder="e.g. 123.421345"></div>
+      <div class="form-field full">
+        <label>Floor Plan / Direction Map (optional)</label>
+        <input type="file" id="ex-map-file" accept="image/png,image/jpeg,image/webp" style="display:none;">
+        <div class="file-drop" id="ex-map-drop">Click or drop floor plan image here (shows visitor where to find exhibit)</div>
+        <div class="file-hint">Upload a floor plan snippet or map image showing exhibit location (e.g. 2nd floor plan with red dot)</div>
+        <div class="image-preview-list" id="exMapPreviewList"></div>
+        <div id="exMapUploadStatus" style="font-size:12px; color:var(--ink-soft);"></div>
+      </div>
+      <div class="form-field full">
+        <label>Description (EN)</label>
+        <textarea id="ex-desc" rows="3" placeholder="Detailed description in English">${ex?escapeHtml(ex.description):''}</textarea>
+      </div>
+      <div class="form-field full">
+        <label>Description (Tagalog)</label>
+        <textarea id="ex-desc_tl" rows="2" placeholder="Paglalarawan sa Tagalog">${ex?escapeHtml(ex.description_tl):''}</textarea>
+      </div>
+      <div class="form-field full">
+        <label>Description (Cebuano)</label>
+        <textarea id="ex-desc_cb" rows="2" placeholder="Paglalarawan sa Cebuano">${ex?escapeHtml(ex.description_cb):''}</textarea>
+      </div>
+      <div class="form-field full">
+        <label>Photos (multiple for swipeable album)</label>
+        <input type="file" id="ex-image-file" accept="image/png,image/jpeg,image/webp,image/gif" multiple="multiple" style="display:none;">
+        <div class="file-drop" id="ex-drop">Click or drop photos here (Ctrl/Cmd or Shift to select multiple)</div>
+        <div class="file-hint">Tip: you can also hold Ctrl/Cmd or Shift to select multiple files.</div>
+        <div class="image-preview-list" id="exImagePreviewList"></div>
+        <div id="exUploadStatus" style="font-size:12px; color:var(--ink-soft);"></div>
+      </div>
+      <div class="form-field full">
+        <label>Video (optional — YouTube / Vimeo link or upload video)</label>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="text" id="ex-video" value="${ex?escapeHtml(ex.videoUrl):''}" placeholder="e.g. https://www.youtube.com/watch?v=... or upload video">
+          <button type="button" class="btn btn-ghost dark btn-small" id="ex-upload-video-btn">Upload video</button>
+          <input type="file" id="ex-video-file" accept="video/mp4,video/webm,video/ogg,video/quicktime" style="display:none;">
+        </div>
+        <div id="exVideoStatus" style="font-size:12px; color:var(--ink-soft); margin-top:4px;"></div>
+      </div>
+      <div class="form-error" id="exError"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost dark" id="exCancel">Cancel</button>
+      <button class="btn btn-primary" id="exSave">${isEdit ? 'Save changes' : 'Add exhibit'}</button>
+    </div>
+  `);
+
+  ensureMultipleInput('ex-image-file');
+  renderImagePreviewList(ex ? (Array.isArray(ex.imagePaths) ? [...ex.imagePaths] : (ex.imagePath ? [ex.imagePath] : [])) : [], 'exImagePreviewList');
+
+  const exVideoBtn = document.getElementById('ex-upload-video-btn');
+  const exVideoFile = document.getElementById('ex-video-file');
+  const exVideoInput = document.getElementById('ex-video');
+  const exVideoStatus = document.getElementById('exVideoStatus');
+  if(exVideoBtn && exVideoFile){
+    exVideoBtn.addEventListener('click', ()=>exVideoFile.click());
+    exVideoFile.addEventListener('change', async (e)=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      exVideoStatus.textContent = 'Uploading video… (this may take a few moments)';
+      try{
+        const { path } = await Api.uploadMedia(file);
+        exVideoInput.value = path;
+        exVideoStatus.textContent = 'Video uploaded successfully!';
+      }catch(err){ exVideoStatus.textContent = 'Upload failed: ' + err.message; }
+    });
+  }
+
+  const exInput = document.getElementById('ex-image-file');
+  const exDrop = document.getElementById('ex-drop');
+  if(exDrop){
+    exDrop.addEventListener('click', ()=>exInput.click());
+    exDrop.addEventListener('dragover', (ev)=>{ ev.preventDefault(); exDrop.classList.add('dragover'); });
+    exDrop.addEventListener('dragleave', ()=>exDrop.classList.remove('dragover'));
+    exDrop.addEventListener('drop', async (ev)=>{
+      ev.preventDefault(); exDrop.classList.remove('dragover');
+      const files = Array.from(ev.dataTransfer.files || []);
+      if(files.length === 0) return;
+      const status = document.getElementById('exUploadStatus');
+      status.textContent = 'Uploading…';
+      try{
+        for(const file of files){
+          const { path } = await Api.uploadImage(file);
+          pendingImagePaths.push(path);
+        }
+        renderImagePreviewList(pendingImagePaths, 'exImagePreviewList');
+        status.textContent = `${pendingImagePaths.length} photo${pendingImagePaths.length === 1 ? '' : 's'} ready.`;
+      }catch(err){ status.textContent = 'Upload failed: ' + err.message; }
+    });
+  }
+
+  exInput.addEventListener('change', async (e)=>{
+    const files = Array.from(e.target.files || []);
+    if(!files.length) return;
+    const status = document.getElementById('exUploadStatus');
+    status.textContent = 'Uploading…';
+    try{
+      for(const file of files){
+        const { path } = await Api.uploadImage(file);
+        pendingImagePaths.push(path);
+      }
+      renderImagePreviewList(pendingImagePaths, 'exImagePreviewList');
+      status.textContent = `${pendingImagePaths.length} photo${pendingImagePaths.length === 1 ? '' : 's'} ready.`;
+      e.target.value = '';
+    }catch(err){ status.textContent = 'Upload failed: ' + err.message; }
+  });
+
+  // Map image upload
+  const exMapInput = document.getElementById('ex-map-file');
+  const exMapDrop = document.getElementById('ex-map-drop');
+  if(exMapDrop){
+    exMapDrop.addEventListener('click', ()=>exMapInput.click());
+    exMapDrop.addEventListener('dragover', (ev)=>{ ev.preventDefault(); exMapDrop.classList.add('dragover'); });
+    exMapDrop.addEventListener('dragleave', ()=>exMapDrop.classList.remove('dragover'));
+    exMapDrop.addEventListener('drop', async (ev)=>{
+      ev.preventDefault(); exMapDrop.classList.remove('dragover');
+      const files = Array.from(ev.dataTransfer.files || []);
+      if(files.length === 0) return;
+      const file = files[0];
+      const status = document.getElementById('exMapUploadStatus');
+      status.textContent = 'Uploading map…';
+      try{
+        const { path } = await Api.uploadImage(file);
+        pendingMapImagePath = path;
+        renderImagePreviewList([path], 'exMapPreviewList');
+        status.textContent = 'Map uploaded successfully.';
+      }catch(err){ status.textContent = 'Upload failed: ' + err.message; }
+    });
+  }
+
+  exMapInput.addEventListener('change', async (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const status = document.getElementById('exMapUploadStatus');
+    status.textContent = 'Uploading map…';
+    try{
+      const { path } = await Api.uploadImage(file);
+      pendingMapImagePath = path;
+      renderImagePreviewList([path], 'exMapPreviewList');
+      status.textContent = 'Map uploaded successfully.';
+      e.target.value = '';
+    }catch(err){ status.textContent = 'Upload failed: ' + err.message; }
+  });
+
+  document.getElementById('exCancel').addEventListener('click', closeModal);
+  document.getElementById('exSave').addEventListener('click', async ()=>{
+    const errorEl = document.getElementById('exError');
+    const title = document.getElementById('ex-title').value.trim();
+    if(!title){ errorEl.textContent = 'Title is required.'; return; }
+    const category = document.getElementById('ex-category').value;
+    if(!category){ errorEl.textContent = 'Category is required.'; return; }
+    const lat = document.getElementById('ex-lat').value;
+    const lng = document.getElementById('ex-lng').value;
+    const latNum = lat === '' ? null : parseFloat(lat);
+    const lngNum = lng === '' ? null : parseFloat(lng);
+    if((latNum !== null && isNaN(latNum)) || (lngNum !== null && isNaN(lngNum))){ errorEl.textContent = 'Invalid coordinates.'; return; }
+
+    const payload = {
+      title,
+      category,
+      origin: document.getElementById('ex-origin').value.trim(),
+      year: document.getElementById('ex-year').value.trim(),
+      location: document.getElementById('ex-location').value.trim(),
+      lat: latNum,
+      lng: lngNum,
+      mapImagePath: pendingMapImagePath,
+      description: document.getElementById('ex-desc').value.trim(),
+      description_tl: document.getElementById('ex-desc_tl').value.trim(),
+      description_cb: document.getElementById('ex-desc_cb').value.trim(),
+      imagePaths: pendingImagePaths,
+      imagePath: pendingImagePaths[0] || '',
+      videoUrl: exVideoInput.value.trim()
+    };
+
+    try{
+      if(isEdit){
+        await Api.updateExhibit(ex.id, payload);
+        toast('Exhibit updated');
+      } else {
+        await Api.createExhibit(payload);
+        toast('Exhibit added');
+      }
+      closeModal();
+      renderDashboard();
+    }catch(err){ errorEl.textContent = err.message; }
+  });
 }
 
 async function renderCategoriesTab(contentEl){
@@ -429,17 +831,17 @@ async function renderCategoriesTab(contentEl){
     const count = counts[cat] || 0;
     return `
       <tr>
-        <td class="title-cell">
+        <td class="title-cell" data-label="Category">
           <span style="display:inline-flex; align-items:center; gap:8px;">
             <span class="cat-pill">${escapeHtml(cat)}</span>
           </span>
         </td>
-        <td>
+        <td data-label="Assigned Exhibits">
           <a href="javascript:void(0)" class="cat-count-link" data-view-cat="${escapeHtml(cat)}" title="Click to view exhibits in catalog" style="font-size:12.5px; color:var(--ink-soft); text-decoration:underline;">
             ${count} exhibit${count === 1 ? '' : 's'}
           </a>
         </td>
-        <td>
+        <td data-label="Actions">
           <div class="row-actions">
             <button class="btn btn-primary btn-small" data-add-to-cat="${escapeHtml(cat)}" title="Add an exhibit directly to this category">+ Add exhibit</button>
             <button class="btn btn-ghost dark btn-small" data-manage-cat="${escapeHtml(cat)}" title="Assign/move existing exhibits into this category">Assign</button>
@@ -701,8 +1103,14 @@ function openDeleteCategoryModal(category, count){
 async function renderAnalyticsTab(contentEl){
   contentEl.innerHTML = `<div class="empty-state" style="color:var(--ink-soft);"><p>Loading analytics…</p></div>`;
   let data;
+  let dailyData;
   try{
-    data = await Api.adminAnalytics();
+    const [analyticsRes, dailyRes] = await Promise.all([
+      Api.adminAnalytics(),
+      Api.adminDailyStats(30)
+    ]);
+    data = analyticsRes;
+    dailyData = dailyRes.daily || [];
   }catch(e){
     contentEl.innerHTML = `<div class="empty-state"><h2>Could not load analytics</h2><p>${escapeHtml(e.message)}</p></div>`;
     return;
@@ -714,6 +1122,25 @@ async function renderAnalyticsTab(contentEl){
       <div class="stat-card"><div class="num">${totals.last7Days}</div><div class="label">Last 7 days</div></div>
       <div class="stat-card"><div class="num">${totals.last24Hours}</div><div class="label">Last 24 hours</div></div>
     </div>
+
+    <div class="analytics-chart-section" style="margin:24px 26px 16px;">
+      <h3 style="font-family:'Fraunces',serif; font-size:16px; margin:0 0 12px;">Views Over Time (Last 30 Days)</h3>
+      <div style="position:relative; height:300px; background:var(--white); border:1px solid var(--grey-100); border-radius:12px; padding:16px;">
+        <canvas id="analyticsChart"></canvas>
+      </div>
+      <div style="display:flex; gap:16px; margin-top:12px; flex-wrap:wrap; font-size:13px; color:var(--ink-soft);">
+        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+          <input type="checkbox" id="chartShowScans" checked> Scans (QR)
+        </label>
+        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+          <input type="checkbox" id="chartShowViews" checked> Direct Views
+        </label>
+        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+          <input type="checkbox" id="chartShowTotal" checked> Total
+        </label>
+      </div>
+    </div>
+
     <div style="padding:0 26px 8px;"><h3 style="font-family:'Fraunces',serif; font-size:16px; margin:0 0 10px;">Most viewed exhibits</h3></div>
     <div class="admin-table-wrap">
       <table class="ledger">
@@ -721,11 +1148,11 @@ async function renderAnalyticsTab(contentEl){
         <tbody>
           ${byExhibit.length ? byExhibit.map(row => `
             <tr>
-              <td class="title-cell">${escapeHtml(row.title)}</td>
-              <td class="id-cell">${row.code || '—'}</td>
-              <td>${row.scans}</td>
-              <td>${row.views}</td>
-              <td><b>${row.total}</b></td>
+              <td class="title-cell" data-label="Exhibit">${escapeHtml(row.title)}</td>
+              <td class="id-cell" data-label="Code">${row.code || '—'}</td>
+              <td data-label="Scans (QR)">${row.scans}</td>
+              <td data-label="Other views">${row.views}</td>
+              <td data-label="Total"><b>${row.total}</b></td>
             </tr>
           `).join('') : `<tr><td colspan="5" style="text-align:center; color:var(--ink-soft); padding:24px;">No views recorded yet.</td></tr>`}
         </tbody>
@@ -738,15 +1165,93 @@ async function renderAnalyticsTab(contentEl){
         <tbody>
           ${recent.length ? recent.map(ev => `
             <tr>
-              <td style="font-size:12px; color:var(--ink-soft);">${new Date(ev.at).toLocaleString()}</td>
-              <td class="title-cell">${escapeHtml(ev.title)}</td>
-              <td><span class="cat-pill">${ev.source === 'scan' ? 'QR scan' : 'Direct view'}</span></td>
+              <td data-label="When" style="font-size:12px; color:var(--ink-soft);">${new Date(ev.at).toLocaleString()}</td>
+              <td class="title-cell" data-label="Exhibit">${escapeHtml(ev.title)}</td>
+              <td data-label="Source"><span class="cat-pill">${ev.source === 'scan' ? 'QR scan' : 'Direct view'}</span></td>
             </tr>
           `).join('') : `<tr><td colspan="3" style="text-align:center; color:var(--ink-soft); padding:24px;">Nothing yet.</td></tr>`}
         </tbody>
       </table>
     </div>
   `;
+
+  // Render line chart
+  if (typeof Chart !== 'undefined' && dailyData.length) {
+    renderAnalyticsChart(dailyData);
+    document.getElementById('chartShowScans')?.addEventListener('change', ()=>renderAnalyticsChart(dailyData));
+    document.getElementById('chartShowViews')?.addEventListener('change', ()=>renderAnalyticsChart(dailyData));
+    document.getElementById('chartShowTotal')?.addEventListener('change', ()=>renderAnalyticsChart(dailyData));
+  }
+}
+
+function renderAnalyticsChart(daily) {
+  const ctx = document.getElementById('analyticsChart');
+  if (!ctx) return;
+  const showScans = document.getElementById('chartShowScans')?.checked ?? true;
+  const showViews = document.getElementById('chartShowViews')?.checked ?? true;
+  const showTotal = document.getElementById('chartShowTotal')?.checked ?? true;
+
+  const labels = daily.map(d => d.label);
+  const datasets = [];
+
+  if (showScans) {
+    datasets.push({
+      label: 'Scans (QR)',
+      data: daily.map(d => d.scans),
+      borderColor: '#00A4BD',
+      backgroundColor: 'rgba(0,164,189,0.1)',
+      fill: true,
+      tension: 0.3,
+      pointRadius: 3,
+      pointHoverRadius: 5
+    });
+  }
+  if (showViews) {
+    datasets.push({
+      label: 'Direct Views',
+      data: daily.map(d => d.views),
+      borderColor: '#E85D2A',
+      backgroundColor: 'rgba(232,93,42,0.1)',
+      fill: true,
+      tension: 0.3,
+      pointRadius: 3,
+      pointHoverRadius: 5
+    });
+  }
+  if (showTotal) {
+    datasets.push({
+      label: 'Total',
+      data: daily.map(d => d.total),
+      borderColor: '#2B271F',
+      backgroundColor: 'rgba(43,39,31,0.08)',
+      fill: true,
+      tension: 0.3,
+      pointRadius: 3,
+      pointHoverRadius: 5,
+      borderDash: [6, 4]
+    });
+  }
+
+  if (window.analyticsChartInstance) {
+    window.analyticsChartInstance.destroy();
+  }
+  window.analyticsChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'top', labels: { usePointStyle: true, padding: 16, font: { size: 12 } } },
+        tooltip: { backgroundColor: 'rgba(0,0,0,0.8)', padding: 12, titleFont: { size: 13 }, bodyFont: { size: 12 } }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { maxTicksLimit: 10, font: { size: 11 } } },
+        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 11 }, stepSize: 1 } }
+      }
+    }
+  });
 }
 
 // ---------------- Feedback ----------------
@@ -944,12 +1449,13 @@ async function renderVisitorsTab(contentEl){
       </div>
     </div>
 
-    <div class="admin-toolbar-wrap">
+<div class="admin-toolbar-wrap">
       <div class="admin-toolbar-row">
         <input type="text" id="adminVisitorsSearchInput" class="admin-search-input" placeholder="Search visitors by name, group, school, phone, guide…" value="${escapeHtml(adminVisitorsSearch)}">
         <div style="display:flex; gap:8px; align-items:center;">
           <button class="btn-export" id="exportVisitorsBtn" title="Export current visitor list as CSV">📥 Export CSV</button>
           <button class="btn btn-primary btn-small" id="addVisitorBtn">+ Log visitor entry</button>
+          <button class="btn btn-primary btn-small" id="visitorCheckinQrBtn">📱 Check-in QR</button>
         </div>
       </div>
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:8px;">
@@ -978,7 +1484,7 @@ async function renderVisitorsTab(contentEl){
       </div>
     </div>
 
-    <div class="admin-table-wrap" style="margin-top:12px;">
+<div class="admin-table-wrap" style="margin-top:12px;">
       <table class="ledger">
         <thead>
           <tr>
@@ -989,6 +1495,9 @@ async function renderVisitorsTab(contentEl){
             <th>Purpose</th>
             <th>Tour Guide</th>
             <th>Status</th>
+            <th>Address</th>
+            <th>Sex</th>
+            <th>Age</th>
             <th style="text-align:right;">Actions</th>
           </tr>
         </thead>
@@ -1028,8 +1537,9 @@ async function renderVisitorsTab(contentEl){
     adminVisitorsDateFilter = '';
     renderVisitorsTab(contentEl);
   });
+document.getElementById('exportVisitorsBtn')?.addEventListener('click', ()=>exportVisitorsCSV(filtered));
   document.getElementById('addVisitorBtn')?.addEventListener('click', ()=>openVisitorModal(null));
-  document.getElementById('exportVisitorsBtn')?.addEventListener('click', ()=>exportVisitorsCSV(filtered));
+  document.getElementById('visitorCheckinQrBtn')?.addEventListener('click', ()=>openVisitorCheckinQrModal());
 
   const tbody = document.getElementById('visitorsTableBody');
   if(tbody){
@@ -1038,47 +1548,42 @@ async function renderVisitorsTab(contentEl){
       const contactInfo = [v.contactNumber, v.email].filter(Boolean).join(' · ');
       return `
         <tr>
-          <td style="white-space:nowrap;">
+          <td data-label="Date & Time" style="white-space:nowrap;">
             <div style="font-weight:700; color:var(--ink);">${escapeHtml(v.visitDate || '—')}</div>
             <div style="font-size:11.5px; color:var(--grey-400);">${escapeHtml(v.visitTime || '')}</div>
           </td>
-          <td>
+          <td data-label="Visitor / Contact">
             <div style="font-weight:700; color:var(--ink);">${escapeHtml(v.visitorName)}</div>
             ${contactInfo ? `<div style="font-size:11.5px; color:var(--grey-400);">${escapeHtml(contactInfo)}</div>` : ''}
           </td>
-          <td>
+          <td data-label="Group / Organization">
             ${v.groupName ? `<div style="font-weight:600; color:var(--ink);">${escapeHtml(v.groupName)}</div>` : ''}
             <span class="cat-pill" style="font-size:10px;">${escapeHtml(v.groupType || 'Individual')}</span>
           </td>
-          <td style="text-align:center;">
+          <td data-label="Pax" style="text-align:center;">
             <span style="font-weight:800; font-size:14px; background:var(--teal-light); color:var(--teal-dark); padding:2px 8px; border-radius:6px;">${v.pax || 1}</span>
           </td>
-          <td>
+          <td data-label="Purpose">
             <div style="font-size:13px;">${escapeHtml(v.purpose || 'General Visit')}</div>
             ${v.notes ? `<div style="font-size:11px; color:var(--grey-400); max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(v.notes)}">📝 ${escapeHtml(v.notes)}</div>` : ''}
           </td>
-          <td>
+          <td data-label="Tour Guide">
             <div style="font-size:13px; color:${v.tourGuide ? 'var(--ink)' : 'var(--grey-400)'};">${escapeHtml(v.tourGuide || 'Unassigned')}</div>
           </td>
-          <td>
+          <td data-label="Status">
             <span class="status-badge ${statusClass}">${escapeHtml(v.status || 'Checked-in')}</span>
           </td>
-          <td style="text-align:right; white-space:nowrap;">
-            <button class="btn btn-ghost dark btn-small" data-edit-visitor="${v.id}" title="Edit visitor log">Edit</button>
-            <button class="btn btn-danger btn-small" data-del-visitor="${v.id}" style="margin-left:4px;" title="Delete entry">Delete</button>
+          <td data-label="Address" style="font-size:12px; color:var(--ink-soft); max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(v.address || '—')}">${escapeHtml(v.address || '—')}</td>
+          <td data-label="Sex" style="font-size:12px; color:var(--ink-soft);">${escapeHtml(v.sex || '—')}</td>
+          <td data-label="Age" style="font-size:12px; color:var(--ink-soft); text-align:center;">${v.age !== null && v.age !== undefined ? v.age : '—'}</td>
+          <td data-label="Actions" style="text-align:right; white-space:nowrap;">
+            <button class="btn btn-danger btn-small" data-del-visitor="${v.id}" title="Delete entry">Delete</button>
           </td>
         </tr>
       `;
     }).join('');
 
-    tbody.querySelectorAll('[data-edit-visitor]').forEach(btn => {
-      btn.addEventListener('click', ()=>{
-        const v = visitorsCache.find(item => item.id === btn.dataset.editVisitor);
-        if(v) openVisitorModal(v);
-      });
-    });
-
-    tbody.querySelectorAll('[data-del-visitor]').forEach(btn => {
+tbody.querySelectorAll('[data-del-visitor]').forEach(btn => {
       btn.addEventListener('click', async ()=>{
         const v = visitorsCache.find(item => item.id === btn.dataset.delVisitor);
         if(!v) return;
@@ -1094,7 +1599,7 @@ async function renderVisitorsTab(contentEl){
 }
 
 function exportVisitorsCSV(list){
-  const headers = ['Date', 'Time', 'Visitor / Contact Person', 'Group / Organization', 'Group Type', 'Pax', 'Purpose', 'Tour Guide', 'Status', 'Phone', 'Email', 'Notes'];
+  const headers = ['Date', 'Time', 'Visitor / Contact Person', 'Group / Organization', 'Group Type', 'Pax', 'Purpose', 'Tour Guide', 'Status', 'Phone', 'Email', 'Address', 'Sex', 'Age', 'Notes'];
   const rows = list.map(v => [
     `"${(v.visitDate || '').replace(/"/g, '""')}"`,
     `"${(v.visitTime || '').replace(/"/g, '""')}"`,
@@ -1107,12 +1612,36 @@ function exportVisitorsCSV(list){
     `"${(v.status || '').replace(/"/g, '""')}"`,
     `"${(v.contactNumber || '').replace(/"/g, '""')}"`,
     `"${(v.email || '').replace(/"/g, '""')}"`,
+    `"${(v.address || '').replace(/"/g, '""')}"`,
+    `"${(v.sex || '').replace(/"/g, '""')}"`,
+    v.age !== null && v.age !== undefined ? v.age : '',
     `"${(v.notes || '').replace(/"/g, '""')}"`
   ]);
   const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
   const dateStr = new Date().toISOString().slice(0, 10);
   downloadCSV(csv, `msbn-visitors-log-${dateStr}.csv`);
   toast('Visitor log CSV exported');
+}
+
+function openVisitorCheckinQrModal(){
+  openModal(`
+    <h2>Visitor Check-in QR Code</h2>
+    <p style="font-size:13px; color:var(--ink-soft); margin:-10px 0 16px; line-height:1.4;">
+      Place this QR code at the entrance. Visitors can scan it to check in using their phone.
+    </p>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:16px;">
+      <img src="${Api.visitorCheckinQrUrl()}" alt="Visitor Check-in QR Code" style="max-width:100%; height:auto; border:1px solid var(--grey-200); border-radius:12px; background:#fff; padding:12px; box-shadow:var(--shadow-sm);">
+      <div style="text-align:center; color:var(--ink-soft); font-size:13px;">
+        <div style="font-weight:700; color:var(--ink); margin-bottom:4px;">Visitor Check-in</div>
+        <div style="font-family:'IBM Plex Mono',monospace; font-size:12px;">/checkin.html</div>
+      </div>
+      <a class="btn btn-primary" href="${Api.visitorCheckinQrUrl()}" download="visitor-checkin-tag.png" style="width:100%; max-width:300px; text-align:center;">⬇ Download QR Code</a>
+    </div>
+    <div class="modal-actions" style="margin-top:8px;">
+      <button class="btn btn-primary" id="closeCheckinQrModal">Close</button>
+    </div>
+  `);
+  document.getElementById('closeCheckinQrModal')?.addEventListener('click', closeModal);
 }
 
 function openVisitorModal(v){
@@ -1127,6 +1656,24 @@ function openVisitorModal(v){
       <div class="form-field full">
         <label>Visitor / Contact Person Name *</label>
         <input type="text" id="vf-name" value="${v ? escapeHtml(v.visitorName) : ''}" placeholder="e.g. Maria Santos">
+      </div>
+      <div class="form-field full">
+        <label>Address *</label>
+        <textarea id="vf-address" placeholder="Enter complete address">${v ? escapeHtml(v.address || '') : ''}</textarea>
+      </div>
+      <div class="form-field">
+        <label>Sex *</label>
+        <select id="vf-sex">
+          <option value="">Select</option>
+          <option value="Male" ${v && v.sex==='Male'?'selected':''}>Male</option>
+          <option value="Female" ${v && v.sex==='Female'?'selected':''}>Female</option>
+          <option value="Other" ${v && v.sex==='Other'?'selected':''}>Other</option>
+          <option value="Prefer not to say" ${v && v.sex==='Prefer not to say'?'selected':''}>Prefer not to say</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Age *</label>
+        <input type="number" id="vf-age" min="0" max="120" value="${v && v.age !== null && v.age !== undefined ? v.age : ''}" placeholder="e.g. 25">
       </div>
       <div class="form-field">
         <label>Group / School / Org Name (optional)</label>
@@ -1202,11 +1749,31 @@ function openVisitorModal(v){
 
   document.getElementById('vfCancel').addEventListener('click', closeModal);
   const saveBtn = document.getElementById('vfSave');
-  saveBtn.addEventListener('click', async ()=>{
+saveBtn.addEventListener('click', async ()=>{
     const visitorName = document.getElementById('vf-name').value.trim();
     const errorEl = document.getElementById('vfError');
     if(!visitorName){
       errorEl.textContent = 'Visitor or contact person name is required.';
+      return;
+    }
+    const address = document.getElementById('vf-address').value.trim();
+    if(!address){
+      errorEl.textContent = 'Address is required.';
+      return;
+    }
+    const sex = document.getElementById('vf-sex').value;
+    if(!sex){
+      errorEl.textContent = 'Sex is required.';
+      return;
+    }
+    const age = document.getElementById('vf-age').value;
+    if(age === ''){
+      errorEl.textContent = 'Age is required.';
+      return;
+    }
+    const ageNum = parseInt(age, 10);
+    if(isNaN(ageNum) || ageNum < 0 || ageNum > 120){
+      errorEl.textContent = 'Age must be a valid number between 0 and 120.';
       return;
     }
     const pax = parseInt(document.getElementById('vf-pax').value, 10) || 1;
@@ -1217,6 +1784,9 @@ function openVisitorModal(v){
 
     const payload = {
       visitorName,
+      address,
+      sex,
+      age: ageNum,
       groupName: document.getElementById('vf-group').value.trim(),
       groupType: document.getElementById('vf-groupType').value,
       pax,
@@ -1431,30 +2001,30 @@ async function renderArtifactsTab(contentEl){
       const statusClass = (a.status || '').toLowerCase().replace(/[^a-z0-9]/g, '-');
       return `
         <tr>
-          <td>
+          <td data-label="Accession #">
             <span style="font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:12px; color:var(--ink); background:rgba(0,0,0,0.06); padding:2px 6px; border-radius:4px;">${escapeHtml(a.accessionNo)}</span>
           </td>
-          <td>
+          <td data-label="Artifact Name">
             <div style="font-weight:700; color:var(--ink);">${escapeHtml(a.name)}</div>
             ${a.description ? `<div style="font-size:11.5px; color:var(--grey-400); max-width:240px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(a.description)}">${escapeHtml(a.description)}</div>` : ''}
           </td>
-          <td>
+          <td data-label="Category">
             <span class="cat-pill" style="font-size:10px;">${escapeHtml(a.category || 'Other')}</span>
           </td>
-          <td>
+          <td data-label="Condition">
             <span class="cond-badge ${condClass}">${escapeHtml(a.condition || 'Good')}</span>
           </td>
-          <td>
+          <td data-label="Storage / Display Location">
             <div style="font-size:13px; font-weight:600; color:var(--ink);">📍 ${escapeHtml(a.location || 'Unassigned')}</div>
           </td>
-          <td>
+          <td data-label="Status">
             <span class="status-badge ${statusClass}">${escapeHtml(a.status || 'On Display')}</span>
           </td>
-          <td>
+          <td data-label="Donor / Acquisition">
             <div style="font-size:12.5px; color:var(--ink);">${escapeHtml(a.donor || 'Museum Acquisition')}</div>
             <div style="font-size:11px; color:var(--grey-400);">${escapeHtml(a.acquisitionDate || '')}</div>
           </td>
-          <td style="text-align:right; white-space:nowrap;">
+          <td data-label="Actions" style="text-align:right; white-space:nowrap;">
             <button class="btn btn-ghost dark btn-small" data-edit-artifact="${a.id}" title="Edit artifact record">Edit</button>
             <button class="btn btn-danger btn-small" data-del-artifact="${a.id}" style="margin-left:4px;" title="Delete artifact record">Delete</button>
           </td>
@@ -1687,10 +2257,10 @@ async function renderProgramsTab(contentEl){
   const tbody = document.getElementById('programsBody');
   tbody.innerHTML = filteredPrograms.map(p => `
     <tr>
-      <td class="title-cell">${escapeHtml(p.title)} ${p.videoUrl ? '<span class="video-badge" style="font-size:10.5px;">▶ Video</span>' : ''}</td>
-      <td style="font-size:12.5px; color:var(--ink-soft);">${escapeHtml(p.ageRange||'—')}</td>
-      <td style="font-size:12.5px; color:var(--ink-soft);">${escapeHtml(p.schedule||'—')}</td>
-      <td><div class="row-actions">
+      <td class="title-cell" data-label="Title">${escapeHtml(p.title)} ${p.videoUrl ? '<span class="video-badge" style="font-size:10.5px;">▶ Video</span>' : ''}</td>
+      <td data-label="Ages" style="font-size:12.5px; color:var(--ink-soft);">${escapeHtml(p.ageRange||'—')}</td>
+      <td data-label="Schedule" style="font-size:12.5px; color:var(--ink-soft);">${escapeHtml(p.schedule||'—')}</td>
+      <td data-label="Actions"><div class="row-actions">
         <button class="btn btn-ghost dark btn-small" data-edit-program="${p.id}">Edit</button>
         <button class="btn btn-danger btn-small" data-delete-program="${p.id}">Delete</button>
       </div></td>
@@ -1910,10 +2480,10 @@ async function renderEventsTab(contentEl){
   const tbody = document.getElementById('eventsBody');
   tbody.innerHTML = filteredEvents.map(e => `
     <tr>
-      <td class="title-cell">${escapeHtml(e.title)} ${e.videoUrl ? '<span class="video-badge" style="font-size:10.5px;">▶ Video</span>' : ''}</td>
-      <td style="font-size:12.5px; color:var(--ink-soft);">${escapeHtml(e.date||'—')}</td>
-      <td style="font-size:12.5px; color:var(--ink-soft);">${escapeHtml(e.location||'—')}</td>
-      <td><div class="row-actions">
+      <td class="title-cell" data-label="Title">${escapeHtml(e.title)} ${e.videoUrl ? '<span class="video-badge" style="font-size:10.5px;">▶ Video</span>' : ''}</td>
+      <td data-label="Date" style="font-size:12.5px; color:var(--ink-soft);">${escapeHtml(e.date||'—')}</td>
+      <td data-label="Location" style="font-size:12.5px; color:var(--ink-soft);">${escapeHtml(e.location||'—')}</td>
+      <td data-label="Actions"><div class="row-actions">
         <button class="btn btn-ghost dark btn-small" data-edit-event="${e.id}">Edit</button>
         <button class="btn btn-danger btn-small" data-delete-event="${e.id}">Delete</button>
       </div></td>
@@ -2300,3 +2870,206 @@ function openGalleryModal(id){
 }
 
 boot();
+
+// ─── Museum Info ───
+async function renderMuseumInfoTab(contentEl){
+  let info = {};
+  try{
+    const res = await Api.getMuseumInfo();
+    info = res.museumInfo || {};
+  }catch(e){
+    contentEl.innerHTML = `<div class="empty-state"><h2>Could not load museum info</h2><p>${escapeHtml(e.message)}</p></div>`;
+    return;
+  }
+
+  contentEl.innerHTML = `
+    <div class="admin-toolbar-wrap">
+      <div class="admin-toolbar-row">
+        <button class="btn btn-primary btn-small" id="editMuseumInfoBtn">✏️ Edit Museum Info</button>
+      </div>
+    </div>
+    <div style="padding:20px 26px; display:flex; flex-direction:column; gap:20px;">
+      <div class="info-card">
+        <h3 style="margin:0 0 12px; font-family:'Fraunces',serif; font-size:16px;">Basic Information</h3>
+        <div class="info-row"><span class="info-label">Name</span><span class="info-value">${escapeHtml(info.name || '—')}</span></div>
+        <div class="info-row"><span class="info-label">Tagline</span><span class="info-value">${escapeHtml(info.tagline || '—')}</span></div>
+        <div class="info-row"><span class="info-label">Address</span><span class="info-value">${escapeHtml(info.address || '—')}</span></div>
+        <div class="info-row"><span class="info-label">Phone</span><span class="info-value">${escapeHtml(info.phone || '—')}</span></div>
+        <div class="info-row"><span class="info-label">Hours</span><span class="info-value">${escapeHtml(info.hours || '—')}</span></div>
+      </div>
+
+      <div class="info-card">
+        <h3 style="margin:0 0 12px; font-family:'Fraunces',serif; font-size:16px;">About</h3>
+        <div class="info-value" style="white-space:pre-wrap; font-weight:400;">${escapeHtml(info.about || '—')}</div>
+      </div>
+
+      <div class="info-card">
+        <h3 style="margin:0 0 12px; font-family:'Fraunces',serif; font-size:16px;">Entrance Fees</h3>
+        <ul style="margin:0; padding-left:20px;">
+          ${(info.entranceFees || []).map(f => `<li style="margin:6px 0;">${escapeHtml(f)}</li>`).join('')}
+        </ul>
+      </div>
+
+      <div class="info-card">
+        <h3 style="margin:0 0 12px; font-family:'Fraunces',serif; font-size:16px;">Footer Links</h3>
+        <ul style="margin:0; padding-left:20px;">
+          ${(info.footerLinks || []).map(f => `<li style="margin:6px 0;"><strong>${escapeHtml(f.label)}</strong> → ${escapeHtml(f.href)}</li>`).join('')}
+        </ul>
+      </div>
+    </div>
+
+    <style>
+      .info-card { background:var(--white); border:1px solid var(--grey-100); border-radius:12px; padding:20px; }
+      .info-row { display:flex; gap:16px; padding:8px 0; border-bottom:1px solid var(--grey-100); align-items:flex-start; }
+      .info-row:last-child { border-bottom:none; }
+      .info-label { font-weight:700; color:var(--ink-soft); min-width:120px; font-size:13px; }
+      .info-value { color:var(--ink); flex:1; font-size:13px; line-height:1.5; }
+    </style>
+  `;
+
+  document.getElementById('editMuseumInfoBtn')?.addEventListener('click', ()=>openMuseumInfoModal(info));
+}
+
+function openMuseumInfoModal(info){
+  const feesHtml = (info.entranceFees || []).map((f, i) => `
+    <div class="form-field" style="display:flex; gap:8px; align-items:center;">
+      <input type="text" id="mi-fee-${i}" value="${escapeHtml(f)}" placeholder="Fee description" style="flex:1;">
+      <button type="button" class="btn btn-ghost dark btn-small" data-remove-fee="${i}" style="flex-shrink:0;">Remove</button>
+    </div>
+  `).join('');
+
+  const linksHtml = (info.footerLinks || []).map((l, i) => `
+    <div class="form-field" style="display:flex; gap:8px; align-items:center;">
+      <input type="text" id="mi-link-label-${i}" value="${escapeHtml(l.label)}" placeholder="Label" style="width:140px;">
+      <input type="text" id="mi-link-href-${i}" value="${escapeHtml(l.href)}" placeholder="URL (e.g. /donate.html)" style="flex:1;">
+      <button type="button" class="btn btn-ghost dark btn-small" data-remove-link="${i}" style="flex-shrink:0;">Remove</button>
+    </div>
+  `).join('');
+
+  openModal(`
+    <h2>Edit Museum Information</h2>
+    <div class="form-grid">
+      <div class="form-field full"><label>Museum Name *</label><input type="text" id="mi-name" value="${escapeHtml(info.name || '')}" required></div>
+      <div class="form-field full"><label>Tagline *</label><textarea id="mi-tagline" rows="2" placeholder="Subtitle shown in footer...">${escapeHtml(info.tagline || '')}</textarea></div>
+      <div class="form-field full"><label>Address *</label><textarea id="mi-address" rows="2" placeholder="Full address">${escapeHtml(info.address || '')}</textarea></div>
+      <div class="form-field"><label>Phone *</label><input type="text" id="mi-phone" value="${escapeHtml(info.phone || '')}" required></div>
+      <div class="form-field full"><label>Hours *</label><textarea id="mi-hours" rows="2" placeholder="Opening hours">${escapeHtml(info.hours || '')}</textarea></div>
+      <div class="form-field full"><label>About</label><textarea id="mi-about" rows="4" placeholder="About the museum...">${escapeHtml(info.about || '')}</textarea></div>
+      
+      <div class="form-field full">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <label>Entrance Fees</label>
+          <button type="button" class="btn btn-primary btn-small" id="addFeeBtn">+ Add Fee</button>
+        </div>
+        <div id="feeFields">${feesHtml || '<div class="form-field" style="display:flex; gap:8px; align-items:center;"><input type="text" id="mi-fee-0" value="" placeholder="Fee description" style="flex:1;"><button type="button" class="btn btn-ghost dark btn-small" data-remove-fee="0" style="flex-shrink:0;">Remove</button></div>'}</div>
+      </div>
+
+      <div class="form-field full">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <label>Footer Links</label>
+          <button type="button" class="btn btn-primary btn-small" id="addLinkBtn">+ Add Link</button>
+        </div>
+        <div id="linkFields">${linksHtml || '<div class="form-field" style="display:flex; gap:8px; align-items:center;"><input type="text" id="mi-link-label-0" value="💖 Donate" placeholder="Label" style="width:140px;"><input type="text" id="mi-link-href-0" value="/donate.html" placeholder="URL" style="flex:1;"><button type="button" class="btn btn-ghost dark btn-small" data-remove-link="0" style="flex-shrink:0;">Remove</button></div>'}</div>
+      </div>
+
+      <div class="form-error" id="miError"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost dark" id="miCancel">Cancel</button>
+      <button class="btn btn-primary" id="miSave">Save changes</button>
+    </div>
+  `);
+
+  let feeIndex = (info.entranceFees || []).length;
+  let linkIndex = (info.footerLinks || []).length;
+
+  const feeFields = document.getElementById('feeFields');
+  const linkFields = document.getElementById('linkFields');
+
+  document.getElementById('addFeeBtn')?.addEventListener('click', ()=>{
+    const id = feeIndex++;
+    const div = document.createElement('div');
+    div.className = 'form-field';
+    div.style.cssText = 'display:flex; gap:8px; align-items:center;';
+    div.innerHTML = `<input type="text" id="mi-fee-${id}" value="" placeholder="Fee description" style="flex:1;"><button type="button" class="btn btn-ghost dark btn-small" data-remove-fee="${id}" style="flex-shrink:0;">Remove</button>`;
+    feeFields.appendChild(div);
+  });
+
+  document.getElementById('addLinkBtn')?.addEventListener('click', ()=>{
+    const id = linkIndex++;
+    const div = document.createElement('div');
+    div.className = 'form-field';
+    div.style.cssText = 'display:flex; gap:8px; align-items:center;';
+    div.innerHTML = `<input type="text" id="mi-link-label-${id}" value="" placeholder="Label" style="width:140px;"><input type="text" id="mi-link-href-${id}" value="" placeholder="URL (e.g. /donate.html)" style="flex:1;"><button type="button" class="btn btn-ghost dark btn-small" data-remove-link="${id}" style="flex-shrink:0;">Remove</button>`;
+    linkFields.appendChild(div);
+  });
+
+  feeFields.addEventListener('click', e=>{
+    if(e.target.matches('[data-remove-fee]')){
+      e.target.closest('.form-field').remove();
+    }
+  });
+
+  linkFields.addEventListener('click', e=>{
+    if(e.target.matches('[data-remove-link]')){
+      e.target.closest('.form-field').remove();
+    }
+  });
+
+  document.getElementById('miCancel')?.addEventListener('click', closeModal);
+  document.getElementById('miSave')?.addEventListener('click', async ()=>{
+    const errorEl = document.getElementById('miError');
+    const name = document.getElementById('mi-name').value.trim();
+    if(!name){ errorEl.textContent = 'Museum name is required.'; return; }
+    const tagline = document.getElementById('mi-tagline').value.trim();
+    if(!tagline){ errorEl.textContent = 'Tagline is required.'; return; }
+    const address = document.getElementById('mi-address').value.trim();
+    if(!address){ errorEl.textContent = 'Address is required.'; return; }
+    const phone = document.getElementById('mi-phone').value.trim();
+    if(!phone){ errorEl.textContent = 'Phone is required.'; return; }
+    const hours = document.getElementById('mi-hours').value.trim();
+    if(!hours){ errorEl.textContent = 'Hours is required.'; return; }
+
+    // Collect fees
+    const feeInputs = feeFields.querySelectorAll('input[id^="mi-fee-"]');
+    const entranceFees = Array.from(feeInputs).map(i => i.value.trim()).filter(Boolean);
+
+    // Collect links
+    const linkLabels = linkFields.querySelectorAll('input[id^="mi-link-label-"]');
+    const linkHrefs = linkFields.querySelectorAll('input[id^="mi-link-href-"]');
+    const footerLinks = [];
+    linkLabels.forEach((labelInput, i) => {
+      const label = labelInput.value.trim();
+      const href = linkHrefs[i]?.value.trim();
+      if(label && href) footerLinks.push({ label, href });
+    });
+
+    const payload = {
+      name,
+      tagline,
+      address,
+      phone,
+      hours,
+      about: document.getElementById('mi-about').value.trim(),
+      entranceFees,
+      footerLinks
+    };
+
+    try{
+      await Api.updateMuseumInfo(payload);
+      toast('Museum information updated');
+      closeModal();
+      renderDashboard();
+    }catch(err){
+      errorEl.textContent = err.message;
+    }
+  });
+}
+
+// Add API method for museum info
+if(!Api.getMuseumInfo){
+  Api.getMuseumInfo = () => request('/api/museum-info');
+}
+if(!Api.updateMuseumInfo){
+  Api.updateMuseumInfo = (payload) => request('/api/museum-info', { method: 'PUT', body: JSON.stringify(payload) });
+}

@@ -39,6 +39,33 @@ function recent(limit) {
   return all().slice(-Math.max(1, limit || 25)).reverse();
 }
 
+function dailyStats(days = 30) {
+  const events = all();
+  const now = Date.now();
+  const dayMs = 24 * 60 * 60 * 1000;
+  const result = [];
+
+  for (let i = days - 1; i >= 0; i--) {
+    const dayStart = new Date(now - i * dayMs);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(dayStart.getTime() + dayMs);
+    const dayEvents = events.filter(e => {
+      const t = new Date(e.at).getTime();
+      return t >= dayStart.getTime() && t < dayEnd.getTime();
+    });
+    const scans = dayEvents.filter(e => e.source === 'scan').length;
+    const views = dayEvents.filter(e => e.source === 'view').length;
+    result.push({
+      date: dayStart.toISOString().slice(0, 10),
+      label: dayStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      scans,
+      views,
+      total: scans + views
+    });
+  }
+  return result;
+}
+
 function totals() {
   const events = all();
   const last7 = events.filter(e => Date.now() - new Date(e.at).getTime() <= 7 * 24 * 60 * 60 * 1000);
@@ -46,4 +73,4 @@ function totals() {
   return { allTime: events.length, last7Days: last7.length, last24Hours: last24h.length };
 }
 
-module.exports = { record, all, summaryByExhibit, recent, totals };
+module.exports = { record, all, summaryByExhibit, recent, totals, dailyStats };

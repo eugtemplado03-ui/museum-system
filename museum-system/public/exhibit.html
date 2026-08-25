@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -7,14 +7,21 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<style>
+  .leaflet-container { font-family: 'Open Sans', 'Nunito', sans-serif; }
+  .leaflet-popup-content-wrapper { border-radius: 8px; }
+  .leaflet-popup-content { margin: 10px 14px; }
+</style>
 </head>
 <body>
+  <!-- ── Top Navigation Bar ─────────────────────────────────────── -->
   <div class="topbar">
     <a class="brand" href="/">
       <div class="brand-mark">M</div>
       <div class="brand-text">
         <div class="name">Museo Sang Bata sa Negros</div>
-        <div class="tagline">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
+        <div class="tagline" style="font-size: 9px; max-width: 400px;">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
       </div>
     </a>
     <div class="nav-links">
@@ -28,21 +35,16 @@
   </div>
 
   <main><div class="wrap" style="max-width: 680px;">
-    <a class="detail-back" href="/">&larr; Back to gallery</a>
+    <a class="detail-back" href="/exhibits.html">&larr; Back to exhibits</a>
     <div id="content">Loading exhibit…</div>
   </div></main>
-  <footer>
-    Museo Sang Bata sa Negros · Exhibit Guide<br>
-    Barangay Old Sagay, Sagay City, Negros Occidental, Philippines 6122 ·
-    Open Mon–Fri 8:00 AM–5:00 PM (weekends by booked tour only) ·
-    +63 917 798 7420
-  </footer>
 
   <script src="/js/api.js"></script>
   <script src="/js/chatbot.js"></script>
   <script src="/js/carousel.js"></script>
   <script src="/js/image-enhance.js"></script>
   <script src="/js/lightbox.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script>
     function escapeHtml(str){
       return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -66,7 +68,7 @@
       const src = params.get('src') === 'scan' ? 'scan' : 'view';
       const content = document.getElementById('content');
       if(!code){
-        content.innerHTML = `<div class="empty-state"><h2>No exhibit specified</h2><p>Scan a tag or choose an exhibit from the gallery.</p><a class="btn btn-primary" href="/">Browse all exhibits</a></div>`;
+        content.innerHTML = `<div class="empty-state"><h2>No exhibit specified</h2><p>Scan a tag or choose an exhibit from the gallery.</p><a class="btn btn-primary" href="/exhibits.html">Browse all exhibits</a></div>`;
         return;
       }
       try{
@@ -86,6 +88,12 @@
                 <button class="fav-btn-plaque" id="favToggleBtn" aria-label="Toggle favorite">♡</button>
               </div>
               <h1>${escapeHtml(exhibit.title)}</h1>
+              <!-- ── Prominent Location/Direction ── -->
+              ${exhibit.location ? `
+              <div class="plaque-location-badge" style="display:inline-flex; align-items:center; gap:6px; background:var(--teal-light); color:var(--teal-dark); padding:8px 12px; border-radius:999px; font-size:13px; font-weight:600; margin:6px 0 12px; flex-wrap:wrap;">
+                <span>📍</span>
+                <span>${escapeHtml(exhibit.location)}</span>
+              </div>` : ''}
               <div class="plaque-meta-row">
                 <div><span>Origin</span><b>${escapeHtml(exhibit.origin||'—')}</b></div>
                 <div><span>Date</span><b>${escapeHtml(exhibit.year||'—')}</b></div>
@@ -123,6 +131,25 @@
                 <a class="btn btn-secondary btn-small plaque-qr-dl" href="${Api.qrUrl(exhibit.code)}" download="${exhibit.code}-tag.png">&#8595; Download QR</a>
               </div>
 
+              <!-- ── Map Section ── -->
+              ${(exhibit.lat !== null && exhibit.lat !== undefined && exhibit.lng !== null && exhibit.lng !== undefined) ? `
+              <div class="plaque-map-section" style="margin-top:16px; padding-top:16px; border-top:1px solid var(--grey-100);">
+                <div style="font-weight:700; color:var(--ink); margin-bottom:8px; font-size:14px;">📍 Location on Map</div>
+                <div id="exhibitMap" style="width:100%; height:200px; border-radius:8px; overflow:hidden; background:var(--grey-100);"></div>
+                <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
+                  <a href="https://www.google.com/maps/search/?api=1&query=${exhibit.lat},${exhibit.lng}" target="_blank" class="btn btn-secondary btn-small">Open in Google Maps</a>
+                  <a href="https://www.openstreetmap.org/?mlat=${exhibit.lat}&mlon=${exhibit.lng}#map=15/${exhibit.lat}/${exhibit.lng}" target="_blank" class="btn btn-ghost btn-small">Open in OpenStreetMap</a>
+                </div>
+              </div>` : ''}
+              ${exhibit.mapImagePath ? `
+              <div class="plaque-map-image-section" style="margin-top:16px; padding-top:16px; border-top:1px solid var(--grey-100);">
+                <div style="font-weight:700; color:var(--ink); margin-bottom:8px; font-size:14px;">🗺️ Floor Plan / Directions</div>
+                <div style="position:relative; border-radius:8px; overflow:hidden; max-width:100%;">
+                  <img src="${escapeHtml(exhibit.mapImagePath)}" alt="Floor plan showing exhibit location" style="width:100%; height:auto; max-height:300px; object-fit:cover; display:block;">
+                </div>
+                <div style="margin-top:6px; font-size:11.5px; color:var(--ink-soft); text-align:center;">Tap image to view full screen</div>
+              </div>` : ''}
+
               <div id="ratingSummary" class="rating-summary"></div>
               <div class="rating-form">
                 <div style="font-size:13px; font-weight:600; color:var(--ink);">Rate this exhibit</div>
@@ -141,8 +168,33 @@
         wireFavorite(exhibit);
         wireRatings(exhibit, code);
         wireTTS(exhibit);
+        initMap(exhibit);
       }catch(e){
-        content.innerHTML = `<div class="empty-state"><h2>Tag not recognized</h2><p>No exhibit matches code "${escapeHtml(code)}". It may have been moved or retired.</p><a class="btn btn-primary" href="/">Browse all exhibits</a></div>`;
+        console.error('Exhibit load error:', e);
+        content.innerHTML = `<div class="empty-state"><h2>Tag not recognized</h2><p>No exhibit matches code "${escapeHtml(code)}". It may have been moved or retired.</p><a class="btn btn-primary" href="/exhibits.html">Browse all exhibits</a></div>`;
+      }
+    }
+
+    // ── Map Initialization ────────────────────────────────────────────
+    function initMap(exhibit) {
+      const mapEl = document.getElementById('exhibitMap');
+      if (!mapEl) return;
+      if (exhibit.lat === null || exhibit.lat === undefined || exhibit.lng === null || exhibit.lng === undefined) {
+        mapEl.style.display = 'none';
+        return;
+      }
+      try {
+        const map = L.map('exhibitMap').setView([exhibit.lat, exhibit.lng], 17);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors',
+          maxZoom: 19
+        }).addTo(map);
+        L.marker([exhibit.lat, exhibit.lng]).addTo(map)
+          .bindPopup(`<b>${escapeHtml(exhibit.title)}</b><br>${escapeHtml(exhibit.location || '')}`)
+          .openPopup();
+      } catch (e) {
+        console.error('Map init error:', e);
+        mapEl.style.display = 'none';
       }
     }
 
@@ -198,7 +250,7 @@
         }
       }
 
-      // ── Speak text using OpenAI TTS-1 (nova) via server ──────────
+      // ── Speak text using OpenAI TTS-1 (nova) via server, with browser fallback ──────────
       async function speakCurrent() {
         stopAudio();
         const textToSpeak = _currentText || _cache.original;
@@ -206,8 +258,9 @@
           setStatus('No description to read.', false);
           return;
         }
-        setStatus('⏳ Generating audio…', true);
+        // Try server TTS first, fallback to browser speech synthesis
         try {
+          setStatus('⏳ Generating audio…', true);
           const resp = await fetch('/api/tts/speak', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -223,8 +276,20 @@
           _audioEl.onerror = () => { URL.revokeObjectURL(url); _audioEl = null; setStatus('Playback error.', false); };
           await _audioEl.play();
         } catch (e) {
-          console.error('[TTS speak]', e);
-          setStatus('Audio unavailable — check connection.', false);
+          console.warn('[TTS speak] server TTS failed, trying browser fallback:', e);
+          // Fallback: browser built-in speech synthesis
+          try {
+            setStatus('🔊 Playing (browser voice)…', true);
+            const utter = new SpeechSynthesisUtterance(textToSpeak);
+            utter.lang = langSelect?.value === 'tl' ? 'fil-PH' : (langSelect?.value === 'cb' ? 'ceb-PH' : 'en-US');
+            utter.onend = () => setStatus('', false);
+            utter.onerror = () => setStatus('Audio unavailable.', false);
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utter);
+          } catch (e2) {
+            console.error('[TTS speak] both failed:', e2);
+            setStatus('Audio unavailable — check connection.', false);
+          }
         }
       }
 
@@ -249,7 +314,6 @@
       stopBtn.addEventListener('click', stopAudio);
       window.addEventListener('pagehide', stopAudio);
     }
-
 
     async function wireFavorite(exhibit){
       const btn = document.getElementById('favToggleBtn');

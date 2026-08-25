@@ -1,10 +1,68 @@
 const express = require('express');
+const QRCode = require('qrcode');
 const visitors = require('../db/visitors');
 const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
-// All visitor log endpoints are Admin Only
+// Public check-in endpoint (no auth required)
+function validateCheckin(body) {
+  const errors = [];
+  if (!body.visitorName || !body.visitorName.trim()) {
+    errors.push('Visitor name is required.');
+  }
+  if (!body.address || !body.address.trim()) {
+    errors.push('Address is required.');
+  }
+  if (!body.sex) {
+    errors.push('Sex is required.');
+  }
+  if (body.age !== undefined && body.age !== '' && (isNaN(parseInt(body.age, 10)) || parseInt(body.age, 10) < 0 || parseInt(body.age, 10) > 120)) {
+    errors.push('Age must be a valid number between 0 and 120.');
+  }
+  return errors;
+}
+
+router.post('/checkin', (req, res) => {
+  const errors = validateCheckin(req.body);
+  if (errors.length) return res.status(400).json({ error: errors.join(' ') });
+  
+  const now = new Date();
+  const payload = {
+    visitorName: req.body.visitorName.trim(),
+    address: req.body.address.trim(),
+    sex: req.body.sex,
+    age: req.body.age !== undefined && req.body.age !== '' ? parseInt(req.body.age, 10) : null,
+    contactNumber: (req.body.contactNumber || '').trim(),
+    email: (req.body.email || '').trim(),
+    groupName: (req.body.groupName || '').trim(),
+    groupType: 'Walk-in / Individual',
+    pax: 1,
+    purpose: 'General Visit',
+    status: 'Checked-in',
+    notes: (req.body.notes || '').trim()
+  };
+  
+  const visitor = visitors.create(payload);
+  res.status(201).json({ visitor });
+});
+
+// Public QR code for visitor check-in
+router.get('/checkin/qr', async (req, res) => {
+  try {
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    const url = `${protocol}://${host}/checkin.html`;
+    const png = await QRCode.toBuffer(url, { width: 320, margin: 1, color: { dark: '#2B271F', light: '#FFFFFF' } });
+    res.set('Content-Type', 'image/png');
+    res.set('Content-Disposition', 'inline; filename="visitor-checkin-tag.png"');
+    res.send(png);
+  } catch (e) {
+    res.status(500).json({ error: 'Could not generate QR code.' });
+  }
+});
+
+// All visitor log endpoints below are Admin Only
 router.use(requireAuth);
 
 function validate(body) {
