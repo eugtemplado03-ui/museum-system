@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -185,7 +185,7 @@
           const resp = await fetch('/api/tts/speak', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: textToSpeak }),
+            body: JSON.stringify({ text: textToSpeak, lang: langSelect?.value || 'en' }),
           });
           if (!resp.ok) throw new Error('TTS error ' + resp.status);
           const blob = await resp.blob();
@@ -196,8 +196,19 @@
           _audioEl.onerror = () => { URL.revokeObjectURL(url); _audioEl = null; setStatus('Playback error.', false); };
           await _audioEl.play();
         } catch(e) {
-          console.error('[TTS speak]', e);
-          setStatus('Audio unavailable — check connection.', false);
+          console.warn('[TTS speak] server TTS failed, trying browser fallback:', e);
+          try {
+            setStatus('🔊 Playing (browser voice)…', true);
+            const utter = new SpeechSynthesisUtterance(textToSpeak);
+            utter.lang = langSelect?.value === 'tl' ? 'fil-PH' : (langSelect?.value === 'cb' ? 'ceb-PH' : 'en-US');
+            utter.onend = () => setStatus('', false);
+            utter.onerror = () => setStatus('Audio unavailable.', false);
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utter);
+          } catch (e2) {
+            console.error('[TTS speak] both failed:', e2);
+            setStatus('Audio unavailable — check connection.', false);
+          }
         }
       });
 

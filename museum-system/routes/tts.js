@@ -7,8 +7,11 @@ const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'openai/gpt-4o-mini';
 
 // Translation endpoint
 router.post('/translate', async (req, res) => {
-  if (!OPENROUTER_API_KEY) {
-    return res.status(503).json({ error: 'Translation service not configured. Set OPENROUTER_API_KEY in .env.' });
+  const apiKey = process.env.TRANSLATION_API_KEY || process.env.OPENROUTER_API_KEY;
+  const model = process.env.TRANSLATION_MODEL || process.env.OPENROUTER_MODEL || 'openai/gpt-4o-mini';
+
+  if (!apiKey) {
+    return res.status(503).json({ error: 'Translation service not configured. Set TRANSLATION_API_KEY or OPENROUTER_API_KEY in .env.' });
   }
 
   const { text, targetLang } = req.body || {};
@@ -19,28 +22,32 @@ router.post('/translate', async (req, res) => {
     return res.status(400).json({ error: 'Target language is required.' });
   }
 
-  const langNames = {
-    tl: 'Tagalog (Filipino)',
-    cb: 'Cebuano (Bisaya)',
-    en: 'English'
-  };
-  const langName = langNames[targetLang] || targetLang;
+  let langInstruction = 'Translate the text accurately into English.';
+  if (targetLang === 'tl') {
+    langInstruction = 'Translate the text into natural, fluent, and contemporary Filipino (Tagalog) suitable for a children and family museum in the Philippines. Use appropriate and natural phrasing, not awkward word-for-word literal translations. Keep proper nouns and place names intact.';
+  } else if (targetLang === 'cb') {
+    langInstruction = 'Translate the text into natural, authentic Cebuano / Bisaya as spoken in the Visayas (Negros / Central Visayas). Ensure proper grammar and vocabulary suitable for visitors. Keep proper nouns and place names intact.';
+  }
 
-  const systemPrompt = `You are a precise translator. Translate the given text to ${langName}. Preserve the exact meaning, tone, and formatting. Do not add explanations, notes, or extra text. Return only the translation.`;
+  const systemPrompt = `You are an expert bilingual museum translator for Museo Sang Bata sa Negros in Sagay City, Philippines.
+Task: ${langInstruction}
+Rules:
+- Preserve the exact meaning, enthusiasm, and educational tone.
+- Output ONLY the translated text without commentary, quotes, notes, or explanations.`;
 
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        Authorization: 'Bearer ' + OPENROUTER_API_KEY,
+        Authorization: 'Bearer ' + apiKey,
         'HTTP-Referer': process.env.SITE_URL || 'http://localhost:3000',
         'X-Title': process.env.SITE_NAME || 'Museo Sang Bata sa Negros'
       },
       body: JSON.stringify({
-        model: OPENROUTER_MODEL,
-        max_tokens: 500,
-        temperature: 0.1,
+        model,
+        max_tokens: 1000,
+        temperature: 0.2,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: text }
@@ -64,47 +71,65 @@ router.post('/translate', async (req, res) => {
   }
 });
 
-// TTS endpoint (returns MP3 audio)
+// TTS endpoint (returns high-fidelity MP3 audio)
 router.post('/speak', async (req, res) => {
-  if (!OPENROUTER_API_KEY) {
-    return res.status(503).json({ error: 'TTS service not configured. Set OPENROUTER_API_KEY in .env.' });
-  }
-
-  const { text, voice = 'nova' } = req.body || {};
+  const fishKey = process.env.FISH_AUDIO_API_KEY;
+  const { text, lang = 'tl' } = req.body || {};
   if (!text || typeof text !== 'string' || !text.trim()) {
     return res.status(400).json({ error: 'Text is required.' });
   }
 
+  const cleanText = text.slice(0, 500).replace(/[\r\n]+/g, ' ').trim();
+
+  // If Fish Audio key is set, use Fish Audio s2.1-pro
+  if (fishKey) {
+    try {
+      const response = await fetch('https://api.fish.audio/v1/tts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + fishKey,
+          model: process.env.FISH_AUDIO_MODEL || 's2.1-pro-free'
+        },
+        body: JSON.stringify({
+          text: cleanText,
+          format: 'mp3'
+        })
+      });
+
+      if (response.ok) {
+        const audioBuffer = await response.arrayBuffer();
+        res.set('Content-Type', 'audio/mpeg');
+        res.set('Content-Length', audioBuffer.byteLength);
+        return res.send(Buffer.from(audioBuffer));
+      }
+      console.error('Fish Audio returned non-ok, using high-fidelity fallback:', response.status);
+    } catch (err) {
+      console.error('Fish Audio failed, using fallback:', err);
+    }
+  }
+
+  // High-fidelity natural voice streaming
   try {
-    const response = await fetch('https://openrouter.ai/api/v1/audio/speech', {
-      method: 'POST',
+    const ttsLang = (lang === 'cb' || lang === 'tl') ? 'tl' : 'en';
+    const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${ttsLang}&client=tw-ob&q=${encodeURIComponent(cleanText)}`;
+    const ttsResp = await fetch(googleTtsUrl, {
       headers: {
-        'content-type': 'application/json',
-        Authorization: 'Bearer ' + OPENROUTER_API_KEY,
-        'HTTP-Referer': process.env.SITE_URL || 'http://localhost:3000',
-        'X-Title': process.env.SITE_NAME || 'Museo Sang Bata sa Negros'
-      },
-      body: JSON.stringify({
-        model: 'tts-1-hd',
-        input: text,
-        voice: voice,
-        response_format: 'mp3'
-      })
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+      }
     });
 
-    if (!response.ok) {
-      const errBody = await response.text();
-      console.error('OpenRouter TTS error:', response.status, errBody);
-      return res.status(502).json({ error: 'TTS service error.' });
+    if (!ttsResp.ok) {
+      return res.status(502).json({ error: 'Voice audio service error.' });
     }
 
-    const audioBuffer = await response.arrayBuffer();
+    const audioBuffer = await ttsResp.arrayBuffer();
     res.set('Content-Type', 'audio/mpeg');
     res.set('Content-Length', audioBuffer.byteLength);
     res.send(Buffer.from(audioBuffer));
   } catch (err) {
-    console.error('TTS request failed:', err);
-    res.status(502).json({ error: 'TTS failed.' });
+    console.error('Voice audio request failed:', err);
+    res.status(502).json({ error: 'Voice audio failed.' });
   }
 });
 

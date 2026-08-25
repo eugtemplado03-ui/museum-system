@@ -264,7 +264,7 @@
           const resp = await fetch('/api/tts/speak', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: textToSpeak }),
+            body: JSON.stringify({ text: textToSpeak, lang: langSelect?.value || 'en' }),
           });
           if (!resp.ok) throw new Error('TTS API error ' + resp.status);
 
