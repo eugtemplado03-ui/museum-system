@@ -41,7 +41,16 @@ app.use('/api/museum-info', museumInfoRoutes);
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
 // Fallback 404 for unknown API routes
-app.use('/api', (req, res) => res.status(404).json({ error: 'Not found.' }));
+// Auto-seed initial catalog if database is empty on fresh deployment
+try {
+  const exhibits = require('./db/exhibits');
+  if (exhibits.all().length === 0) {
+    console.log('Database is empty — auto-seeding exhibits, programs, events, and gallery...');
+    require('./scripts/seed');
+  }
+} catch (e) {
+  console.warn('Auto-seed skipped:', e.message);
+}
 
 app.listen(PORT, () => {
   console.log(`Museo Sang Bata sa Negros server running on http://localhost:${PORT}`);
