@@ -2473,7 +2473,7 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
   }
   .scan-hero {
     gap: 24px;
-    padding: 36px 28px;
+    padding: 32px 24px;
   }
   .admin-layout {
     flex-direction: column;
@@ -2485,26 +2485,104 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
   }
 }
 
+/* ── Tablet & Mobile (<= 860px) ──────────────────────────────────── */
+@media (max-width: 860px) {
+  /* Layout Containers */
+  .user-layout,
+  .browse-layout {
+    flex-direction: column;
+  }
+
+  /* Sleek Mobile Horizontal Category & Navigation Bar */
+  .user-sidebar,
+  .browse-sidebar {
+    width: 100% !important;
+    position: static !important;
+    height: auto !important;
+    max-height: none !important;
+    border-radius: 14px !important;
+    margin: 0 0 16px 0 !important;
+    padding: 10px 12px !important;
+    background: linear-gradient(145deg, #0d2e38 0%, #00384a 100%) !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15) !important;
+  }
+  .user-sidebar-brand,
+  .browse-sidebar-title {
+    display: none !important;
+  }
+  .user-sidebar-nav {
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    -webkit-overflow-scrolling: touch;
+    gap: 6px !important;
+    padding: 4px 2px !important;
+    scrollbar-width: none;
+  }
+  .user-sidebar-nav::-webkit-scrollbar {
+    display: none;
+  }
+  .user-sidebar-section-title {
+    display: none !important;
+  }
+  .user-sidebar-btn,
+  .cat-sidebar-btn {
+    width: auto !important;
+    padding: 7px 13px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0;
+    border-radius: 999px !important;
+    background: rgba(255,255,255,0.08) !important;
+    color: rgba(255,255,255,0.88) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    transition: all 0.2s ease !important;
+  }
+  .user-sidebar-btn:hover,
+  .cat-sidebar-btn:hover {
+    background: rgba(255,255,255,0.16) !important;
+    color: #ffffff !important;
+  }
+  .user-sidebar-btn.active,
+  .cat-sidebar-btn.active {
+    background: var(--teal) !important;
+    color: #ffffff !important;
+    border-color: var(--teal) !important;
+    box-shadow: 0 2px 10px rgba(0,174,189,0.4) !important;
+  }
+  .user-sidebar-indicator {
+    display: none !important;
+  }
+  .user-sidebar-footer {
+    display: none !important;
+  }
+}
+
 /* ── Tablet & Mobile (<= 768px) ──────────────────────────────────── */
 @media (max-width: 768px) {
   /* Topbar Navigation */
   .topbar {
     height: auto;
-    min-height: 56px;
-    padding: 8px 14px;
+    min-height: 54px;
+    padding: 8px 12px;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
   }
   .brand {
     gap: 8px;
   }
   .brand-mark {
-    width: 30px;
-    height: 30px;
-    font-size: 13px;
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+    border-radius: 9px;
   }
   .brand-text .name {
     font-size: 13.5px;
+    font-weight: 800;
   }
   .brand-text .tagline {
     display: none;
@@ -2523,56 +2601,90 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
     display: none;
   }
   .nav-btn {
-    padding: 5px 11px;
-    font-size: 11px;
+    padding: 6px 12px;
+    font-size: 12px;
     white-space: nowrap;
     flex-shrink: 0;
+    border-radius: 8px;
   }
 
   /* Main Container */
   main {
-    padding: 20px 12px 64px;
+    padding: 16px 10px 64px;
   }
 
   /* Hero & Scanner Banner */
   .scan-hero {
     grid-template-columns: 1fr;
-    gap: 24px;
-    padding: 28px 18px;
-    border-radius: 16px;
-    margin-bottom: 28px;
-    text-align: center;
-  }
-  .scan-hero h1 {
-    font-size: 26px;
-    margin-bottom: 10px;
-  }
-  .scan-hero p {
-    font-size: 14px;
-    max-width: 100%;
-    margin: 0 auto 20px;
-  }
-  .scan-cta {
-    justify-content: center;
-    width: 100%;
-  }
-  .scan-cta .btn {
-    flex: 1 1 140px;
-    justify-content: center;
-  }
-
-  /* Page Hero on Subpages */
-  .page-hero {
-    padding: 26px 18px;
+    gap: 22px;
+    padding: 26px 16px;
     border-radius: 16px;
     margin-bottom: 24px;
     text-align: center;
   }
-  .page-hero h1 {
+  .scan-hero h1 {
+    font-size: 24px;
+    line-height: 1.25;
+    margin-bottom: 10px;
+  }
+  .scan-hero p {
+    font-size: 13.5px;
+    max-width: 100%;
+    margin: 0 auto 18px;
+    line-height: 1.5;
+  }
+  .scan-cta {
+    justify-content: center;
+    width: 100%;
+    gap: 8px;
+  }
+  .scan-cta .btn {
+    flex: 1 1 130px;
+    justify-content: center;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  /* Camera Viewport & Code Input */
+  .scan-card {
+    border-radius: 14px;
+    padding: 14px;
+  }
+  #viewport {
+    width: 100% !important;
+    max-height: 260px;
+    border-radius: 10px;
+  }
+  .code-input-row {
+    flex-direction: row;
+    gap: 8px;
+  }
+  .code-input-row input {
+    flex: 1;
+    font-size: 16px; /* Prevents auto-zoom on iOS */
+  }
+
+  /* Page Hero on Subpages */
+  .page-hero,
+  .exhibits-hero {
+    padding: 24px 16px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    text-align: center;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .page-hero h1,
+  .exhibits-hero h1 {
     font-size: 24px;
   }
-  .page-hero p {
+  .page-hero p,
+  .exhibits-hero p {
     font-size: 13.5px;
+  }
+  .exhibits-hero-icon {
+    font-size: 36px;
+    margin-top: 4px;
   }
 
   /* Grids: Exhibits, Programs, Events, Gallery */
@@ -2587,15 +2699,16 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
   }
   .stats-grid {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px !important;
+    gap: 10px !important;
   }
 
   /* Cards */
   .card, .exhibit-card, .program-card, .event-card, .gallery-card {
     border-radius: 14px;
+    overflow: hidden;
   }
   .card-media {
-    height: 180px;
+    height: 190px;
   }
 
   /* Exhibit / Plaque Detail Page */
@@ -2604,7 +2717,7 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
     overflow: hidden;
   }
   .plaque-body {
-    padding: 20px 16px;
+    padding: 18px 14px;
   }
   .plaque-body h1 {
     font-size: 22px;
@@ -2614,12 +2727,14 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
     grid-template-columns: 1fr 1fr;
     gap: 10px;
     padding: 12px;
+    border-radius: 12px;
   }
   .plaque-qr-section {
     flex-direction: column;
     text-align: center;
     gap: 14px;
     padding: 18px 14px;
+    border-radius: 14px;
   }
   .plaque-qr-dl {
     width: 100%;
@@ -2627,55 +2742,21 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
   }
   .tts-controls {
     flex-wrap: wrap;
+    gap: 8px;
   }
   .tts-controls .btn {
-    flex: 1 1 120px;
+    flex: 1 1 110px;
     justify-content: center;
   }
 
-  /* User Sidebar & Browse Layout */
-  .browse-layout,
-  .user-layout {
-    flex-direction: column;
-  }
-  .browse-sidebar,
-  .user-sidebar {
-    width: 100% !important;
-    position: static !important;
-    height: auto !important;
-    max-height: none !important;
-    border-radius: 12px !important;
-    margin: 0 0 16px 0 !important;
-    padding: 8px !important;
-  }
-  .browse-sidebar-title,
-  .user-sidebar-section-title {
-    display: none !important;
-  }
-  .user-sidebar-nav {
-    flex-direction: row !important;
-    overflow-x: auto !important;
-    flex-wrap: nowrap !important;
-    -webkit-overflow-scrolling: touch;
-    gap: 6px !important;
-    padding: 4px !important;
-  }
-  .user-sidebar-btn,
-  .cat-sidebar-btn {
-    width: auto !important;
-    padding: 7px 12px !important;
-    font-size: 12px !important;
-    white-space: nowrap !important;
-    flex-shrink: 0;
-  }
-
-  /* AI Chatbot Widget on Mobile (Bottom-Sheet Experience) */
+  /* AI Chatbot Widget on Mobile (Native Bottom-Sheet) */
   .chat-toggle {
-    bottom: 18px;
-    right: 18px;
-    width: 50px;
-    height: 50px;
+    bottom: 16px;
+    right: 16px;
+    width: 48px;
+    height: 48px;
     font-size: 22px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
   }
   .chat-panel {
     position: fixed;
@@ -2686,8 +2767,8 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
     max-width: 100% !important;
     height: 82vh !important;
     max-height: 82vh !important;
-    border-radius: 20px 20px 0 0 !important;
-    box-shadow: 0 -8px 32px rgba(0,0,0,0.25) !important;
+    border-radius: 22px 22px 0 0 !important;
+    box-shadow: 0 -8px 36px rgba(0,0,0,0.3) !important;
     transform: translateY(100%);
     transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
     z-index: 1000 !important;
@@ -2706,7 +2787,7 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
     padding: 10px 12px;
   }
   .chat-input-row input {
-    font-size: 16px; /* Prevents auto-zoom on iOS */
+    font-size: 16px; /* Prevents auto-zoom on iOS Safari */
   }
 
   /* Tables & Admin Layout */
@@ -2719,7 +2800,7 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
     border: 1px solid var(--grey-100);
   }
   .admin-table {
-    min-width: 580px;
+    min-width: 560px;
   }
   .admin-actions {
     flex-wrap: wrap;
@@ -2733,6 +2814,7 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
     max-height: 88vh !important;
     padding: 20px 16px !important;
     margin: 10px auto !important;
+    border-radius: 16px !important;
   }
 
   /* Check-in & Survey Forms */
@@ -2755,6 +2837,7 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
   textarea {
     font-size: 16px !important; /* Prevents iOS auto-zoom */
     padding: 10px 12px !important;
+    border-radius: 9px !important;
   }
 
   /* Video Players */
@@ -2775,8 +2858,8 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
     padding: 6px 10px;
   }
   .brand-mark {
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
     font-size: 12px;
   }
   .brand-text .name {
@@ -2791,7 +2874,7 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
   .btn {
     width: 100%;
     justify-content: center;
-    padding: 10px 16px;
+    padding: 10px 14px;
   }
   .scan-cta {
     flex-direction: column;
@@ -2803,11 +2886,12 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
     padding: 16px 12px;
   }
   .scan-hero {
-    padding: 22px 14px;
+    padding: 20px 12px;
   }
   .scan-hero h1 {
-    font-size: 22px;
+    font-size: 21px;
   }
 }
+
 
 
