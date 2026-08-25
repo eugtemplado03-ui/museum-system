@@ -103,6 +103,7 @@ const Api = (() => {
     login: (username, password) => request('/api/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
     me: () => request('/api/auth/me'),
     listExhibits: () => request('/api/exhibits'),
+    listRecommendedExhibits: (limit = 6) => request('/api/exhibits/recommended?limit=' + limit),
     getExhibit: (code) => request('/api/exhibits/' + encodeURIComponent(code)),
     createExhibit: (payload) => request('/api/exhibits', { method: 'POST', body: JSON.stringify(payload) }),
     updateExhibit: (id, payload) => request('/api/exhibits/' + id, { method: 'PUT', body: JSON.stringify(payload) }),
@@ -123,8 +124,8 @@ const Api = (() => {
     trackView: (code, source) => request(`/api/exhibits/${encodeURIComponent(code)}/track`, { method: 'POST', body: JSON.stringify({ source }) }).catch(()=>{}),
 
     getRatings: (code) => request(`/api/exhibits/${encodeURIComponent(code)}/ratings`),
-    submitRating: (code, rating, comment) => request(`/api/exhibits/${encodeURIComponent(code)}/ratings`, {
-      method: 'POST', body: JSON.stringify({ visitorId: getVisitorId(), rating, comment })
+    submitRating: (code, rating, comment, visitorName) => request(`/api/exhibits/${encodeURIComponent(code)}/ratings`, {
+      method: 'POST', body: JSON.stringify({ visitorId: getVisitorId(), rating, comment, visitorName })
     }),
 
     listFavorites: () => request('/api/favorites/' + encodeURIComponent(getVisitorId())),

@@ -160,17 +160,59 @@
                 <div style="margin-top:6px; font-size:11.5px; color:var(--ink-soft); text-align:center;">Tap image to view full screen</div>
               </div>` : ''}
 
-              <div id="ratingSummary" class="rating-summary"></div>
-              <div class="rating-form">
-                <div style="font-size:13px; font-weight:600; color:var(--ink);">Rate this exhibit</div>
-                <div class="stars-input" id="starsInput">
-                  ${[1,2,3,4,5].map(n=>`<span class="star" data-star="${n}">★</span>`).join('')}
+              <!-- ── Ratings & Visitor Reviews Section ── -->
+              <section class="exhibit-reviews-section" style="margin-top:28px; padding-top:22px; border-top:1.5px solid rgba(255,255,255,0.12);">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+                  <div>
+                    <h3 style="font-family:'Nunito',sans-serif; font-weight:800; font-size:19px; color:#ffffff; margin:0 0 4px; display:flex; align-items:center; gap:8px;">
+                      <span>⭐</span> Visitor Ratings &amp; Comments
+                    </h3>
+                    <p style="margin:0; font-size:13px; color:rgba(255,255,255,0.7);">Hear what other guests loved, or leave your own rating and review</p>
+                  </div>
+                  <div id="ratingSummary" class="rating-summary-badge"></div>
                 </div>
-                <textarea id="ratingComment" placeholder="Optional: tell us what you thought — other visitors will see this"></textarea>
-                <button class="btn btn-primary btn-small" id="submitRatingBtn" style="margin-top:10px;">Submit rating</button>
-                <div id="ratingMsg" style="font-size:12px; color:var(--ink-soft); margin-top:6px;"></div>
-              </div>
-              <div class="rating-list" id="ratingList"></div>
+
+                <!-- Rating & Review Form -->
+                <div class="rating-form-card">
+                  <div class="rating-form-title">
+                    <span>✍️</span> Rate this Exhibit &amp; Share Feedback
+                  </div>
+                  
+                  <div class="rating-form-fields">
+                    <div style="display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+                      <label class="rating-field-label" style="margin-bottom:0;">Your Rating <span class="required" style="color:var(--orange);">*</span>:</label>
+                      <div class="stars-input" id="starsInput">
+                        ${[1,2,3,4,5].map(n=>`<button type="button" class="star-btn" data-star="${n}" title="${n} Stars">★</button>`).join('')}
+                      </div>
+                      <span id="starRatingLabel" style="font-size:12.5px; font-weight:700; color:#fbbf24; margin-left:6px;">Tap a star</span>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr; gap:10px;">
+                      <div>
+                        <label class="rating-field-label">Your Name / Nickname (optional)</label>
+                        <input type="text" id="ratingVisitorName" placeholder="e.g. Maria S., Teacher Mark, or leave blank for Visitor" maxlength="50" class="rating-input">
+                      </div>
+                      <div>
+                        <label class="rating-field-label">Your Comment or Experience</label>
+                        <textarea id="ratingComment" placeholder="Tell other visitors what you enjoyed, learned, or found fascinating about this exhibit..." maxlength="500" class="rating-textarea"></textarea>
+                      </div>
+                    </div>
+
+                    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-top:14px;">
+                      <button class="btn btn-primary btn-small" id="submitRatingBtn" style="padding:10px 20px; font-weight:700;">Submit Rating &amp; Review</button>
+                      <div id="ratingMsg" style="font-size:12.5px; font-weight:600; color:#5eead4;"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Visitor Reviews Feed -->
+                <div style="margin-top:24px;">
+                  <h4 style="font-family:'Nunito',sans-serif; font-size:15px; font-weight:700; color:#ffffff; margin:0 0 12px; display:flex; align-items:center; gap:6px;">
+                    <span>💬</span> Visitor Reviews (<span id="reviewsCountSpan">0</span>)
+                  </h4>
+                  <div class="rating-list" id="ratingList"></div>
+                </div>
+              </section>
             </div>
           </div>`;
 
@@ -359,44 +401,93 @@
       return '★'.repeat(rounded) + '☆'.repeat(5 - rounded);
     }
 
+    const STAR_LABELS = { 1: '1 Star — Poor', 2: '2 Stars — Fair', 3: '3 Stars — Good', 4: '4 Stars — Very Good', 5: '5 Stars — Excellent!' };
+
     function renderRatingSummary(summary){
       const el = document.getElementById('ratingSummary');
-      if(!summary.count){
-        el.innerHTML = `<span style="font-size:13px; color:var(--ink-soft);">No ratings yet — be the first!</span>`;
+      if(!el) return;
+      if(!summary || !summary.count){
+        el.innerHTML = `<span style="font-size:12.5px; color:rgba(255,255,255,0.7); font-weight:600;">No ratings yet — be the first!</span>`;
         return;
       }
       el.innerHTML = `
-        <span class="avg">${summary.average}</span>
+        <span class="avg">${summary.average.toFixed(1)}</span>
         <span class="stars">${starString(summary.average)}</span>
-        <span class="count">${summary.count} rating${summary.count===1?'':'s'}</span>`;
+        <span class="count">(${summary.count} review${summary.count===1?'':'s'})</span>`;
     }
 
     function renderRatingList(ratings){
       const el = document.getElementById('ratingList');
-      const withComments = ratings.filter(r => r.comment);
-      if(withComments.length === 0){ el.innerHTML = ''; return; }
-      el.innerHTML = withComments.slice(0, 10).map(r => `
-        <div class="rating-item">
-          <span class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
-          <div class="comment">${escapeHtml(r.comment)}</div>
-          <div class="when">${new Date(r.createdAt).toLocaleDateString()}</div>
-        </div>
-      `).join('');
+      const countEl = document.getElementById('reviewsCountSpan');
+      if(!el) return;
+      
+      const list = Array.isArray(ratings) ? ratings : [];
+      if(countEl) countEl.textContent = list.length;
+
+      if(list.length === 0){
+        el.innerHTML = `
+          <div style="background:rgba(6,28,38,0.6); border:1px dashed rgba(255,255,255,0.18); border-radius:12px; padding:20px; text-align:center; color:rgba(255,255,255,0.7); font-size:13.5px;">
+            No visitor reviews yet for this exhibit. Be the first to share your thoughts above!
+          </div>`;
+        return;
+      }
+
+      el.innerHTML = list.map(r => {
+        const name = escapeHtml(r.visitorName || 'Visitor');
+        const initial = (name.charAt(0) || 'V').toUpperCase();
+        const stars = '★'.repeat(r.rating || 5) + '☆'.repeat(5 - (r.rating || 5));
+        const dateStr = r.createdAt ? new Date(r.createdAt).toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' }) : 'Recently';
+        const comment = r.comment ? escapeHtml(r.comment) : '<em style="color:#94a3b8; font-size:12.5px;">Rated without written comment</em>';
+
+        return `
+          <div class="rating-item">
+            <div class="rating-item-header">
+              <div class="reviewer-info">
+                <div class="reviewer-avatar">${initial}</div>
+                <div>
+                  <div class="reviewer-name">${name}</div>
+                  <div class="reviewer-date">${dateStr}</div>
+                </div>
+              </div>
+              <div class="stars" title="${r.rating || 5} Stars">${stars}</div>
+            </div>
+            <div class="comment">${comment}</div>
+          </div>
+        `;
+      }).join('');
     }
 
     async function wireRatings(exhibit, code){
       let selected = 0;
       const starsInput = document.getElementById('starsInput');
+      const starLabel = document.getElementById('starRatingLabel');
       const msg = document.getElementById('ratingMsg');
+      const nameInput = document.getElementById('ratingVisitorName');
+      const commentInput = document.getElementById('ratingComment');
+      const submitBtn = document.getElementById('submitRatingBtn');
 
-      function paintStars(){
-        starsInput.querySelectorAll('.star').forEach(s=>{
-          s.classList.toggle('filled', Number(s.dataset.star) <= selected);
+      function paintStars(tempVal){
+        const val = tempVal !== undefined ? tempVal : selected;
+        starsInput.querySelectorAll('.star-btn').forEach(btn => {
+          const starNum = Number(btn.dataset.star);
+          btn.classList.toggle('filled', starNum <= val);
+        });
+        if(starLabel){
+          starLabel.textContent = STAR_LABELS[val] || (selected ? STAR_LABELS[selected] : 'Tap a star');
+        }
+      }
+
+      if(starsInput){
+        starsInput.querySelectorAll('.star-btn').forEach(btn => {
+          btn.addEventListener('mouseenter', () => paintStars(Number(btn.dataset.star)));
+          btn.addEventListener('mouseleave', () => paintStars());
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            selected = Number(btn.dataset.star);
+            paintStars();
+          });
         });
       }
-      starsInput.querySelectorAll('.star').forEach(s=>{
-        s.addEventListener('click', ()=>{ selected = Number(s.dataset.star); paintStars(); });
-      });
 
       try{
         const { summary, ratings } = await Api.getRatings(code);
@@ -404,21 +495,37 @@
         renderRatingList(ratings);
       }catch(e){ /* ignore */ }
 
-      document.getElementById('submitRatingBtn').addEventListener('click', async ()=>{
-        if(!selected){ msg.textContent = 'Tap a star to choose a rating first.'; return; }
-        const comment = document.getElementById('ratingComment').value.trim();
-        msg.textContent = 'Submitting…';
-        try{
-          const { summary } = await Api.submitRating(code, selected, comment);
-          renderRatingSummary(summary);
-          const { ratings } = await Api.getRatings(code);
-          renderRatingList(ratings);
-          msg.textContent = 'Thanks for your feedback!';
-          document.getElementById('ratingComment').value = '';
-        }catch(e){
-          msg.textContent = e.message;
-        }
-      });
+      if(submitBtn){
+        submitBtn.addEventListener('click', async (e)=>{
+          e.preventDefault();
+          if(!selected){
+            msg.textContent = '⚠️ Please tap a star rating (1–5) first.';
+            msg.style.color = 'var(--orange)';
+            return;
+          }
+          const comment = (commentInput ? commentInput.value : '').trim();
+          const visitorName = (nameInput ? nameInput.value : '').trim();
+
+          msg.textContent = '⏳ Submitting review…';
+          msg.style.color = '#5eead4';
+          submitBtn.disabled = true;
+
+          try{
+            const { summary } = await Api.submitRating(code, selected, comment, visitorName);
+            renderRatingSummary(summary);
+            const { ratings } = await Api.getRatings(code);
+            renderRatingList(ratings);
+            msg.textContent = '✅ Thank you! Your review has been posted.';
+            msg.style.color = '#4ade80';
+            if(commentInput) commentInput.value = '';
+          }catch(err){
+            msg.textContent = '❌ ' + (err.message || 'Failed to submit rating.');
+            msg.style.color = 'var(--danger)';
+          }finally{
+            submitBtn.disabled = false;
+          }
+        });
+      }
     }
 
     load();

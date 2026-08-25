@@ -41,6 +41,11 @@ router.get('/', (req, res) => {
   res.json({ exhibits: exhibits.all().map(enrich) });
 });
 
+router.get('/recommended', (req, res) => {
+  const limit = parseInt(req.query.limit, 10) || 6;
+  res.json({ exhibits: ratings.topRatedExhibits(limit) });
+});
+
 router.get('/categories', (req, res) => {
   res.json({ categories: exhibits.categories() });
 });
@@ -54,7 +59,7 @@ router.get('/:code/ratings', (req, res) => {
 router.post('/:code/ratings', (req, res) => {
   const ex = exhibits.findByCode(req.params.code);
   if (!ex) return res.status(404).json({ error: 'Exhibit not found.' });
-  const { visitorId, rating, comment } = req.body || {};
+  const { visitorId, rating, comment, visitorName } = req.body || {};
   if (!visitorId || typeof visitorId !== 'string') {
     return res.status(400).json({ error: 'A visitorId is required.' });
   }
@@ -63,7 +68,8 @@ router.post('/:code/ratings', (req, res) => {
     return res.status(400).json({ error: 'Rating must be a whole number from 1 to 5.' });
   }
   const safeComment = typeof comment === 'string' ? comment.trim().slice(0, 500) : '';
-  const record = ratings.submit(visitorId, ex.id, numRating, safeComment);
+  const safeName = typeof visitorName === 'string' ? visitorName.trim().slice(0, 50) : 'Visitor';
+  const record = ratings.submit(visitorId, ex.id, numRating, safeComment, safeName);
   res.status(201).json({ rating: record, summary: ratings.summaryForExhibit(ex.id) });
 });
 

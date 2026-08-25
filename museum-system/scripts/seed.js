@@ -201,8 +201,39 @@ function seedGallery() {
   console.log(`Seeded ${items.length} gallery photos based on museosangbata.org.`);
 }
 
+function seedRatings() {
+  const ratings = require('../db/ratings');
+  const exhibits = require('../db/exhibits');
+  const existing = ratings.allForAdmin();
+  if (existing.length > 0) {
+    console.log('Ratings already exist — skipping sample ratings.');
+    return;
+  }
+  const allEx = exhibits.all();
+  if (allEx.length === 0) return;
+
+  const sampleReviews = [
+    { code: 'EX-001', visitorName: 'Maria Santos', rating: 5, comment: 'The marine life and touch pool are amazing! The kids loved seeing how coral reefs grow.' },
+    { code: 'EX-001', visitorName: 'Teacher Ryan', rating: 5, comment: 'Very educational exhibit for our elementary field trip. The mangrove ecosystem is explained so clearly.' },
+    { code: 'EX-002', visitorName: 'Jobert M.', rating: 5, comment: 'Great visualization of the freshwater journey down to the Negros coastline.' },
+    { code: 'EX-003', visitorName: 'Elena Cruz', rating: 5, comment: 'The touch pool was the highlight of our visit! The children gently touched starfish and sea cucumbers.' },
+    { code: 'EX-008', visitorName: 'Green Negros Advocate', rating: 5, comment: 'Powerful message on marine plastic pollution. The Floating Witches net art installation is breathtaking.' },
+    { code: 'EX-006', visitorName: 'Grandma Teresa', rating: 5, comment: 'Wonderful folk toy collection! Brought back so many childhood memories.' }
+  ];
+
+  sampleReviews.forEach((rev, idx) => {
+    const ex = allEx.find(e => e.code === rev.code);
+    if (ex) {
+      ratings.submit(`seed-v-${idx + 1}`, ex.id, rev.rating, rev.comment, rev.visitorName);
+    }
+  });
+  console.log(`Seeded ${sampleReviews.length} sample visitor ratings and reviews.`);
+}
+
 seedAdmin();
 seedExhibits();
 seedPrograms();
 seedEvents();
 seedGallery();
+seedRatings();
+

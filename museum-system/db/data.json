@@ -213,6 +213,16 @@
       "comment": "nice",
       "createdAt": "2026-07-29T05:45:03.751Z",
       "updatedAt": "2026-07-29T05:45:03.751Z"
+    },
+    {
+      "id": "mavl1bBdze",
+      "visitorId": "test-v-101",
+      "visitorName": "Hannah L.",
+      "exhibitId": "8J8l15t-1H",
+      "rating": 5,
+      "comment": "Loved the sea creatures and interactive sand exhibit!",
+      "createdAt": "2026-08-25T14:44:59.681Z",
+      "updatedAt": "2026-08-25T14:44:59.681Z"
     }
   ],
   "scanEvents": [

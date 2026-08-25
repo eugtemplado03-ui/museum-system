@@ -360,6 +360,26 @@
 
           <!-- ── Minimal Previews: Exhibits, Programs, Events & Gallery ──── -->
           <div class="home-previews-container">
+            <!-- ⭐ Recommended & Top-Rated Exhibits Preview -->
+            <section class="home-preview-block" id="homeRecommendedBlock" style="border: 1.5px solid rgba(245, 158, 11, 0.40); background: linear-gradient(145deg, rgba(6, 28, 38, 0.90) 0%, rgba(20, 48, 62, 0.88) 100%);">
+              <div class="home-preview-head">
+                <div class="home-preview-title-group">
+                  <div class="home-preview-icon" style="background: rgba(245, 158, 11, 0.22); border: 1px solid rgba(245, 158, 11, 0.45); color:#f59e0b;">⭐</div>
+                  <div>
+                    <h3 class="home-preview-title" style="color: #ffffff; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                      Top-Rated &amp; Recommended Exhibits
+                      <span style="font-size: 10.5px; font-weight: 800; background: linear-gradient(135deg, #f59e0b, #d97706); color: #ffffff; padding: 2px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.08em; box-shadow:0 2px 6px rgba(245,158,11,0.4);">Visitor Choice</span>
+                    </h3>
+                    <p class="home-preview-sub" style="color: rgba(255, 255, 255, 0.78);">Highest rated hands-on experiences based on real visitor feedback</p>
+                  </div>
+                </div>
+                <a href="/exhibits.html" class="home-preview-viewall" style="color: #fbbf24; font-weight:700;">Browse all exhibits &rarr;</a>
+              </div>
+              <div class="home-minimal-grid" id="homeRecommendedGrid">
+                <div style="color:rgba(255,255,255,0.7); font-size:13px; grid-column:1/-1;">Loading recommendations&hellip;</div>
+              </div>
+            </section>
+
             <!-- Minimal Exhibits Preview -->
             <section class="home-preview-block" id="homeExhibitsBlock">
               <div class="home-preview-head">
@@ -460,17 +480,71 @@
     // ── Minimal Previews Loader (Exhibits, Programs, Events, Gallery) ────
     async function loadHomePreviews(){
       try {
-        const [exhibitRes, progRes, eventRes, galleryRes] = await Promise.all([
+        const [recRes, exhibitRes, progRes, eventRes, galleryRes] = await Promise.all([
+          Api.listRecommendedExhibits(3).catch(()=>({ exhibits: [] })),
           Api.listExhibits().catch(()=>({ exhibits: [] })),
           Api.listPrograms().catch(()=>({ programs: [] })),
           Api.listEvents().catch(()=>({ events: [] })),
           Api.listGallery().catch(()=>({ gallery: [] }))
         ]);
 
-        // 0. Exhibits (curated subset preview, exactly 3 — not all exhibits)
+        const ICONS = {'Marine & Nature':'🐟','Touch & Play':'✋','Toys & Collections':'🧸','Character & Heritage':'🏆','Environmental':'♻️','Reading & Learning':'📖','Other':'🏛️'};
+
+        // 0. ⭐ Recommended & Top-Rated Exhibits (based on visitor ratings)
+        const recExhibits = (recRes && Array.isArray(recRes.exhibits)) ? recRes.exhibits : [];
+        const recGrid = document.getElementById('homeRecommendedGrid');
+        if(recGrid){
+          if(recExhibits.length === 0){
+            recGrid.innerHTML = `<div style="color:rgba(255,255,255,0.7); font-size:13px; grid-column:1/-1;">No ratings recorded yet. Visit exhibits and leave the first review!</div>`;
+          } else {
+            recGrid.innerHTML = recExhibits.map(ex => {
+              const imgs = Array.isArray(ex.optimizedImagePaths) && ex.optimizedImagePaths.length ? ex.optimizedImagePaths
+                         : Array.isArray(ex.imagePaths) && ex.imagePaths.length ? ex.imagePaths
+                         : ex.imagePath ? [ex.imagePath] : [];
+              const img = imgs[0] || '';
+              const icon = ICONS[ex.category] || '🏛️';
+              const hasRating = ex.ratingAverage != null;
+              const starStr = hasRating ? '★'.repeat(Math.round(ex.ratingAverage)) + '☆'.repeat(5 - Math.round(ex.ratingAverage)) : '★★★★★';
+              const reviewCount = ex.ratingCount || 0;
+              const topReview = ex.featuredReview;
+
+              return `
+                <a href="/exhibit.html?code=${encodeURIComponent(ex.code)}" class="home-mini-card home-exhibit-card recommended-card">
+                  <div class="home-mini-card-top">
+                    ${img
+                      ? `<div class="home-exhibit-media"><img src="${escapeHtml(img)}" alt="${escapeHtml(ex.title)}" loading="lazy"></div>`
+                      : `<div class="home-exhibit-media placeholder">${icon}</div>`
+                    }
+                    <div class="home-mini-badges">
+                      ${hasRating
+                        ? `<span class="rating-badge-pill"><span class="stars-gold">${starStr}</span> <strong>${ex.ratingAverage.toFixed(1)}</strong> <span class="rev-count">(${reviewCount})</span></span>`
+                        : `<span class="rating-badge-pill fresh">✨ Recommended</span>`
+                      }
+                      ${ex.category ? `<span class="home-mini-badge">${escapeHtml(ex.category)}</span>` : ''}
+                    </div>
+                    <h4 class="home-mini-title">${escapeHtml(ex.title)}</h4>
+                    <div class="home-mini-snippet">${escapeHtml(ex.summary || ex.description || 'Interactive museum exhibit at Museo Sang Bata sa Negros.')}</div>
+
+                    ${topReview && topReview.comment ? `
+                      <div class="card-review-snippet">
+                        <span class="quote-mark">“</span>
+                        <span class="snippet-text">${escapeHtml(topReview.comment)}</span>
+                        <span class="snippet-author">— ${escapeHtml(topReview.visitorName || 'Visitor')}</span>
+                      </div>
+                    ` : ''}
+                  </div>
+                  <div class="home-mini-foot">
+                    <span>${escapeHtml(ex.room || ex.location || 'Museum floor')}</span>
+                    <span class="home-mini-link">Explore &amp; Rate &rarr;</span>
+                  </div>
+                </a>`;
+            }).join('');
+          }
+        }
+
+        // 1. Exhibits (curated subset preview, exactly 3 — not all exhibits)
         const exhibits = (exhibitRes && Array.isArray(exhibitRes.exhibits)) ? exhibitRes.exhibits : [];
         const exGrid = document.getElementById('homeExhibitsGrid');
-        const ICONS = {'Marine & Nature':'🐟','Touch & Play':'✋','Toys & Collections':'🧸','Character & Heritage':'🏆','Environmental':'♻️','Reading & Learning':'📖','Other':'🏛️'};
 
         if(exGrid){
           if(exhibits.length === 0){
@@ -483,6 +557,9 @@
                          : ex.imagePath ? [ex.imagePath] : [];
               const img = imgs[0] || '';
               const icon = ICONS[ex.category] || '🏛️';
+              const hasRating = ex.ratingAverage != null;
+              const starStr = hasRating ? '★'.repeat(Math.round(ex.ratingAverage)) + '☆'.repeat(5 - Math.round(ex.ratingAverage)) : '';
+
               return `
                 <a href="/exhibit.html?code=${encodeURIComponent(ex.code)}" class="home-mini-card home-exhibit-card">
                   <div class="home-mini-card-top">
@@ -491,6 +568,7 @@
                       : `<div class="home-exhibit-media placeholder">${icon}</div>`
                     }
                     <div class="home-mini-badges">
+                      ${hasRating ? `<span class="rating-badge-pill"><span class="stars-gold">${starStr}</span> <strong>${ex.ratingAverage.toFixed(1)}</strong></span>` : ''}
                       ${ex.category ? `<span class="home-mini-badge">${escapeHtml(ex.category)}</span>` : ''}
                       ${ex.code ? `<span class="home-mini-badge" style="font-family:'IBM Plex Mono',monospace; background:rgba(0,0,0,0.07); color:var(--ink);">${escapeHtml(ex.code)}</span>` : ''}
                     </div>
