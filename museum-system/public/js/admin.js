@@ -1494,21 +1494,21 @@ async function renderVisitorsTab(contentEl){
             <option value="Researcher / Scholar" ${adminVisitorsGroupFilter==='Researcher / Scholar'?'selected':''}>Researcher / Scholar</option>
             <option value="Other" ${adminVisitorsGroupFilter==='Other'?'selected':''}>Other</option>
           </select>
-          <select id="adminVisitorsStatusSelect" class="filter-select" style="padding:6px 12px; font-size:12.5px; border-radius:8px; border:1px solid var(--grey-200);">
+          <select id="adminVisitorsStatusSelect" class="filter-select" style="padding:6px 12px; font-size:12.5px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,42,54,0.85); color:#ffffff;">
             <option value="All" ${adminVisitorsStatusFilter==='All'?'selected':''}>All Statuses</option>
             <option value="Checked-in" ${adminVisitorsStatusFilter==='Checked-in'?'selected':''}>Checked-in</option>
             <option value="Completed" ${adminVisitorsStatusFilter==='Completed'?'selected':''}>Completed</option>
             <option value="Scheduled" ${adminVisitorsStatusFilter==='Scheduled'?'selected':''}>Scheduled</option>
             <option value="Cancelled" ${adminVisitorsStatusFilter==='Cancelled'?'selected':''}>Cancelled</option>
           </select>
-          <input type="date" id="adminVisitorsDateInput" value="${escapeHtml(adminVisitorsDateFilter)}" title="Filter by visit date" style="padding:5px 10px; font-size:12.5px; border-radius:8px; border:1px solid var(--grey-200);">
-          ${(adminVisitorsSearch || adminVisitorsGroupFilter !== 'All' || adminVisitorsStatusFilter !== 'All' || adminVisitorsDateFilter) ? '<button type="button" class="btn btn-ghost dark btn-small" id="clearVisitorsFilters" style="padding:4px 8px; font-size:11.5px;">Reset filters</button>' : ''}
+          <input type="date" id="adminVisitorsDateInput" value="${escapeHtml(adminVisitorsDateFilter)}" title="Filter by visit date" style="padding:5px 10px; font-size:12.5px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,42,54,0.85); color:#ffffff;">
+          ${(adminVisitorsSearch || adminVisitorsGroupFilter !== 'All' || adminVisitorsStatusFilter !== 'All' || adminVisitorsDateFilter) ? '<button type="button" class="btn btn-ghost dark btn-small" id="clearVisitorsFilters" style="padding:4px 8px; font-size:11.5px; color:#5eead4; border-color:rgba(0,174,189,0.4);">Reset filters</button>' : ''}
         </div>
-        <span style="font-size:13px; color:var(--ink-soft);">${filtered.length} of ${visitorsCache.length} records</span>
+        <span style="font-size:13px; color:#cbd5e1; font-weight:600;">${filtered.length} of ${visitorsCache.length} records</span>
       </div>
     </div>
 
-<div class="admin-table-wrap" style="margin-top:12px;">
+    <div class="admin-table-wrap" style="margin-top:12px;">
       <table class="ledger">
         <thead>
           <tr>
@@ -1528,7 +1528,7 @@ async function renderVisitorsTab(contentEl){
         <tbody id="visitorsTableBody"></tbody>
       </table>
     </div>
-    ${filtered.length === 0 ? `<div class="empty-state"><h2>No visitor records found</h2><p>No visitor logs match your search and filter criteria.</p></div>` : ''}
+    ${filtered.length === 0 ? `<div class="empty-state"><h2 style="color:#ffffff;">No visitor records found</h2><p style="color:#cbd5e1;">No visitor logs match your search and filter criteria.</p></div>` : ''}
   `;
 
   // Bind Events
@@ -1561,7 +1561,7 @@ async function renderVisitorsTab(contentEl){
     adminVisitorsDateFilter = '';
     renderVisitorsTab(contentEl);
   });
-document.getElementById('exportVisitorsBtn')?.addEventListener('click', ()=>exportVisitorsCSV(filtered));
+  document.getElementById('exportVisitorsBtn')?.addEventListener('click', ()=>exportVisitorsCSV(filtered));
   document.getElementById('addVisitorBtn')?.addEventListener('click', ()=>openVisitorModal(null));
   document.getElementById('visitorCheckinQrBtn')?.addEventListener('click', ()=>openVisitorCheckinQrModal());
 
@@ -1573,33 +1573,33 @@ document.getElementById('exportVisitorsBtn')?.addEventListener('click', ()=>expo
       return `
         <tr>
           <td data-label="Date & Time" style="white-space:nowrap;">
-            <div style="font-weight:700; color:var(--ink);">${escapeHtml(v.visitDate || '—')}</div>
-            <div style="font-size:11.5px; color:var(--grey-400);">${escapeHtml(v.visitTime || '')}</div>
+            <div style="font-weight:800; color:#ffffff; font-size:13.5px; text-shadow:0 1px 2px rgba(0,0,0,0.5);">${escapeHtml(v.visitDate || '—')}</div>
+            <div style="font-size:11.5px; color:#cbd5e1; font-weight:600;">${escapeHtml(v.visitTime || '')}</div>
           </td>
           <td data-label="Visitor / Contact">
-            <div style="font-weight:700; color:var(--ink);">${escapeHtml(v.visitorName)}</div>
-            ${contactInfo ? `<div style="font-size:11.5px; color:var(--grey-400);">${escapeHtml(contactInfo)}</div>` : ''}
+            <div style="font-weight:800; color:#ffffff; font-size:14.5px; text-shadow:0 1px 2px rgba(0,0,0,0.5);">${escapeHtml(v.visitorName)}</div>
+            ${contactInfo ? `<div style="font-size:11.5px; color:#cbd5e1; margin-top:2px;">${escapeHtml(contactInfo)}</div>` : ''}
           </td>
           <td data-label="Group / Organization">
-            ${v.groupName ? `<div style="font-weight:600; color:var(--ink);">${escapeHtml(v.groupName)}</div>` : ''}
-            <span class="cat-pill" style="font-size:10px;">${escapeHtml(v.groupType || 'Individual')}</span>
+            ${v.groupName ? `<div style="font-weight:700; color:#ffffff; font-size:14px; text-shadow:0 1px 2px rgba(0,0,0,0.5); margin-bottom:4px;">${escapeHtml(v.groupName)}</div>` : ''}
+            <span class="cat-pill" style="font-size:10px; font-weight:700; background:rgba(0,174,189,0.20); color:#5eead4; border:1px solid rgba(0,174,189,0.35);">${escapeHtml(v.groupType || 'Individual')}</span>
           </td>
           <td data-label="Pax" style="text-align:center;">
-            <span style="font-weight:800; font-size:14px; background:var(--teal-light); color:var(--teal-dark); padding:2px 8px; border-radius:6px;">${v.pax || 1}</span>
+            <span style="font-weight:800; font-size:14px; background:rgba(0,174,189,0.25); color:#5eead4; border:1px solid rgba(0,174,189,0.45); padding:3px 9px; border-radius:8px; display:inline-block;">${v.pax || 1}</span>
           </td>
           <td data-label="Purpose">
-            <div style="font-size:13px;">${escapeHtml(v.purpose || 'General Visit')}</div>
-            ${v.notes ? `<div style="font-size:11px; color:var(--grey-400); max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(v.notes)}">📝 ${escapeHtml(v.notes)}</div>` : ''}
+            <div style="font-size:13.5px; font-weight:600; color:#ffffff;">${escapeHtml(v.purpose || 'General Visit')}</div>
+            ${v.notes ? `<div style="font-size:11.5px; color:#cbd5e1; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;" title="${escapeHtml(v.notes)}">📝 ${escapeHtml(v.notes)}</div>` : ''}
           </td>
           <td data-label="Tour Guide">
-            <div style="font-size:13px; color:${v.tourGuide ? 'var(--ink)' : 'var(--grey-400)'};">${escapeHtml(v.tourGuide || 'Unassigned')}</div>
+            <div style="font-size:13px; font-weight:600; color:${v.tourGuide ? '#ffffff' : '#94a3b8'};">${escapeHtml(v.tourGuide || 'Unassigned')}</div>
           </td>
           <td data-label="Status">
             <span class="status-badge ${statusClass}">${escapeHtml(v.status || 'Checked-in')}</span>
           </td>
-          <td data-label="Address" style="font-size:12px; color:var(--ink-soft); max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(v.address || '—')}">${escapeHtml(v.address || '—')}</td>
-          <td data-label="Sex" style="font-size:12px; color:var(--ink-soft);">${escapeHtml(v.sex || '—')}</td>
-          <td data-label="Age" style="font-size:12px; color:var(--ink-soft); text-align:center;">${v.age !== null && v.age !== undefined ? v.age : '—'}</td>
+          <td data-label="Address" style="font-size:12.5px; color:#f1f5f9; max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(v.address || '—')}">${escapeHtml(v.address || '—')}</td>
+          <td data-label="Sex" style="font-size:12.5px; color:#f1f5f9;">${escapeHtml(v.sex || '—')}</td>
+          <td data-label="Age" style="font-size:12.5px; color:#f1f5f9; text-align:center; font-weight:700;">${v.age !== null && v.age !== undefined ? v.age : '—'}</td>
           <td data-label="Actions" style="text-align:right; white-space:nowrap;">
             <button class="btn btn-danger btn-small" data-del-visitor="${v.id}" title="Delete entry">Delete</button>
           </td>
