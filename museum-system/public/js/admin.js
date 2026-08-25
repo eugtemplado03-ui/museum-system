@@ -227,6 +227,7 @@ const mobileSignOut = document.getElementById('signOutBtnMobile');
   else if(activeTab === 'analytics') await renderAnalyticsTab(contentEl);
   else if(activeTab === 'feedback') await renderFeedbackTab(contentEl);
   else if(activeTab === 'museumInfo') await renderMuseumInfoTab(contentEl);
+  window.initMobileSidebar?.();
 };
 
 let adminCatalogCategory = 'All';
