@@ -109,10 +109,11 @@
                   <option value="original">Original (English)</option>
                   <option value="tl">Tagalog (Filipino)</option>
                   <option value="cb">Bisaya (Cebuano)</option>
+                  <option value="hil">Hiligaynon (Ilonggo)</option>
                 </select>
               </div>
 
-              <div class="plaque-desc" id="plaqueDesc">
+              <div class="plaque-desc" id="plaqueDesc" data-desc-original="${escapeHtml(event.description || '')}" data-desc-tl="${escapeHtml(event.description_tl || '')}" data-desc-cb="${escapeHtml(event.description_cb || '')}" data-desc-hil="${escapeHtml(event.description_hil || '')}">
                 ${escapeHtml(event.description || 'No detailed description available for this event.')}
               </div>
 
@@ -139,9 +140,13 @@
       const langSelect = document.getElementById('langSelect');
       if (!playBtn || !stopBtn || !descEl) return;
 
-      const _cache = { original: event.description || '' };
+      const _cache = {
+        original: descEl.dataset.descOriginal || event.description || '',
+        tl: descEl.dataset.descTl || event.description_tl || '',
+        cb: descEl.dataset.descCb || event.description_cb || '',
+        hil: descEl.dataset.descHil || event.description_hil || ''
+      };
       let _currentText = _cache.original;
-      const LANG_CODE = { original: 'en-US', tl: 'fil-PH', cb: 'fil-PH' };
 
       function setStatus(msg, isLoading) {
         statusEl.textContent = msg;
@@ -149,7 +154,7 @@
       }
 
       async function fetchTranslation(targetLang) {
-        if (_cache[targetLang]) return _cache[targetLang];
+        if (_cache[targetLang] && _cache[targetLang].trim()) return _cache[targetLang].trim();
         const originalText = _cache.original || '';
         if (!originalText.trim()) return originalText;
 
@@ -162,9 +167,9 @@
           });
           if (!resp.ok) throw new Error('Translation error');
           const { translatedText } = await resp.json();
-          _cache[targetLang] = translatedText;
+          if (translatedText) _cache[targetLang] = translatedText;
           setStatus('', false);
-          return translatedText;
+          return translatedText || originalText;
         } catch (e) {
           setStatus('Translation unavailable — using original text.', false);
           return originalText;
@@ -195,14 +200,15 @@
 
       playBtn.addEventListener('click', async () => {
         stopAudio();
-        const textToSpeak = _currentText || ev.title || '';
+        const textToSpeak = _currentText || event.title || '';
         if (!textToSpeak.trim()) { setStatus('Nothing to read.', false); return; }
         setStatus('⏳ Generating audio…', true);
         try {
+          const currentLang = (langSelect && langSelect.value !== 'original') ? langSelect.value : 'en';
           const resp = await fetch('/api/tts/speak', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: textToSpeak, lang: langSelect?.value || 'en' }),
+            body: JSON.stringify({ text: textToSpeak, lang: currentLang }),
           });
           if (!resp.ok) throw new Error('TTS error ' + resp.status);
           const blob = await resp.blob();
@@ -217,7 +223,7 @@
           try {
             setStatus('🔊 Playing (browser voice)…', true);
             const utter = new SpeechSynthesisUtterance(textToSpeak);
-            utter.lang = langSelect?.value === 'tl' ? 'fil-PH' : (langSelect?.value === 'cb' ? 'ceb-PH' : 'en-US');
+            utter.lang = (langSelect?.value === 'tl' || langSelect?.value === 'cb' || langSelect?.value === 'hil') ? 'fil-PH' : 'en-US';
             utter.onend = () => setStatus('', false);
             utter.onerror = () => setStatus('Audio unavailable.', false);
             window.speechSynthesis.cancel();
