@@ -119,39 +119,7 @@ function renderLogin(){
   closeModal();
   if (window.MuseoSidebar) window.MuseoSidebar.close();
   document.body.classList.remove('sidebar-open');
-  const toggleBtn = document.getElementById('sidebarToggleBtn');
-  if (toggleBtn) toggleBtn.style.display = 'none';
-
-  app.innerHTML = `
-    <div class="gate">
-      <h2>Staff sign-in</h2>
-      <p>Enter your admin credentials to manage exhibits.</p>
-      <div class="error" id="loginError"></div>
-      <input type="text" id="loginUser" placeholder="Username" autocomplete="username">
-      <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password">
-      <button class="btn btn-primary" style="width:100%; justify-content:center;" id="loginSubmit">Sign in</button>
-      <div class="hint">First time? Run <span class="mono">npm run seed</span> on the server to create the initial admin account.</div>
-    </div>`;
-
-  const submit = async ()=>{
-    const username = document.getElementById('loginUser').value.trim();
-    const password = document.getElementById('loginPass').value;
-    const errorEl = document.getElementById('loginError');
-    errorEl.textContent = '';
-    if(!username || !password){ errorEl.textContent = 'Enter a username and password.'; return; }
-    const btn = document.getElementById('loginSubmit');
-    btn.disabled = true; btn.textContent = 'Signing in…';
-    try{
-      const { token } = await Api.login(username, password);
-      Api.setToken(token);
-      renderDashboard();
-    }catch(e){
-      errorEl.textContent = e.message;
-      btn.disabled = false; btn.textContent = 'Sign in';
-    }
-  };
-  document.getElementById('loginSubmit').addEventListener('click', submit);
-  document.getElementById('loginPass').addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); });
+  window.location.replace('/checkin.html?tab=admin');
 }
 
 let activeTab = 'dashboard';
