@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -9,14 +9,22 @@
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+  <!-- ── Top Navigation Bar ─────────────────────────────────────── -->
   <div class="topbar">
-    <a class="brand" href="/">
-      <div class="brand-mark">M</div>
-      <div class="brand-text">
-        <div class="name">Museo Sang Bata sa Negros</div>
-        <div class="tagline" style="font-size: 9px; max-width: 400px;">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
-      </div>
-    </a>
+    <div class="topbar-left">
+      <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle navigation sidebar" title="Open Menu">
+        <span class="toggle-bar"></span>
+        <span class="toggle-bar"></span>
+        <span class="toggle-bar"></span>
+      </button>
+      <a class="brand" href="/">
+        <div class="brand-mark">M</div>
+        <div class="brand-text">
+          <div class="name">Museo Sang Bata sa Negros</div>
+          <div class="tagline" style="font-size: 9px; max-width: 400px;">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
+        </div>
+      </a>
+    </div>
     <div class="nav-links">
       <a class="nav-btn" href="/">Home</a>
       <a class="nav-btn" href="/exhibits.html">Exhibits</a>
@@ -27,10 +35,15 @@
     </div>
   </div>
 
-  <main><div class="wrap">
-    <div class="page-hero">
-      <h1>Photo gallery</h1>
-      <p>A look around the museum — exhibits, workshops, and community activities.</p>
+  <div class="user-layout">
+    <div class="user-main">
+      <main><div class="wrap">
+    <div class="page-hero gallery-hero">
+      <div style="position:relative; z-index:1;">
+        <h1>Photo gallery</h1>
+        <p>A look around the museum — exhibits, workshops, and community activities.</p>
+      </div>
+      <div class="page-hero-icon" style="font-size:72px; flex-shrink:0; opacity:0.9;" aria-hidden="true">🖼️</div>
     </div>
 
     <!-- Search & Filter Toolbar -->
@@ -243,5 +256,11 @@
     }
     load();
   </script>
+      </main>
+    </div>
+  </div>
+  <footer id="siteFooter"></footer>
+  <script src="/js/sidebar.js"></script>
+  <script src="/js/footer.js"></script>
 </body>
 </html>

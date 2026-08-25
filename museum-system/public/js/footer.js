@@ -36,4 +36,11 @@
   }
   
   loadFooter();
+    
+  // Auto-load sidebar controller script if not yet loaded
+  if (!window.__MUSEO_SIDEBAR_INIT__ && !document.querySelector('script[src*="sidebar.js"]')) {
+    const s = document.createElement('script');
+    s.src = '/js/sidebar.js';
+    document.head.appendChild(s);
+  }
 })();

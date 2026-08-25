@@ -81,7 +81,7 @@
 
 /* ── Exhibits Page Hero ── */
 .exhibits-hero {
-  background: linear-gradient(135deg, var(--teal-dark) 0%, #0ea3b5 60%, #22c5d8 100%);
+  background: linear-gradient(135deg, rgba(0, 48, 62, 0.68) 0%, rgba(0, 32, 44, 0.82) 100%), url('/uploads/ex1.jpeg') center / cover no-repeat;
   border-radius: 20px;
   padding: 40px 44px;
   margin-bottom: 36px;
@@ -89,7 +89,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  box-shadow: 0 8px 32px rgba(0,174,189,0.22);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   overflow: hidden;
   position: relative;
 }
@@ -174,13 +177,20 @@
 <body>
   <!-- ── Top Navigation Bar ─────────────────────────────────────── -->
   <div class="topbar">
-    <a class="brand" href="/">
-      <div class="brand-mark">M</div>
-      <div class="brand-text">
-        <div class="name">Museo Sang Bata sa Negros</div>
-        <div class="tagline" style="font-size: 9px; max-width: 400px;">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
-      </div>
-    </a>
+    <div class="topbar-left">
+      <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle navigation sidebar" title="Open Menu">
+        <span class="toggle-bar"></span>
+        <span class="toggle-bar"></span>
+        <span class="toggle-bar"></span>
+      </button>
+      <a class="brand" href="/">
+        <div class="brand-mark">M</div>
+        <div class="brand-text">
+          <div class="name">Museo Sang Bata sa Negros</div>
+          <div class="tagline" style="font-size: 9px; max-width: 400px;">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
+        </div>
+      </a>
+    </div>
     <div class="nav-links">
       <a class="nav-btn" href="/">Home</a>
       <a class="nav-btn active" href="/exhibits.html">Exhibits</a>
@@ -192,11 +202,12 @@
   </div>
 
   <div class="user-layout">
-    <!-- ── Categories Sidebar ───────────────────────────────────── -->
-    <aside class="user-sidebar">
+    <!-- ── Categories Sidebar (Slide to Show) ───────────────────── -->
+    <aside class="user-sidebar" id="userSidebar">
       <div class="user-sidebar-brand" style="padding: 16px 14px 12px;">
         <div class="user-sidebar-logo" style="width:32px; height:32px; font-size:14px;">🏷️</div>
         <div class="user-sidebar-title" style="font-size:13px;">Categories<br><span style="font-size:9px;">Filter exhibits</span></div>
+        <button type="button" class="user-sidebar-close" id="sidebarCloseBtn" aria-label="Close sidebar">✕</button>
       </div>
 
       <nav class="user-sidebar-nav">
@@ -614,6 +625,7 @@
     }
   </script>
   <footer id="siteFooter"></footer>
+  <script src="/js/sidebar.js"></script>
   <script src="/js/footer.js"></script>
 </body>
 </html>

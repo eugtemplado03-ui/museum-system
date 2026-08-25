@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -11,13 +11,20 @@
 </head>
 <body>
   <div class="topbar">
-    <a class="brand" href="/">
-      <div class="brand-mark">M</div>
-      <div class="brand-text">
-        <div class="name">Museo Sang Bata sa Negros</div>
-        <div class="tagline" style="font-size: 9px; max-width: 400px;">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
-      </div>
-    </a>
+    <div class="topbar-left">
+      <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle admin sidebar" title="Open Admin Menu">
+        <span class="toggle-bar"></span>
+        <span class="toggle-bar"></span>
+        <span class="toggle-bar"></span>
+      </button>
+      <a class="brand" href="/">
+        <div class="brand-mark">M</div>
+        <div class="brand-text">
+          <div class="name">Museo Sang Bata sa Negros</div>
+          <div class="tagline" style="font-size: 9px; max-width: 400px;">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
+        </div>
+      </a>
+    </div>
     <div class="nav-links">
       <a class="nav-btn" href="/">Home</a>
       <a class="nav-btn" href="/exhibits.html">Exhibits</a>
@@ -34,6 +41,7 @@
   <script src="/js/api.js"></script>
   <script src="/js/image-enhance.js"></script>
   <script src="/js/lightbox.js"></script>
+  <script src="/js/sidebar.js"></script>
   <script src="/js/admin.js?v=6"></script>
   <script src="/js/footer.js"></script>
 </body>

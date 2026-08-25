@@ -116,6 +116,12 @@ async function boot(){
 }
 
 function renderLogin(){
+  closeModal();
+  if (window.MuseoSidebar) window.MuseoSidebar.close();
+  document.body.classList.remove('sidebar-open');
+  const toggleBtn = document.getElementById('sidebarToggleBtn');
+  if (toggleBtn) toggleBtn.style.display = 'none';
+
   app.innerHTML = `
     <div class="gate">
       <h2>Staff sign-in</h2>
@@ -164,15 +170,27 @@ const SIDEBAR_ITEMS = [
   { id: 'museumInfo',   label: 'Museum Info',   icon: '🏛️' },
 ];
 
+function handleSignOut() {
+  Api.clearToken();
+  if (window.MuseoSidebar) window.MuseoSidebar.close();
+  document.body.classList.remove('sidebar-open');
+  toast('Signed out successfully');
+  renderLogin();
+}
+
 async function renderDashboard(){
+  const toggleBtn = document.getElementById('sidebarToggleBtn');
+  if (toggleBtn) toggleBtn.style.display = '';
+
   const activeItem = SIDEBAR_ITEMS.find(s => s.id === activeTab) || SIDEBAR_ITEMS[0];
   app.innerHTML = `
     <div class="admin-layout">
-      <!-- Sidebar -->
-      <aside class="admin-sidebar">
+      <!-- Sidebar (Slide to Show) -->
+      <aside class="admin-sidebar" id="adminSidebar">
         <div class="admin-sidebar-brand">
           <div class="admin-sidebar-logo">M</div>
           <div class="admin-sidebar-title">Admin<br><span>Dashboard</span></div>
+          <button type="button" class="admin-sidebar-close" id="adminSidebarCloseBtn" aria-label="Close admin menu">✕</button>
         </div>
         <nav class="admin-sidebar-nav">
           ${SIDEBAR_ITEMS.map(item => `
@@ -200,19 +218,25 @@ async function renderDashboard(){
               <p class="admin-topbar-sub">Manage ${activeItem.label.toLowerCase()} content</p>
             </div>
           </div>
-          <button class="admin-sidebar-signout mobile-only" id="signOutBtnMobile">⎋ Sign out</button>
         </header>
         <div id="tabContent" class="admin-content"></div>
       </div>
     </div>`;
 
-  document.getElementById('signOutBtn').addEventListener('click', ()=>{ Api.clearToken(); renderLogin(); });
-const mobileSignOut = document.getElementById('signOutBtnMobile');
-  if(mobileSignOut) mobileSignOut.addEventListener('click', ()=>{ Api.clearToken(); renderLogin(); });
+  const signOutBtn = document.getElementById('signOutBtn');
+  if (signOutBtn) signOutBtn.addEventListener('click', handleSignOut);
 
   app.querySelectorAll('[data-tab]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{ activeTab = btn.dataset.tab; renderDashboard(); });
+    btn.addEventListener('click', ()=>{ 
+      activeTab = btn.dataset.tab; 
+      if (window.MuseoSidebar) window.MuseoSidebar.close();
+      renderDashboard(); 
+    });
   });
+
+  if (window.MuseoSidebar && window.MuseoSidebar.init) {
+    window.MuseoSidebar.init();
+  }
 
   await loadCategories();
   const contentEl = document.getElementById('tabContent');
@@ -327,84 +351,84 @@ async function renderDashboardHomeTab(contentEl){
           <div class="stat-card" style="padding:10px 12px;"><div class="num" style="font-size:16px;">${totals.last24Hours}</div><div class="label" style="font-size:10px;">Last 24 Hours</div></div>
         </div>
 
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:12px;">
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px; margin-top:8px;">
           <!-- Exhibits by Category -->
-          <div class="info-card" style="padding:12px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-              <h3 style="margin:0; font-family:'Fraunces',serif; font-size:14px;">Exhibits by Category</h3>
-              <a href="/exhibits.html" class="btn btn-ghost dark btn-small" target="_blank" style="font-size:10px; padding:3px 8px;">View All</a>
+          <div class="info-card" style="padding:14px 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <h3 style="margin:0; font-family:'Nunito',sans-serif; font-weight:800; font-size:15px; color:#ffffff; text-shadow:0 1px 3px rgba(0,0,0,0.5);">Exhibits by Category</h3>
+              <a href="/exhibits.html" class="view-all-btn" target="_blank">View All →</a>
             </div>
             ${Object.entries(categoryCounts).length ? `
               <ul style="margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px;">
                 ${Object.entries(categoryCounts).sort((a,b)=>b[1]-a[1]).map(([cat, count]) => `
-                  <li style="display:flex; justify-content:space-between; align-items:center; padding:6px 10px; background:var(--grey-50); border-radius:6px;">
-                    <span style="display:flex; align-items:center; gap:6px; font-size:12px;">
-                      <span style="width:8px; height:8px; border-radius:50%; background:var(--teal);"></span>
+                  <li style="display:flex; justify-content:space-between; align-items:center; padding:7px 12px; background:rgba(0,42,54,0.80); border:1px solid rgba(255,255,255,0.12); border-radius:8px; color:#ffffff;">
+                    <span style="display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600; color:#ffffff;">
+                      <span style="width:8px; height:8px; border-radius:50%; background:var(--teal); box-shadow:0 0 6px var(--teal);"></span>
                       ${escapeHtml(cat)}
                     </span>
-                    <span style="font-weight:700; color:var(--ink); font-size:12px;">${count}</span>
+                    <span style="font-weight:700; color:#ffffff; font-size:12px; background:rgba(0,174,189,0.28); border:1px solid rgba(0,174,189,0.4); padding:2px 8px; border-radius:999px;">${count}</span>
                   </li>
                 `).join('')}
               </ul>
-            ` : `<p style="color:var(--ink-soft); font-size:11px;">No exhibits yet</p>`}
+            ` : `<p style="color:#cbd5e1; font-size:12px; margin:4px 0 0;">No exhibits yet</p>`}
           </div>
 
           <!-- Recent Visitors -->
-          <div class="info-card" style="padding:12px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-              <h3 style="margin:0; font-family:'Fraunces',serif; font-size:14px;">Recent Visitors</h3>
-              <a href="#" class="btn btn-ghost dark btn-small" data-tab="visitors" style="font-size:10px; padding:3px 8px;">View All</a>
+          <div class="info-card" style="padding:14px 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <h3 style="margin:0; font-family:'Nunito',sans-serif; font-weight:800; font-size:15px; color:#ffffff; text-shadow:0 1px 3px rgba(0,0,0,0.5);">Recent Visitors</h3>
+              <a href="#" class="view-all-btn" data-tab="visitors">View All →</a>
             </div>
             ${recentVisitors.length ? `
               <ul style="margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px;">
                 ${recentVisitors.map(v => `
-                  <li style="display:flex; justify-content:space-between; align-items:center; padding:6px 10px; background:var(--grey-50); border-radius:6px;">
+                  <li style="display:flex; justify-content:space-between; align-items:center; padding:7px 12px; background:rgba(0,42,54,0.80); border:1px solid rgba(255,255,255,0.12); border-radius:8px; color:#ffffff;">
                     <div>
-                      <div style="font-weight:600; color:var(--ink); font-size:12px;">${escapeHtml(v.visitorName)}</div>
-                      <div style="font-size:10px; color:var(--ink-soft);">${escapeHtml(v.visitDate)} · ${v.pax || 1} pax</div>
+                      <div style="font-weight:700; color:#ffffff; font-size:12.5px;">${escapeHtml(v.visitorName)}</div>
+                      <div style="font-size:10.5px; color:#cbd5e1; margin-top:2px;">${escapeHtml(v.visitDate)} · ${v.pax || 1} pax</div>
                     </div>
-                    <span class="status-badge ${(v.status || '').toLowerCase().replace(/[^a-z0-9]/g, '-')}" style="font-size:9px; padding:1px 6px;">${escapeHtml(v.status || 'Checked-in')}</span>
+                    <span class="status-badge ${(v.status || '').toLowerCase().replace(/[^a-z0-9]/g, '-')}" style="font-size:9.5px; padding:2px 7px;">${escapeHtml(v.status || 'Checked-in')}</span>
                   </li>
                 `).join('')}
               </ul>
-            ` : `<p style="color:var(--ink-soft); font-size:11px;">No visitors logged yet</p>`}
+            ` : `<p style="color:#cbd5e1; font-size:12px; margin:4px 0 0;">No visitors logged yet</p>`}
           </div>
 
           <!-- Upcoming Events -->
-          <div class="info-card" style="padding:12px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-              <h3 style="margin:0; font-family:'Fraunces',serif; font-size:14px;">Upcoming Events</h3>
-              <a href="/events.html" class="btn btn-ghost dark btn-small" target="_blank" style="font-size:10px; padding:3px 8px;">View All</a>
+          <div class="info-card" style="padding:14px 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <h3 style="margin:0; font-family:'Nunito',sans-serif; font-weight:800; font-size:15px; color:#ffffff; text-shadow:0 1px 3px rgba(0,0,0,0.5);">Upcoming Events</h3>
+              <a href="/events.html" class="view-all-btn" target="_blank">View All →</a>
             </div>
             ${upcomingEvents.length ? `
               <ul style="margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px;">
                 ${upcomingEvents.map(e => `
-                  <li style="display:flex; flex-direction:column; gap:2px; padding:8px 10px; background:var(--grey-50); border-radius:6px;">
-                    <div style="font-weight:600; color:var(--ink); font-size:12px;">${escapeHtml(e.title)}</div>
-                    <div style="font-size:10px; color:var(--ink-soft); display:flex; gap:10px; flex-wrap:wrap;">
+                  <li style="display:flex; flex-direction:column; gap:3px; padding:8px 12px; background:rgba(0,42,54,0.80); border:1px solid rgba(255,255,255,0.12); border-radius:8px; color:#ffffff;">
+                    <div style="font-weight:700; color:#ffffff; font-size:12.5px;">${escapeHtml(e.title)}</div>
+                    <div style="font-size:10.5px; color:#cbd5e1; display:flex; gap:10px; flex-wrap:wrap; margin-top:2px;">
                       <span>📅 ${escapeHtml(e.date)}</span>
                       <span>📍 ${escapeHtml(e.location || 'TBD')}</span>
                     </div>
                   </li>
                 `).join('')}
               </ul>
-            ` : `<p style="color:var(--ink-soft); font-size:11px;">No upcoming events</p>`}
+            ` : `<p style="color:#cbd5e1; font-size:12px; margin:4px 0 0;">No upcoming events</p>`}
           </div>
 
           <!-- Recent Gallery -->
-          <div class="info-card" style="padding:12px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-              <h3 style="margin:0; font-family:'Fraunces',serif; font-size:14px;">Recent Gallery</h3>
-              <a href="/gallery.html" class="btn btn-ghost dark btn-small" target="_blank" style="font-size:10px; padding:3px 8px;">View All</a>
+          <div class="info-card" style="padding:14px 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <h3 style="margin:0; font-family:'Nunito',sans-serif; font-weight:800; font-size:15px; color:#ffffff; text-shadow:0 1px 3px rgba(0,0,0,0.5);">Recent Gallery</h3>
+              <a href="/gallery.html" class="view-all-btn" target="_blank">View All →</a>
             </div>
             ${recentGallery.length ? `
-              <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:6px;">
+              <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px;">
                 ${recentGallery.map(g => {
                   const paths = Array.isArray(g.imagePaths) && g.imagePaths.length ? g.imagePaths : (g.imagePath ? [g.imagePath] : []);
                   const img = paths[0] || '';
                   return `
-                    <a href="/gallery.html" class="home-gallery-mini-item" target="_blank">
-                      ${img ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(g.title || 'Gallery')}" loading="lazy">` : `<div style="width:100%; height:100%; background:var(--teal-light); display:flex; align-items:center; justify-content:center; font-size:24px;">🖼️</div>`}
+                    <a href="/gallery.html" class="home-gallery-mini-item" target="_blank" style="border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,0.18);">
+                      ${img ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(g.title || 'Gallery')}" loading="lazy" style="width:100%; height:100%; object-fit:cover; display:block;">` : `<div style="width:100%; height:100%; background:rgba(0,42,54,0.85); display:flex; align-items:center; justify-content:center; font-size:24px;">🖼️</div>`}
                       <div class="home-gallery-mini-overlay">
                         <div class="home-gallery-mini-caption">${escapeHtml(g.title || g.caption || 'Museum snapshot')}</div>
                       </div>
@@ -412,7 +436,7 @@ async function renderDashboardHomeTab(contentEl){
                   `;
                 }).join('')}
               </div>
-            ` : `<p style="color:var(--ink-soft); font-size:11px;">No gallery items yet</p>`}
+            ` : `<p style="color:#cbd5e1; font-size:12px; margin:4px 0 0;">No gallery items yet</p>`}
           </div>
         </div>
       </div>
@@ -3073,3 +3097,14 @@ if(!Api.getMuseumInfo){
 if(!Api.updateMuseumInfo){
   Api.updateMuseumInfo = (payload) => request('/api/museum-info', { method: 'PUT', body: JSON.stringify(payload) });
 }
+
+// Global click handler to guarantee sign-out functionality
+document.addEventListener('click', (e) => {
+  if (e.target.closest('#signOutBtn, #signOutBtnMobile, .admin-sidebar-signout')) {
+    e.preventDefault();
+    handleSignOut();
+  }
+});
+
+// Boot admin app
+boot();

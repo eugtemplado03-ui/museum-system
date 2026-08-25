@@ -9,14 +9,22 @@
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+  <!-- ── Top Navigation Bar ─────────────────────────────────────── -->
   <div class="topbar">
-    <a class="brand" href="/">
-      <div class="brand-mark">M</div>
-      <div class="brand-text">
-        <div class="name">Museo Sang Bata sa Negros</div>
-        <div class="tagline" style="font-size: 9px; max-width: 400px;">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
-      </div>
-    </a>
+    <div class="topbar-left">
+      <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle navigation sidebar" title="Open Menu">
+        <span class="toggle-bar"></span>
+        <span class="toggle-bar"></span>
+        <span class="toggle-bar"></span>
+      </button>
+      <a class="brand" href="/">
+        <div class="brand-mark">M</div>
+        <div class="brand-text">
+          <div class="name">Museo Sang Bata sa Negros</div>
+          <div class="tagline" style="font-size: 9px; max-width: 400px;">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
+        </div>
+      </a>
+    </div>
     <div class="nav-links">
       <a class="nav-btn" href="/">Home</a>
       <a class="nav-btn" href="/exhibits.html">Exhibits</a>
@@ -27,7 +35,9 @@
     </div>
   </div>
 
-  <main><div class="wrap" style="max-width: 680px;">
+  <div class="user-layout">
+    <div class="user-main">
+      <main><div class="wrap" style="max-width: 680px;">
     <a class="detail-back" href="/programs.html">&larr; Back to programs</a>
     <div id="content">Loading program details…</div>
   </div></main>
@@ -218,7 +228,11 @@
 
     load();
   </script>
+      </main>
+    </div>
+  </div>
   <footer id="siteFooter"></footer>
+  <script src="/js/sidebar.js"></script>
   <script src="/js/footer.js"></script>
 </body>
 </html>

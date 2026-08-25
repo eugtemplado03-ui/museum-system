@@ -9,26 +9,35 @@
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+  <!-- ── Top Navigation Bar ─────────────────────────────────────── -->
   <div class="topbar">
-    <a class="brand" href="/">
-      <div class="brand-mark">M</div>
-      <div class="brand-text">
-        <div class="name">Museo Sang Bata sa Negros</div>
-        <div class="tagline" style="font-size: 9px; max-width: 400px;">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
-      </div>
-    </a>
+    <div class="topbar-left">
+      <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle navigation sidebar" title="Open Menu">
+        <span class="toggle-bar"></span>
+        <span class="toggle-bar"></span>
+        <span class="toggle-bar"></span>
+      </button>
+      <a class="brand" href="/">
+        <div class="brand-mark">M</div>
+        <div class="brand-text">
+          <div class="name">Museo Sang Bata sa Negros</div>
+          <div class="tagline" style="font-size: 9px; max-width: 400px;">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
+        </div>
+      </a>
+    </div>
     <div class="nav-links">
       <a class="nav-btn" href="/">Home</a>
       <a class="nav-btn" href="/exhibits.html">Exhibits</a>
       <a class="nav-btn" href="/programs.html">Programs</a>
       <a class="nav-btn" href="/gallery.html">Gallery</a>
       <a class="nav-btn" href="/events.html">Events</a>
-      <a class="nav-btn active" href="/donate.html">Donate</a>
       <a class="nav-btn" href="/admin.html">Admin</a>
     </div>
   </div>
 
-  <main><div class="wrap">
+  <div class="user-layout">
+    <div class="user-main">
+      <main><div class="wrap">
     <div class="page-hero">
       <h1>Donate to Museo Sang Bata sa Negros</h1>
       <p>Help the museum continue marine education, community outreach, and conservation programs for children and coastal families.</p>
@@ -64,12 +73,15 @@
       <p>Every gift helps the museum carry out marine educational programs, design exhibitions, and raise awareness of marine resources in the coastal communities around Sagay City.</p>
     </div>
 
-  </div></main>
+      </main>
+    </div>
+  </div>
 
   <footer id="siteFooter"></footer>
 
   <script src="/js/api.js"></script>
   <script src="/js/chatbot.js"></script>
+  <script src="/js/sidebar.js"></script>
   <script src="/js/footer.js"></script>
 </body>
 </html>
