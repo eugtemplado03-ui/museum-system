@@ -162,32 +162,39 @@
 </head>
 <body>
   <div class="topbar">
-    <a class="brand" href="/">
-      <div class="brand-mark">M</div>
-      <div class="brand-text">
-        <div class="name">Museo Sang Bata sa Negros</div>
-        <div class="tagline" style="font-size: 9px; max-width: 400px;">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
-      </div>
-    </a>
+    <div class="topbar-left">
+      <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle navigation sidebar" title="Open Menu">
+        <span class="toggle-bar"></span>
+        <span class="toggle-bar"></span>
+        <span class="toggle-bar"></span>
+      </button>
+      <a class="brand" href="/">
+        <div class="brand-mark">M</div>
+        <div class="brand-text">
+          <div class="name">Museo Sang Bata sa Negros</div>
+          <div class="tagline" style="font-size: 9px; max-width: 400px;">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
+        </div>
+      </a>
+    </div>
     <div class="nav-links">
       <a class="nav-btn" href="/">Home</a>
       <a class="nav-btn" href="/exhibits.html">Exhibits</a>
       <a class="nav-btn" href="/programs.html">Programs</a>
       <a class="nav-btn" href="/gallery.html">Gallery</a>
       <a class="nav-btn" href="/events.html">Events</a>
+      <a class="nav-btn" href="/donate.html">Donate</a>
       <a class="nav-btn" href="/admin.html">Admin</a>
     </div>
   </div>
 
   <main style="flex:1; padding: clamp(16px, 3vw, 36px) 16px;">
     <div class="checkin-container">
-      <div class="checkin-header">
-        <div class="logo">🏛️</div>
-        <h1>Visitor Check-in</h1>
-        <p>Please provide your information to log your visit</p>
-      </div>
-
       <form class="checkin-form" id="checkinForm" novalidate>
+        <div style="text-align:center; margin-bottom:22px; padding-bottom:14px; border-bottom:1px solid var(--grey-100);">
+          <h1 style="font-family:'Nunito',sans-serif; font-weight:800; font-size:22px; color:var(--ink); margin:0 0 4px;">Visitor Check-in</h1>
+          <p style="margin:0; font-size:13px; color:var(--grey-400);">Please fill in your details to log your museum visit</p>
+        </div>
+
         <div class="error-message" id="errorMessage"></div>
 
         <div class="form-group">
@@ -252,10 +259,10 @@
     </div>
   </main>
 
-  <footer style="text-align:center; padding:24px; color:rgba(255,255,255,0.7); font-size:13px; line-height:1.7; background:#003642; margin-top:auto;">
-    Museo Sang Bata sa Negros · Barangay Old Sagay, Sagay City, Negros Occidental, Philippines 6122
-  </footer>
+  <footer id="siteFooter"></footer>
 
+  <script src="/js/sidebar.js"></script>
+  <script src="/js/footer.js"></script>
   <script>
     function escapeHtml(str) {
       return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
