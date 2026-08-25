@@ -243,7 +243,11 @@
       <div class="success-message" id="successMessage">
         <div class="icon">✅</div>
         <h2>Check-in Successful!</h2>
-        <p>Thank you for visiting Museo Sang Bata sa Negros. Your visit has been logged.</p>
+        <p id="successDetails" style="font-size:14.5px; margin: 0 0 16px; color:var(--ink);">Thank you for visiting Museo Sang Bata sa Negros. Your visit has been logged.</p>
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:14px;">
+          <button type="button" class="btn btn-secondary btn-small" id="checkinAnotherBtn">➕ Check in another visitor</button>
+          <a class="btn btn-primary btn-small" href="/exhibits.html">Explore Exhibits →</a>
+        </div>
       </div>
     </div>
   </main>
@@ -254,13 +258,15 @@
 
   <script>
     function escapeHtml(str) {
-      return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&','<':'<','>':'>','"':'"',"'":'''}[m]));
+      return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
     }
 
     const form = document.getElementById('checkinForm');
     const submitBtn = document.getElementById('submitBtn');
     const errorMessage = document.getElementById('errorMessage');
     const successMessage = document.getElementById('successMessage');
+    const successDetails = document.getElementById('successDetails');
+    const checkinAnotherBtn = document.getElementById('checkinAnotherBtn');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -293,6 +299,8 @@
         }
         
         form.style.display = 'none';
+        const v = data.visitor || {};
+        successDetails.innerHTML = `Welcome, <strong>${escapeHtml(v.visitorName || payload.visitorName)}</strong>! Your visit on <strong>${escapeHtml(v.visitDate || '')} at ${escapeHtml(v.visitTime || '')}</strong> has been logged in the museum records.`;
         successMessage.classList.add('visible');
         
       } catch (err) {
@@ -301,6 +309,15 @@
         submitBtn.disabled = false;
         submitBtn.textContent = 'Check In';
       }
+    });
+
+    checkinAnotherBtn?.addEventListener('click', () => {
+      form.reset();
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Check In';
+      successMessage.classList.remove('visible');
+      form.style.display = 'block';
+      document.getElementById('visitorName').focus();
     });
   </script>
 </body>

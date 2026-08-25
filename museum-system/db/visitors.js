@@ -44,13 +44,25 @@ function findById(id) {
   return (data.visitors || []).find(v => v.id === id);
 }
 
+function getPhilippineDateTime() {
+  const now = new Date();
+  try {
+    const phDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila', year: 'numeric', month: '2-digit', day: '2-digit' }).format(now);
+    const phTime = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', hour12: false }).format(now);
+    return { date: phDate, time: phTime };
+  } catch (e) {
+    return { date: now.toISOString().slice(0, 10), time: now.toTimeString().slice(0, 5) };
+  }
+}
+
 function create(payload) {
   const data = load();
   if (!Array.isArray(data.visitors)) data.visitors = [];
 
   const now = new Date();
-  const defaultDate = now.toISOString().slice(0, 10);
-  const defaultTime = now.toTimeString().slice(0, 5);
+  const ph = getPhilippineDateTime();
+  const defaultDate = ph.date;
+  const defaultTime = ph.time;
 
   const visitor = {
     id: nanoid(10),

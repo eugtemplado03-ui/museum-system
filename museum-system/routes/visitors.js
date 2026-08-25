@@ -50,9 +50,11 @@ router.post('/checkin', (req, res) => {
 // Public QR code for visitor check-in
 router.get('/checkin/qr', async (req, res) => {
   try {
-    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-    const host = req.headers['x-forwarded-host'] || req.headers.host;
-    const url = `${protocol}://${host}/checkin.html`;
+    const rawProto = req.headers['x-forwarded-proto'] || req.protocol;
+    const protocol = (typeof rawProto === 'string' && rawProto.includes(',')) ? rawProto.split(',')[0].trim() : rawProto;
+    const host = req.headers['x-forwarded-host'] || req.get('host');
+    const base = process.env.SITE_URL || `${protocol}://${host}`;
+    const url = `${base.replace(/\/$/, '')}/checkin.html`;
     const png = await QRCode.toBuffer(url, { width: 320, margin: 1, color: { dark: '#2B271F', light: '#FFFFFF' } });
     res.set('Content-Type', 'image/png');
     res.set('Content-Disposition', 'inline; filename="visitor-checkin-tag.png"');

@@ -11,8 +11,11 @@ const { upload } = require('../middleware/upload');
 const router = express.Router();
 
 function publicUrlForExhibit(req, code) {
-  const base = `${req.protocol}://${req.get('host')}`;
-  return `${base}/exhibit.html?code=${encodeURIComponent(code)}`;
+  const rawProto = req.headers['x-forwarded-proto'] || req.protocol;
+  const protocol = (typeof rawProto === 'string' && rawProto.includes(',')) ? rawProto.split(',')[0].trim() : rawProto;
+  const host = req.headers['x-forwarded-host'] || req.get('host');
+  const base = process.env.SITE_URL || `${protocol}://${host}`;
+  return `${base.replace(/\/$/, '')}/exhibit.html?code=${encodeURIComponent(code)}`;
 }
 
 function validatePayload(body) {
