@@ -1,0 +1,1377 @@
+{
+  "users": [
+    {
+      "id": "ODHOLdpu5Y",
+      "username": "admin",
+      "passwordHash": "$2b$10$PSUoUfLUXQ5jDqTV0TxRDOH3D6TLH08f.QaqAOnNcQV2Nj3eNU7.m",
+      "role": "admin",
+      "createdAt": "2026-07-24T07:09:34.699Z"
+    }
+  ],
+  "exhibits": [
+    {
+      "id": "8J8l15t-1H",
+      "code": "EX-001",
+      "title": "Under the Sea",
+      "category": "Toys & Collections",
+      "origin": "Museum's main exhibit",
+      "year": "Permanent exhibit",
+      "location": "Main Exhibit Hall",
+      "imagePath": "https://museosangbata.org/wp-content/uploads/2014/11/under-the-sea-banner-260x170.jpg",
+      "description": "The museum's flagship exhibit on the marine environment — how sand forms, how coral reefs grow and the threats facing them, marine mammals, and the role mangroves play along the coast.",
+      "additionalDetails": "Shells, sea stars, sea cucumbers, clownfish, and soft corals are highlighted here.\nLook for the shell gallery that explains how each shell is named and why it grows the way it does.\nVisitors can also learn about other sea creatures that share the underwater world, including shrimp, algae, and reef fishes.",
+      "description_tl": "Pangunahing eksibit ng museo tungkol sa karagatan — kung paano nabubuo ang buhangin, paano lumalaki ang mga coral reef at ang mga banta sa mga ito, mga yamang-dagat at ang papel ng mga bakawan sa baybayin.",
+      "description_cb": "Pangunang eksibit sa museyo bahin sa dagat — giunsa paghulma ang balas, giunsa pagtubo ang coral reef ug ang mga hulga nga ilang giatubang, mga dagatnong mamalya, ug ang papel sa mangrove sa baybayon.",
+      "createdAt": "2026-07-24T07:09:34.703Z",
+      "updatedAt": "2026-08-19T11:22:09.874Z",
+      "imagePaths": [
+        "https://museosangbata.org/wp-content/uploads/2014/11/under-the-sea-banner-260x170.jpg"
+      ],
+      "videoPath": "/uploads/3b5faddbc6959cd0b2aef3f3.mp4"
+    },
+    {
+      "id": "eHOuUiCTyI",
+      "code": "EX-002",
+      "title": "The River",
+      "category": "Marine Nature Exhibit",
+      "origin": "Marine Conservation Education Program",
+      "year": "Permanent exhibit",
+      "location": "Main Exhibit Hall",
+      "imagePath": "/uploads/f2594672f504b807e7e37ba5.jpg",
+      "description": "One of the museum's eight permanent exhibits, following freshwater systems on their way toward the sea — part of the museum's broader effort to build appreciation for Negros' marine and coastal environment.",
+      "description_tl": "Isa sa walong permanenteng eksibit ng museo, sumusubaybay sa mga sistema ng tubig-tabang patungong dagat — bahagi ng mas malawak na pagsisikap ng museo na palaganapin ang pagpapahalaga sa dagat at baybayin ng Negros.",
+      "description_cb": "Usa sa walo ka permanenteng eksibit sa museyo, nagasunod sa freshwater systems padulong sa dagat — bahin sa mas lapad nga paningkamot sa museyo sa pagpahalaga sa dagat ug baybayon sa Negros.",
+      "createdAt": "2026-07-24T07:09:34.703Z",
+      "updatedAt": "2026-07-29T04:35:16.031Z",
+      "imagePaths": [
+        "/uploads/f2594672f504b807e7e37ba5.jpg",
+        "/uploads/77be55b9d5f44f3ffea2e486.jpg",
+        "/uploads/d18f7d875589fd19788befb4.jpg"
+      ]
+    },
+    {
+      "id": "kvsizqpXcT",
+      "code": "EX-003",
+      "title": "Splash Zone (Touch Pool)",
+      "category": "Other",
+      "origin": "Live touch-pool exhibit",
+      "year": "Permanent exhibit",
+      "location": "Splash Zone",
+      "imagePath": "https://museosangbata.org/wp-content/uploads/2014/11/splash-banner-260x170.jpg",
+      "description": "A hands-on touch pool where visitors can see and gently handle seashore creatures — sea stars, sea cucumbers, snails, and small fish — a favorite stop for kids and adults alike.",
+      "description_tl": "Isang hands-on na touch pool kung saan makikita at maaring maramdam nang maingat ang mga nilalang sa tabing-dagat — sea stars, sea cucumbers, mga suso, at maliliit na isda — paboritong lugar ng mga bata at matatanda.",
+      "description_cb": "Usa ka hands-on touch pool diin makakita ug mahimong hinay-hinay hikapon ang mga hayop sa baybayon — sea stars, sea cucumbers, mga suso, ug gagmay nga isda — paboritong hunonganan sa mga bata ug hamtong.",
+      "createdAt": "2026-07-24T07:09:34.703Z",
+      "updatedAt": "2026-07-24T07:09:34.703Z"
+    },
+    {
+      "id": "4Kgu3oMucu",
+      "code": "EX-004",
+      "title": "Everyday Heroes",
+      "category": "Character & Heritage",
+      "origin": "Character education exhibit",
+      "year": "Permanent exhibit",
+      "location": "Character Gallery",
+      "imagePath": "https://museosangbata.org/wp-content/uploads/2014/11/everyday-heroes-banner-260x170.jpg",
+      "description": "Profiles of ordinary people who quietly live out values like hard work, thrift, generosity, fairness, forgiveness and courage — encouraging visitors to see everyday character as its own kind of heroism.",
+      "description_tl": "Mga paglalarawan ng ordinaryong tao na tahimik na isinasabuhay ang mga pagpapahalaga tulad ng sipag, pagtipid, kabutihang-loob, katarungan, pagpapatawad at tapang — hinihikayat ang mga bisita na makita ang araw-araw na pagkatao bilang isang uri ng kabayanihan.",
+      "description_cb": "Profil sa ordinaryong mga tawo nga hinay-hinay nagpuyo sa mga bili sama sa kugi, pagtipig, pagkamaayo, pagkatarong, pagpasaylo ug kaisog — nag-awhag sa mga bisita nga tan-awon ang matag-adlaw nga pagkatawo isip laing matang sa pagka-hero.",
+      "createdAt": "2026-07-24T07:09:34.703Z",
+      "updatedAt": "2026-07-24T07:09:34.703Z"
+    },
+    {
+      "id": "R61RQcd-Ag",
+      "code": "EX-005",
+      "title": "Joseph G. Marañon Memorabilia",
+      "category": "Character & Heritage",
+      "origin": "Dedicated to the late Gov. Joseph G. Marañon",
+      "year": "Permanent exhibit",
+      "location": "Memorial Gallery",
+      "imagePath": "https://museosangbata.org/wp-content/uploads/2014/09/jgm-banner-260x170.jpg",
+      "description": "A memorial exhibit honoring the late Negros Occidental Governor Joseph G. Marañon, preserving memorabilia connected to his life and public service.",
+      "description_tl": "Isang memorial na eksibit para parangalan ang yumaong Gobernador ng Negros Occidental na si Joseph G. Marañon, na pinangangalagaan ang mga memorabilia na konektado sa kanyang buhay at pampublikong paglilingkod.",
+      "description_cb": "Usa ka memorial exhibit nga nagpasidungog sa mihimong Gobernador sa Negros Occidental nga si Joseph G. Marañon, nagtipig sa mga memorabilia nga may kalabotan sa iyang kinabuhi ug serbisyo publiko.",
+      "createdAt": "2026-07-24T07:09:34.704Z",
+      "updatedAt": "2026-07-24T07:09:34.704Z"
+    },
+    {
+      "id": "FNV2fFLZMU",
+      "code": "EX-006",
+      "title": "Hampanganan (Toy Room)",
+      "category": "Toys & Collections",
+      "origin": "Mara Montelibano folk toy collection",
+      "year": "Permanent exhibit",
+      "location": "Toy Room",
+      "imagePath": "https://museosangbata.org/wp-content/uploads/2014/09/hampanganan-banner-260x170.jpg",
+      "description": "A folk toy collection spanning more than 50 countries, gathered by Ms. Mara Montelibano, alongside donated McDonald's promotional toys and a Beanie Babies collection.",
+      "description_tl": "Isang koleksyon ng mga katutubong laruan mula sa mahigit 50 bansa, na pinag-isa ni Ms. Mara Montelibano, kasama ang mga donasyong promotional na laruan ng McDonald's at isang koleksyon ng Beanie Babies.",
+      "description_cb": "Usa ka koleksyon sa folk toys nga gikan sa kapin 50 ka nasud, gitigum ni Ms. Mara Montelibano, kauban ang gimdonar nga mga promotional toys sa McDonald's ug koleksyon sa Beanie Babies.",
+      "createdAt": "2026-07-24T07:09:34.704Z",
+      "updatedAt": "2026-07-24T07:09:34.704Z"
+    },
+    {
+      "id": "ZowcFn9Udh",
+      "code": "EX-007",
+      "title": "Biodiversity",
+      "category": "Marine Nature Exhibit",
+      "origin": "Marine Conservation Education Program",
+      "year": "Permanent exhibit",
+      "location": "Main Exhibit Hall",
+      "imagePath": "",
+      "description": "One of the museum's eight permanent exhibits, introducing the range of plant and animal life found across Negros' marine and coastal habitats.",
+      "description_tl": "Isa sa walong permanenteng eksibit ng museo, ipinapakilala ang hanay ng mga halaman at hayop na matatagpuan sa iba't ibang marine at baybaying tirahan ng Negros.",
+      "description_cb": "Usa sa walo ka permanenteng eksibit sa museyo, nagpakita sa lain-laing klase sa tanom ug hayop nga makita sa dagat ug baybayon sa Negros.",
+      "createdAt": "2026-07-24T07:09:34.704Z",
+      "updatedAt": "2026-07-24T07:09:34.704Z"
+    },
+    {
+      "id": "kTe0pYLkzk",
+      "code": "EX-008",
+      "title": "Story of Plastic",
+      "category": "Environmental",
+      "origin": "Companion piece to the \"Floating Witches\" art installation",
+      "year": "Since 2019",
+      "location": "Environmental Gallery",
+      "imagePath": "https://museosangbata.org/wp-content/uploads/2019/01/image2-1-e1548236083574-260x170.jpeg",
+      "description": "An exhibit raising awareness about plastic waste and its impact on marine life around Negros and Sagay, created alongside the museum's 'Floating Witches' installation made from discarded fishing nets.",
+      "description_tl": "Isang eksibit na nagpapataas ng kamalayan tungkol sa plastic waste at ang epekto nito sa buhay-dagat sa paligid ng Negros at Sagay, nilikha kasabay ng 'Floating Witches' na gawa sa itinamang lambat ng pangingisda.",
+      "description_cb": "Usa ka exhibit nga nagpalambo sa kahibalo bahin sa plastic waste ug ang epekto niini sa dagatnong kinabuhi sa palibot sa Negros ug Sagay, gihimo kauban ang 'Floating Witches' nga gihimo gikan sa gipanglabay nga fishing nets.",
+      "createdAt": "2026-07-24T07:09:34.704Z",
+      "updatedAt": "2026-07-24T07:09:34.704Z"
+    },
+    {
+      "id": "BE29m8zPmZ",
+      "code": "EX-009",
+      "title": "Carnival (Discovery Room)",
+      "category": "Other",
+      "origin": "The museum's discovery room",
+      "year": "Since 2019",
+      "location": "Discovery Room",
+      "imagePath": "https://museosangbata.org/wp-content/uploads/2019/01/image2-e1548236620227-260x170.jpeg",
+      "description": "A playful discovery room built around the idea that play is learning — supporting children's healthy development through open-ended, hands-on activity.",
+      "description_tl": "Isang masayang discovery room na nakabatay sa ideya na ang paglalaro ay pagkatuto — sinusuportahan ang malusog na pag-unlad ng mga bata sa pamamagitan ng bukas at hands-on na aktibidad.",
+      "description_cb": "Usa ka playful discovery room nga gibase sa ideya nga ang pagdula usa ka pamaagi sa pagkat-on — nagsuporta sa himsog nga paglambo sa mga bata pinaagi sa open-ended, hands-on activities.",
+      "createdAt": "2026-07-24T07:09:34.704Z",
+      "updatedAt": "2026-07-24T07:09:34.704Z"
+    },
+    {
+      "id": "L8FAkDqEAr",
+      "code": "EX-010",
+      "title": "Franco's Reading Corner",
+      "category": "Reading & Learning",
+      "origin": "Opened March 28, 2019",
+      "year": "Since 2019",
+      "location": "Reading Corner",
+      "imagePath": "https://museosangbata.org/wp-content/uploads/2019/04/IMG_9526-260x170.jpg",
+      "description": "A dedicated children's reading nook, blessed and opened to the public in March 2019 to encourage a love of books alongside the museum's hands-on exhibits.",
+      "description_tl": "Isang espesyal na reading nook para sa mga bata, na pinasinayaan noong Marso 2019 upang himukin ang pagmamahal sa mga libro kasabay ng mga hands-on na eksibit ng museo.",
+      "description_cb": "Usa ka dedikadong reading nook para sa mga bata, gibanhigan ug gibuksan sa publiko niadtong Marso 2019 aron dasigon ang paghigugma sa mga libro kauban sa hands-on exhibits sa museyo.",
+      "createdAt": "2026-07-24T07:09:34.704Z",
+      "updatedAt": "2026-07-24T07:09:34.704Z"
+    },
+    {
+      "id": "elWEKuJBSJ",
+      "code": "EX-011",
+      "title": "Mangrove Walk (Outdoor Exhibit)",
+      "category": "Marine Nature Exhibit",
+      "origin": "Outdoor extension of the indoor mangrove exhibit",
+      "year": "Permanent exhibit",
+      "location": "Outdoor — behind the main building",
+      "imagePath": "https://museosangbata.org/wp-content/uploads/2014/11/mangrove-walk-banner-260x170.jpg",
+      "description": "A small mangrove park and walkway behind the museum showcasing different mangrove species up close, used alongside the museum's mangrove seminars and indoor exhibit.",
+      "description_tl": "Isang maliit na parke ng bakawan at lakaran sa likod ng museo na nagpapakita ng iba't ibang species ng bakawan nang malapitan, ginagamit kasama ng mga seminar ng museo tungkol sa bakawan at indoor exhibit.",
+      "description_cb": "Usa ka gamay nga mangrove park ug walkway sa likod sa museyo nga nagpakita sa lain-laing species sa mangrove duol, gigamit kauban ang mangrove seminars sa museyo ug indoor exhibit.",
+      "createdAt": "2026-07-24T07:09:34.705Z",
+      "updatedAt": "2026-07-24T07:09:34.705Z"
+    }
+  ],
+  "favorites": [],
+  "ratings": [
+    {
+      "id": "OBEAXCj2sV",
+      "visitorId": "v-mrycach9-8ezrwffy",
+      "exhibitId": "kvsizqpXcT",
+      "rating": 5,
+      "comment": "niceeeee",
+      "createdAt": "2026-07-27T02:33:08.504Z",
+      "updatedAt": "2026-07-27T02:33:08.504Z"
+    },
+    {
+      "id": "cQ9WpAWGrZ",
+      "visitorId": "v-mrycach9-8ezrwffy",
+      "exhibitId": "elWEKuJBSJ",
+      "rating": 5,
+      "comment": "goodsssssss",
+      "createdAt": "2026-07-28T05:06:52.864Z",
+      "updatedAt": "2026-07-28T05:06:52.864Z"
+    },
+    {
+      "id": "6-hHINX_ZS",
+      "visitorId": "v-mrycach9-8ezrwffy",
+      "exhibitId": "4Kgu3oMucu",
+      "rating": 5,
+      "comment": "nice",
+      "createdAt": "2026-07-29T05:45:03.751Z",
+      "updatedAt": "2026-07-29T05:45:03.751Z"
+    }
+  ],
+  "scanEvents": [
+    {
+      "id": "j5wNOmaSXa",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-24T07:20:10.123Z"
+    },
+    {
+      "id": "fGPT6gC1-F",
+      "exhibitId": "elWEKuJBSJ",
+      "source": "view",
+      "at": "2026-07-24T07:21:25.547Z"
+    },
+    {
+      "id": "2-lkwusGIg",
+      "exhibitId": "R61RQcd-Ag",
+      "source": "view",
+      "at": "2026-07-24T07:22:03.652Z"
+    },
+    {
+      "id": "yJxqH9V8GF",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-24T07:22:38.147Z"
+    },
+    {
+      "id": "FUC6jbzIvG",
+      "exhibitId": "eHOuUiCTyI",
+      "source": "view",
+      "at": "2026-07-24T07:26:48.286Z"
+    },
+    {
+      "id": "QPGvPsJPJX",
+      "exhibitId": "R61RQcd-Ag",
+      "source": "view",
+      "at": "2026-07-24T07:27:20.126Z"
+    },
+    {
+      "id": "jwtlTYlHHj",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-24T07:27:52.150Z"
+    },
+    {
+      "id": "Kh5Y2RlHT3",
+      "exhibitId": "elWEKuJBSJ",
+      "source": "view",
+      "at": "2026-07-24T07:28:35.229Z"
+    },
+    {
+      "id": "s3uquxTNDO",
+      "exhibitId": "eHOuUiCTyI",
+      "source": "view",
+      "at": "2026-07-24T07:30:25.749Z"
+    },
+    {
+      "id": "lwqupPypTV",
+      "exhibitId": "QPtfzv0ViD",
+      "source": "view",
+      "at": "2026-07-24T07:32:27.088Z"
+    },
+    {
+      "id": "zuJ8uATtWy",
+      "exhibitId": "elWEKuJBSJ",
+      "source": "view",
+      "at": "2026-07-24T07:33:06.228Z"
+    },
+    {
+      "id": "vPFY_fMBRj",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-24T07:35:30.328Z"
+    },
+    {
+      "id": "X3kUNpFMls",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-24T07:38:19.233Z"
+    },
+    {
+      "id": "fZKL1LGg4r",
+      "exhibitId": "elWEKuJBSJ",
+      "source": "view",
+      "at": "2026-07-24T07:40:13.073Z"
+    },
+    {
+      "id": "xHzXO-7OcS",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-24T07:46:50.360Z"
+    },
+    {
+      "id": "iHPrJj9ltm",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-24T07:48:04.523Z"
+    },
+    {
+      "id": "UVS7sLyJok",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-24T07:49:46.699Z"
+    },
+    {
+      "id": "I8cCsH5b_-",
+      "exhibitId": "eHOuUiCTyI",
+      "source": "view",
+      "at": "2026-07-24T07:50:13.253Z"
+    },
+    {
+      "id": "GC5n5tF9PZ",
+      "exhibitId": "kvsizqpXcT",
+      "source": "view",
+      "at": "2026-07-24T07:50:19.875Z"
+    },
+    {
+      "id": "THNWsFZUqM",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-24T07:53:36.536Z"
+    },
+    {
+      "id": "HF4nd8puE4",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-24T10:43:30.252Z"
+    },
+    {
+      "id": "CpTDh-Vhfh",
+      "exhibitId": "ZowcFn9Udh",
+      "source": "view",
+      "at": "2026-07-24T11:25:40.793Z"
+    },
+    {
+      "id": "PUIpgCPYUV",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-24T12:01:46.930Z"
+    },
+    {
+      "id": "eTLMye0PFt",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-26T09:50:39.842Z"
+    },
+    {
+      "id": "FHimyCUbbF",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-26T10:02:17.049Z"
+    },
+    {
+      "id": "bOtroAwKfB",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-26T10:18:45.042Z"
+    },
+    {
+      "id": "jZs59zPiz-",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-26T10:20:07.409Z"
+    },
+    {
+      "id": "r3bHNaZugw",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-26T10:21:39.462Z"
+    },
+    {
+      "id": "TSkX9f7QpI",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-26T10:22:53.714Z"
+    },
+    {
+      "id": "Ku9rXdxwmh",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-26T10:25:01.790Z"
+    },
+    {
+      "id": "AB8FQ7dAiW",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-26T13:12:20.815Z"
+    },
+    {
+      "id": "_AtAY3VWFB",
+      "exhibitId": "elWEKuJBSJ",
+      "source": "view",
+      "at": "2026-07-26T13:51:03.457Z"
+    },
+    {
+      "id": "IM-CnLcv7I",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-26T13:53:37.963Z"
+    },
+    {
+      "id": "4f-pdYurR9",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-26T13:55:30.612Z"
+    },
+    {
+      "id": "NVV2qa-wFp",
+      "exhibitId": "R61RQcd-Ag",
+      "source": "view",
+      "at": "2026-07-26T13:57:50.696Z"
+    },
+    {
+      "id": "X_5uIY4xq_",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-26T14:05:16.830Z"
+    },
+    {
+      "id": "SGNZOIKoUm",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-26T14:22:51.250Z"
+    },
+    {
+      "id": "YCp01H-w3a",
+      "exhibitId": "BE29m8zPmZ",
+      "source": "view",
+      "at": "2026-07-26T14:27:16.754Z"
+    },
+    {
+      "id": "7Ypnj9GLmP",
+      "exhibitId": "elWEKuJBSJ",
+      "source": "view",
+      "at": "2026-07-26T14:29:24.625Z"
+    },
+    {
+      "id": "tQc48unO_N",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-26T14:42:05.096Z"
+    },
+    {
+      "id": "zVllCoe_Ia",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-27T02:31:57.173Z"
+    },
+    {
+      "id": "s3wBfHt7GD",
+      "exhibitId": "kvsizqpXcT",
+      "source": "view",
+      "at": "2026-07-27T02:32:59.697Z"
+    },
+    {
+      "id": "aztkwm5Fle",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-27T02:44:02.669Z"
+    },
+    {
+      "id": "-mFJjQKIvR",
+      "exhibitId": "elWEKuJBSJ",
+      "source": "view",
+      "at": "2026-07-28T04:58:08.615Z"
+    },
+    {
+      "id": "_B-QWpdUGq",
+      "exhibitId": "elWEKuJBSJ",
+      "source": "view",
+      "at": "2026-07-28T05:05:30.904Z"
+    },
+    {
+      "id": "-y3oFcx9z7",
+      "exhibitId": "elWEKuJBSJ",
+      "source": "view",
+      "at": "2026-07-28T05:06:35.509Z"
+    },
+    {
+      "id": "QY1N6n7tGv",
+      "exhibitId": "elWEKuJBSJ",
+      "source": "view",
+      "at": "2026-07-28T10:54:52.359Z"
+    },
+    {
+      "id": "GkDQeBf5VU",
+      "exhibitId": "R61RQcd-Ag",
+      "source": "view",
+      "at": "2026-07-28T10:55:03.030Z"
+    },
+    {
+      "id": "OHE_HQpOXW",
+      "exhibitId": "kTe0pYLkzk",
+      "source": "view",
+      "at": "2026-07-28T10:55:14.088Z"
+    },
+    {
+      "id": "xeoduwG9TO",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-28T11:28:03.795Z"
+    },
+    {
+      "id": "OAX-glVVVz",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-28T11:32:38.978Z"
+    },
+    {
+      "id": "7r6iWJpO32",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-29T04:07:21.066Z"
+    },
+    {
+      "id": "6SCfPoOorA",
+      "exhibitId": "kTe0pYLkzk",
+      "source": "view",
+      "at": "2026-07-29T04:19:24.507Z"
+    },
+    {
+      "id": "50RwaW8JAe",
+      "exhibitId": "eHOuUiCTyI",
+      "source": "view",
+      "at": "2026-07-29T04:36:12.704Z"
+    },
+    {
+      "id": "Yph3jgszgg",
+      "exhibitId": "eHOuUiCTyI",
+      "source": "view",
+      "at": "2026-07-29T04:37:12.056Z"
+    },
+    {
+      "id": "3R99e3HG4v",
+      "exhibitId": "elWEKuJBSJ",
+      "source": "view",
+      "at": "2026-07-29T04:42:59.559Z"
+    },
+    {
+      "id": "OI4QLcmPy3",
+      "exhibitId": "eHOuUiCTyI",
+      "source": "view",
+      "at": "2026-07-29T04:44:45.049Z"
+    },
+    {
+      "id": "Eng6VT3cgX",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-29T05:28:35.088Z"
+    },
+    {
+      "id": "U86evVSNWW",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-29T05:31:13.487Z"
+    },
+    {
+      "id": "q8_c49zQZt",
+      "exhibitId": "R61RQcd-Ag",
+      "source": "view",
+      "at": "2026-07-29T05:33:33.541Z"
+    },
+    {
+      "id": "Fe2W9ak8yo",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-29T05:42:08.676Z"
+    },
+    {
+      "id": "_Od3o80tJ6",
+      "exhibitId": "4Kgu3oMucu",
+      "source": "view",
+      "at": "2026-07-29T05:44:51.527Z"
+    },
+    {
+      "id": "ro_faVF6Kt",
+      "exhibitId": "kvsizqpXcT",
+      "source": "view",
+      "at": "2026-07-29T05:49:17.775Z"
+    },
+    {
+      "id": "MGH8HBzdSS",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-29T14:43:08.743Z"
+    },
+    {
+      "id": "_7wfK-ubic",
+      "exhibitId": "R61RQcd-Ag",
+      "source": "view",
+      "at": "2026-07-29T14:43:42.433Z"
+    },
+    {
+      "id": "KepOZ4syvS",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-29T14:51:11.483Z"
+    },
+    {
+      "id": "AmIV9MVEs9",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-29T14:55:47.674Z"
+    },
+    {
+      "id": "5IfszIlRjG",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-29T14:56:05.903Z"
+    },
+    {
+      "id": "N2VVKTxVyE",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-29T14:57:45.465Z"
+    },
+    {
+      "id": "fHyWUXT-a2",
+      "exhibitId": "eHOuUiCTyI",
+      "source": "view",
+      "at": "2026-07-29T14:58:03.274Z"
+    },
+    {
+      "id": "0syZdCa3IU",
+      "exhibitId": "eHOuUiCTyI",
+      "source": "view",
+      "at": "2026-07-29T14:58:20.994Z"
+    },
+    {
+      "id": "KQzD3MKrNt",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-29T15:03:41.824Z"
+    },
+    {
+      "id": "OmwKLYZDeS",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-29T15:22:02.805Z"
+    },
+    {
+      "id": "FSfbELrDrZ",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-29T15:25:17.106Z"
+    },
+    {
+      "id": "YOcFbnaZ9a",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-29T15:26:06.910Z"
+    },
+    {
+      "id": "B01E3qWOoy",
+      "exhibitId": "eHOuUiCTyI",
+      "source": "view",
+      "at": "2026-07-29T15:26:29.252Z"
+    },
+    {
+      "id": "AtEzXDXnkm",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-29T15:43:16.724Z"
+    },
+    {
+      "id": "SJ6VdPDYsC",
+      "exhibitId": "eHOuUiCTyI",
+      "source": "view",
+      "at": "2026-07-29T15:44:09.275Z"
+    },
+    {
+      "id": "yIm-KXhfEz",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-29T15:47:14.404Z"
+    },
+    {
+      "id": "7KuLTjxXe8",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-29T15:49:22.587Z"
+    },
+    {
+      "id": "X4fZjXbMy9",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-29T15:50:20.823Z"
+    },
+    {
+      "id": "9Xo7gGORHz",
+      "exhibitId": "eHOuUiCTyI",
+      "source": "view",
+      "at": "2026-07-29T15:51:05.708Z"
+    },
+    {
+      "id": "-eIMqEwsAs",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-29T15:51:46.599Z"
+    },
+    {
+      "id": "TJPo-lSxFR",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-07-29T15:55:15.957Z"
+    },
+    {
+      "id": "rIrB710rZI",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-05T11:34:25.559Z"
+    },
+    {
+      "id": "sntArvyxzN",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-05T11:42:20.663Z"
+    },
+    {
+      "id": "NlUKP9Al1w",
+      "exhibitId": "4Kgu3oMucu",
+      "source": "view",
+      "at": "2026-08-05T11:44:01.954Z"
+    },
+    {
+      "id": "yZJ4G9UevI",
+      "exhibitId": "eHOuUiCTyI",
+      "source": "view",
+      "at": "2026-08-05T12:31:17.135Z"
+    },
+    {
+      "id": "DiZplF9B9i",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-05T12:31:38.478Z"
+    },
+    {
+      "id": "pAYTMCL6EG",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-05T12:38:35.923Z"
+    },
+    {
+      "id": "3knbcG9vOJ",
+      "exhibitId": "FNV2fFLZMU",
+      "source": "view",
+      "at": "2026-08-05T12:41:26.184Z"
+    },
+    {
+      "id": "4aCWtH-uW8",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-05T13:03:09.263Z"
+    },
+    {
+      "id": "PVANETlRpm",
+      "exhibitId": "kvsizqpXcT",
+      "source": "view",
+      "at": "2026-08-05T13:03:51.251Z"
+    },
+    {
+      "id": "3kjg-EeG5N",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-05T13:06:30.534Z"
+    },
+    {
+      "id": "Fv8bl1eFch",
+      "exhibitId": "eHOuUiCTyI",
+      "source": "view",
+      "at": "2026-08-05T13:13:05.239Z"
+    },
+    {
+      "id": "ZIZ9sdUAy3",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-05T13:18:38.834Z"
+    },
+    {
+      "id": "hvNxM8AI7w",
+      "exhibitId": "L8FAkDqEAr",
+      "source": "view",
+      "at": "2026-08-18T08:49:55.326Z"
+    },
+    {
+      "id": "wZi3tpciDy",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-18T09:05:03.857Z"
+    },
+    {
+      "id": "dGX18QUqkw",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-18T09:45:05.651Z"
+    },
+    {
+      "id": "FdO39Ukhsc",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-18T09:47:47.819Z"
+    },
+    {
+      "id": "RXGqTuZ5FI",
+      "exhibitId": "FNV2fFLZMU",
+      "source": "view",
+      "at": "2026-08-18T13:28:14.646Z"
+    },
+    {
+      "id": "s7hhgGOJI8",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-18T13:47:01.637Z"
+    },
+    {
+      "id": "HrtAHTtKyi",
+      "exhibitId": "eHOuUiCTyI",
+      "source": "view",
+      "at": "2026-08-18T13:50:02.325Z"
+    },
+    {
+      "id": "c8lgkDpg_P",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-18T14:01:45.799Z"
+    },
+    {
+      "id": "FSbB-s9izU",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-18T14:05:54.646Z"
+    },
+    {
+      "id": "b9dJaZSEcr",
+      "exhibitId": "eHOuUiCTyI",
+      "source": "view",
+      "at": "2026-08-18T14:06:19.559Z"
+    },
+    {
+      "id": "ofTj6ZL5xS",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-18T14:10:49.226Z"
+    },
+    {
+      "id": "c9e0fMUGlA",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-18T14:39:52.023Z"
+    },
+    {
+      "id": "NFUTPTUCrS",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-18T14:44:35.867Z"
+    },
+    {
+      "id": "xJO0EPpdUu",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-18T14:46:20.427Z"
+    },
+    {
+      "id": "DBry8vVQiG",
+      "exhibitId": "eHOuUiCTyI",
+      "source": "view",
+      "at": "2026-08-19T03:54:32.242Z"
+    },
+    {
+      "id": "FmD-c3JoQw",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-19T03:59:38.003Z"
+    },
+    {
+      "id": "-r8pke5rJ8",
+      "exhibitId": "L8FAkDqEAr",
+      "source": "view",
+      "at": "2026-08-19T04:02:58.745Z"
+    },
+    {
+      "id": "CndQQwbPL-",
+      "exhibitId": "L8FAkDqEAr",
+      "source": "view",
+      "at": "2026-08-19T04:03:32.692Z"
+    },
+    {
+      "id": "N5K6JKYTUI",
+      "exhibitId": "eHOuUiCTyI",
+      "source": "view",
+      "at": "2026-08-19T04:30:25.204Z"
+    },
+    {
+      "id": "DSbP-klAUt",
+      "exhibitId": "eHOuUiCTyI",
+      "source": "view",
+      "at": "2026-08-19T04:43:35.132Z"
+    },
+    {
+      "id": "lo8Gi1oyfS",
+      "exhibitId": "eHOuUiCTyI",
+      "source": "view",
+      "at": "2026-08-19T04:43:52.331Z"
+    },
+    {
+      "id": "dknNJU7UZc",
+      "exhibitId": "R61RQcd-Ag",
+      "source": "view",
+      "at": "2026-08-19T04:51:25.794Z"
+    },
+    {
+      "id": "yTISSzY3B9",
+      "exhibitId": "kvsizqpXcT",
+      "source": "view",
+      "at": "2026-08-19T11:42:45.877Z"
+    },
+    {
+      "id": "streum2PpJ",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-23T15:52:02.656Z"
+    },
+    {
+      "id": "4gE_jzrVYq",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-24T04:27:21.065Z"
+    },
+    {
+      "id": "4HmzN1afHW",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-24T05:36:35.573Z"
+    },
+    {
+      "id": "TSxGKEEALv",
+      "exhibitId": "eHOuUiCTyI",
+      "source": "view",
+      "at": "2026-08-24T05:36:46.828Z"
+    },
+    {
+      "id": "fdi1TrAO9C",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-24T05:37:16.561Z"
+    },
+    {
+      "id": "Z6oXkl_oCU",
+      "exhibitId": "kvsizqpXcT",
+      "source": "view",
+      "at": "2026-08-24T05:37:24.741Z"
+    },
+    {
+      "id": "EGj21mg61_",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-24T05:42:01.743Z"
+    },
+    {
+      "id": "NCstnURCOW",
+      "exhibitId": "kvsizqpXcT",
+      "source": "view",
+      "at": "2026-08-24T05:42:24.321Z"
+    },
+    {
+      "id": "PIiMIQS224",
+      "exhibitId": "kvsizqpXcT",
+      "source": "view",
+      "at": "2026-08-24T05:49:43.909Z"
+    },
+    {
+      "id": "vPb7KOez0X",
+      "exhibitId": "eHOuUiCTyI",
+      "source": "view",
+      "at": "2026-08-24T05:50:22.930Z"
+    },
+    {
+      "id": "e_bKImJVo5",
+      "exhibitId": "-lxwql-s-6",
+      "source": "view",
+      "at": "2026-08-24T05:52:19.560Z"
+    },
+    {
+      "id": "ZdwOz3UUxK",
+      "exhibitId": "-lxwql-s-6",
+      "source": "view",
+      "at": "2026-08-24T07:37:45.059Z"
+    },
+    {
+      "id": "6NbRYzdw97",
+      "exhibitId": "-lxwql-s-6",
+      "source": "view",
+      "at": "2026-08-24T07:47:01.610Z"
+    },
+    {
+      "id": "m95OxlZpZB",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-24T07:54:01.583Z"
+    },
+    {
+      "id": "fsAQSmPsw5",
+      "exhibitId": "-lxwql-s-6",
+      "source": "view",
+      "at": "2026-08-24T07:54:27.182Z"
+    },
+    {
+      "id": "BUCmYROXGy",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-25T04:51:48.266Z"
+    },
+    {
+      "id": "pBqBXufLn4",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-25T05:34:52.388Z"
+    },
+    {
+      "id": "-eC4Zfih8T",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-25T05:41:18.783Z"
+    },
+    {
+      "id": "3c4dzPqFTK",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-25T05:45:10.184Z"
+    },
+    {
+      "id": "Y7Lm_rHEJU",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-25T05:49:26.930Z"
+    },
+    {
+      "id": "hKowmxc-rc",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-25T05:53:10.500Z"
+    },
+    {
+      "id": "ODUtubXtCy",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-25T05:53:23.287Z"
+    },
+    {
+      "id": "gzav67lI3l",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-25T05:55:10.778Z"
+    },
+    {
+      "id": "OCF_4bh-RM",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-25T05:55:32.998Z"
+    },
+    {
+      "id": "CHpcVtxBX8",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-25T05:59:15.065Z"
+    },
+    {
+      "id": "vlzdm5HJKI",
+      "exhibitId": "eHOuUiCTyI",
+      "source": "view",
+      "at": "2026-08-25T06:36:42.569Z"
+    },
+    {
+      "id": "0Quc2Saf8o",
+      "exhibitId": "8J8l15t-1H",
+      "source": "view",
+      "at": "2026-08-25T11:33:05.029Z"
+    },
+    {
+      "id": "5LEoqOHYYO",
+      "exhibitId": "eHOuUiCTyI",
+      "source": "view",
+      "at": "2026-08-25T11:39:55.919Z"
+    },
+    {
+      "id": "ZQXeQdO539",
+      "exhibitId": "R61RQcd-Ag",
+      "source": "view",
+      "at": "2026-08-25T11:40:38.106Z"
+    }
+  ],
+  "programs": [
+    {
+      "id": "Mx7P5tCjc-",
+      "title": "Junior Museum Guide Program",
+      "ageRange": "7–12",
+      "schedule": "Ongoing training cohorts",
+      "imagePath": "",
+      "description": "Children are trained to act as guides for visitors touring the museum. More than 300 children have completed the program to date.",
+      "createdAt": "2026-07-24T07:09:34.706Z",
+      "updatedAt": "2026-07-24T07:09:34.706Z"
+    },
+    {
+      "id": "ASYdVmIVZY",
+      "title": "Junior Interactive Storytelling Program",
+      "ageRange": "7–12",
+      "schedule": "Ongoing, tied to the Museo Reading Club",
+      "imagePath": "",
+      "description": "Children learn to interpret stories through action, song and dance. Most participants are also members of the Museo Reading Club.",
+      "createdAt": "2026-07-24T07:09:34.706Z",
+      "updatedAt": "2026-07-24T07:09:34.706Z"
+    },
+    {
+      "id": "eZlgWf0ocE",
+      "title": "4 Vegetable Program",
+      "ageRange": "All museum visitors",
+      "schedule": "Ongoing",
+      "imagePath": "/uploads/3efbc0b9dbbd5451237f6cb9.jpg",
+      "description": "A hands-on gardening program where children grow four kinds of vegetables, built around the idea that eating right starts early.",
+      "createdAt": "2026-07-24T07:09:34.706Z",
+      "updatedAt": "2026-07-26T09:45:16.455Z",
+      "images": [
+        "/uploads/3efbc0b9dbbd5451237f6cb9.jpg",
+        "/uploads/127076e1d4cc6a84fb1dda2b.jpg",
+        "/uploads/ad3c260886c97d5f0b13f18c.jpg"
+      ]
+    },
+    {
+      "id": "D9nk_OUX_M",
+      "title": "Basic Hygiene Program",
+      "ageRange": "All museum visitors",
+      "schedule": "Ongoing",
+      "imagePath": "",
+      "description": "Teaches the basics of personal hygiene — proper toothbrushing, bathing, hair washing, and nail care.",
+      "createdAt": "2026-07-24T07:09:34.706Z",
+      "updatedAt": "2026-07-24T07:09:34.706Z"
+    },
+    {
+      "id": "AUqpS7HuhB",
+      "title": "Revival of Intangible Cultural Heritage Program",
+      "ageRange": "All ages",
+      "schedule": "Includes annual \"Adlaw sang Kabataan\" (Children's Day)",
+      "imagePath": "",
+      "description": "Aims to revive disappearing songs, games, dances and crafts through Music and Dance Workshops, culminating in the yearly Children's Day celebration.",
+      "createdAt": "2026-07-24T07:09:34.707Z",
+      "updatedAt": "2026-07-24T07:09:34.707Z"
+    },
+    {
+      "id": "WoiDlalfpn",
+      "title": "Museum Volunteers Program",
+      "ageRange": "Any age",
+      "schedule": "Ongoing, flexible",
+      "imagePath": "",
+      "description": "Open to anyone who wants to contribute time, talent, or resources to the museum. Over 100 volunteers have taken part over the years.",
+      "createdAt": "2026-07-24T07:09:34.707Z",
+      "updatedAt": "2026-07-24T07:09:34.707Z"
+    },
+    {
+      "id": "B01bLpb2a4",
+      "title": "Teen Health Club",
+      "ageRange": "13–17",
+      "schedule": "Ongoing",
+      "imagePath": "",
+      "description": "A club addressing the health issues and challenges teens face while growing up, for kids who are \"no longer children but not old enough\" to be treated as adults.",
+      "createdAt": "2026-07-24T07:09:34.707Z",
+      "updatedAt": "2026-07-24T07:09:34.707Z"
+    },
+    {
+      "id": "4sixPMN4Pe",
+      "title": "Marine Biodiversity Conservation and Climate Change Adaptation Education Program",
+      "ageRange": "Teachers, students & community",
+      "schedule": "Ongoing outreach and training",
+      "imagePath": "",
+      "description": "The museum's flagship program, training public elementary science teachers and running outreach to mothers, fisherfolk, boatmen, and schools on marine conservation and climate adaptation.",
+      "createdAt": "2026-07-24T07:09:34.707Z",
+      "updatedAt": "2026-07-24T07:09:34.707Z"
+    }
+  ],
+  "events": [
+    {
+      "id": "QBfyYMO5x4",
+      "title": "Museo Sang Bata Sa Negros Turns 23",
+      "date": "2026-06-10",
+      "location": "Museo Sang Bata sa Negros",
+      "imagePath": "",
+      "description": "The museum marked 23 years since its founding in 2003 — from a small idea to a hands-on children's museum serving thousands of families across Negros.",
+      "createdAt": "2026-07-24T07:09:34.708Z",
+      "updatedAt": "2026-07-24T07:09:34.708Z"
+    },
+    {
+      "id": "784KNhmcze",
+      "title": "Adlaw Sang Kabataan 2026",
+      "date": "2026-03-17",
+      "location": "Museo Sang Bata sa Negros",
+      "imagePath": "",
+      "description": "The museum's 18th annual Children's Day celebration — a yearly inter-school competition. The 2026 edition drew 34 schools and 320 kids.",
+      "createdAt": "2026-07-24T07:09:34.709Z",
+      "updatedAt": "2026-07-24T07:09:34.709Z"
+    },
+    {
+      "id": "sug_2_dYwZ",
+      "title": "Recycling Workshop and Storytelling",
+      "date": "2026-02-21",
+      "location": "Purok Camantigue B, Sitio Looc, Brgy. Old Sagay",
+      "imagePath": "",
+      "description": "A community outreach workshop where kids made pencil holders from plastic bottles and popsicle sticks, paired with a storytelling session.",
+      "createdAt": "2026-07-24T07:09:34.709Z",
+      "updatedAt": "2026-07-24T07:09:34.709Z"
+    },
+    {
+      "id": "-VAw8omzGV",
+      "title": "Museum Junior Guide Training",
+      "date": "2026-05-18",
+      "location": "Museo Sang Bata sa Negros",
+      "imagePath": "",
+      "description": "An 11-day training program (May 18–28) for new and returning Junior Museum Guides, covering exhibit familiarization and public speaking.",
+      "createdAt": "2026-07-24T07:09:34.709Z",
+      "updatedAt": "2026-07-24T07:09:34.709Z"
+    },
+    {
+      "id": "Uc8_k7lvyJ",
+      "title": "Mobile Library Launch: \"Books and Exhibit on Wheels\"",
+      "date": "2019-02-15",
+      "location": "Museo Sang Bata sa Negros",
+      "imagePath": "",
+      "description": "Blessing and launch of the museum's mobile library initiative, bringing books and mini-exhibits to communities outside the museum, supported by local book donors and legislators.",
+      "createdAt": "2026-07-24T07:09:34.709Z",
+      "updatedAt": "2026-07-24T07:09:34.709Z"
+    }
+  ],
+  "gallery": [
+    {
+      "id": "-ULtxBSybo",
+      "title": "Carnival Exhibit",
+      "caption": "Play-based learning in the discovery room.",
+      "imagePath": "https://museosangbata.org/wp-content/uploads/2019/01/image2-e1548236620227-260x170.jpeg",
+      "createdAt": "2026-07-24T07:09:34.711Z"
+    },
+    {
+      "id": "BEW-mCuA6y",
+      "title": "Under the Sea",
+      "caption": "The museum's flagship marine exhibit.",
+      "imagePath": "https://museosangbata.org/wp-content/uploads/2014/11/under-the-sea-banner-260x170.jpg",
+      "createdAt": "2026-07-24T07:09:34.711Z"
+    },
+    {
+      "id": "IuLJsmDTWX",
+      "title": "Mangrove Walk",
+      "caption": "The outdoor mangrove walkway behind the museum.",
+      "imagePath": "https://museosangbata.org/wp-content/uploads/2014/11/mangrove-walk-banner-260x170.jpg",
+      "createdAt": "2026-07-24T07:09:34.711Z"
+    },
+    {
+      "id": "2Yiw1J53ux",
+      "title": "Friendship Room / Training Room",
+      "caption": "Used for workshops and junior guide training.",
+      "imagePath": "https://museosangbata.org/wp-content/uploads/2014/11/training-room-banner-260x170.jpg",
+      "createdAt": "2026-07-24T07:09:34.712Z"
+    },
+    {
+      "id": "okqTWr7Pg8",
+      "title": "The Toy Library",
+      "caption": "Toys available for children to borrow and play with.",
+      "imagePath": "https://museosangbata.org/wp-content/uploads/2014/11/toy-library-banner-260x170.jpg",
+      "createdAt": "2026-07-24T07:09:34.712Z"
+    },
+    {
+      "id": "9ugnxcJhDS",
+      "title": "Mobile Library Launch",
+      "caption": "\"Books and Exhibit on Wheels\" blessing and launch, February 2019.",
+      "imagePath": "https://museosangbata.org/wp-content/uploads/2019/04/IMG_0150-260x170.jpg",
+      "createdAt": "2026-07-24T07:09:34.712Z"
+    },
+    {
+      "id": "xeEiiFzR8S",
+      "title": "niceeeeeeeeeeee",
+      "caption": "",
+      "imagePaths": [],
+      "imagePath": "",
+      "videoUrl": "/uploads/fca6624f9b6dbd2c73f8e1ae.mp4",
+      "createdAt": "2026-08-18T09:41:44.041Z"
+    }
+  ],
+  "categories": [
+    "Toys & Collections",
+    "Character & Heritage",
+    "Environmental",
+    "Reading & Learning",
+    "Marine Nature Exhibit",
+    "under the sea"
+  ],
+  "visitors": [
+    {
+      "id": "KUKj4JYBBd",
+      "visitorName": "Test Visitor",
+      "groupName": "Test Group",
+      "groupType": "Walk-in / Individual",
+      "pax": 1,
+      "contactNumber": "+639123456789",
+      "email": "test@example.com",
+      "address": "123 Test St, Manila",
+      "sex": "Male",
+      "age": 25,
+      "visitDate": "2026-08-23",
+      "visitTime": "23:40",
+      "purpose": "General Visit",
+      "tourGuide": "",
+      "status": "Checked-in",
+      "notes": "Test check-in",
+      "createdAt": "2026-08-23T15:40:43.754Z",
+      "updatedAt": "2026-08-23T15:40:43.754Z"
+    },
+    {
+      "id": "iPi7eAiY-l",
+      "visitorName": "Maria Santos",
+      "groupName": "Sagay High School",
+      "groupType": "Walk-in / Individual",
+      "pax": 1,
+      "contactNumber": "09123456789",
+      "email": "maria@example.com",
+      "address": "Brgy. Old Sagay",
+      "sex": "Female",
+      "age": 22,
+      "visitDate": "2026-08-25",
+      "visitTime": "14:43",
+      "purpose": "General Visit",
+      "tourGuide": "",
+      "status": "Checked-in",
+      "notes": "Test checkin",
+      "createdAt": "2026-08-25T06:43:45.361Z",
+      "updatedAt": "2026-08-25T06:43:45.361Z"
+    }
+  ],
+  "artifactLogs": [],
+  "museumInfo": {
+    "name": "Museo Sang Bata sa Negros",
+    "tagline": "A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP",
+    "address": "Barangay Old Sagay, Sagay City, Negros Occidental, Philippines 6122",
+    "phone": "+63 917 798 7420",
+    "hours": "Open Monday to Friday, 8:00 AM–5:00 PM. Saturday–Sunday open only for special booked tours.",
+    "about": "Located on the shoreline of Barangay Old Sagay beside the Sagay Marine Reserve, the museum aims to awaken children's creative and intellectual potential and help them understand and appreciate themselves, their environment, and their culture. Its flagship initiative is the Marine Conservation Education Program, which trains public elementary science teachers to raise awareness of the marine environment among children.",
+    "entranceFees": [
+      "Regular tour — Students w/ ID: PHP 20.00, Adults: PHP 50.00, Senior citizens: PHP 40.00",
+      "Special guided tour (with Jr. Guides): PHP 800/person (1 pax), PHP 450/person (2 pax), PHP 300/person (3–4 pax), PHP 200/person (5–7 pax), PHP 150/person (8–9 pax), PHP 130/person (10+ pax)"
+    ],
+    "footerLinks": [
+      {
+        "label": "💖 Donate",
+        "href": "/donate.html"
+      },
+      {
+        "label": "✉️ Contact",
+        "href": "/contact.html"
+      },
+      {
+        "label": "ℹ️ About",
+        "href": "/about.html"
+      }
+    ]
+  }
+}

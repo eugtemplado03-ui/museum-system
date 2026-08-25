@@ -15,7 +15,58 @@ const Api = (() => {
     return id;
   }
 
+  let _staticDataCache = null;
+  async function getStaticData() {
+    if (_staticDataCache) return _staticDataCache;
+    const paths = ['data.json', './data.json', '/data.json', '/museum-system/data.json'];
+    for (const p of paths) {
+      try {
+        const res = await fetch(p);
+        if (res.ok) {
+          _staticDataCache = await res.json();
+          return _staticDataCache;
+        }
+      } catch (e) { /* ignore */ }
+    }
+    return null;
+  }
+
+  async function fallbackStatic(path, method) {
+    if (method && method !== 'GET') return null;
+    const db = await getStaticData();
+    if (!db) return null;
+
+    // Route matching for static fallback
+    if (path === '/api/exhibits') return { exhibits: db.exhibits || [] };
+    if (path.startsWith('/api/exhibits/categories')) return { categories: db.categories || ['Marine & Nature', 'Touch & Play', 'Toys & Collections', 'Character & Heritage', 'Environmental', 'Reading & Learning', 'Other'] };
+    if (path.startsWith('/api/exhibits/')) {
+      const code = decodeURIComponent(path.replace('/api/exhibits/', '').split('?')[0]);
+      if (code && !code.includes('/')) {
+        const ex = (db.exhibits || []).find(e => (e.code && e.code.toLowerCase() === code.toLowerCase()) || e.id === code);
+        if (ex) return { exhibit: ex };
+      }
+    }
+    if (path === '/api/programs') return { programs: db.programs || [] };
+    if (path.startsWith('/api/programs/')) {
+      const id = decodeURIComponent(path.replace('/api/programs/', '').split('?')[0]);
+      const p = (db.programs || []).find(item => item.id === id);
+      if (p) return { program: p };
+    }
+    if (path === '/api/events') return { events: db.events || [] };
+    if (path.startsWith('/api/events/')) {
+      const id = decodeURIComponent(path.replace('/api/events/', '').split('?')[0]);
+      const ev = (db.events || []).find(item => item.id === id);
+      if (ev) return { event: ev };
+    }
+    if (path === '/api/gallery') return { gallery: db.gallery || [] };
+    if (path === '/api/museum-info') return { info: db.museumInfo || {} };
+    if (path.startsWith('/api/favorites/')) return { favorites: [] };
+    if (path.includes('/ratings')) return { ratings: [], average: 5, count: 0 };
+    return null;
+  }
+
   async function request(path, opts = {}) {
+    const method = (opts.method || 'GET').toUpperCase();
     const headers = opts.headers || {};
     if (!(opts.body instanceof FormData)) {
       headers['Content-Type'] = 'application/json';
@@ -23,15 +74,28 @@ const Api = (() => {
     const token = getToken();
     if (token) headers['Authorization'] = 'Bearer ' + token;
 
-    const res = await fetch(path, { ...opts, headers });
-    let data = null;
-    try { data = await res.json(); } catch (e) { /* no body */ }
-    if (!res.ok) {
-      const err = new Error((data && data.error) || `Request failed (${res.status})`);
-      err.status = res.status;
+    try {
+      const res = await fetch(path, { ...opts, headers });
+      let data = null;
+      try { data = await res.json(); } catch (e) { /* no body */ }
+      if (!res.ok) {
+        // If 404 on GET, try static fallback
+        if (res.status === 404 && method === 'GET') {
+          const fallback = await fallbackStatic(path, method);
+          if (fallback) return fallback;
+        }
+        const err = new Error((data && data.error) || `Request failed (${res.status})`);
+        err.status = res.status;
+        throw err;
+      }
+      return data;
+    } catch (err) {
+      if (method === 'GET') {
+        const fallback = await fallbackStatic(path, method);
+        if (fallback) return fallback;
+      }
       throw err;
     }
-    return data;
   }
 
   return {
