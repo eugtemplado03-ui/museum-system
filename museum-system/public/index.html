@@ -389,13 +389,19 @@ body {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-        const data = await res.json();
+        
+        let data = null;
+        try {
+          data = await res.json();
+        } catch (parseErr) {
+          throw new Error('Server is currently starting up or restarting. Please wait 10 seconds and try again.');
+        }
         
         if (!res.ok) {
-          throw new Error(data.error || 'Check-in failed');
+          throw new Error((data && data.error) || 'Check-in failed');
         }
 
-        const v = data.visitor || {};
+        const v = (data && data.visitor) || {};
         const visitorName = v.visitorName || payload.visitorName;
         Gate.setVisitorCheckedIn(visitorName);
 
