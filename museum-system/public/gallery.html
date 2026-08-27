@@ -77,10 +77,10 @@
       </div>
     </div>
 
-    <div class="gallery-grid" id="galleryGrid"></div>
+    <div class="grid" id="galleryGrid"></div>
     <div id="emptyState" style="display:none;" class="empty-state">
-      <h2>No photos yet</h2>
-      <p>Photos added from the admin dashboard will appear here.</p>
+      <h2>No photos or videos yet</h2>
+      <p>Media added from the admin dashboard will appear here.</p>
     </div>
   </div></main>
   <footer id="siteFooter"></footer>
@@ -106,10 +106,30 @@
 
     function galleryItem(g){
       const images = getAllImages(g);
+      const hasVideo = Boolean(g.videoUrl && String(g.videoUrl).trim());
+      const hasPhotos = images.length > 0;
+      
+      let badge = '';
+      if (hasVideo && hasPhotos) {
+        badge = `<div class="tag" style="background:rgba(217,79,61,0.2); color:#ff8585; border:1px solid rgba(217,79,61,0.35);">🎬 Video + 📷 ${images.length} Photos</div>`;
+      } else if (hasVideo) {
+        badge = `<div class="tag" style="background:rgba(217,79,61,0.2); color:#ff8585; border:1px solid rgba(217,79,61,0.35);">▶ Video</div>`;
+      } else if (images.length > 1) {
+        badge = `<div class="tag">📷 ${images.length} Photos</div>`;
+      } else if (images.length === 1) {
+        badge = `<div class="tag">📷 Photo</div>`;
+      }
+
       return `
-      <div class="gallery-item">
-        ${renderMediaBox(images, g.videoUrl, g.title || g.caption || 'Gallery photo', '📷')}
-        ${(g.title || g.caption) ? `<div class="caption">${g.title ? `<b>${escapeHtml(g.title)}</b>` : ''}${g.caption ? escapeHtml(g.caption) : ''}</div>` : ''}
+      <div class="content-card gallery-content-card">
+        <div class="media" style="height: 220px;">
+          ${renderMediaBox(images, g.videoUrl, g.title || g.caption || 'Gallery photo', '📷')}
+        </div>
+        <div class="body">
+          ${badge ? `<div style="margin-bottom:2px;">${badge}</div>` : ''}
+          ${g.title ? `<h3>${escapeHtml(g.title)}</h3>` : ''}
+          ${g.caption ? `<p class="desc">${escapeHtml(g.caption)}</p>` : ''}
+        </div>
       </div>`;
     }
 
