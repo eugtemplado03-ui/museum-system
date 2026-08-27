@@ -405,6 +405,27 @@ body {
         const visitorName = v.visitorName || payload.visitorName;
         Gate.setVisitorCheckedIn(visitorName);
 
+        // Store in personal visitor check-in history
+        try {
+          const hist = JSON.parse(localStorage.getItem('museum_visitor_history') || '[]');
+          hist.unshift({
+            id: v.id || ('v-' + Date.now()),
+            visitorName: visitorName,
+            visitDate: v.visitDate || new Date().toISOString().slice(0, 10),
+            visitTime: v.visitTime || new Date().toTimeString().slice(0, 5),
+            address: payload.address,
+            groupName: payload.groupName,
+            status: v.status || 'Checked-in'
+          });
+          localStorage.setItem('museum_visitor_history', JSON.stringify(hist.slice(0, 20)));
+          localStorage.setItem('museum_last_visit', JSON.stringify({
+            id: v.id,
+            name: visitorName,
+            date: v.visitDate,
+            time: v.visitTime
+          }));
+        } catch(e) {}
+
         // If a redirect URL was preserved (e.g. scanned an exhibit tag)
         if (redirectUrl && redirectUrl !== '/checkin.html') {
           submitBtn.innerHTML = '<span>Check-in Verified! Redirecting...</span>';

@@ -115,6 +115,10 @@
           </a>
 
           <div class="user-sidebar-section-title" style="margin-top:12px;">Quick Jump</div>
+          <a class="user-sidebar-btn" href="#" onclick="event.preventDefault(); window.openVisitorHistoryModal();">
+            <span class="user-sidebar-icon">📋</span>
+            <span class="user-sidebar-label">My Visit History</span>
+          </a>
           <a class="user-sidebar-btn" href="/#scannerSection">
             <span class="user-sidebar-icon">📷</span>
             <span class="user-sidebar-label">Tag Scanner</span>
@@ -129,9 +133,11 @@
         </nav>
 
         <div class="user-sidebar-footer">
-          <div style="font-size:11.5px; color:rgba(255,255,255,0.75); margin-bottom:8px; padding:4px 6px; background:rgba(0,0,0,0.25); border-radius:8px; display:flex; align-items:center; justify-content:space-between;">
-            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">${localStorage.getItem('museum_visitor_name') ? '👤 ' + String(localStorage.getItem('museum_visitor_name')).replace(/[&<>"']/g, '') : '🟢 Verified Visitor'}</span>
-            <a href="#" onclick="event.preventDefault(); localStorage.removeItem('museum_visitor_checked_in'); localStorage.removeItem('museum_visitor_name'); window.location.href='/checkin.html';" style="color:#f87171; text-decoration:none; font-weight:700; font-size:11px; margin-left:6px;">Switch</a>
+          <div style="font-size:11.5px; color:rgba(255,255,255,0.75); margin-bottom:8px; padding:6px 8px; background:rgba(0,0,0,0.25); border-radius:8px; display:flex; align-items:center; justify-content:space-between;">
+            <a href="#" onclick="event.preventDefault(); window.openVisitorHistoryModal();" style="color:#5eead4; text-decoration:none; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">
+              ${localStorage.getItem('museum_visitor_name') ? '👤 ' + String(localStorage.getItem('museum_visitor_name')).replace(/[&<>"']/g, '') : '🟢 Verified Visitor'}
+            </a>
+            <a href="#" onclick="event.preventDefault(); localStorage.removeItem('museum_visitor_checked_in'); localStorage.removeItem('museum_visitor_name'); window.location.href='/checkin.html';" style="color:#f87171; text-decoration:none; font-weight:700; font-size:11px; margin-left:6px;" title="Sign out / Switch visitor">Switch</a>
           </div>
           <a class="user-sidebar-sublink" href="/donate.html">
             <span>💖</span> Support Us
@@ -312,6 +318,78 @@
       // Quiet fail
     }
   }
+
+  window.openVisitorHistoryModal = function() {
+    closeSidebar();
+    const existing = document.getElementById('visitorHistoryOverlay');
+    if (existing) existing.remove();
+
+    const history = JSON.parse(localStorage.getItem('museum_visitor_history') || '[]');
+    const currentName = localStorage.getItem('museum_visitor_name') || 'Visitor';
+    const lastVisit = JSON.parse(localStorage.getItem('museum_last_visit') || '{}');
+
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.id = 'visitorHistoryOverlay';
+    overlay.style.zIndex = '1000';
+
+    overlay.innerHTML = `
+      <div class="modal" style="max-width: 540px; padding: 26px 24px; border-radius: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:22px;">📋</span>
+            <h2 style="margin:0; font-size:20px; color:#ffffff;">My Visit History</h2>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="document.getElementById('visitorHistoryOverlay').remove()" style="width:32px; height:32px; border-radius:50%; border:1.5px solid rgba(255,255,255,0.3); background:rgba(0,0,0,0.4); color:#fff; font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+        </div>
+
+        <!-- Active Pass Badge -->
+        <div style="background:linear-gradient(135deg, rgba(0,174,189,0.25) 0%, rgba(6,28,38,0.9) 100%); border:1.5px solid var(--teal); border-radius:14px; padding:16px 18px; margin-bottom:18px; box-shadow:0 8px 24px rgba(0,174,189,0.2);">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <div style="font-size:11px; font-weight:800; color:#5eead4; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:2px;">Verified Visitor Pass</div>
+              <div style="font-size:18px; font-weight:800; color:#ffffff;">${currentName.replace(/[&<>"']/g, '')}</div>
+            </div>
+            <span class="status-badge checked-in" style="font-size:11px; padding:3px 9px;">Active</span>
+          </div>
+          <div style="margin-top:10px; font-size:12px; color:#cbd5e1; display:flex; gap:12px; flex-wrap:wrap;">
+            <span>📅 ${lastVisit.date || 'Today'}</span>
+            <span>⏰ ${lastVisit.time || 'Checked In'}</span>
+            <span>🏛️ Museo Sang Bata sa Negros</span>
+          </div>
+        </div>
+
+        <h3 style="font-size:14px; font-weight:700; color:#cbd5e1; text-transform:uppercase; letter-spacing:0.05em; margin:0 0 10px;">Past Check-ins on this device</h3>
+        
+        <div style="max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-right:4px;">
+          ${history.length ? history.map((h, i) => `
+            <div style="background:rgba(0,42,54,0.75); border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div style="font-weight:700; font-size:13.5px; color:#ffffff;">${(h.visitorName || 'Visitor').replace(/[&<>"']/g, '')}</div>
+                <div style="font-size:11.5px; color:#94a3b8; margin-top:2px;">${h.visitDate || ''} at ${h.visitTime || ''} ${h.groupName ? '· ' + h.groupName.replace(/[&<>"']/g, '') : ''}</div>
+              </div>
+              <span style="font-size:11px; color:#5eead4; background:rgba(0,174,189,0.18); padding:2px 8px; border-radius:999px; font-weight:600;">Visit #${history.length - i}</span>
+            </div>
+          `).join('') : `
+            <div style="text-align:center; padding:20px; color:#94a3b8; font-size:13px; background:rgba(0,42,54,0.4); border-radius:10px;">
+              No past check-in records found on this device.
+            </div>
+          `}
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; border-top:1px solid rgba(255,255,255,0.12); padding-top:14px;">
+          <a href="/checkin.html" class="btn btn-ghost dark btn-small" style="font-size:12px;">+ Check In Again</a>
+          <button type="button" class="btn btn-primary btn-small" onclick="document.getElementById('visitorHistoryOverlay').remove()">Done</button>
+        </div>
+      </div>
+    `;
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.remove();
+    });
+
+    document.body.appendChild(overlay);
+  };
 
   window.MuseoSidebar = {
     open: openSidebar,

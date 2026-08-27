@@ -1671,13 +1671,28 @@ async function renderVisitorsTab(contentEl){
           <td data-label="Sex" style="font-size:12.5px; color:#f1f5f9;">${escapeHtml(v.sex || '—')}</td>
           <td data-label="Age" style="font-size:12.5px; color:#f1f5f9; text-align:center; font-weight:700;">${v.age !== null && v.age !== undefined ? v.age : '—'}</td>
           <td data-label="Actions" style="text-align:right; white-space:nowrap;">
-            <button class="btn btn-danger btn-small" data-del-visitor="${v.id}" title="Delete entry">Delete</button>
+            <div style="display:flex; gap:6px; justify-content:flex-end;">
+              <button class="btn btn-ghost dark btn-small" data-view-visitor="${v.id}" title="View full history record">View</button>
+              <button class="btn btn-ghost dark btn-small" data-edit-visitor="${v.id}" title="Edit log">Edit</button>
+              <button class="btn btn-danger btn-small" data-del-visitor="${v.id}" title="Delete entry">Delete</button>
+            </div>
           </td>
         </tr>
       `;
     }).join('');
 
-tbody.querySelectorAll('[data-del-visitor]').forEach(btn => {
+    tbody.querySelectorAll('[data-view-visitor]').forEach(btn => {
+      btn.addEventListener('click', () => openVisitorDetailsModal(btn.dataset.viewVisitor));
+    });
+
+    tbody.querySelectorAll('[data-edit-visitor]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const v = visitorsCache.find(item => item.id === btn.dataset.editVisitor);
+        if (v) openVisitorModal(v);
+      });
+    });
+
+    tbody.querySelectorAll('[data-del-visitor]').forEach(btn => {
       btn.addEventListener('click', async ()=>{
         const v = visitorsCache.find(item => item.id === btn.dataset.delVisitor);
         if(!v) return;
@@ -1736,6 +1751,104 @@ function openVisitorCheckinQrModal(){
     </div>
   `);
   document.getElementById('closeCheckinQrModal')?.addEventListener('click', closeModal);
+}
+
+function openVisitorDetailsModal(id){
+  const v = visitorsCache.find(x => x.id === id);
+  if(!v) return;
+
+  const contactInfo = [v.contactNumber, v.email].filter(Boolean).join(' · ');
+  const statusClass = (v.status || '').toLowerCase().replace(/[^a-z0-9]/g, '-');
+
+  openModal(`
+    <div style="max-width: 580px; margin: 0 auto;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+        <div>
+          <span class="cat-pill" style="font-size: 11px; margin-bottom: 6px; display: inline-block;">${escapeHtml(v.groupType || 'Individual')}</span>
+          <h2 style="margin: 0; font-size: 22px; color: #fff;">${escapeHtml(v.visitorName)}</h2>
+          ${v.groupName ? `<div style="font-size: 14px; color: #5eead4; font-weight: 700; margin-top: 2px;">🏛️ ${escapeHtml(v.groupName)}</div>` : ''}
+        </div>
+        <span class="status-badge ${statusClass}" style="font-size: 12px; padding: 4px 10px;">${escapeHtml(v.status || 'Checked-in')}</span>
+      </div>
+
+      <!-- Detail Grid Card -->
+      <div style="background: rgba(0, 42, 54, 0.85); border: 1.5px solid rgba(255, 255, 255, 0.16); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div>
+            <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Visit Date & Time</div>
+            <div style="font-size: 14px; color: #fff; font-weight: 700; margin-top: 2px;">📅 ${escapeHtml(v.visitDate || '—')} at ${escapeHtml(v.visitTime || '')}</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Party Size (Pax)</div>
+            <div style="font-size: 14px; color: #5eead4; font-weight: 800; margin-top: 2px;">👥 ${v.pax || 1} Person(s)</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px;">
+          <div>
+            <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Contact Information</div>
+            <div style="font-size: 13.5px; color: #fff; margin-top: 2px;">${escapeHtml(contactInfo || 'None provided')}</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Demographics</div>
+            <div style="font-size: 13.5px; color: #fff; margin-top: 2px;">${escapeHtml(v.sex || '—')} · Age: ${v.age != null ? v.age : '—'}</div>
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px;">
+          <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Address / Origin</div>
+          <div style="font-size: 13.5px; color: #fff; margin-top: 2px;">📍 ${escapeHtml(v.address || 'Not specified')}</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px;">
+          <div>
+            <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Purpose of Visit</div>
+            <div style="font-size: 13.5px; color: #fff; margin-top: 2px;">${escapeHtml(v.purpose || 'General Visit')}</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Assigned Tour Guide</div>
+            <div style="font-size: 13.5px; color: #fff; margin-top: 2px;">🧑‍💼 ${escapeHtml(v.tourGuide || 'Unassigned')}</div>
+          </div>
+        </div>
+
+        ${v.notes ? `
+          <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px;">
+            <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Notes & Remarks</div>
+            <div style="font-size: 13px; color: #cbd5e1; margin-top: 2px; line-height: 1.5; font-style: italic;">📝 ${escapeHtml(v.notes)}</div>
+          </div>
+        ` : ''}
+      </div>
+
+      <!-- Quick Actions -->
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <button type="button" class="btn btn-secondary btn-small" id="toggleVisitorStatusBtn">
+          ${v.status === 'Completed' ? '↩ Re-open Check-in' : '✓ Mark as Completed (Check Out)'}
+        </button>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-ghost dark btn-small" id="editFromViewBtn">Edit Entry</button>
+          <button type="button" class="btn btn-primary btn-small" onclick="closeModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  `);
+
+  document.getElementById('editFromViewBtn')?.addEventListener('click', () => {
+    closeModal();
+    openVisitorModal(v);
+  });
+
+  document.getElementById('toggleVisitorStatusBtn')?.addEventListener('click', async () => {
+    const newStatus = v.status === 'Completed' ? 'Checked-in' : 'Completed';
+    try {
+      await Api.updateVisitor(v.id, { status: newStatus });
+      toast(`Visitor status updated to "${newStatus}"`);
+      v.status = newStatus;
+      closeModal();
+      renderDashboard();
+    } catch(e) {
+      toast(e.message, true);
+    }
+  });
 }
 
 function openVisitorModal(v){
