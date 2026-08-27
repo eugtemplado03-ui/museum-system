@@ -90,7 +90,7 @@
         content.innerHTML = `
           <div class="plaque">
             <div class="plaque-media">
-              ${renderPhotoCarousel(images, exhibit.title, CATEGORY_ICON[exhibit.category] || CATEGORY_ICON.Other)}
+              ${renderMediaBox(images, exhibit.videoUrl, exhibit.title, CATEGORY_ICON[exhibit.category] || CATEGORY_ICON.Other)}
             </div>
             <div class="plaque-body">
               <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">

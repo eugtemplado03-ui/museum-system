@@ -132,17 +132,56 @@
   };
 
   /**
-   * Renders unified media (video player OR photo carousel).
+   * Renders unified media (video player AND/OR photo carousel).
+   * When both photos and video are present, renders a tabbed switcher.
    */
   window.renderMediaBox = function(images, videoUrl, title, fallbackIcon, customClass) {
     const rawPaths = Array.isArray(images) ? images : (images ? [images] : []);
     const paths = rawPaths.map(p => String(p || '').trim()).filter(Boolean);
     const hasVideo = Boolean(videoUrl && String(videoUrl).trim());
+    const hasPhotos = paths.length > 0;
+    const extraClass = customClass ? ' ' + customClass : '';
+
+    if (hasVideo && hasPhotos) {
+      const videoHtml = window.renderVideoPlayer(videoUrl, title);
+      const photoHtml = window.renderPhotoCarousel(paths, title, fallbackIcon);
+      const uid = 'mb-' + Math.random().toString(36).slice(2, 9);
+      return `
+        <div class="media-combo-box${extraClass}" id="${uid}">
+          <div class="media-combo-nav">
+            <button type="button" class="media-combo-tab active" data-target="video" onclick="switchMediaTab(this, '${uid}', 'video')">▶ Video</button>
+            <button type="button" class="media-combo-tab" data-target="photos" onclick="switchMediaTab(this, '${uid}', 'photos')">📷 Photos (${paths.length})</button>
+          </div>
+          <div class="media-combo-panel active" data-panel="video">
+            ${videoHtml}
+          </div>
+          <div class="media-combo-panel" data-panel="photos" style="display:none;">
+            ${photoHtml}
+          </div>
+        </div>`;
+    }
 
     if (hasVideo) {
       return window.renderVideoPlayer(videoUrl, title, customClass);
     }
     return window.renderPhotoCarousel(paths, title, fallbackIcon, customClass);
+  };
+
+  window.switchMediaTab = function(btn, uid, target) {
+    const box = document.getElementById(uid) || btn.closest('.media-combo-box');
+    if (!box) return;
+    box.querySelectorAll('.media-combo-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    box.querySelectorAll('.media-combo-panel').forEach(p => {
+      if (p.dataset.panel === target) {
+        p.style.display = '';
+        p.classList.add('active');
+      } else {
+        p.style.display = 'none';
+        p.classList.remove('active');
+      }
+    });
+    window.initPhotoCarousels(box);
   };
 
   /**

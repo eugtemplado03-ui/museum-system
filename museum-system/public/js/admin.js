@@ -2704,7 +2704,7 @@ async function renderGalleryTab(contentEl){
       <label class="gallery-item-checkbox">
         <input type="checkbox" class="gallery-select" data-id="${g.id}" ${gallerySelection.has(g.id)?'checked':''}>
       </label>
-      ${g.videoUrl ? `<div class="carousel-badge" style="background:rgba(217,79,61,0.85);">▶ Video</div>` : (paths.length > 1 ? `<div class="carousel-badge">📷 ${paths.length} photos</div>` : '')}
+      ${(g.videoUrl && paths.length > 0) ? `<div class="carousel-badge" style="background:rgba(217,79,61,0.9);">▶ Video + 📷 ${paths.length}</div>` : (g.videoUrl ? `<div class="carousel-badge" style="background:rgba(217,79,61,0.85);">▶ Video</div>` : (paths.length > 1 ? `<div class="carousel-badge">📷 ${paths.length} photos</div>` : ''))}
       ${primary ? `<img src="${escapeHtml(primary)}" alt="${escapeHtml(g.title)}">` : (g.videoUrl ? `<div style="width:100%; height:100%; background:#000; display:flex; align-items:center; justify-content:center; color:#fff; font-size:32px;">▶</div>` : `<div style="width:100%; height:100%; background:var(--teal-light); display:flex; align-items:center; justify-content:center; font-size:32px;">📷</div>`)}
       <div class="caption">
         ${g.title ? `<b>${escapeHtml(g.title)}</b>` : ''}
