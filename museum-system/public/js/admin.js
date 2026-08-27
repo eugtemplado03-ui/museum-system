@@ -268,42 +268,42 @@ async function renderDashboardHomeTab(contentEl){
       <div style="padding:16px 20px; display:flex; flex-direction:column; gap:16px;">
         <!-- Stats Overview -->
         <div class="kpi-cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:10px;">
-          <div class="kpi-stat-card" style="padding:10px 12px;">
+          <div class="kpi-stat-card" style="padding:10px 12px; cursor:pointer;" data-tab="catalog" title="Open Catalog">
             <div class="kpi-stat-icon" style="width:28px; height:28px; font-size:14px;">🏛️</div>
             <div class="kpi-stat-info">
               <div class="kpi-stat-value" style="font-size:18px;">${exhibits.length}</div>
               <div class="kpi-stat-label" style="font-size:10px;">Total Exhibits</div>
             </div>
           </div>
-          <div class="kpi-stat-card" style="padding:10px 12px;">
+          <div class="kpi-stat-card" style="padding:10px 12px; cursor:pointer;" data-tab="programs" title="Open Programs">
             <div class="kpi-stat-icon green" style="width:28px; height:28px; font-size:14px;">🌱</div>
             <div class="kpi-stat-info">
               <div class="kpi-stat-value" style="font-size:18px;">${programs.length}</div>
               <div class="kpi-stat-label" style="font-size:10px;">Active Programs</div>
             </div>
           </div>
-          <div class="kpi-stat-card" style="padding:10px 12px;">
+          <div class="kpi-stat-card" style="padding:10px 12px; cursor:pointer;" data-tab="events" title="Open Events">
             <div class="kpi-stat-icon orange" style="width:28px; height:28px; font-size:14px;">📅</div>
             <div class="kpi-stat-info">
               <div class="kpi-stat-value" style="font-size:18px;">${events.length}</div>
               <div class="kpi-stat-label" style="font-size:10px;">Events</div>
             </div>
           </div>
-          <div class="kpi-stat-card" style="padding:10px 12px;">
+          <div class="kpi-stat-card" style="padding:10px 12px; cursor:pointer;" data-tab="gallery" title="Open Gallery">
             <div class="kpi-stat-icon purple" style="width:28px; height:28px; font-size:14px;">🖼️</div>
             <div class="kpi-stat-info">
               <div class="kpi-stat-value" style="font-size:18px;">${gallery.length}</div>
               <div class="kpi-stat-label" style="font-size:10px;">Gallery Items</div>
             </div>
           </div>
-          <div class="kpi-stat-card" style="padding:10px 12px;">
+          <div class="kpi-stat-card" style="padding:10px 12px; cursor:pointer;" data-tab="visitors" title="Open Visitor Logs">
             <div class="kpi-stat-icon blue" style="width:28px; height:28px; font-size:14px;">👥</div>
             <div class="kpi-stat-info">
               <div class="kpi-stat-value" style="font-size:18px;">${visitors.length}</div>
               <div class="kpi-stat-label" style="font-size:10px;">Visitor Logs</div>
             </div>
           </div>
-          <div class="kpi-stat-card" style="padding:10px 12px;">
+          <div class="kpi-stat-card" style="padding:10px 12px; cursor:pointer;" data-tab="artifacts" title="Open Artifacts Log">
             <div class="kpi-stat-icon" style="width:28px; height:28px; font-size:14px;">🏺</div>
             <div class="kpi-stat-info">
               <div class="kpi-stat-value" style="font-size:18px;">${artifacts.length}</div>
@@ -3173,11 +3173,22 @@ document.addEventListener('click', (e) => {
   if (e.target.closest('#signOutBtn, #signOutBtnMobile, .admin-sidebar-signout')) {
     e.preventDefault();
     handleSignOut();
+    return;
   }
   const tagBtn = e.target.closest('[data-tag]');
   if (tagBtn && tagBtn.dataset.tag) {
     e.preventDefault();
     openTagModal(tagBtn.dataset.tag);
+    return;
+  }
+  const tabBtn = e.target.closest('[data-tab]');
+  if (tabBtn && tabBtn.dataset.tab) {
+    e.preventDefault();
+    activeTab = tabBtn.dataset.tab;
+    if (window.MuseoSidebar) window.MuseoSidebar.close();
+    renderDashboard();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
   }
 });
 
