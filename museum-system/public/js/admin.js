@@ -125,17 +125,18 @@ function renderLogin(){
 let activeTab = 'dashboard';
 
 const SIDEBAR_ITEMS = [
-  { id: 'dashboard',    label: 'Dashboard',         icon: '📊' },
-  { id: 'catalog',      label: 'Catalog',           icon: '🏛️' },
-  { id: 'categories',   label: 'Categories',        icon: '🏷️' },
-  { id: 'visitors',     label: 'Visitor History',   icon: '📋' },
-  { id: 'artifacts',    label: 'Artifacts Log',     icon: '🏺' },
-  { id: 'programs',     label: 'Programs',          icon: '🌱' },
-  { id: 'events',       label: 'Events',            icon: '📅' },
-  { id: 'gallery',      label: 'Gallery',           icon: '🖼️' },
-  { id: 'analytics',    label: 'Analytics',         icon: '📈' },
-  { id: 'feedback',     label: 'Feedback',          icon: '💬' },
-  { id: 'museumInfo',   label: 'Museum Info',       icon: '🏛️' },
+  { id: 'dashboard',      label: 'Dashboard',         icon: '📊' },
+  { id: 'catalog',        label: 'Catalog',           icon: '🏛️' },
+  { id: 'categories',     label: 'Categories',        icon: '🏷️' },
+  { id: 'visitors',       label: 'Visitor Log',       icon: '🟢' },
+  { id: 'visitorHistory', label: 'Visitor History',   icon: '📋' },
+  { id: 'artifacts',      label: 'Artifacts Log',     icon: '🏺' },
+  { id: 'programs',       label: 'Programs',          icon: '🌱' },
+  { id: 'events',         label: 'Events',            icon: '📅' },
+  { id: 'gallery',        label: 'Gallery',           icon: '🖼️' },
+  { id: 'analytics',      label: 'Analytics',         icon: '📈' },
+  { id: 'feedback',       label: 'Feedback',          icon: '💬' },
+  { id: 'museumInfo',     label: 'Museum Info',       icon: '🏛️' },
 ];
 
 function handleSignOut() {
@@ -212,6 +213,7 @@ async function renderDashboard(){
   else if(activeTab === 'catalog') await renderCatalogTab(contentEl);
   else if(activeTab === 'categories') await renderCategoriesTab(contentEl);
   else if(activeTab === 'visitors') await renderVisitorsTab(contentEl);
+  else if(activeTab === 'visitorHistory') await renderVisitorHistoryTab(contentEl);
   else if(activeTab === 'artifacts') await renderArtifactsTab(contentEl);
   else if(activeTab === 'programs') await renderProgramsTab(contentEl);
   else if(activeTab === 'events') await renderEventsTab(contentEl);
@@ -343,9 +345,12 @@ async function renderDashboardHomeTab(contentEl){
 
           <!-- Recent Visitors -->
           <div class="info-card" style="padding:14px 16px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:6px;">
               <h3 style="margin:0; font-family:'Nunito',sans-serif; font-weight:800; font-size:15px; color:#ffffff; text-shadow:0 1px 3px rgba(0,0,0,0.5);">Recent Visitors</h3>
-              <a href="#" class="view-all-btn" data-tab="visitors">View All →</a>
+              <div style="display:flex; gap:8px;">
+                <a href="#" class="view-all-btn" data-tab="visitors" title="Open Live Visitor Log">🟢 Live Log</a>
+                <a href="#" class="view-all-btn" data-tab="visitorHistory" title="Open Visitor History Archive">📜 History →</a>
+              </div>
             </div>
             ${recentVisitors.length ? `
               <ul style="margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px;">
@@ -1458,16 +1463,44 @@ function downloadCSV(csvContent, filename){
   document.body.removeChild(link);
 }
 
-// ---------------- Visitor Log ----------------
+// ---------------- Visitor Log (Live) & Visitor History (Past) ----------------
 let visitorsCache = [];
 let visitorStatsCache = null;
-let adminVisitorsSearch = '';
-let adminVisitorsGroupFilter = 'All';
-let adminVisitorsStatusFilter = 'All';
-let adminVisitorsDateFilter = '';
 
+// Live Visitor Log State
+let adminLiveVisitorsSearch = '';
+let adminLiveVisitorsGroupFilter = 'All';
+let adminLiveVisitorsStatusFilter = 'All';
+
+// Visitor History State
+let adminHistoryVisitorsSearch = '';
+let adminHistoryVisitorsGroupFilter = 'All';
+let adminHistoryVisitorsStatusFilter = 'All';
+let adminHistoryVisitorsPreset = 'past5'; // 'past5', 'past7', 'past30', 'all', 'custom'
+let adminHistoryVisitorsDate = '';
+
+function getPhilippineTodayIso() {
+  const now = new Date();
+  try {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila', year: 'numeric', month: '2-digit', day: '2-digit' }).format(now);
+  } catch (e) {
+    return now.toISOString().slice(0, 10);
+  }
+}
+
+function getPastDateIso(daysAgo) {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  try {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
+  } catch (e) {
+    return d.toISOString().slice(0, 10);
+  }
+}
+
+// ─── 1. Live Visitor Log (Today's Active Visitors) ───
 async function renderVisitorsTab(contentEl){
-  contentEl.innerHTML = `<div class="empty-state" style="color:var(--ink-soft);"><p>Loading visitor logs…</p></div>`;
+  contentEl.innerHTML = `<div class="empty-state" style="color:var(--ink-soft);"><p>Loading live visitor logs…</p></div>`;
   try{
     const [visRes, statsRes] = await Promise.all([
       Api.listVisitors(),
@@ -1476,21 +1509,23 @@ async function renderVisitorsTab(contentEl){
     visitorsCache = (visRes && Array.isArray(visRes.visitors)) ? visRes.visitors : [];
     visitorStatsCache = (statsRes && statsRes.stats) ? statsRes.stats : {};
   }catch(e){
-    contentEl.innerHTML = `<div class="empty-state"><h2>Could not load visitor logs</h2><p>${escapeHtml(e.message)}</p></div>`;
+    contentEl.innerHTML = `<div class="empty-state"><h2>Could not load live visitor logs</h2><p>${escapeHtml(e.message)}</p></div>`;
     return;
   }
 
-  const stats = visitorStatsCache || {};
-  const totalVisits = stats.totalVisits != null ? stats.totalVisits : visitorsCache.length;
-  const totalPax = stats.totalPax != null ? stats.totalPax : 0;
-  const todayVisits = stats.todayVisits != null ? stats.todayVisits : 0;
-  const todayPax = stats.todayPax != null ? stats.todayPax : 0;
-  const scheduledCount = (stats.byStatus && stats.byStatus['Scheduled']) || 0;
-  const checkedInCount = (stats.byStatus && stats.byStatus['Checked-in']) || 0;
+  const todayIso = getPhilippineTodayIso();
+  // Filter for today's live visitors
+  let liveVisitors = visitorsCache.filter(v => (v.visitDate || '').startsWith(todayIso));
 
-  let filtered = [...visitorsCache];
-  if(adminVisitorsSearch){
-    const q = adminVisitorsSearch.toLowerCase();
+  const todayTotalVisits = liveVisitors.length;
+  const todayTotalPax = liveVisitors.reduce((sum, v) => sum + (v.pax || 1), 0);
+  const activeCheckedIn = liveVisitors.filter(v => (v.status || '').toLowerCase() === 'checked-in');
+  const activePax = activeCheckedIn.reduce((sum, v) => sum + (v.pax || 1), 0);
+  const completedVisits = liveVisitors.filter(v => (v.status || '').toLowerCase() === 'completed').length;
+
+  let filtered = [...liveVisitors];
+  if(adminLiveVisitorsSearch){
+    const q = adminLiveVisitorsSearch.toLowerCase();
     filtered = filtered.filter(v =>
       (v.visitorName || '').toLowerCase().includes(q) ||
       (v.groupName || '').toLowerCase().includes(q) ||
@@ -1498,100 +1533,98 @@ async function renderVisitorsTab(contentEl){
       (v.email || '').toLowerCase().includes(q) ||
       (v.purpose || '').toLowerCase().includes(q) ||
       (v.tourGuide || '').toLowerCase().includes(q) ||
-      (v.notes || '').toLowerCase().includes(q)
+      (v.notes || '').toLowerCase().includes(q) ||
+      (v.address || '').toLowerCase().includes(q)
     );
   }
-  if(adminVisitorsGroupFilter !== 'All'){
-    filtered = filtered.filter(v => (v.groupType || '').toLowerCase() === adminVisitorsGroupFilter.toLowerCase());
+  if(adminLiveVisitorsGroupFilter !== 'All'){
+    filtered = filtered.filter(v => (v.groupType || '').toLowerCase() === adminLiveVisitorsGroupFilter.toLowerCase());
   }
-  if(adminVisitorsStatusFilter !== 'All'){
-    filtered = filtered.filter(v => (v.status || '').toLowerCase() === adminVisitorsStatusFilter.toLowerCase());
-  }
-  if(adminVisitorsDateFilter){
-    filtered = filtered.filter(v => (v.visitDate || '').startsWith(adminVisitorsDateFilter));
+  if(adminLiveVisitorsStatusFilter !== 'All'){
+    filtered = filtered.filter(v => (v.status || '').toLowerCase() === adminLiveVisitorsStatusFilter.toLowerCase());
   }
 
   contentEl.innerHTML = `
+    <!-- Live KPIs -->
     <div class="kpi-cards-grid">
-      <div class="kpi-stat-card">
-        <div class="kpi-stat-icon">📋</div>
+      <div class="kpi-stat-card" style="border:1.5px solid rgba(94,234,212,0.4); background:linear-gradient(135deg, rgba(0,42,54,0.9) 0%, rgba(0,174,189,0.2) 100%);">
+        <div class="kpi-stat-icon green">🟢</div>
         <div class="kpi-stat-info">
-          <div class="kpi-stat-value">${totalVisits}</div>
-          <div class="kpi-stat-label">Total Visits Logged</div>
+          <div class="kpi-stat-value" style="color:#5eead4;">${activePax} <span style="font-size:12px; font-weight:600; color:#cbd5e1;">pax</span></div>
+          <div class="kpi-stat-label">Currently Inside (${activeCheckedIn.length} groups)</div>
         </div>
       </div>
       <div class="kpi-stat-card">
         <div class="kpi-stat-icon orange">👥</div>
         <div class="kpi-stat-info">
-          <div class="kpi-stat-value">${totalPax}</div>
-          <div class="kpi-stat-label">Total Visitors (Pax)</div>
+          <div class="kpi-stat-value">${todayTotalPax}</div>
+          <div class="kpi-stat-label">Today's Total Visitors (${todayTotalVisits} logs)</div>
         </div>
       </div>
       <div class="kpi-stat-card">
-        <div class="kpi-stat-icon green">📅</div>
+        <div class="kpi-stat-icon purple">✓</div>
         <div class="kpi-stat-info">
-          <div class="kpi-stat-value">${todayVisits}</div>
-          <div class="kpi-stat-label">Today's Visits (${todayPax} pax)</div>
+          <div class="kpi-stat-value">${completedVisits}</div>
+          <div class="kpi-stat-label">Completed / Checked Out Today</div>
         </div>
       </div>
-      <div class="kpi-stat-card">
-        <div class="kpi-stat-icon purple">⏳</div>
+      <div class="kpi-stat-card" style="cursor:pointer;" data-tab="visitorHistory" title="View historical records">
+        <div class="kpi-stat-icon">📜</div>
         <div class="kpi-stat-info">
-          <div class="kpi-stat-value">${checkedInCount + scheduledCount}</div>
-          <div class="kpi-stat-label">${checkedInCount} Checked-in · ${scheduledCount} Scheduled</div>
+          <div class="kpi-stat-value">${visitorsCache.length}</div>
+          <div class="kpi-stat-label">All-Time History Archive →</div>
         </div>
       </div>
     </div>
 
-<div class="admin-toolbar-wrap">
-      <!-- Quick History Range Filters -->
-      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">
-        <button class="filter-chip ${!adminVisitorsDateFilter ? 'active' : ''}" id="vHistAll">All History (${visitorsCache.length})</button>
-        <button class="filter-chip ${adminVisitorsDateFilter === new Date().toISOString().slice(0, 10) ? 'active' : ''}" id="vHistToday">Today</button>
-        <button class="filter-chip ${adminVisitorsDateFilter === new Date().toISOString().slice(0, 7) ? 'active' : ''}" id="vHistThisMonth">This Month</button>
-        <button class="filter-chip ${adminVisitorsDateFilter === new Date().toISOString().slice(0, 4) ? 'active' : ''}" id="vHistThisYear">This Year</button>
+    <!-- Live Toolbar -->
+    <div class="admin-toolbar-wrap" style="margin-top:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px; padding:8px 12px; background:rgba(0,42,54,0.6); border-radius:10px; border:1px solid rgba(255,255,255,0.1);">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#22c55e; box-shadow:0 0 8px #22c55e;"></span>
+          <span style="font-size:13px; font-weight:800; color:#ffffff;">LIVE LOG · ${todayIso}</span>
+        </div>
+        <a href="#" class="view-all-btn" data-tab="visitorHistory" style="font-size:12px; color:#5eead4; font-weight:700;">📜 View Past 5+ Days in Visitor History →</a>
       </div>
 
       <div class="admin-toolbar-row">
-        <input type="text" id="adminVisitorsSearchInput" class="admin-search-input" placeholder="Search visitor history by name, school, group, phone, guide, address…" value="${escapeHtml(adminVisitorsSearch)}">
+        <input type="text" id="adminLiveVisitorsSearchInput" class="admin-search-input" placeholder="Search today's visitors by name, group, school, phone, address…" value="${escapeHtml(adminLiveVisitorsSearch)}">
         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-          <button class="btn-export" id="exportVisitorsBtn" title="Export current visitor list as CSV">📥 Export CSV</button>
-          <button class="btn btn-ghost dark btn-small" id="printVisitorsReportBtn" title="Print visitor history summary report">🖨 Print Report</button>
-          <button class="btn btn-primary btn-small" id="addVisitorBtn">+ Log visitor</button>
+          <button class="btn btn-primary btn-small" id="addWalkinVisitorBtn">+ Log walk-in</button>
           <button class="btn btn-primary btn-small" id="visitorCheckinQrBtn">📱 Check-in QR</button>
+          <button class="btn-export" id="exportLiveVisitorsBtn" title="Export today's list as CSV">📥 Export Today CSV</button>
         </div>
       </div>
+
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:8px;">
         <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-          <select id="adminVisitorsGroupSelect" class="filter-select" style="padding:6px 12px; font-size:12.5px; border-radius:8px; border:1px solid var(--grey-200);">
-            <option value="All" ${adminVisitorsGroupFilter==='All'?'selected':''}>All Group Types</option>
-            <option value="Walk-in / Individual" ${adminVisitorsGroupFilter==='Walk-in / Individual'?'selected':''}>Walk-in / Individual</option>
-            <option value="School Tour" ${adminVisitorsGroupFilter==='School Tour'?'selected':''}>School Tour</option>
-            <option value="Family" ${adminVisitorsGroupFilter==='Family'?'selected':''}>Family</option>
-            <option value="Government / VIP" ${adminVisitorsGroupFilter==='Government / VIP'?'selected':''}>Government / VIP</option>
-            <option value="NGO / Community" ${adminVisitorsGroupFilter==='NGO / Community'?'selected':''}>NGO / Community</option>
-            <option value="Researcher / Scholar" ${adminVisitorsGroupFilter==='Researcher / Scholar'?'selected':''}>Researcher / Scholar</option>
-            <option value="Other" ${adminVisitorsGroupFilter==='Other'?'selected':''}>Other</option>
+          <select id="adminLiveVisitorsGroupSelect" class="filter-select" style="padding:6px 12px; font-size:12.5px; border-radius:8px; border:1px solid var(--grey-200);">
+            <option value="All" ${adminLiveVisitorsGroupFilter==='All'?'selected':''}>All Group Types</option>
+            <option value="Walk-in / Individual" ${adminLiveVisitorsGroupFilter==='Walk-in / Individual'?'selected':''}>Walk-in / Individual</option>
+            <option value="School Tour" ${adminLiveVisitorsGroupFilter==='School Tour'?'selected':''}>School Tour</option>
+            <option value="Family" ${adminLiveVisitorsGroupFilter==='Family'?'selected':''}>Family</option>
+            <option value="Government / VIP" ${adminLiveVisitorsGroupFilter==='Government / VIP'?'selected':''}>Government / VIP</option>
+            <option value="NGO / Community" ${adminLiveVisitorsGroupFilter==='NGO / Community'?'selected':''}>NGO / Community</option>
+            <option value="Researcher / Scholar" ${adminLiveVisitorsGroupFilter==='Researcher / Scholar'?'selected':''}>Researcher / Scholar</option>
+            <option value="Other" ${adminLiveVisitorsGroupFilter==='Other'?'selected':''}>Other</option>
           </select>
-          <select id="adminVisitorsStatusSelect" class="filter-select" style="padding:6px 12px; font-size:12.5px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,42,54,0.85); color:#ffffff;">
-            <option value="All" ${adminVisitorsStatusFilter==='All'?'selected':''}>All Statuses</option>
-            <option value="Checked-in" ${adminVisitorsStatusFilter==='Checked-in'?'selected':''}>Checked-in</option>
-            <option value="Completed" ${adminVisitorsStatusFilter==='Completed'?'selected':''}>Completed</option>
-            <option value="Scheduled" ${adminVisitorsStatusFilter==='Scheduled'?'selected':''}>Scheduled</option>
-            <option value="Cancelled" ${adminVisitorsStatusFilter==='Cancelled'?'selected':''}>Cancelled</option>
+          <select id="adminLiveVisitorsStatusSelect" class="filter-select" style="padding:6px 12px; font-size:12.5px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,42,54,0.85); color:#ffffff;">
+            <option value="All" ${adminLiveVisitorsStatusFilter==='All'?'selected':''}>All Statuses</option>
+            <option value="Checked-in" ${adminLiveVisitorsStatusFilter==='Checked-in'?'selected':''}>Checked-in (Inside)</option>
+            <option value="Completed" ${adminLiveVisitorsStatusFilter==='Completed'?'selected':''}>Completed (Checked Out)</option>
           </select>
-          <input type="date" id="adminVisitorsDateInput" value="${escapeHtml(adminVisitorsDateFilter)}" title="Filter by visit date" style="padding:5px 10px; font-size:12.5px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,42,54,0.85); color:#ffffff;">
-          ${(adminVisitorsSearch || adminVisitorsGroupFilter !== 'All' || adminVisitorsStatusFilter !== 'All' || adminVisitorsDateFilter) ? '<button type="button" class="btn btn-ghost dark btn-small" id="clearVisitorsFilters" style="padding:4px 8px; font-size:11.5px; color:#5eead4; border-color:rgba(0,174,189,0.4);">Reset filters</button>' : ''}
+          ${(adminLiveVisitorsSearch || adminLiveVisitorsGroupFilter !== 'All' || adminLiveVisitorsStatusFilter !== 'All') ? '<button type="button" class="btn btn-ghost dark btn-small" id="clearLiveVisitorsFilters" style="padding:4px 8px; font-size:11.5px; color:#5eead4; border-color:rgba(0,174,189,0.4);">Reset filters</button>' : ''}
         </div>
-        <span style="font-size:13px; color:#cbd5e1; font-weight:600;">${filtered.length} of ${visitorsCache.length} records</span>
+        <span style="font-size:13px; color:#cbd5e1; font-weight:600;">${filtered.length} of ${liveVisitors.length} today</span>
       </div>
     </div>
 
+    <!-- Live Visitors Table -->
     <div class="admin-table-wrap" style="margin-top:12px;">
       <table class="ledger">
         <thead>
           <tr>
-            <th>Date & Time</th>
+            <th>Time</th>
             <th>Visitor / Contact</th>
             <th>Group / Organization</th>
             <th style="text-align:center;">Pax</th>
@@ -1604,82 +1637,68 @@ async function renderVisitorsTab(contentEl){
             <th style="text-align:right;">Actions</th>
           </tr>
         </thead>
-        <tbody id="visitorsTableBody"></tbody>
+        <tbody id="liveVisitorsTableBody"></tbody>
       </table>
     </div>
-    ${filtered.length === 0 ? `<div class="empty-state"><h2 style="color:#ffffff;">No visitor records found</h2><p style="color:#cbd5e1;">No visitor logs match your search and filter criteria.</p></div>` : ''}
+    ${filtered.length === 0 ? `
+      <div class="empty-state">
+        <h2 style="color:#ffffff;">No live visitors today yet</h2>
+        <p style="color:#cbd5e1;">Visitors who check in today (${todayIso}) will appear here in real time.</p>
+        <div style="margin-top:14px; display:flex; gap:10px; justify-content:center;">
+          <button class="btn btn-primary btn-small" id="addWalkinVisitorBtnEmpty">+ Log walk-in</button>
+          <a href="#" class="btn btn-ghost dark btn-small" data-tab="visitorHistory">Open Visitor History Archive →</a>
+        </div>
+      </div>
+    ` : ''}
   `;
 
   // Bind Events
-  const searchInput = document.getElementById('adminVisitorsSearchInput');
+  const searchInput = document.getElementById('adminLiveVisitorsSearchInput');
   if(searchInput){
     searchInput.addEventListener('input', (e)=>{
-      adminVisitorsSearch = e.target.value.trim();
+      adminLiveVisitorsSearch = e.target.value.trim();
       renderVisitorsTab(contentEl);
-      const updated = document.getElementById('adminVisitorsSearchInput');
+      const updated = document.getElementById('adminLiveVisitorsSearchInput');
       if(updated){ updated.focus(); updated.setSelectionRange(updated.value.length, updated.value.length); }
     });
   }
 
-  // History filter chips
-  document.getElementById('vHistAll')?.addEventListener('click', ()=>{
-    adminVisitorsDateFilter = '';
+  document.getElementById('adminLiveVisitorsGroupSelect')?.addEventListener('change', (e)=>{
+    adminLiveVisitorsGroupFilter = e.target.value;
     renderVisitorsTab(contentEl);
   });
-  document.getElementById('vHistToday')?.addEventListener('click', ()=>{
-    adminVisitorsDateFilter = new Date().toISOString().slice(0, 10);
+  document.getElementById('adminLiveVisitorsStatusSelect')?.addEventListener('change', (e)=>{
+    adminLiveVisitorsStatusFilter = e.target.value;
     renderVisitorsTab(contentEl);
   });
-  document.getElementById('vHistThisMonth')?.addEventListener('click', ()=>{
-    adminVisitorsDateFilter = new Date().toISOString().slice(0, 7);
+  document.getElementById('clearLiveVisitorsFilters')?.addEventListener('click', ()=>{
+    adminLiveVisitorsSearch = '';
+    adminLiveVisitorsGroupFilter = 'All';
+    adminLiveVisitorsStatusFilter = 'All';
     renderVisitorsTab(contentEl);
   });
-  document.getElementById('vHistThisYear')?.addEventListener('click', ()=>{
-    adminVisitorsDateFilter = new Date().toISOString().slice(0, 4);
-    renderVisitorsTab(contentEl);
-  });
-
-  document.getElementById('adminVisitorsGroupSelect')?.addEventListener('change', (e)=>{
-    adminVisitorsGroupFilter = e.target.value;
-    renderVisitorsTab(contentEl);
-  });
-  document.getElementById('adminVisitorsStatusSelect')?.addEventListener('change', (e)=>{
-    adminVisitorsStatusFilter = e.target.value;
-    renderVisitorsTab(contentEl);
-  });
-  document.getElementById('adminVisitorsDateInput')?.addEventListener('change', (e)=>{
-    adminVisitorsDateFilter = e.target.value;
-    renderVisitorsTab(contentEl);
-  });
-  document.getElementById('clearVisitorsFilters')?.addEventListener('click', ()=>{
-    adminVisitorsSearch = '';
-    adminVisitorsGroupFilter = 'All';
-    adminVisitorsStatusFilter = 'All';
-    adminVisitorsDateFilter = '';
-    renderVisitorsTab(contentEl);
-  });
-  document.getElementById('exportVisitorsBtn')?.addEventListener('click', ()=>exportVisitorsCSV(filtered));
-  document.getElementById('printVisitorsReportBtn')?.addEventListener('click', ()=>printVisitorsHistoryReport(filtered));
-  document.getElementById('addVisitorBtn')?.addEventListener('click', ()=>openVisitorModal(null));
+  document.getElementById('exportLiveVisitorsBtn')?.addEventListener('click', ()=>exportVisitorsCSV(filtered, `msbn-live-visitors-${todayIso}.csv`));
+  document.getElementById('addWalkinVisitorBtn')?.addEventListener('click', ()=>openVisitorWalkinModal());
+  document.getElementById('addWalkinVisitorBtnEmpty')?.addEventListener('click', ()=>openVisitorWalkinModal());
   document.getElementById('visitorCheckinQrBtn')?.addEventListener('click', ()=>openVisitorCheckinQrModal());
 
-  const tbody = document.getElementById('visitorsTableBody');
+  const tbody = document.getElementById('liveVisitorsTableBody');
   if(tbody){
     tbody.innerHTML = filtered.map(v => {
       const statusClass = (v.status || '').toLowerCase().replace(/[^a-z0-9]/g, '-');
       const contactInfo = [v.contactNumber, v.email].filter(Boolean).join(' · ');
+      const isCheckedIn = (v.status || '').toLowerCase() === 'checked-in';
       return `
         <tr>
-          <td data-label="Date & Time" style="white-space:nowrap;">
-            <div style="font-weight:800; color:#ffffff; font-size:13.5px; text-shadow:0 1px 2px rgba(0,0,0,0.5);">${escapeHtml(v.visitDate || '—')}</div>
-            <div style="font-size:11.5px; color:#cbd5e1; font-weight:600;">${escapeHtml(v.visitTime || '')}</div>
+          <td data-label="Time" style="white-space:nowrap;">
+            <div style="font-weight:800; color:#ffffff; font-size:14px;">${escapeHtml(v.visitTime || '—')}</div>
           </td>
           <td data-label="Visitor / Contact">
-            <div style="font-weight:800; color:#ffffff; font-size:14.5px; text-shadow:0 1px 2px rgba(0,0,0,0.5);">${escapeHtml(v.visitorName)}</div>
+            <div style="font-weight:800; color:#ffffff; font-size:14.5px;">${escapeHtml(v.visitorName)}</div>
             ${contactInfo ? `<div style="font-size:11.5px; color:#cbd5e1; margin-top:2px;">${escapeHtml(contactInfo)}</div>` : ''}
           </td>
           <td data-label="Group / Organization">
-            ${v.groupName ? `<div style="font-weight:700; color:#ffffff; font-size:14px; text-shadow:0 1px 2px rgba(0,0,0,0.5); margin-bottom:4px;">${escapeHtml(v.groupName)}</div>` : ''}
+            ${v.groupName ? `<div style="font-weight:700; color:#ffffff; font-size:14px; margin-bottom:4px;">${escapeHtml(v.groupName)}</div>` : ''}
             <span class="cat-pill" style="font-size:10px; font-weight:700; background:rgba(0,174,189,0.20); color:#5eead4; border:1px solid rgba(0,174,189,0.35);">${escapeHtml(v.groupType || 'Individual')}</span>
           </td>
           <td data-label="Pax" style="text-align:center;">
@@ -1695,13 +1714,15 @@ async function renderVisitorsTab(contentEl){
           <td data-label="Status">
             <span class="status-badge ${statusClass}">${escapeHtml(v.status || 'Checked-in')}</span>
           </td>
-          <td data-label="Address" style="font-size:12.5px; color:#f1f5f9; max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(v.address || '—')}">${escapeHtml(v.address || '—')}</td>
+          <td data-label="Address" style="font-size:12.5px; color:#f1f5f9; max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(v.address || '—')}">${escapeHtml(v.address || '—')}</td>
           <td data-label="Sex" style="font-size:12.5px; color:#f1f5f9;">${escapeHtml(v.sex || '—')}</td>
           <td data-label="Age" style="font-size:12.5px; color:#f1f5f9; text-align:center; font-weight:700;">${v.age !== null && v.age !== undefined ? v.age : '—'}</td>
           <td data-label="Actions" style="text-align:right; white-space:nowrap;">
             <div style="display:flex; gap:6px; justify-content:flex-end;">
-              <button class="btn btn-ghost dark btn-small" data-view-visitor="${v.id}" title="View full history record">View</button>
-              <button class="btn btn-ghost dark btn-small" data-edit-visitor="${v.id}" title="Edit log">Edit</button>
+              <button class="btn btn-ghost dark btn-small" data-view-visitor="${v.id}" title="View full details (read-only)">View</button>
+              <button class="btn btn-secondary btn-small" data-toggle-live-status="${v.id}" title="${isCheckedIn ? 'Mark as Completed / Check out' : 'Re-open check-in'}">
+                ${isCheckedIn ? 'Check Out' : 'Re-open'}
+              </button>
               <button class="btn btn-danger btn-small" data-del-visitor="${v.id}" title="Delete entry">Delete</button>
             </div>
           </td>
@@ -1713,10 +1734,19 @@ async function renderVisitorsTab(contentEl){
       btn.addEventListener('click', () => openVisitorDetailsModal(btn.dataset.viewVisitor));
     });
 
-    tbody.querySelectorAll('[data-edit-visitor]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const v = visitorsCache.find(item => item.id === btn.dataset.editVisitor);
-        if (v) openVisitorModal(v);
+    tbody.querySelectorAll('[data-toggle-live-status]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const v = visitorsCache.find(x => x.id === btn.dataset.toggleLiveStatus);
+        if(!v) return;
+        const newStatus = (v.status || '').toLowerCase() === 'checked-in' ? 'Completed' : 'Checked-in';
+        try {
+          await Api.updateVisitor(v.id, { status: newStatus });
+          toast(`Status updated to "${newStatus}"`);
+          v.status = newStatus;
+          renderVisitorsTab(contentEl);
+        } catch(err) {
+          toast(err.message, true);
+        }
       });
     });
 
@@ -1735,7 +1765,601 @@ async function renderVisitorsTab(contentEl){
   }
 }
 
-function exportVisitorsCSV(list){
+// ─── 2. Visitor History (Past 5 Days & Complete Historical Archive) ───
+async function renderVisitorHistoryTab(contentEl){
+  contentEl.innerHTML = `<div class="empty-state" style="color:var(--ink-soft);"><p>Loading visitor history archive…</p></div>`;
+  try{
+    const [visRes, statsRes] = await Promise.all([
+      Api.listVisitors(),
+      Api.getVisitorStats().catch(()=>({ stats: {} }))
+    ]);
+    visitorsCache = (visRes && Array.isArray(visRes.visitors)) ? visRes.visitors : [];
+    visitorStatsCache = (statsRes && statsRes.stats) ? statsRes.stats : {};
+  }catch(e){
+    contentEl.innerHTML = `<div class="empty-state"><h2>Could not load visitor history</h2><p>${escapeHtml(e.message)}</p></div>`;
+    return;
+  }
+
+  const todayIso = getPhilippineTodayIso();
+  const past5Cutoff = getPastDateIso(5);
+  const past7Cutoff = getPastDateIso(7);
+  const past30Cutoff = getPastDateIso(30);
+
+  // Filter based on preset
+  let historyList = visitorsCache.filter(v => (v.visitDate || '') < todayIso);
+
+  if(adminHistoryVisitorsPreset === 'past5'){
+    historyList = historyList.filter(v => (v.visitDate || '') >= past5Cutoff);
+  } else if(adminHistoryVisitorsPreset === 'past7'){
+    historyList = historyList.filter(v => (v.visitDate || '') >= past7Cutoff);
+  } else if(adminHistoryVisitorsPreset === 'past30'){
+    historyList = historyList.filter(v => (v.visitDate || '') >= past30Cutoff);
+  } else if(adminHistoryVisitorsPreset === 'custom' && adminHistoryVisitorsDate){
+    historyList = visitorsCache.filter(v => (v.visitDate || '').startsWith(adminHistoryVisitorsDate));
+  } else if(adminHistoryVisitorsPreset === 'all'){
+    historyList = [...visitorsCache];
+  }
+
+  const totalHistVisits = historyList.length;
+  const totalHistPax = historyList.reduce((sum, v) => sum + (v.pax || 1), 0);
+  const schoolTours = historyList.filter(v => (v.groupType || '').toLowerCase() === 'school tour').length;
+
+  let filtered = [...historyList];
+  if(adminHistoryVisitorsSearch){
+    const q = adminHistoryVisitorsSearch.toLowerCase();
+    filtered = filtered.filter(v =>
+      (v.visitorName || '').toLowerCase().includes(q) ||
+      (v.groupName || '').toLowerCase().includes(q) ||
+      (v.contactNumber || '').toLowerCase().includes(q) ||
+      (v.email || '').toLowerCase().includes(q) ||
+      (v.purpose || '').toLowerCase().includes(q) ||
+      (v.tourGuide || '').toLowerCase().includes(q) ||
+      (v.notes || '').toLowerCase().includes(q) ||
+      (v.address || '').toLowerCase().includes(q)
+    );
+  }
+  if(adminHistoryVisitorsGroupFilter !== 'All'){
+    filtered = filtered.filter(v => (v.groupType || '').toLowerCase() === adminHistoryVisitorsGroupFilter.toLowerCase());
+  }
+  if(adminHistoryVisitorsStatusFilter !== 'All'){
+    filtered = filtered.filter(v => (v.status || '').toLowerCase() === adminHistoryVisitorsStatusFilter.toLowerCase());
+  }
+
+  contentEl.innerHTML = `
+    <!-- History KPIs -->
+    <div class="kpi-cards-grid">
+      <div class="kpi-stat-card">
+        <div class="kpi-stat-icon">📋</div>
+        <div class="kpi-stat-info">
+          <div class="kpi-stat-value">${totalHistVisits}</div>
+          <div class="kpi-stat-label">Past Visits (${adminHistoryVisitorsPreset.toUpperCase()})</div>
+        </div>
+      </div>
+      <div class="kpi-stat-card">
+        <div class="kpi-stat-icon orange">👥</div>
+        <div class="kpi-stat-info">
+          <div class="kpi-stat-value">${totalHistPax}</div>
+          <div class="kpi-stat-label">Total Past Visitors (Pax)</div>
+        </div>
+      </div>
+      <div class="kpi-stat-card">
+        <div class="kpi-stat-icon green">🏫</div>
+        <div class="kpi-stat-info">
+          <div class="kpi-stat-value">${schoolTours}</div>
+          <div class="kpi-stat-label">School & Group Tours</div>
+        </div>
+      </div>
+      <div class="kpi-stat-card" style="cursor:pointer;" data-tab="visitors" title="Go to Live Visitor Log">
+        <div class="kpi-stat-icon">🟢</div>
+        <div class="kpi-stat-info">
+          <div class="kpi-stat-value">Live Log</div>
+          <div class="kpi-stat-label">Go to Today's Visitors →</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- History Toolbar -->
+    <div class="admin-toolbar-wrap" style="margin-top:12px;">
+      <!-- History Range Presets -->
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button class="filter-chip ${adminHistoryVisitorsPreset==='past5'?'active':''}" id="vHistPast5">Past 5 Days</button>
+          <button class="filter-chip ${adminHistoryVisitorsPreset==='past7'?'active':''}" id="vHistPast7">Past 7 Days</button>
+          <button class="filter-chip ${adminHistoryVisitorsPreset==='past30'?'active':''}" id="vHistPast30">Past 30 Days</button>
+          <button class="filter-chip ${adminHistoryVisitorsPreset==='all'?'active':''}" id="vHistAllTime">All History (${visitorsCache.length})</button>
+        </div>
+        <a href="#" class="view-all-btn" data-tab="visitors" style="font-size:12px; color:#5eead4; font-weight:700;">🟢 Live Visitors Today →</a>
+      </div>
+
+      <div class="admin-toolbar-row">
+        <input type="text" id="adminHistoryVisitorsSearchInput" class="admin-search-input" placeholder="Search past visitor history by name, school, group, guide, address…" value="${escapeHtml(adminHistoryVisitorsSearch)}">
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <button class="btn-export" id="exportHistoryVisitorsBtn" title="Export current history list as CSV">📥 Export CSV</button>
+          <button class="btn btn-ghost dark btn-small" id="printHistoryReportBtn" title="Print visitor history report">🖨 Print Report</button>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:8px;">
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <select id="adminHistoryVisitorsGroupSelect" class="filter-select" style="padding:6px 12px; font-size:12.5px; border-radius:8px; border:1px solid var(--grey-200);">
+            <option value="All" ${adminHistoryVisitorsGroupFilter==='All'?'selected':''}>All Group Types</option>
+            <option value="Walk-in / Individual" ${adminHistoryVisitorsGroupFilter==='Walk-in / Individual'?'selected':''}>Walk-in / Individual</option>
+            <option value="School Tour" ${adminHistoryVisitorsGroupFilter==='School Tour'?'selected':''}>School Tour</option>
+            <option value="Family" ${adminHistoryVisitorsGroupFilter==='Family'?'selected':''}>Family</option>
+            <option value="Government / VIP" ${adminHistoryVisitorsGroupFilter==='Government / VIP'?'selected':''}>Government / VIP</option>
+            <option value="NGO / Community" ${adminHistoryVisitorsGroupFilter==='NGO / Community'?'selected':''}>NGO / Community</option>
+            <option value="Researcher / Scholar" ${adminHistoryVisitorsGroupFilter==='Researcher / Scholar'?'selected':''}>Researcher / Scholar</option>
+            <option value="Other" ${adminHistoryVisitorsGroupFilter==='Other'?'selected':''}>Other</option>
+          </select>
+          <select id="adminHistoryVisitorsStatusSelect" class="filter-select" style="padding:6px 12px; font-size:12.5px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,42,54,0.85); color:#ffffff;">
+            <option value="All" ${adminHistoryVisitorsStatusFilter==='All'?'selected':''}>All Statuses</option>
+            <option value="Completed" ${adminHistoryVisitorsStatusFilter==='Completed'?'selected':''}>Completed</option>
+            <option value="Checked-in" ${adminHistoryVisitorsStatusFilter==='Checked-in'?'selected':''}>Checked-in</option>
+          </select>
+          <input type="date" id="adminHistoryVisitorsDateInput" value="${escapeHtml(adminHistoryVisitorsDate)}" title="Filter by specific visit date" style="padding:5px 10px; font-size:12.5px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,42,54,0.85); color:#ffffff;">
+          ${(adminHistoryVisitorsSearch || adminHistoryVisitorsGroupFilter !== 'All' || adminHistoryVisitorsStatusFilter !== 'All' || adminHistoryVisitorsDate || adminHistoryVisitorsPreset !== 'past5') ? '<button type="button" class="btn btn-ghost dark btn-small" id="clearHistoryFilters" style="padding:4px 8px; font-size:11.5px; color:#5eead4; border-color:rgba(0,174,189,0.4);">Reset filters</button>' : ''}
+        </div>
+        <span style="font-size:13px; color:#cbd5e1; font-weight:600;">${filtered.length} of ${historyList.length} historical records</span>
+      </div>
+    </div>
+
+    <!-- History Table -->
+    <div class="admin-table-wrap" style="margin-top:12px;">
+      <table class="ledger">
+        <thead>
+          <tr>
+            <th>Date & Time</th>
+            <th>Visitor / Contact</th>
+            <th>Group / Organization</th>
+            <th style="text-align:center;">Pax</th>
+            <th>Purpose</th>
+            <th>Tour Guide</th>
+            <th>Status</th>
+            <th>Address</th>
+            <th>Sex</th>
+            <th>Age</th>
+            <th style="text-align:right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="historyVisitorsTableBody"></tbody>
+      </table>
+    </div>
+    ${filtered.length === 0 ? `<div class="empty-state"><h2 style="color:#ffffff;">No past visitor records found</h2><p style="color:#cbd5e1;">No historical visitor records match the selected range and filters.</p></div>` : ''}
+  `;
+
+  // Bind History Events
+  document.getElementById('vHistPast5')?.addEventListener('click', ()=>{
+    adminHistoryVisitorsPreset = 'past5';
+    adminHistoryVisitorsDate = '';
+    renderVisitorHistoryTab(contentEl);
+  });
+  document.getElementById('vHistPast7')?.addEventListener('click', ()=>{
+    adminHistoryVisitorsPreset = 'past7';
+    adminHistoryVisitorsDate = '';
+    renderVisitorHistoryTab(contentEl);
+  });
+  document.getElementById('vHistPast30')?.addEventListener('click', ()=>{
+    adminHistoryVisitorsPreset = 'past30';
+    adminHistoryVisitorsDate = '';
+    renderVisitorHistoryTab(contentEl);
+  });
+  document.getElementById('vHistAllTime')?.addEventListener('click', ()=>{
+    adminHistoryVisitorsPreset = 'all';
+    adminHistoryVisitorsDate = '';
+    renderVisitorHistoryTab(contentEl);
+  });
+
+  const searchInput = document.getElementById('adminHistoryVisitorsSearchInput');
+  if(searchInput){
+    searchInput.addEventListener('input', (e)=>{
+      adminHistoryVisitorsSearch = e.target.value.trim();
+      renderVisitorHistoryTab(contentEl);
+      const updated = document.getElementById('adminHistoryVisitorsSearchInput');
+      if(updated){ updated.focus(); updated.setSelectionRange(updated.value.length, updated.value.length); }
+    });
+  }
+
+  document.getElementById('adminHistoryVisitorsGroupSelect')?.addEventListener('change', (e)=>{
+    adminHistoryVisitorsGroupFilter = e.target.value;
+    renderVisitorHistoryTab(contentEl);
+  });
+  document.getElementById('adminHistoryVisitorsStatusSelect')?.addEventListener('change', (e)=>{
+    adminHistoryVisitorsStatusFilter = e.target.value;
+    renderVisitorHistoryTab(contentEl);
+  });
+  document.getElementById('adminHistoryVisitorsDateInput')?.addEventListener('change', (e)=>{
+    adminHistoryVisitorsDate = e.target.value;
+    adminHistoryVisitorsPreset = 'custom';
+    renderVisitorHistoryTab(contentEl);
+  });
+  document.getElementById('clearHistoryFilters')?.addEventListener('click', ()=>{
+    adminHistoryVisitorsSearch = '';
+    adminHistoryVisitorsGroupFilter = 'All';
+    adminHistoryVisitorsStatusFilter = 'All';
+    adminHistoryVisitorsPreset = 'past5';
+    adminHistoryVisitorsDate = '';
+    renderVisitorHistoryTab(contentEl);
+  });
+
+  document.getElementById('exportHistoryVisitorsBtn')?.addEventListener('click', ()=>exportVisitorsCSV(filtered, `msbn-visitor-history-${adminHistoryVisitorsPreset}.csv`));
+  document.getElementById('printHistoryReportBtn')?.addEventListener('click', ()=>printVisitorsHistoryReport(filtered));
+
+  const tbody = document.getElementById('historyVisitorsTableBody');
+  if(tbody){
+    tbody.innerHTML = filtered.map(v => {
+      const statusClass = (v.status || '').toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const contactInfo = [v.contactNumber, v.email].filter(Boolean).join(' · ');
+      return `
+        <tr>
+          <td data-label="Date & Time" style="white-space:nowrap;">
+            <div style="font-weight:800; color:#ffffff; font-size:13.5px;">${escapeHtml(v.visitDate || '—')}</div>
+            <div style="font-size:11.5px; color:#cbd5e1; font-weight:600;">${escapeHtml(v.visitTime || '')}</div>
+          </td>
+          <td data-label="Visitor / Contact">
+            <div style="font-weight:800; color:#ffffff; font-size:14.5px;">${escapeHtml(v.visitorName)}</div>
+            ${contactInfo ? `<div style="font-size:11.5px; color:#cbd5e1; margin-top:2px;">${escapeHtml(contactInfo)}</div>` : ''}
+          </td>
+          <td data-label="Group / Organization">
+            ${v.groupName ? `<div style="font-weight:700; color:#ffffff; font-size:14px; margin-bottom:4px;">${escapeHtml(v.groupName)}</div>` : ''}
+            <span class="cat-pill" style="font-size:10px; font-weight:700; background:rgba(0,174,189,0.20); color:#5eead4; border:1px solid rgba(0,174,189,0.35);">${escapeHtml(v.groupType || 'Individual')}</span>
+          </td>
+          <td data-label="Pax" style="text-align:center;">
+            <span style="font-weight:800; font-size:14px; background:rgba(0,174,189,0.25); color:#5eead4; border:1px solid rgba(0,174,189,0.45); padding:3px 9px; border-radius:8px; display:inline-block;">${v.pax || 1}</span>
+          </td>
+          <td data-label="Purpose">
+            <div style="font-size:13.5px; font-weight:600; color:#ffffff;">${escapeHtml(v.purpose || 'General Visit')}</div>
+            ${v.notes ? `<div style="font-size:11.5px; color:#cbd5e1; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;" title="${escapeHtml(v.notes)}">📝 ${escapeHtml(v.notes)}</div>` : ''}
+          </td>
+          <td data-label="Tour Guide">
+            <div style="font-size:13px; font-weight:600; color:${v.tourGuide ? '#ffffff' : '#94a3b8'};">${escapeHtml(v.tourGuide || 'Unassigned')}</div>
+          </td>
+          <td data-label="Status">
+            <span class="status-badge ${statusClass}">${escapeHtml(v.status || 'Checked-in')}</span>
+          </td>
+          <td data-label="Address" style="font-size:12.5px; color:#f1f5f9; max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(v.address || '—')}">${escapeHtml(v.address || '—')}</td>
+          <td data-label="Sex" style="font-size:12.5px; color:#f1f5f9;">${escapeHtml(v.sex || '—')}</td>
+          <td data-label="Age" style="font-size:12.5px; color:#f1f5f9; text-align:center; font-weight:700;">${v.age !== null && v.age !== undefined ? v.age : '—'}</td>
+          <td data-label="Actions" style="text-align:right; white-space:nowrap;">
+            <div style="display:flex; gap:6px; justify-content:flex-end;">
+              <button class="btn btn-ghost dark btn-small" data-view-visitor="${v.id}" title="View full history record (read-only)">View</button>
+              <button class="btn btn-danger btn-small" data-del-visitor="${v.id}" title="Delete entry">Delete</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    tbody.querySelectorAll('[data-view-visitor]').forEach(btn => {
+      btn.addEventListener('click', () => openVisitorDetailsModal(btn.dataset.viewVisitor));
+    });
+
+    tbody.querySelectorAll('[data-del-visitor]').forEach(btn => {
+      btn.addEventListener('click', async ()=>{
+        const v = visitorsCache.find(item => item.id === btn.dataset.delVisitor);
+        if(!v) return;
+        if(!confirm(`Delete visitor history entry for "${v.visitorName}" (${v.visitDate})?`)) return;
+        try{
+          await Api.deleteVisitor(v.id);
+          toast('Visitor history record deleted');
+          renderVisitorHistoryTab(contentEl);
+        }catch(err){ toast(err.message, true); }
+      });
+    });
+  }
+}
+
+// ─── 3. Read-Only Visitor Details Modal (Immutable Details) ───
+function openVisitorDetailsModal(id){
+  const v = visitorsCache.find(x => x.id === id);
+  if(!v) return;
+
+  const contactInfo = [v.contactNumber, v.email].filter(Boolean).join(' · ');
+  const statusClass = (v.status || '').toLowerCase().replace(/[^a-z0-9]/g, '-');
+
+  openModal(`
+    <div style="max-width: 580px; margin: 0 auto;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+        <div>
+          <span class="cat-pill" style="font-size: 11px; margin-bottom: 6px; display: inline-block;">${escapeHtml(v.groupType || 'Individual')}</span>
+          <h2 style="margin: 0; font-size: 22px; color: #fff;">${escapeHtml(v.visitorName)}</h2>
+          ${v.groupName ? `<div style="font-size: 14px; color: #5eead4; font-weight: 700; margin-top: 2px;">🏛️ ${escapeHtml(v.groupName)}</div>` : ''}
+        </div>
+        <span class="status-badge ${statusClass}" style="font-size: 12px; padding: 4px 10px;">${escapeHtml(v.status || 'Checked-in')}</span>
+      </div>
+
+      <!-- Immutable Notice Banner -->
+      <div style="background: rgba(0, 174, 189, 0.15); border: 1px solid rgba(0, 174, 189, 0.35); border-radius: 8px; padding: 7px 12px; margin-bottom: 14px; font-size: 11.5px; color: #5eead4; display: flex; align-items: center; gap: 8px;">
+        <span>🔒</span>
+        <span>Visitor check-in details are verified and read-only to preserve record integrity.</span>
+      </div>
+
+      <!-- Detail Grid Card -->
+      <div style="background: rgba(0, 42, 54, 0.85); border: 1.5px solid rgba(255, 255, 255, 0.16); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div>
+            <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Visit Date & Time</div>
+            <div style="font-size: 14px; color: #fff; font-weight: 700; margin-top: 2px;">📅 ${escapeHtml(v.visitDate || '—')} at ${escapeHtml(v.visitTime || '')}</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Party Size (Pax)</div>
+            <div style="font-size: 14px; color: #5eead4; font-weight: 800; margin-top: 2px;">👥 ${v.pax || 1} Person(s)</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px;">
+          <div>
+            <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Contact Information</div>
+            <div style="font-size: 13.5px; color: #fff; margin-top: 2px;">${escapeHtml(contactInfo || 'None provided')}</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Demographics</div>
+            <div style="font-size: 13.5px; color: #fff; margin-top: 2px;">${escapeHtml(v.sex || '—')} · Age: ${v.age != null ? v.age : '—'}</div>
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px;">
+          <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Address / Origin</div>
+          <div style="font-size: 13.5px; color: #fff; margin-top: 2px;">📍 ${escapeHtml(v.address || 'Not specified')}</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px;">
+          <div>
+            <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Purpose of Visit</div>
+            <div style="font-size: 13.5px; color: #fff; margin-top: 2px;">${escapeHtml(v.purpose || 'General Visit')}</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Assigned Tour Guide</div>
+            <div style="font-size: 13.5px; color: #fff; margin-top: 2px;">🧑‍💼 ${escapeHtml(v.tourGuide || 'Unassigned')}</div>
+          </div>
+        </div>
+
+        ${v.notes ? `
+          <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px;">
+            <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Notes & Remarks</div>
+            <div style="font-size: 13px; color: #cbd5e1; margin-top: 2px; line-height: 1.5; font-style: italic;">📝 ${escapeHtml(v.notes)}</div>
+          </div>
+        ` : ''}
+      </div>
+
+      <!-- Quick Actions -->
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <button type="button" class="btn btn-secondary btn-small" id="toggleVisitorStatusBtn">
+          ${(v.status || '').toLowerCase() === 'completed' ? '↩ Re-open Check-in' : '✓ Mark as Completed (Check Out)'}
+        </button>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-ghost dark btn-small" id="printSingleVisitorPassBtn">🖨 Print Pass</button>
+          <button type="button" class="btn btn-primary btn-small" onclick="closeModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  `);
+
+  document.getElementById('toggleVisitorStatusBtn')?.addEventListener('click', async () => {
+    const newStatus = (v.status || '').toLowerCase() === 'completed' ? 'Checked-in' : 'Completed';
+    try {
+      await Api.updateVisitor(v.id, { status: newStatus });
+      toast(`Visitor status updated to "${newStatus}"`);
+      v.status = newStatus;
+      closeModal();
+      renderDashboard();
+    } catch(e) {
+      toast(e.message, true);
+    }
+  });
+
+  document.getElementById('printSingleVisitorPassBtn')?.addEventListener('click', () => {
+    const win = window.open('', '_blank', 'width=600,height=600');
+    if (!win) return;
+    win.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Visitor Pass — ${escapeHtml(v.visitorName)}</title>
+        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=IBM+Plex+Mono:wght@600&display=swap" rel="stylesheet">
+        <style>
+          body { margin: 40px; font-family: 'Nunito', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 80vh; }
+          .pass-box { border: 2.5px solid #007d8a; border-radius: 16px; padding: 24px; text-align: center; max-width: 340px; width: 100%; box-sizing: border-box; }
+          .mono { font-family: 'IBM Plex Mono', monospace; }
+          @media print { body { margin: 0; } }
+        </style>
+      </head>
+      <body>
+        <div class="pass-box">
+          <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #007d8a; margin-bottom: 4px;">Museo Sang Bata sa Negros</div>
+          <div style="font-size: 18px; font-weight: 900; color: #0f172a; margin-bottom: 10px;">OFFICIAL VISITOR PASS</div>
+          <div style="font-size: 20px; font-weight: 900; color: #007d8a; margin-bottom: 4px;">${escapeHtml(v.visitorName)}</div>
+          ${v.groupName ? `<div style="font-size: 13px; font-weight: 700; color: #64748b; margin-bottom: 12px;">${escapeHtml(v.groupName)}</div>` : ''}
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; margin: 12px 0; text-align: left; font-size: 12px;">
+            <div>📅 <strong>Date:</strong> ${escapeHtml(v.visitDate || '—')} ${escapeHtml(v.visitTime || '')}</div>
+            <div>👥 <strong>Pax:</strong> ${v.pax || 1}</div>
+            <div>📍 <strong>Origin:</strong> ${escapeHtml(v.address || '—')}</div>
+            <div>🏷️ <strong>Status:</strong> ${escapeHtml(v.status || 'Checked-in')}</div>
+          </div>
+          <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Valid for single entry admission</div>
+        </div>
+        <script>
+          window.onload = () => { setTimeout(() => { window.print(); }, 300); };
+        <\/script>
+      </body>
+      </html>
+    `);
+    win.document.close();
+  });
+}
+
+// ─── 4. Walk-in Front Desk Registration Modal (New Walk-in Only) ───
+function openVisitorWalkinModal(){
+  const now = new Date();
+  const defaultDate = getPhilippineTodayIso();
+  const defaultTime = now.toTimeString().slice(0, 5);
+
+  openModal(`
+    <h2>Log new walk-in visitor</h2>
+    <p style="font-size:12.5px; color:var(--ink-soft); margin:-8px 0 16px;">
+      Register a front-desk visitor or walk-in group directly into today's log.
+    </p>
+    <div class="form-grid">
+      <div class="form-field full">
+        <label>Visitor / Contact Person Name *</label>
+        <input type="text" id="vf-name" placeholder="e.g. Maria Santos" required>
+      </div>
+      <div class="form-field full">
+        <label>Address / Hometown *</label>
+        <textarea id="vf-address" placeholder="e.g. Brgy. Old Sagay, Sagay City" rows="2" required></textarea>
+      </div>
+      <div class="form-field">
+        <label>Sex *</label>
+        <select id="vf-sex">
+          <option value="">Select</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+          <option value="Prefer not to say">Prefer not to say</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Age *</label>
+        <input type="number" id="vf-age" min="0" max="120" placeholder="e.g. 25" required>
+      </div>
+      <div class="form-field">
+        <label>Group / School / Org Name (optional)</label>
+        <input type="text" id="vf-group" placeholder="e.g. Sagay National High School">
+      </div>
+      <div class="form-field">
+        <label>Group Type</label>
+        <select id="vf-groupType">
+          <option value="Walk-in / Individual" selected>Walk-in / Individual</option>
+          <option value="School Tour">School Tour</option>
+          <option value="Family">Family</option>
+          <option value="Government / VIP">Government / VIP</option>
+          <option value="NGO / Community">NGO / Community</option>
+          <option value="Researcher / Scholar">Researcher / Scholar</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Headcount (Pax) *</label>
+        <input type="number" id="vf-pax" min="1" value="1">
+      </div>
+      <div class="form-field">
+        <label>Purpose of Visit</label>
+        <select id="vf-purpose">
+          <option value="General Visit" selected>General Visit</option>
+          <option value="Educational Tour">Educational Tour</option>
+          <option value="Research">Research</option>
+          <option value="Special Event">Special Event</option>
+          <option value="Donation / Official">Donation / Official</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Visit Date</label>
+        <input type="date" id="vf-date" value="${defaultDate}">
+      </div>
+      <div class="form-field">
+        <label>Visit Time</label>
+        <input type="time" id="vf-time" value="${defaultTime}">
+      </div>
+      <div class="form-field">
+        <label>Assigned Tour Guide / Staff</label>
+        <input type="text" id="vf-guide" placeholder="e.g. Staff Guide">
+      </div>
+      <div class="form-field">
+        <label>Status</label>
+        <select id="vf-status">
+          <option value="Checked-in" selected>Checked-in</option>
+          <option value="Completed">Completed</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Contact Phone / Mobile</label>
+        <input type="text" id="vf-phone" placeholder="e.g. +63 917 123 4567">
+      </div>
+      <div class="form-field">
+        <label>Email Address</label>
+        <input type="email" id="vf-email" placeholder="e.g. visitor@example.com">
+      </div>
+      <div class="form-field full">
+        <label>Notes / Special Requirements</label>
+        <textarea id="vf-notes" rows="2" placeholder="Special accommodations or remarks..."></textarea>
+      </div>
+      <div class="form-error" id="vfError"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost dark" id="vfCancel">Cancel</button>
+      <button class="btn btn-primary" id="vfSave">Log walk-in visitor</button>
+    </div>
+  `);
+
+  document.getElementById('vfCancel').addEventListener('click', closeModal);
+  const saveBtn = document.getElementById('vfSave');
+  saveBtn.addEventListener('click', async ()=>{
+    const visitorName = document.getElementById('vf-name').value.trim();
+    const errorEl = document.getElementById('vfError');
+    if(!visitorName){
+      errorEl.textContent = 'Visitor or contact person name is required.';
+      return;
+    }
+    const address = document.getElementById('vf-address').value.trim();
+    if(!address){
+      errorEl.textContent = 'Address is required.';
+      return;
+    }
+    const sex = document.getElementById('vf-sex').value;
+    if(!sex){
+      errorEl.textContent = 'Sex is required.';
+      return;
+    }
+    const age = document.getElementById('vf-age').value;
+    if(age === ''){
+      errorEl.textContent = 'Age is required.';
+      return;
+    }
+    const ageNum = parseInt(age, 10);
+    if(isNaN(ageNum) || ageNum < 0 || ageNum > 120){
+      errorEl.textContent = 'Age must be a valid number between 0 and 120.';
+      return;
+    }
+    const pax = parseInt(document.getElementById('vf-pax').value, 10) || 1;
+    if(pax < 1){
+      errorEl.textContent = 'Pax must be at least 1.';
+      return;
+    }
+
+    const payload = {
+      visitorName,
+      address,
+      sex,
+      age: ageNum,
+      groupName: document.getElementById('vf-group').value.trim(),
+      groupType: document.getElementById('vf-groupType').value,
+      pax,
+      purpose: document.getElementById('vf-purpose').value,
+      visitDate: document.getElementById('vf-date').value,
+      visitTime: document.getElementById('vf-time').value,
+      tourGuide: document.getElementById('vf-guide').value.trim(),
+      status: document.getElementById('vf-status').value,
+      contactNumber: document.getElementById('vf-phone').value.trim(),
+      email: document.getElementById('vf-email').value.trim(),
+      notes: document.getElementById('vf-notes').value.trim()
+    };
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Logging visitor…';
+    try{
+      await Api.createVisitor(payload);
+      toast('Walk-in visitor logged successfully');
+      closeModal();
+      renderDashboard();
+    }catch(err){
+      errorEl.textContent = err.message;
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Log walk-in visitor';
+    }
+  });
+}
+
+function exportVisitorsCSV(list, filename){
   const headers = ['Date', 'Time', 'Visitor / Contact Person', 'Group / Organization', 'Group Type', 'Pax', 'Purpose', 'Tour Guide', 'Status', 'Phone', 'Email', 'Address', 'Sex', 'Age', 'Notes'];
   const rows = list.map(v => [
     `"${(v.visitDate || '').replace(/"/g, '""')}"`,
@@ -1755,9 +2379,8 @@ function exportVisitorsCSV(list){
     `"${(v.notes || '').replace(/"/g, '""')}"`
   ]);
   const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-  const dateStr = new Date().toISOString().slice(0, 10);
-  downloadCSV(csv, `msbn-visitors-log-${dateStr}.csv`);
-  toast('Visitor history CSV exported');
+  downloadCSV(csv, filename || `msbn-visitors-log-${new Date().toISOString().slice(0, 10)}.csv`);
+  toast('Visitor CSV exported');
 }
 
 function printVisitorsHistoryReport(list) {
@@ -1797,15 +2420,15 @@ function printVisitorsHistoryReport(list) {
         </div>
         <div style="text-align: right; font-size: 11px; color: #64748b;">
           <div>Generated: <strong>${dateStr}</strong></div>
-          <div>Filter: <strong>${escapeHtml(adminVisitorsDateFilter || 'All Time')}</strong></div>
+          <div>Filter: <strong>${escapeHtml(adminHistoryVisitorsPreset.toUpperCase())}</strong></div>
         </div>
       </div>
 
       <div class="meta-grid">
         <div class="meta-item"><div>Total Entries</div><div class="meta-val">${list.length}</div></div>
         <div class="meta-item"><div>Total Visitors (Pax)</div><div class="meta-val">${totalPax}</div></div>
-        <div class="meta-item"><div>Group Type Filter</div><div class="meta-val">${escapeHtml(adminVisitorsGroupFilter)}</div></div>
-        <div class="meta-item"><div>Status Filter</div><div class="meta-val">${escapeHtml(adminVisitorsStatusFilter)}</div></div>
+        <div class="meta-item"><div>Group Type Filter</div><div class="meta-val">${escapeHtml(adminHistoryVisitorsGroupFilter)}</div></div>
+        <div class="meta-item"><div>Status Filter</div><div class="meta-val">${escapeHtml(adminHistoryVisitorsStatusFilter)}</div></div>
       </div>
 
       <table>
@@ -1864,280 +2487,6 @@ function openVisitorCheckinQrModal(){
     </div>
   `);
   document.getElementById('closeCheckinQrModal')?.addEventListener('click', closeModal);
-}
-
-function openVisitorDetailsModal(id){
-  const v = visitorsCache.find(x => x.id === id);
-  if(!v) return;
-
-  const contactInfo = [v.contactNumber, v.email].filter(Boolean).join(' · ');
-  const statusClass = (v.status || '').toLowerCase().replace(/[^a-z0-9]/g, '-');
-
-  openModal(`
-    <div style="max-width: 580px; margin: 0 auto;">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
-        <div>
-          <span class="cat-pill" style="font-size: 11px; margin-bottom: 6px; display: inline-block;">${escapeHtml(v.groupType || 'Individual')}</span>
-          <h2 style="margin: 0; font-size: 22px; color: #fff;">${escapeHtml(v.visitorName)}</h2>
-          ${v.groupName ? `<div style="font-size: 14px; color: #5eead4; font-weight: 700; margin-top: 2px;">🏛️ ${escapeHtml(v.groupName)}</div>` : ''}
-        </div>
-        <span class="status-badge ${statusClass}" style="font-size: 12px; padding: 4px 10px;">${escapeHtml(v.status || 'Checked-in')}</span>
-      </div>
-
-      <!-- Detail Grid Card -->
-      <div style="background: rgba(0, 42, 54, 0.85); border: 1.5px solid rgba(255, 255, 255, 0.16); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-          <div>
-            <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Visit Date & Time</div>
-            <div style="font-size: 14px; color: #fff; font-weight: 700; margin-top: 2px;">📅 ${escapeHtml(v.visitDate || '—')} at ${escapeHtml(v.visitTime || '')}</div>
-          </div>
-          <div>
-            <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Party Size (Pax)</div>
-            <div style="font-size: 14px; color: #5eead4; font-weight: 800; margin-top: 2px;">👥 ${v.pax || 1} Person(s)</div>
-          </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px;">
-          <div>
-            <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Contact Information</div>
-            <div style="font-size: 13.5px; color: #fff; margin-top: 2px;">${escapeHtml(contactInfo || 'None provided')}</div>
-          </div>
-          <div>
-            <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Demographics</div>
-            <div style="font-size: 13.5px; color: #fff; margin-top: 2px;">${escapeHtml(v.sex || '—')} · Age: ${v.age != null ? v.age : '—'}</div>
-          </div>
-        </div>
-
-        <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px;">
-          <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Address / Origin</div>
-          <div style="font-size: 13.5px; color: #fff; margin-top: 2px;">📍 ${escapeHtml(v.address || 'Not specified')}</div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px;">
-          <div>
-            <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Purpose of Visit</div>
-            <div style="font-size: 13.5px; color: #fff; margin-top: 2px;">${escapeHtml(v.purpose || 'General Visit')}</div>
-          </div>
-          <div>
-            <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Assigned Tour Guide</div>
-            <div style="font-size: 13.5px; color: #fff; margin-top: 2px;">🧑‍💼 ${escapeHtml(v.tourGuide || 'Unassigned')}</div>
-          </div>
-        </div>
-
-        ${v.notes ? `
-          <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px;">
-            <div style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Notes & Remarks</div>
-            <div style="font-size: 13px; color: #cbd5e1; margin-top: 2px; line-height: 1.5; font-style: italic;">📝 ${escapeHtml(v.notes)}</div>
-          </div>
-        ` : ''}
-      </div>
-
-      <!-- Quick Actions -->
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-        <button type="button" class="btn btn-secondary btn-small" id="toggleVisitorStatusBtn">
-          ${v.status === 'Completed' ? '↩ Re-open Check-in' : '✓ Mark as Completed (Check Out)'}
-        </button>
-        <div style="display: flex; gap: 8px;">
-          <button type="button" class="btn btn-ghost dark btn-small" id="editFromViewBtn">Edit Entry</button>
-          <button type="button" class="btn btn-primary btn-small" onclick="closeModal()">Close</button>
-        </div>
-      </div>
-    </div>
-  `);
-
-  document.getElementById('editFromViewBtn')?.addEventListener('click', () => {
-    closeModal();
-    openVisitorModal(v);
-  });
-
-  document.getElementById('toggleVisitorStatusBtn')?.addEventListener('click', async () => {
-    const newStatus = v.status === 'Completed' ? 'Checked-in' : 'Completed';
-    try {
-      await Api.updateVisitor(v.id, { status: newStatus });
-      toast(`Visitor status updated to "${newStatus}"`);
-      v.status = newStatus;
-      closeModal();
-      renderDashboard();
-    } catch(e) {
-      toast(e.message, true);
-    }
-  });
-}
-
-function openVisitorModal(v){
-  const isEdit = Boolean(v);
-  const now = new Date();
-  const defaultDate = now.toISOString().slice(0, 10);
-  const defaultTime = now.toTimeString().slice(0, 5);
-
-  openModal(`
-    <h2>${isEdit ? 'Edit visitor log' : 'Log new visitor entry'}</h2>
-    <div class="form-grid">
-      <div class="form-field full">
-        <label>Visitor / Contact Person Name *</label>
-        <input type="text" id="vf-name" value="${v ? escapeHtml(v.visitorName) : ''}" placeholder="e.g. Maria Santos">
-      </div>
-      <div class="form-field full">
-        <label>Address *</label>
-        <textarea id="vf-address" placeholder="Enter complete address">${v ? escapeHtml(v.address || '') : ''}</textarea>
-      </div>
-      <div class="form-field">
-        <label>Sex *</label>
-        <select id="vf-sex">
-          <option value="">Select</option>
-          <option value="Male" ${v && v.sex==='Male'?'selected':''}>Male</option>
-          <option value="Female" ${v && v.sex==='Female'?'selected':''}>Female</option>
-          <option value="Other" ${v && v.sex==='Other'?'selected':''}>Other</option>
-          <option value="Prefer not to say" ${v && v.sex==='Prefer not to say'?'selected':''}>Prefer not to say</option>
-        </select>
-      </div>
-      <div class="form-field">
-        <label>Age *</label>
-        <input type="number" id="vf-age" min="0" max="120" value="${v && v.age !== null && v.age !== undefined ? v.age : ''}" placeholder="e.g. 25">
-      </div>
-      <div class="form-field">
-        <label>Group / School / Org Name (optional)</label>
-        <input type="text" id="vf-group" value="${v ? escapeHtml(v.groupName) : ''}" placeholder="e.g. Sagay National High School">
-      </div>
-      <div class="form-field">
-        <label>Group Type</label>
-        <select id="vf-groupType">
-          <option value="Walk-in / Individual" ${(!v || v.groupType==='Walk-in / Individual')?'selected':''}>Walk-in / Individual</option>
-          <option value="School Tour" ${v && v.groupType==='School Tour'?'selected':''}>School Tour</option>
-          <option value="Family" ${v && v.groupType==='Family'?'selected':''}>Family</option>
-          <option value="Government / VIP" ${v && v.groupType==='Government / VIP'?'selected':''}>Government / VIP</option>
-          <option value="NGO / Community" ${v && v.groupType==='NGO / Community'?'selected':''}>NGO / Community</option>
-          <option value="Researcher / Scholar" ${v && v.groupType==='Researcher / Scholar'?'selected':''}>Researcher / Scholar</option>
-          <option value="Other" ${v && v.groupType==='Other'?'selected':''}>Other</option>
-        </select>
-      </div>
-      <div class="form-field">
-        <label>Headcount (Pax) *</label>
-        <input type="number" id="vf-pax" min="1" value="${v ? (v.pax || 1) : 1}">
-      </div>
-      <div class="form-field">
-        <label>Purpose of Visit</label>
-        <select id="vf-purpose">
-          <option value="General Visit" ${(!v || v.purpose==='General Visit')?'selected':''}>General Visit</option>
-          <option value="Educational Tour" ${v && v.purpose==='Educational Tour'?'selected':''}>Educational Tour</option>
-          <option value="Research" ${v && v.purpose==='Research'?'selected':''}>Research</option>
-          <option value="Special Event" ${v && v.purpose==='Special Event'?'selected':''}>Special Event</option>
-          <option value="Donation / Official" ${v && v.purpose==='Donation / Official'?'selected':''}>Donation / Official</option>
-          <option value="Other" ${v && v.purpose==='Other'?'selected':''}>Other</option>
-        </select>
-      </div>
-      <div class="form-field">
-        <label>Visit Date</label>
-        <input type="date" id="vf-date" value="${v ? escapeHtml(v.visitDate) : defaultDate}">
-      </div>
-      <div class="form-field">
-        <label>Visit Time</label>
-        <input type="time" id="vf-time" value="${v ? escapeHtml(v.visitTime) : defaultTime}">
-      </div>
-      <div class="form-field">
-        <label>Assigned Tour Guide / Staff</label>
-        <input type="text" id="vf-guide" value="${v ? escapeHtml(v.tourGuide) : ''}" placeholder="e.g. Juan De La Cruz">
-      </div>
-      <div class="form-field">
-        <label>Status</label>
-        <select id="vf-status">
-          <option value="Checked-in" ${(!v || v.status==='Checked-in')?'selected':''}>Checked-in</option>
-          <option value="Completed" ${v && v.status==='Completed'?'selected':''}>Completed</option>
-          <option value="Scheduled" ${v && v.status==='Scheduled'?'selected':''}>Scheduled</option>
-          <option value="Cancelled" ${v && v.status==='Cancelled'?'selected':''}>Cancelled</option>
-        </select>
-      </div>
-      <div class="form-field">
-        <label>Contact Phone / Mobile</label>
-        <input type="text" id="vf-phone" value="${v ? escapeHtml(v.contactNumber) : ''}" placeholder="e.g. +63 917 123 4567">
-      </div>
-      <div class="form-field">
-        <label>Email Address</label>
-        <input type="email" id="vf-email" value="${v ? escapeHtml(v.email) : ''}" placeholder="e.g. visitor@example.com">
-      </div>
-      <div class="form-field full">
-        <label>Notes / Special Requirements / Accommodations</label>
-        <textarea id="vf-notes" rows="2" placeholder="Special accommodations, feedback, or reminders...">${v ? escapeHtml(v.notes) : ''}</textarea>
-      </div>
-      <div class="form-error" id="vfError"></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost dark" id="vfCancel">Cancel</button>
-      <button class="btn btn-primary" id="vfSave">${isEdit ? 'Save changes' : 'Log visitor'}</button>
-    </div>
-  `);
-
-  document.getElementById('vfCancel').addEventListener('click', closeModal);
-  const saveBtn = document.getElementById('vfSave');
-saveBtn.addEventListener('click', async ()=>{
-    const visitorName = document.getElementById('vf-name').value.trim();
-    const errorEl = document.getElementById('vfError');
-    if(!visitorName){
-      errorEl.textContent = 'Visitor or contact person name is required.';
-      return;
-    }
-    const address = document.getElementById('vf-address').value.trim();
-    if(!address){
-      errorEl.textContent = 'Address is required.';
-      return;
-    }
-    const sex = document.getElementById('vf-sex').value;
-    if(!sex){
-      errorEl.textContent = 'Sex is required.';
-      return;
-    }
-    const age = document.getElementById('vf-age').value;
-    if(age === ''){
-      errorEl.textContent = 'Age is required.';
-      return;
-    }
-    const ageNum = parseInt(age, 10);
-    if(isNaN(ageNum) || ageNum < 0 || ageNum > 120){
-      errorEl.textContent = 'Age must be a valid number between 0 and 120.';
-      return;
-    }
-    const pax = parseInt(document.getElementById('vf-pax').value, 10) || 1;
-    if(pax < 1){
-      errorEl.textContent = 'Pax must be at least 1.';
-      return;
-    }
-
-    const payload = {
-      visitorName,
-      address,
-      sex,
-      age: ageNum,
-      groupName: document.getElementById('vf-group').value.trim(),
-      groupType: document.getElementById('vf-groupType').value,
-      pax,
-      purpose: document.getElementById('vf-purpose').value,
-      visitDate: document.getElementById('vf-date').value,
-      visitTime: document.getElementById('vf-time').value,
-      tourGuide: document.getElementById('vf-guide').value.trim(),
-      status: document.getElementById('vf-status').value,
-      contactNumber: document.getElementById('vf-phone').value.trim(),
-      email: document.getElementById('vf-email').value.trim(),
-      notes: document.getElementById('vf-notes').value.trim()
-    };
-
-    saveBtn.disabled = true;
-    saveBtn.textContent = 'Saving…';
-    try{
-      if(isEdit){
-        await Api.updateVisitor(v.id, payload);
-        toast('Visitor log updated');
-      } else {
-        await Api.createVisitor(payload);
-        toast('Visitor entry logged');
-      }
-      closeModal();
-      renderDashboard();
-    }catch(err){
-      errorEl.textContent = err.message;
-      saveBtn.disabled = false;
-      saveBtn.textContent = isEdit ? 'Save changes' : 'Log visitor';
-    }
-  });
 }
 
 // ---------------- Artifacts Log ----------------

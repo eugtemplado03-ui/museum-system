@@ -129,16 +129,21 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT /api/visitors/:id - update visitor entry
+// PUT /api/visitors/:id - update visitor status/notes only (details cannot be altered)
 router.put('/:id', async (req, res) => {
-  const errors = validate(req.body);
-  if (errors.length) return res.status(400).json({ error: errors.join(' ') });
   try {
-    const visitor = await visitors.update(req.params.id, req.body);
-    if (!visitor) return res.status(404).json({ error: 'Visitor log not found.' });
+    const existing = await visitors.findById(req.params.id);
+    if (!existing) return res.status(404).json({ error: 'Visitor log not found.' });
+
+    const updatePayload = {};
+    if (req.body.status) updatePayload.status = req.body.status;
+    if (req.body.notes !== undefined) updatePayload.notes = req.body.notes;
+    if (req.body.tourGuide !== undefined) updatePayload.tourGuide = req.body.tourGuide;
+
+    const visitor = await visitors.update(req.params.id, updatePayload);
     res.json({ visitor });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to update visitor.' });
+    res.status(500).json({ error: 'Failed to update visitor status.' });
   }
 });
 
