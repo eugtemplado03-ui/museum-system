@@ -16,50 +16,74 @@ function validate(body) {
 }
 
 // GET /api/artifact-logs - list artifact logs with optional filters
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   const filter = {
     search: req.query.search,
     category: req.query.category,
     condition: req.query.condition,
     status: req.query.status
   };
-  res.json({ artifactLogs: artifactLogs.all(filter) });
+  try {
+    res.json({ artifactLogs: await artifactLogs.all(filter) });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch artifact logs' });
+  }
 });
 
 // GET /api/artifact-logs/stats - get summary metrics
-router.get('/stats', (req, res) => {
-  res.json({ stats: artifactLogs.stats() });
+router.get('/stats', async (req, res) => {
+  try {
+    res.json({ stats: await artifactLogs.stats() });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch artifact log stats' });
+  }
 });
 
 // GET /api/artifact-logs/:id - get single artifact log entry
-router.get('/:id', (req, res) => {
-  const artifact = artifactLogs.findById(req.params.id);
-  if (!artifact) return res.status(404).json({ error: 'Artifact log not found.' });
-  res.json({ artifact });
+router.get('/:id', async (req, res) => {
+  try {
+    const artifact = await artifactLogs.findById(req.params.id);
+    if (!artifact) return res.status(404).json({ error: 'Artifact log not found.' });
+    res.json({ artifact });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch artifact log' });
+  }
 });
 
 // POST /api/artifact-logs - create artifact log entry
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const errors = validate(req.body);
   if (errors.length) return res.status(400).json({ error: errors.join(' ') });
-  const artifact = artifactLogs.create(req.body);
-  res.status(201).json({ artifact });
+  try {
+    const artifact = await artifactLogs.create(req.body);
+    res.status(201).json({ artifact });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to create artifact log' });
+  }
 });
 
 // PUT /api/artifact-logs/:id - update artifact log entry
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   const errors = validate(req.body);
   if (errors.length) return res.status(400).json({ error: errors.join(' ') });
-  const artifact = artifactLogs.update(req.params.id, req.body);
-  if (!artifact) return res.status(404).json({ error: 'Artifact log not found.' });
-  res.json({ artifact });
+  try {
+    const artifact = await artifactLogs.update(req.params.id, req.body);
+    if (!artifact) return res.status(404).json({ error: 'Artifact log not found.' });
+    res.json({ artifact });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update artifact log' });
+  }
 });
 
 // DELETE /api/artifact-logs/:id - delete artifact log entry
-router.delete('/:id', (req, res) => {
-  const ok = artifactLogs.remove(req.params.id);
-  if (!ok) return res.status(404).json({ error: 'Artifact log not found.' });
-  res.json({ ok: true });
+router.delete('/:id', async (req, res) => {
+  try {
+    const ok = await artifactLogs.remove(req.params.id);
+    if (!ok) return res.status(404).json({ error: 'Artifact log not found.' });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete artifact log' });
+  }
 });
 
 module.exports = router;

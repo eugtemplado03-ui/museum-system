@@ -1,57 +1,67 @@
-const { load, save, normalizeImagePaths } = require('./store');
+const mongoose = require('mongoose');
 const { nanoid } = require('nanoid');
 
-function all() {
-  return load().gallery.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+const gallerySchema = new mongoose.Schema({
+  id: { type: String, default: () => nanoid(10), unique: true },
+  title: { type: String, default: '' },
+  caption: { type: String, default: '' },
+  imagePaths: { type: [String], default: [] },
+  imagePath: { type: String, default: '' },
+  videoUrl: { type: String, default: '' },
+  createdAt: { type: String, default: () => new Date().toISOString() }
+});
+
+const Gallery = mongoose.models.Gallery || mongoose.model('Gallery', gallerySchema);
+
+function normalizeImagePaths(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.filter(Boolean).map(String);
+  if (typeof value === 'string') return value.trim() ? [value.trim()] : [];
+  return [];
 }
 
-function findById(id) {
-  return load().gallery.find(g => g.id === id);
+async function all() {
+  const items = await Gallery.find({}).lean();
+  return items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }
 
-function create(payload) {
-  const data = load();
+async function findById(id) {
+  return await Gallery.findOne({ id }).lean();
+}
+
+async function create(payload) {
   const paths = normalizeImagePaths(payload.imagePaths ?? payload.imagePath);
-  const item = {
-    id: nanoid(10),
+  const item = new Gallery({
     title: payload.title || '',
     caption: payload.caption || '',
     imagePaths: paths,
     imagePath: paths[0] || '',
-    videoUrl: (payload.videoUrl || '').trim(),
-    createdAt: new Date().toISOString()
-  };
-  data.gallery.push(item);
-  save(data);
-  return item;
+    videoUrl: (payload.videoUrl || '').trim()
+  });
+  await item.save();
+  return item.toObject();
 }
 
-function update(id, payload) {
-  const data = load();
-  const idx = data.gallery.findIndex(g => g.id === id);
-  if (idx === -1) return null;
-  const existing = data.gallery[idx];
+async function update(id, payload) {
+  const existing = await Gallery.findOne({ id });
+  if (!existing) return null;
+
   const providedPaths = payload.imagePaths !== undefined ? normalizeImagePaths(payload.imagePaths) : normalizeImagePaths(payload.imagePath ?? existing.imagePath);
   const imagePaths = payload.imagePaths !== undefined ? providedPaths : normalizeImagePaths(existing.imagePaths || existing.imagePath || '');
-  const updated = {
-    ...existing,
-    title: payload.title ?? existing.title,
-    caption: payload.caption ?? existing.caption,
-    imagePaths,
-    imagePath: imagePaths[0] || '',
-    videoUrl: payload.videoUrl !== undefined ? (payload.videoUrl || '').trim() : existing.videoUrl || ''
-  };
-  data.gallery[idx] = updated;
-  save(data);
-  return updated;
+  
+  if (payload.title !== undefined) existing.title = payload.title;
+  if (payload.caption !== undefined) existing.caption = payload.caption;
+  existing.imagePaths = imagePaths;
+  existing.imagePath = imagePaths[0] || '';
+  if (payload.videoUrl !== undefined) existing.videoUrl = (payload.videoUrl || '').trim();
+  
+  await existing.save();
+  return existing.toObject();
 }
 
-function remove(id) {
-  const data = load();
-  const before = data.gallery.length;
-  data.gallery = data.gallery.filter(g => g.id !== id);
-  save(data);
-  return data.gallery.length < before;
+async function remove(id) {
+  const result = await Gallery.deleteOne({ id });
+  return result.deletedCount > 0;
 }
 
-module.exports = { all, findById, create, update, remove };
+module.exports = { all, findById, create, update, remove, Gallery };

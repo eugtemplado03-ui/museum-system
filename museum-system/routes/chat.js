@@ -25,18 +25,21 @@ function isRateLimited(ip) {
   return entry.count > 30; // 30 messages / 10 min / IP
 }
 
-function buildSystemPrompt() {
-  const info = museumInfo.getInfo();
-  const exhibitBlock = exhibits.all().map(e => (
+async function buildSystemPrompt() {
+  const info = await museumInfo.getInfo();
+  const allExhibits = await exhibits.all();
+  const exhibitBlock = allExhibits.map(e => (
     `- [${e.code}] ${e.title} (${e.category}) — Location: ${e.location || 'not specified'}. ` +
     `${e.year ? 'Status/date: ' + e.year + '. ' : ''}${e.description || 'No description on file.'}`
   )).join('\n');
 
-  const programBlock = programs.all().map(p => (
+  const allPrograms = await programs.all();
+  const programBlock = allPrograms.map(p => (
     `- ${p.title}${p.ageRange ? ' (Ages ' + p.ageRange + ')' : ''}: ${p.description || 'No description on file.'}`
   )).join('\n');
 
-  const eventBlock = events.all().map(e => (
+  const allEvents = await events.all();
+  const eventBlock = allEvents.map(e => (
     `- ${e.title} — ${e.date || 'date not set'}: ${e.description || 'No description on file.'}`
   )).join('\n');
 
@@ -104,13 +107,14 @@ router.post('/', async (req, res) => {
       .map(m => ({ role: m.role, content: m.content.slice(0, MAX_MESSAGE_LENGTH) }));
   }
 
-  const messages = [
-    { role: 'system', content: buildSystemPrompt() },
-    ...cleanHistory,
-    { role: 'user', content: message.trim() }
-  ];
-
   try {
+    const sysPrompt = await buildSystemPrompt();
+    const messages = [
+      { role: 'system', content: sysPrompt },
+      ...cleanHistory,
+      { role: 'user', content: message.trim() }
+    ];
+
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {

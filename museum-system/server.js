@@ -43,21 +43,47 @@ app.use('/api/museum-info', museumInfoRoutes);
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
-// Fallback 404 for unknown API routes
+const mongoose = require('mongoose');
+
 // Auto-seed initial catalog if database is empty on fresh deployment
-try {
-  const exhibits = require('./db/exhibits');
-  if (exhibits.all().length === 0) {
-    console.log('Database is empty — auto-seeding exhibits, programs, events, and gallery...');
-    require('./scripts/seed');
+async function startServer() {
+  try {
+    if (process.env.MONGODB_URI) {
+      console.log('Connecting to MongoDB...');
+      await mongoose.connect(process.env.MONGODB_URI);
+      console.log('Connected to MongoDB successfully.');
+    } else {
+      console.warn('MONGODB_URI is not set. Using in-memory MongoDB for local development.');
+      try {
+        const { MongoMemoryServer } = require('mongodb-memory-server');
+        const mongoServer = await MongoMemoryServer.create();
+        await mongoose.connect(mongoServer.getUri());
+        console.log('Connected to local in-memory MongoDB successfully.');
+      } catch (e) {
+        console.warn('Failed to start in-memory MongoDB. Please install mongodb-memory-server or set MONGODB_URI.');
+      }
+    }
+  } catch (err) {
+    console.error('Failed to connect to MongoDB:', err);
   }
-} catch (e) {
-  console.warn('Auto-seed skipped:', e.message);
+
+  try {
+    const exhibits = require('./db/exhibits');
+    const exhibitCount = await exhibits.countDocuments ? await exhibits.countDocuments() : (await exhibits.all()).length;
+    if (exhibitCount === 0) {
+      console.log('Database is empty — auto-seeding exhibits, programs, events, and gallery...');
+      require('./scripts/seed');
+    }
+  } catch (e) {
+    console.warn('Auto-seed skipped:', e.message);
+  }
+
+  app.listen(PORT, () => {
+    console.log(`Museo Sang Bata sa Negros server running on http://localhost:${PORT}`);
+    if (!process.env.OPENROUTER_API_KEY) {
+      console.log('NOTE: OPENROUTER_API_KEY is not set — the museum chat assistant will be disabled until you add it to .env.');
+    }
+  });
 }
 
-app.listen(PORT, () => {
-  console.log(`Museo Sang Bata sa Negros server running on http://localhost:${PORT}`);
-  if (!process.env.OPENROUTER_API_KEY) {
-    console.log('NOTE: OPENROUTER_API_KEY is not set — the museum chat assistant will be disabled until you add it to .env.');
-  }
-});
+startServer();

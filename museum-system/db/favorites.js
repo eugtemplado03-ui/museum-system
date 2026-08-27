@@ -1,30 +1,34 @@
-const { load, save } = require('./store');
+const mongoose = require('mongoose');
 
-function keyOf(visitorId, exhibitId) { return visitorId + '::' + exhibitId; }
+const favoriteSchema = new mongoose.Schema({
+  visitorId: { type: String, required: true },
+  exhibitId: { type: String, required: true },
+  createdAt: { type: String, default: () => new Date().toISOString() }
+});
 
-function listForVisitor(visitorId) {
-  return load().favorites.filter(f => f.visitorId === visitorId).map(f => f.exhibitId);
+const Favorite = mongoose.models.Favorite || mongoose.model('Favorite', favoriteSchema);
+
+async function listForVisitor(visitorId) {
+  const favorites = await Favorite.find({ visitorId }).lean();
+  return favorites.map(f => f.exhibitId);
 }
 
-function add(visitorId, exhibitId) {
-  const data = load();
-  const exists = data.favorites.some(f => f.visitorId === visitorId && f.exhibitId === exhibitId);
+async function add(visitorId, exhibitId) {
+  const exists = await Favorite.findOne({ visitorId, exhibitId });
   if (!exists) {
-    data.favorites.push({ visitorId, exhibitId, createdAt: new Date().toISOString() });
-    save(data);
+    const fav = new Favorite({ visitorId, exhibitId });
+    await fav.save();
   }
   return true;
 }
 
-function remove(visitorId, exhibitId) {
-  const data = load();
-  data.favorites = data.favorites.filter(f => !(f.visitorId === visitorId && f.exhibitId === exhibitId));
-  save(data);
+async function remove(visitorId, exhibitId) {
+  await Favorite.deleteOne({ visitorId, exhibitId });
   return true;
 }
 
-function countForExhibit(exhibitId) {
-  return load().favorites.filter(f => f.exhibitId === exhibitId).length;
+async function countForExhibit(exhibitId) {
+  return await Favorite.countDocuments({ exhibitId });
 }
 
-module.exports = { listForVisitor, add, remove, countForExhibit };
+module.exports = { listForVisitor, add, remove, countForExhibit, Favorite };

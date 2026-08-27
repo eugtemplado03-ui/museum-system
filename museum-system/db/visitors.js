@@ -1,36 +1,61 @@
-const { load, save } = require('./store');
+const mongoose = require('mongoose');
 const { nanoid } = require('nanoid');
 
-function all(filter = {}) {
-  let list = load().visitors || [];
+const visitorSchema = new mongoose.Schema({
+  id: { type: String, default: () => nanoid(10), unique: true },
+  visitorName: { type: String, default: '' },
+  groupName: { type: String, default: '' },
+  groupType: { type: String, default: 'Walk-in / Individual' },
+  pax: { type: Number, default: 1 },
+  contactNumber: { type: String, default: '' },
+  email: { type: String, default: '' },
+  address: { type: String, default: '' },
+  sex: { type: String, default: '' },
+  age: { type: Number, default: null },
+  visitDate: { type: String, default: '' },
+  visitTime: { type: String, default: '' },
+  purpose: { type: String, default: 'General Visit' },
+  tourGuide: { type: String, default: '' },
+  status: { type: String, default: 'Checked-in' },
+  notes: { type: String, default: '' },
+  createdAt: { type: String, default: () => new Date().toISOString() },
+  updatedAt: { type: String, default: () => new Date().toISOString() }
+});
+
+const Visitor = mongoose.models.Visitor || mongoose.model('Visitor', visitorSchema);
+
+async function all(filter = {}) {
+  let query = {};
   
   if (filter.search) {
     const q = filter.search.toLowerCase();
-    list = list.filter(v =>
-      (v.visitorName || '').toLowerCase().includes(q) ||
-      (v.groupName || '').toLowerCase().includes(q) ||
-      (v.contactNumber || '').toLowerCase().includes(q) ||
-      (v.email || '').toLowerCase().includes(q) ||
-      (v.purpose || '').toLowerCase().includes(q) ||
-      (v.tourGuide || '').toLowerCase().includes(q) ||
-      (v.notes || '').toLowerCase().includes(q)
-    );
+    query.$or = [
+      { visitorName: { $regex: q, $options: 'i' } },
+      { groupName: { $regex: q, $options: 'i' } },
+      { contactNumber: { $regex: q, $options: 'i' } },
+      { email: { $regex: q, $options: 'i' } },
+      { purpose: { $regex: q, $options: 'i' } },
+      { tourGuide: { $regex: q, $options: 'i' } },
+      { notes: { $regex: q, $options: 'i' } }
+    ];
   }
 
   if (filter.groupType && filter.groupType !== 'All') {
-    list = list.filter(v => (v.groupType || '').toLowerCase() === filter.groupType.toLowerCase());
+    query.groupType = filter.groupType;
   }
 
   if (filter.status && filter.status !== 'All') {
-    list = list.filter(v => (v.status || '').toLowerCase() === filter.status.toLowerCase());
+    query.status = filter.status;
   }
 
   if (filter.date) {
-    list = list.filter(v => (v.visitDate || '').startsWith(filter.date));
+    query.visitDate = { $regex: `^${filter.date}` };
   }
 
-  // Sort newest visit date/time first
-  return list.slice().sort((a, b) => {
+  // Sort logic mapped to Mongoose
+  const visitors = await Visitor.find(query).lean();
+  
+  return visitors.sort((a, b) => {
     const da = (a.visitDate || '') + ' ' + (a.visitTime || '');
     const db = (b.visitDate || '') + ' ' + (b.visitTime || '');
     if (da < db) return 1;
@@ -39,9 +64,8 @@ function all(filter = {}) {
   });
 }
 
-function findById(id) {
-  const data = load();
-  return (data.visitors || []).find(v => v.id === id);
+async function findById(id) {
+  return await Visitor.findOne({ id }).lean();
 }
 
 function getPhilippineDateTime() {
@@ -55,17 +79,12 @@ function getPhilippineDateTime() {
   }
 }
 
-function create(payload) {
-  const data = load();
-  if (!Array.isArray(data.visitors)) data.visitors = [];
-
-  const now = new Date();
+async function create(payload) {
   const ph = getPhilippineDateTime();
   const defaultDate = ph.date;
   const defaultTime = ph.time;
 
-  const visitor = {
-    id: nanoid(10),
+  const visitor = new Visitor({
     visitorName: (payload.visitorName || '').trim(),
     groupName: (payload.groupName || '').trim(),
     groupType: payload.groupType || 'Walk-in / Individual',
@@ -80,59 +99,45 @@ function create(payload) {
     purpose: payload.purpose || 'General Visit',
     tourGuide: (payload.tourGuide || '').trim(),
     status: payload.status || 'Checked-in',
-    notes: (payload.notes || '').trim(),
-    createdAt: now.toISOString(),
-    updatedAt: now.toISOString()
-  };
+    notes: (payload.notes || '').trim()
+  });
 
-  data.visitors.push(visitor);
-  save(data);
-  return visitor;
+  await visitor.save();
+  return visitor.toObject();
 }
 
-function update(id, payload) {
-  const data = load();
-  if (!Array.isArray(data.visitors)) data.visitors = [];
-  const idx = data.visitors.findIndex(v => v.id === id);
-  if (idx === -1) return null;
+async function update(id, payload) {
+  const existing = await Visitor.findOne({ id });
+  if (!existing) return null;
 
-  const existing = data.visitors[idx];
-  const updated = {
-    ...existing,
-    visitorName: payload.visitorName !== undefined ? payload.visitorName.trim() : existing.visitorName,
-    groupName: payload.groupName !== undefined ? payload.groupName.trim() : existing.groupName,
-    groupType: payload.groupType !== undefined ? payload.groupType : existing.groupType,
-    pax: payload.pax !== undefined ? Math.max(1, parseInt(payload.pax, 10) || 1) : existing.pax,
-    contactNumber: payload.contactNumber !== undefined ? payload.contactNumber.trim() : existing.contactNumber,
-    email: payload.email !== undefined ? payload.email.trim() : existing.email,
-    address: payload.address !== undefined ? payload.address.trim() : existing.address,
-    sex: payload.sex !== undefined ? payload.sex : existing.sex,
-    age: payload.age !== undefined && payload.age !== '' ? parseInt(payload.age, 10) : existing.age,
-    visitDate: payload.visitDate !== undefined ? payload.visitDate : existing.visitDate,
-    visitTime: payload.visitTime !== undefined ? payload.visitTime : existing.visitTime,
-    purpose: payload.purpose !== undefined ? payload.purpose : existing.purpose,
-    tourGuide: payload.tourGuide !== undefined ? payload.tourGuide.trim() : existing.tourGuide,
-    status: payload.status !== undefined ? payload.status : existing.status,
-    notes: payload.notes !== undefined ? payload.notes.trim() : existing.notes,
-    updatedAt: new Date().toISOString()
-  };
-
-  data.visitors[idx] = updated;
-  save(data);
-  return updated;
+  if (payload.visitorName !== undefined) existing.visitorName = payload.visitorName.trim();
+  if (payload.groupName !== undefined) existing.groupName = payload.groupName.trim();
+  if (payload.groupType !== undefined) existing.groupType = payload.groupType;
+  if (payload.pax !== undefined) existing.pax = Math.max(1, parseInt(payload.pax, 10) || 1);
+  if (payload.contactNumber !== undefined) existing.contactNumber = payload.contactNumber.trim();
+  if (payload.email !== undefined) existing.email = payload.email.trim();
+  if (payload.address !== undefined) existing.address = payload.address.trim();
+  if (payload.sex !== undefined) existing.sex = payload.sex;
+  if (payload.age !== undefined && payload.age !== '') existing.age = parseInt(payload.age, 10);
+  if (payload.visitDate !== undefined) existing.visitDate = payload.visitDate;
+  if (payload.visitTime !== undefined) existing.visitTime = payload.visitTime;
+  if (payload.purpose !== undefined) existing.purpose = payload.purpose;
+  if (payload.tourGuide !== undefined) existing.tourGuide = payload.tourGuide.trim();
+  if (payload.status !== undefined) existing.status = payload.status;
+  if (payload.notes !== undefined) existing.notes = payload.notes.trim();
+  
+  existing.updatedAt = new Date().toISOString();
+  await existing.save();
+  return existing.toObject();
 }
 
-function remove(id) {
-  const data = load();
-  if (!Array.isArray(data.visitors)) return false;
-  const before = data.visitors.length;
-  data.visitors = data.visitors.filter(v => v.id !== id);
-  save(data);
-  return data.visitors.length < before;
+async function remove(id) {
+  const result = await Visitor.deleteOne({ id });
+  return result.deletedCount > 0;
 }
 
-function stats() {
-  const list = load().visitors || [];
+async function stats() {
+  const list = await Visitor.find({}).lean();
   const today = new Date().toISOString().slice(0, 10);
   const thisMonth = today.slice(0, 7);
 
@@ -184,4 +189,4 @@ function stats() {
   };
 }
 
-module.exports = { all, findById, create, update, remove, stats };
+module.exports = { all, findById, create, update, remove, stats, Visitor };

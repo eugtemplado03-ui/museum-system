@@ -88,7 +88,7 @@
 
         <nav class="user-sidebar-nav">
           <div class="user-sidebar-section-title">Navigation</div>
-          <a class="user-sidebar-btn ${activeKey === 'home' ? 'active' : ''}" href="/">
+          <a class="user-sidebar-btn ${activeKey === 'home' ? 'active' : ''}" href="/dashboard.html">
             <span class="user-sidebar-icon">🏠</span>
             <span class="user-sidebar-label">Home</span>
             ${activeKey === 'home' ? '<span class="user-sidebar-indicator"></span>' : ''}

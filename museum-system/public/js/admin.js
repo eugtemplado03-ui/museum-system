@@ -119,7 +119,7 @@ function renderLogin(){
   closeModal();
   if (window.MuseoSidebar) window.MuseoSidebar.close();
   document.body.classList.remove('sidebar-open');
-  window.location.replace('/checkin.html?tab=admin');
+  window.location.replace('/?tab=admin');
 }
 
 let activeTab = 'dashboard';

@@ -20,7 +20,7 @@ function isRateLimited(key) {
   return entry.count > 10;
 }
 
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
   const { username, password } = req.body || {};
   if (!username || !password) {
     return res.status(400).json({ error: 'Username and password are required.' });
@@ -30,17 +30,22 @@ router.post('/login', (req, res) => {
     return res.status(429).json({ error: 'Too many attempts. Try again in a few minutes.' });
   }
 
-  const user = users.findByUsername(username);
-  if (!user || !bcrypt.compareSync(password, user.passwordHash)) {
-    return res.status(401).json({ error: 'Incorrect username or password.' });
-  }
+  try {
+    const user = await users.findByUsername(username);
+    if (!user || !bcrypt.compareSync(password, user.passwordHash)) {
+      return res.status(401).json({ error: 'Incorrect username or password.' });
+    }
 
-  const token = jwt.sign(
-    { sub: user.id, username: user.username, role: user.role },
-    JWT_SECRET,
-    { expiresIn: '12h' }
-  );
-  res.json({ token, user: { id: user.id, username: user.username, role: user.role } });
+    const token = jwt.sign(
+      { sub: user.id, username: user.username, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '12h' }
+    );
+    res.json({ token, user: { id: user.id, username: user.username, role: user.role } });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 router.get('/me', requireAuth, (req, res) => {

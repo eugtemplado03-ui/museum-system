@@ -23,11 +23,10 @@ function validateCheckin(body) {
   return errors;
 }
 
-router.post('/checkin', (req, res) => {
+router.post('/checkin', async (req, res) => {
   const errors = validateCheckin(req.body);
   if (errors.length) return res.status(400).json({ error: errors.join(' ') });
   
-  const now = new Date();
   const payload = {
     visitorName: req.body.visitorName.trim(),
     address: req.body.address.trim(),
@@ -43,8 +42,13 @@ router.post('/checkin', (req, res) => {
     notes: (req.body.notes || '').trim()
   };
   
-  const visitor = visitors.create(payload);
-  res.status(201).json({ visitor });
+  try {
+    const visitor = await visitors.create(payload);
+    res.status(201).json({ visitor });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to process check-in.' });
+  }
 });
 
 // Public QR code for visitor check-in
@@ -79,50 +83,74 @@ function validate(body) {
 }
 
 // GET /api/visitors - list visitor logs with optional filters
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   const filter = {
     search: req.query.search,
     groupType: req.query.groupType,
     status: req.query.status,
     date: req.query.date
   };
-  res.json({ visitors: visitors.all(filter) });
+  try {
+    res.json({ visitors: await visitors.all(filter) });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch visitors.' });
+  }
 });
 
 // GET /api/visitors/stats - get summary metrics
-router.get('/stats', (req, res) => {
-  res.json({ stats: visitors.stats() });
+router.get('/stats', async (req, res) => {
+  try {
+    res.json({ stats: await visitors.stats() });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch stats.' });
+  }
 });
 
 // GET /api/visitors/:id - get single visitor entry
-router.get('/:id', (req, res) => {
-  const visitor = visitors.findById(req.params.id);
-  if (!visitor) return res.status(404).json({ error: 'Visitor log not found.' });
-  res.json({ visitor });
+router.get('/:id', async (req, res) => {
+  try {
+    const visitor = await visitors.findById(req.params.id);
+    if (!visitor) return res.status(404).json({ error: 'Visitor log not found.' });
+    res.json({ visitor });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch visitor.' });
+  }
 });
 
 // POST /api/visitors - create visitor entry
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const errors = validate(req.body);
   if (errors.length) return res.status(400).json({ error: errors.join(' ') });
-  const visitor = visitors.create(req.body);
-  res.status(201).json({ visitor });
+  try {
+    const visitor = await visitors.create(req.body);
+    res.status(201).json({ visitor });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to create visitor.' });
+  }
 });
 
 // PUT /api/visitors/:id - update visitor entry
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   const errors = validate(req.body);
   if (errors.length) return res.status(400).json({ error: errors.join(' ') });
-  const visitor = visitors.update(req.params.id, req.body);
-  if (!visitor) return res.status(404).json({ error: 'Visitor log not found.' });
-  res.json({ visitor });
+  try {
+    const visitor = await visitors.update(req.params.id, req.body);
+    if (!visitor) return res.status(404).json({ error: 'Visitor log not found.' });
+    res.json({ visitor });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update visitor.' });
+  }
 });
 
 // DELETE /api/visitors/:id - delete visitor entry
-router.delete('/:id', (req, res) => {
-  const ok = visitors.remove(req.params.id);
-  if (!ok) return res.status(404).json({ error: 'Visitor log not found.' });
-  res.json({ ok: true });
+router.delete('/:id', async (req, res) => {
+  try {
+    const ok = await visitors.remove(req.params.id);
+    if (!ok) return res.status(404).json({ error: 'Visitor log not found.' });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete visitor.' });
+  }
 });
 
 module.exports = router;

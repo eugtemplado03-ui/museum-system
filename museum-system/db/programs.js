@@ -1,63 +1,75 @@
-const { load, save, normalizeImagePaths } = require('./store');
+const mongoose = require('mongoose');
 const { nanoid } = require('nanoid');
 
-function all() {
-  return load().programs.slice().sort((a, b) => a.title.localeCompare(b.title));
+const programSchema = new mongoose.Schema({
+  id: { type: String, default: () => nanoid(10), unique: true },
+  title: { type: String, required: true },
+  ageRange: { type: String, default: '' },
+  schedule: { type: String, default: '' },
+  imagePaths: { type: [String], default: [] },
+  imagePath: { type: String, default: '' },
+  videoUrl: { type: String, default: '' },
+  description: { type: String, default: '' },
+  createdAt: { type: String, default: () => new Date().toISOString() },
+  updatedAt: { type: String, default: () => new Date().toISOString() }
+});
+
+const Program = mongoose.models.Program || mongoose.model('Program', programSchema);
+
+function normalizeImagePaths(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.filter(Boolean).map(String);
+  if (typeof value === 'string') return value.trim() ? [value.trim()] : [];
+  return [];
 }
 
-function findById(id) {
-  return load().programs.find(p => p.id === id);
+async function all() {
+  const programs = await Program.find({}).lean();
+  return programs.sort((a, b) => a.title.localeCompare(b.title));
 }
 
-function create(payload) {
-  const data = load();
+async function findById(id) {
+  return await Program.findOne({ id }).lean();
+}
+
+async function create(payload) {
   const paths = normalizeImagePaths(payload.imagePaths ?? payload.imagePath);
-  const program = {
-    id: nanoid(10),
+  const program = new Program({
     title: payload.title,
     ageRange: payload.ageRange || '',
     schedule: payload.schedule || '',
     imagePaths: paths,
     imagePath: paths[0] || '',
     videoUrl: (payload.videoUrl || '').trim(),
-    description: payload.description || '',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
-  data.programs.push(program);
-  save(data);
-  return program;
+    description: payload.description || ''
+  });
+  await program.save();
+  return program.toObject();
 }
 
-function update(id, payload) {
-  const data = load();
-  const idx = data.programs.findIndex(p => p.id === id);
-  if (idx === -1) return null;
-  const existing = data.programs[idx];
+async function update(id, payload) {
+  const existing = await Program.findOne({ id });
+  if (!existing) return null;
+
   const providedPaths = payload.imagePaths !== undefined ? normalizeImagePaths(payload.imagePaths) : normalizeImagePaths(payload.imagePath ?? existing.imagePath);
   const imagePaths = payload.imagePaths !== undefined ? providedPaths : normalizeImagePaths(existing.imagePaths || existing.imagePath || '');
-  const updated = {
-    ...existing,
-    title: payload.title ?? existing.title,
-    ageRange: payload.ageRange ?? existing.ageRange,
-    schedule: payload.schedule ?? existing.schedule,
-    imagePaths,
-    imagePath: imagePaths[0] || '',
-    videoUrl: payload.videoUrl !== undefined ? (payload.videoUrl || '').trim() : existing.videoUrl || '',
-    description: payload.description ?? existing.description,
-    updatedAt: new Date().toISOString()
-  };
-  data.programs[idx] = updated;
-  save(data);
-  return updated;
+  
+  if (payload.title !== undefined) existing.title = payload.title;
+  if (payload.ageRange !== undefined) existing.ageRange = payload.ageRange;
+  if (payload.schedule !== undefined) existing.schedule = payload.schedule;
+  existing.imagePaths = imagePaths;
+  existing.imagePath = imagePaths[0] || '';
+  if (payload.videoUrl !== undefined) existing.videoUrl = (payload.videoUrl || '').trim();
+  if (payload.description !== undefined) existing.description = payload.description;
+  
+  existing.updatedAt = new Date().toISOString();
+  await existing.save();
+  return existing.toObject();
 }
 
-function remove(id) {
-  const data = load();
-  const before = data.programs.length;
-  data.programs = data.programs.filter(p => p.id !== id);
-  save(data);
-  return data.programs.length < before;
+async function remove(id) {
+  const result = await Program.deleteOne({ id });
+  return result.deletedCount > 0;
 }
 
-module.exports = { all, findById, create, update, remove };
+module.exports = { all, findById, create, update, remove, Program };

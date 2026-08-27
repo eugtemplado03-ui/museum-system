@@ -33,23 +33,32 @@ const Gate = (() => {
     sessionStorage.removeItem(VISITOR_NAME_KEY);
     localStorage.removeItem(CHECKIN_KEY);
     localStorage.removeItem(VISITOR_NAME_KEY);
-    window.location.href = '/checkin.html';
+    window.location.href = '/';
   }
 
   function logoutAdmin() {
     localStorage.removeItem(ADMIN_TOKEN_KEY);
     sessionStorage.removeItem(ADMIN_TOKEN_KEY);
-    window.location.href = '/checkin.html?tab=admin';
+    window.location.href = '/?tab=admin';
   }
 
   function enforce() {
     const currentPath = window.location.pathname.toLowerCase();
-    const isGatePage = currentPath.endsWith('/checkin.html') || currentPath.endsWith('/checkin') || currentPath.endsWith('/login.html') || currentPath.endsWith('/login');
+    const isGatePage = currentPath === '/' || currentPath.endsWith('/index.html');
 
     if (!isGatePage && !isAuthenticated()) {
       const destination = window.location.pathname + window.location.search + window.location.hash;
-      const redirectParam = encodeURIComponent(destination || '/');
-      window.location.replace(`/checkin.html?redirect=${redirectParam}`);
+      const redirectParam = encodeURIComponent(destination || '/dashboard.html');
+      window.location.replace(`/?redirect=${redirectParam}`);
+    } else if (isGatePage && isAuthenticated()) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectUrl = urlParams.get('redirect') ? decodeURIComponent(urlParams.get('redirect')) : '/dashboard.html';
+      // prevent redirect loop if the redirect url is /
+      if (redirectUrl === '/' || redirectUrl === '/index.html') {
+        window.location.replace('/dashboard.html');
+      } else {
+        window.location.replace(redirectUrl);
+      }
     }
   }
 

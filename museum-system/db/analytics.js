@@ -1,30 +1,41 @@
-const { load, save } = require('./store');
+const mongoose = require('mongoose');
 const { nanoid } = require('nanoid');
 
-// Keep the raw event log bounded so the JSON file doesn't grow forever on a
-// busy floor. Older events are trimmed once this many are stored.
 const MAX_EVENTS = 20000;
 
-function record(exhibitId, source) {
-  const data = load();
-  data.scanEvents.push({
-    id: nanoid(10),
+const scanEventSchema = new mongoose.Schema({
+  id: { type: String, default: () => nanoid(10), unique: true },
+  exhibitId: { type: String, required: true },
+  source: { type: String, required: true }, // 'scan' or 'view'
+  at: { type: String, default: () => new Date().toISOString() }
+});
+
+const ScanEvent = mongoose.models.ScanEvent || mongoose.model('ScanEvent', scanEventSchema);
+
+async function record(exhibitId, source) {
+  const event = new ScanEvent({
     exhibitId,
-    source: source === 'scan' ? 'scan' : 'view', // 'scan' = came from a QR scan, 'view' = opened another way
-    at: new Date().toISOString()
+    source: source === 'scan' ? 'scan' : 'view'
   });
-  if (data.scanEvents.length > MAX_EVENTS) {
-    data.scanEvents = data.scanEvents.slice(data.scanEvents.length - MAX_EVENTS);
+  await event.save();
+  
+  // Optional cleanup if collection gets too large
+  const count = await ScanEvent.countDocuments();
+  if (count > MAX_EVENTS) {
+    const overflow = count - MAX_EVENTS;
+    const oldest = await ScanEvent.find().sort({ _id: 1 }).limit(overflow);
+    if (oldest.length > 0) {
+      await ScanEvent.deleteMany({ _id: { $in: oldest.map(o => o._id) } });
+    }
   }
-  save(data);
 }
 
-function all() {
-  return load().scanEvents;
+async function all() {
+  return await ScanEvent.find({}).lean();
 }
 
-function summaryByExhibit() {
-  const events = all();
+async function summaryByExhibit() {
+  const events = await all();
   const map = new Map();
   for (const e of events) {
     const cur = map.get(e.exhibitId) || { exhibitId: e.exhibitId, total: 0, scans: 0, views: 0 };
@@ -35,12 +46,13 @@ function summaryByExhibit() {
   return Array.from(map.values()).sort((a, b) => b.total - a.total);
 }
 
-function recent(limit) {
-  return all().slice(-Math.max(1, limit || 25)).reverse();
+async function recent(limit) {
+  const events = await ScanEvent.find({}).sort({ _id: -1 }).limit(Math.max(1, limit || 25)).lean();
+  return events;
 }
 
-function dailyStats(days = 30) {
-  const events = all();
+async function dailyStats(days = 30) {
+  const events = await all();
   const now = Date.now();
   const dayMs = 24 * 60 * 60 * 1000;
   const result = [];
@@ -66,11 +78,11 @@ function dailyStats(days = 30) {
   return result;
 }
 
-function totals() {
-  const events = all();
+async function totals() {
+  const events = await all();
   const last7 = events.filter(e => Date.now() - new Date(e.at).getTime() <= 7 * 24 * 60 * 60 * 1000);
   const last24h = events.filter(e => Date.now() - new Date(e.at).getTime() <= 24 * 60 * 60 * 1000);
   return { allTime: events.length, last7Days: last7.length, last24Hours: last24h.length };
 }
 
-module.exports = { record, all, summaryByExhibit, recent, totals, dailyStats };
+module.exports = { record, all, summaryByExhibit, recent, totals, dailyStats, ScanEvent };

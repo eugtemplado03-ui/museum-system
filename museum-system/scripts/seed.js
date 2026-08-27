@@ -5,26 +5,34 @@
 // Descriptions below are paraphrased summaries, not copied text — edit
 // freely from the admin dashboard once the site is running.
 
+require('dotenv').config();
+const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+
 const users = require('../db/users');
 const exhibits = require('../db/exhibits');
+const programs = require('../db/programs');
+const events = require('../db/events');
+const gallery = require('../db/gallery');
+const ratings = require('../db/ratings');
 
 const ADMIN_USERNAME = process.env.SEED_ADMIN_USER || 'admin';
 const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASS || 'museum-admin-2026';
 
-function seedAdmin() {
-  if (users.count() > 0) {
+async function seedAdmin() {
+  if (await users.count() > 0) {
     console.log('Users already exist — skipping admin creation.');
     return;
   }
   const passwordHash = bcrypt.hashSync(ADMIN_PASSWORD, 10);
-  users.create({ username: ADMIN_USERNAME, passwordHash, role: 'admin' });
+  await users.create({ username: ADMIN_USERNAME, passwordHash, role: 'admin' });
   console.log(`Created admin user "${ADMIN_USERNAME}" with password "${ADMIN_PASSWORD}".`);
   console.log('IMPORTANT: sign in and change this password / rotate credentials before going live.');
 }
 
-function seedExhibits() {
-  if (exhibits.all().length > 0) {
+async function seedExhibits() {
+  const allExhibits = await exhibits.all();
+  if (allExhibits.length > 0) {
     console.log('Exhibits already exist — skipping sample data.');
     return;
   }
@@ -129,13 +137,15 @@ function seedExhibits() {
       description: "A small mangrove park and walkway behind the museum showcasing different mangrove species up close, used alongside the museum's mangrove seminars and indoor exhibit."
     }
   ];
-  samples.forEach(s => exhibits.create(s));
+  for (const s of samples) {
+    await exhibits.create(s);
+  }
   console.log(`Seeded ${samples.length} exhibits based on museosangbata.org.`);
 }
 
-function seedPrograms() {
-  const programs = require('../db/programs');
-  if (programs.all().length > 0) {
+async function seedPrograms() {
+  const allProgs = await programs.all();
+  if (allProgs.length > 0) {
     console.log('Programs already exist — skipping.');
     return;
   }
@@ -157,13 +167,15 @@ function seedPrograms() {
     { title: 'Marine Biodiversity Conservation and Climate Change Adaptation Education Program', ageRange: 'Teachers, students & community', schedule: 'Ongoing outreach and training',
       description: "The museum's flagship program, training public elementary science teachers and running outreach to mothers, fisherfolk, boatmen, and schools on marine conservation and climate adaptation." }
   ];
-  items.forEach(i => programs.create(i));
+  for (const i of items) {
+    await programs.create(i);
+  }
   console.log(`Seeded ${items.length} programs based on museosangbata.org.`);
 }
 
-function seedEvents() {
-  const events = require('../db/events');
-  if (events.all().length > 0) {
+async function seedEvents() {
+  const allEvents = await events.all();
+  if (allEvents.length > 0) {
     console.log('Events already exist — skipping.');
     return;
   }
@@ -179,13 +191,15 @@ function seedEvents() {
     { title: 'Mobile Library Launch: "Books and Exhibit on Wheels"', date: '2019-02-15', location: 'Museo Sang Bata sa Negros',
       description: "Blessing and launch of the museum's mobile library initiative, bringing books and mini-exhibits to communities outside the museum, supported by local book donors and legislators." }
   ];
-  items.forEach(i => events.create(i));
+  for (const i of items) {
+    await events.create(i);
+  }
   console.log(`Seeded ${items.length} events based on museosangbata.org.`);
 }
 
-function seedGallery() {
-  const gallery = require('../db/gallery');
-  if (gallery.all().length > 0) {
+async function seedGallery() {
+  const allGallery = await gallery.all();
+  if (allGallery.length > 0) {
     console.log('Gallery already has items — skipping.');
     return;
   }
@@ -197,19 +211,19 @@ function seedGallery() {
     { title: 'The Toy Library', caption: 'Toys available for children to borrow and play with.', imagePath: 'https://museosangbata.org/wp-content/uploads/2014/11/toy-library-banner-260x170.jpg' },
     { title: 'Mobile Library Launch', caption: '"Books and Exhibit on Wheels" blessing and launch, February 2019.', imagePath: 'https://museosangbata.org/wp-content/uploads/2019/04/IMG_0150-260x170.jpg' }
   ];
-  items.forEach(i => gallery.create(i));
+  for (const i of items) {
+    await gallery.create(i);
+  }
   console.log(`Seeded ${items.length} gallery photos based on museosangbata.org.`);
 }
 
-function seedRatings() {
-  const ratings = require('../db/ratings');
-  const exhibits = require('../db/exhibits');
-  const existing = ratings.allForAdmin();
+async function seedRatings() {
+  const existing = await ratings.allForAdmin();
   if (existing.length > 0) {
     console.log('Ratings already exist — skipping sample ratings.');
     return;
   }
-  const allEx = exhibits.all();
+  const allEx = await exhibits.all();
   if (allEx.length === 0) return;
 
   const sampleReviews = [
@@ -221,19 +235,39 @@ function seedRatings() {
     { code: 'EX-006', visitorName: 'Grandma Teresa', rating: 5, comment: 'Wonderful folk toy collection! Brought back so many childhood memories.' }
   ];
 
-  sampleReviews.forEach((rev, idx) => {
+  for (let idx = 0; idx < sampleReviews.length; idx++) {
+    const rev = sampleReviews[idx];
     const ex = allEx.find(e => e.code === rev.code);
     if (ex) {
-      ratings.submit(`seed-v-${idx + 1}`, ex.id, rev.rating, rev.comment, rev.visitorName);
+      await ratings.submit(`seed-v-${idx + 1}`, ex.id, rev.rating, rev.comment, rev.visitorName);
     }
-  });
+  }
   console.log(`Seeded ${sampleReviews.length} sample visitor ratings and reviews.`);
 }
 
-seedAdmin();
-seedExhibits();
-seedPrograms();
-seedEvents();
-seedGallery();
-seedRatings();
+async function main() {
+  try {
+    if (!process.env.MONGODB_URI) {
+      console.error('Missing MONGODB_URI. Make sure your .env is configured.');
+      process.exit(1);
+    }
 
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log('Connected to MongoDB.');
+
+    await seedAdmin();
+    await seedExhibits();
+    await seedPrograms();
+    await seedEvents();
+    await seedGallery();
+    await seedRatings();
+
+    console.log('Seed completed successfully.');
+  } catch (err) {
+    console.error('Seed failed:', err);
+  } finally {
+    await mongoose.connection.close();
+  }
+}
+
+main();

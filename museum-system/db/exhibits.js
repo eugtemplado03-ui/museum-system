@@ -1,12 +1,46 @@
-const { load, save, normalizeImagePaths } = require('./store');
+const mongoose = require('mongoose');
 const { nanoid } = require('nanoid');
+
+const categorySchema = new mongoose.Schema({
+  name: { type: String, required: true, unique: true }
+});
+const Category = mongoose.models.Category || mongoose.model('Category', categorySchema);
+
+const exhibitSchema = new mongoose.Schema({
+  id: { type: String, default: () => nanoid(10), unique: true },
+  code: { type: String, required: true, unique: true },
+  title: { type: String, required: true },
+  category: { type: String, default: 'Other' },
+  origin: { type: String, default: '' },
+  year: { type: String, default: '' },
+  location: { type: String, default: '' },
+  lat: { type: Number, default: null },
+  lng: { type: Number, default: null },
+  mapImagePath: { type: String, default: '' },
+  imagePaths: { type: [String], default: [] },
+  imagePath: { type: String, default: '' },
+  description: { type: String, default: '' },
+  description_tl: { type: String, default: '' },
+  description_cb: { type: String, default: '' },
+  createdAt: { type: String, default: () => new Date().toISOString() },
+  updatedAt: { type: String, default: () => new Date().toISOString() }
+});
+const Exhibit = mongoose.models.Exhibit || mongoose.model('Exhibit', exhibitSchema);
 
 const DEFAULT_CATEGORIES = [
   'Marine & Nature', 'Touch & Play', 'Toys & Collections',
   'Character & Heritage', 'Environmental', 'Reading & Learning', 'Other'
 ];
 
-function nextCode(exhibits) {
+function normalizeImagePaths(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.filter(Boolean).map(String);
+  if (typeof value === 'string') return value.trim() ? [value.trim()] : [];
+  return [];
+}
+
+async function nextCode() {
+  const exhibits = await Exhibit.find({}, { code: 1 }).lean();
   let max = 0;
   exhibits.forEach(e => {
     const n = parseInt((e.code || '').split('-')[1], 10);
@@ -15,38 +49,35 @@ function nextCode(exhibits) {
   return 'EX-' + String(max + 1).padStart(3, '0');
 }
 
-function ensureCategories(data) {
-  if (!Array.isArray(data.categories) || data.categories.length === 0) {
-    const existing = Array.from(new Set(
-      (Array.isArray(data.exhibits) ? data.exhibits : [])
-        .map(e => String(e.category || '').trim())
-        .filter(Boolean)
-    ));
+async function ensureCategories() {
+  const count = await Category.countDocuments();
+  if (count === 0) {
+    const exhibits = await Exhibit.find({}, { category: 1 }).lean();
+    const existing = Array.from(new Set(exhibits.map(e => String(e.category || '').trim()).filter(Boolean)));
     const combined = Array.from(new Set([...DEFAULT_CATEGORIES, ...existing]));
-    data.categories = combined;
-    save(data);
+    for (const name of combined) {
+      await Category.updateOne({ name: name }, { name: name }, { upsert: true });
+    }
   }
-  return data.categories;
 }
 
-function all() {
-  return load().exhibits.sort((a, b) => a.code.localeCompare(b.code));
+async function all() {
+  const exhibits = await Exhibit.find({}).lean();
+  return exhibits.sort((a, b) => a.code.localeCompare(b.code));
 }
 
-function findByCode(code) {
-  return load().exhibits.find(e => e.code.toLowerCase() === String(code).toLowerCase());
+async function findByCode(code) {
+  return await Exhibit.findOne({ code: { $regex: new RegExp(`^${code}$`, 'i') } }).lean();
 }
 
-function findById(id) {
-  return load().exhibits.find(e => e.id === id);
+async function findById(id) {
+  return await Exhibit.findOne({ id }).lean();
 }
 
-function create(payload) {
-  const data = load();
+async function create(payload) {
   const paths = normalizeImagePaths(payload.imagePaths ?? payload.imagePath);
-  const exhibit = {
-    id: nanoid(10),
-    code: nextCode(data.exhibits),
+  const exhibit = new Exhibit({
+    code: await nextCode(),
     title: payload.title,
     category: payload.category || 'Other',
     origin: payload.origin || '',
@@ -59,149 +90,135 @@ function create(payload) {
     imagePath: paths[0] || '',
     description: payload.description || '',
     description_tl: payload.description_tl || '',
-    description_cb: payload.description_cb || '',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
-  data.exhibits.push(exhibit);
-  save(data);
-  return exhibit;
+    description_cb: payload.description_cb || ''
+  });
+  await exhibit.save();
+  return exhibit.toObject();
 }
 
-function update(id, payload) {
-  const data = load();
-  const idx = data.exhibits.findIndex(e => e.id === id);
-  if (idx === -1) return null;
-  const existing = data.exhibits[idx];
+async function update(id, payload) {
+  const existing = await Exhibit.findOne({ id });
+  if (!existing) return null;
+
   const providedPaths = payload.imagePaths !== undefined ? normalizeImagePaths(payload.imagePaths) : normalizeImagePaths(payload.imagePath ?? existing.imagePath);
   const imagePaths = payload.imagePaths !== undefined ? providedPaths : normalizeImagePaths(existing.imagePaths || existing.imagePath || '');
-  const updated = {
-    ...existing,
-    title: payload.title ?? existing.title,
-    category: payload.category ?? existing.category,
-    origin: payload.origin ?? existing.origin,
-    year: payload.year ?? existing.year,
-    location: payload.location ?? existing.location,
-    lat: payload.lat !== undefined && payload.lat !== '' ? parseFloat(payload.lat) : existing.lat ?? null,
-    lng: payload.lng !== undefined && payload.lng !== '' ? parseFloat(payload.lng) : existing.lng ?? null,
-    mapImagePath: payload.mapImagePath !== undefined ? payload.mapImagePath : existing.mapImagePath || '',
-    imagePaths,
-    imagePath: imagePaths[0] || '',
-    description: payload.description ?? existing.description,
-    description_tl: payload.description_tl ?? existing.description_tl,
-    description_cb: payload.description_cb ?? existing.description_cb,
-    updatedAt: new Date().toISOString()
-  };
-  data.exhibits[idx] = updated;
-  save(data);
-  return updated;
+  
+  if (payload.title !== undefined) existing.title = payload.title;
+  if (payload.category !== undefined) existing.category = payload.category;
+  if (payload.origin !== undefined) existing.origin = payload.origin;
+  if (payload.year !== undefined) existing.year = payload.year;
+  if (payload.location !== undefined) existing.location = payload.location;
+  if (payload.lat !== undefined && payload.lat !== '') existing.lat = parseFloat(payload.lat);
+  if (payload.lng !== undefined && payload.lng !== '') existing.lng = parseFloat(payload.lng);
+  if (payload.mapImagePath !== undefined) existing.mapImagePath = payload.mapImagePath;
+  
+  existing.imagePaths = imagePaths;
+  existing.imagePath = imagePaths[0] || '';
+  if (payload.description !== undefined) existing.description = payload.description;
+  if (payload.description_tl !== undefined) existing.description_tl = payload.description_tl;
+  if (payload.description_cb !== undefined) existing.description_cb = payload.description_cb;
+  
+  existing.updatedAt = new Date().toISOString();
+  await existing.save();
+  return existing.toObject();
 }
 
-function remove(id) {
-  const data = load();
-  const before = data.exhibits.length;
-  data.exhibits = data.exhibits.filter(e => e.id !== id);
-  save(data);
-  return data.exhibits.length < before;
+async function remove(id) {
+  const result = await Exhibit.deleteOne({ id });
+  return result.deletedCount > 0;
 }
 
-function categories() {
-  const data = load();
-  ensureCategories(data);
-  const exhibitCats = Array.from(new Set(
-    (Array.isArray(data.exhibits) ? data.exhibits : [])
-      .map(e => String(e.category || '').trim())
-      .filter(Boolean)
-  ));
-  return Array.from(new Set([...(data.categories || []), ...exhibitCats]));
+async function categories() {
+  await ensureCategories();
+  const cats = await Category.find({}).lean();
+  return cats.map(c => c.name);
 }
 
-function addCategory(category) {
+async function addCategory(category) {
   const value = String(category || '').trim();
   if (!value) return null;
-  const data = load();
-  ensureCategories(data);
-  if (data.categories.some(c => c.toLowerCase() === value.toLowerCase())) return null;
-  data.categories.push(value);
-  save(data);
+  await ensureCategories();
+  const exists = await Category.findOne({ name: { $regex: new RegExp(`^${value}$`, 'i') } });
+  if (exists) return null;
+  const newCat = new Category({ name: value });
+  await newCat.save();
   return value;
 }
 
-function updateCategory(oldCategory, newCategory) {
+async function updateCategory(oldCategory, newCategory) {
   const oldValue = String(oldCategory || '').trim();
   const newValue = String(newCategory || '').trim();
   if (!oldValue || !newValue) return null;
   if (oldValue === newValue) return oldValue;
 
-  const data = load();
-  ensureCategories(data);
-  const oldIndex = data.categories.findIndex(c => c.toLowerCase() === oldValue.toLowerCase());
-  if (oldIndex === -1) return null;
+  await ensureCategories();
+  const oldCat = await Category.findOne({ name: { $regex: new RegExp(`^${oldValue}$`, 'i') } });
+  if (!oldCat) return null;
 
-  const duplicateIndex = data.categories.findIndex(c => c.toLowerCase() === newValue.toLowerCase());
-  if (duplicateIndex !== -1 && duplicateIndex !== oldIndex) {
-    // Merge: remove old category entry
-    data.categories.splice(oldIndex, 1);
+  const duplicate = await Category.findOne({ name: { $regex: new RegExp(`^${newValue}$`, 'i') } });
+  if (duplicate && duplicate._id.toString() !== oldCat._id.toString()) {
+    await Category.deleteOne({ _id: oldCat._id });
   } else {
-    data.categories[oldIndex] = newValue;
+    oldCat.name = newValue;
+    await oldCat.save();
   }
 
-  data.exhibits = data.exhibits.map(e => {
-    if (e.category && e.category.toLowerCase() === oldValue.toLowerCase()) {
-      return { ...e, category: newValue };
-    }
-    return e;
-  });
-  save(data);
+  await Exhibit.updateMany(
+    { category: { $regex: new RegExp(`^${oldValue}$`, 'i') } },
+    { $set: { category: newValue } }
+  );
+
   return newValue;
 }
 
-function deleteCategory(category) {
+async function deleteCategory(category) {
   const value = String(category || '').trim();
   if (!value) return false;
-  const data = load();
-  ensureCategories(data);
-  const index = data.categories.findIndex(c => c.toLowerCase() === value.toLowerCase());
-  if (index === -1) return false;
+  await ensureCategories();
+  const oldCat = await Category.findOne({ name: { $regex: new RegExp(`^${value}$`, 'i') } });
+  if (!oldCat) return false;
 
-  const deletedName = data.categories[index];
-  data.categories.splice(index, 1);
+  await Category.deleteOne({ _id: oldCat._id });
 
+  let cats = await Category.find({}).lean();
   let fallback = 'Other';
-  if (data.categories.length > 0) {
-    fallback = data.categories.includes('Other') ? 'Other' : data.categories[0];
+  if (cats.length > 0) {
+    fallback = cats.some(c => c.name === 'Other') ? 'Other' : cats[0].name;
   } else {
-    data.categories.push('Other');
+    const defaultCat = new Category({ name: 'Other' });
+    await defaultCat.save();
     fallback = 'Other';
   }
 
-  data.exhibits = data.exhibits.map(e => {
-    if (e.category && e.category.toLowerCase() === deletedName.toLowerCase()) {
-      return { ...e, category: fallback };
-    }
-    return e;
-  });
-  save(data);
+  await Exhibit.updateMany(
+    { category: { $regex: new RegExp(`^${value}$`, 'i') } },
+    { $set: { category: fallback } }
+  );
+
   return true;
 }
 
-function assignExhibitsToCategory(category, exhibitIds) {
+async function assignExhibitsToCategory(category, exhibitIds) {
   const catName = String(category || '').trim();
   if (!catName) return false;
-  const data = load();
-  ensureCategories(data);
-  if (!data.categories.some(c => c.toLowerCase() === catName.toLowerCase())) {
-    data.categories.push(catName);
+  await ensureCategories();
+  const exists = await Category.findOne({ name: { $regex: new RegExp(`^${catName}$`, 'i') } });
+  if (!exists) {
+    const newCat = new Category({ name: catName });
+    await newCat.save();
   }
-  const idSet = new Set(Array.isArray(exhibitIds) ? exhibitIds : []);
-  data.exhibits = data.exhibits.map(e => {
-    if (idSet.has(e.id)) {
-      return { ...e, category: catName, updatedAt: new Date().toISOString() };
-    }
-    return e;
-  });
-  save(data);
+  
+  const idSet = Array.isArray(exhibitIds) ? exhibitIds : [];
+  await Exhibit.updateMany(
+    { id: { $in: idSet } },
+    { $set: { category: catName, updatedAt: new Date().toISOString() } }
+  );
+  
   return true;
 }
 
-module.exports = { all, findByCode, findById, create, update, remove, categories, addCategory, updateCategory, deleteCategory, assignExhibitsToCategory };
+async function countDocuments() {
+  return await Exhibit.countDocuments();
+}
+
+module.exports = { all, findByCode, findById, create, update, remove, categories, addCategory, updateCategory, deleteCategory, assignExhibitsToCategory, Exhibit, Category, countDocuments };

@@ -1,73 +1,86 @@
-const { load, save } = require('./store');
+const mongoose = require('mongoose');
 const { nanoid } = require('nanoid');
 
-function all(filter = {}) {
-  let list = load().artifactLogs || [];
+const artifactLogSchema = new mongoose.Schema({
+  id: { type: String, default: () => nanoid(10), unique: true },
+  accessionNo: { type: String, required: true },
+  name: { type: String, default: '' },
+  category: { type: String, default: 'Historical Relic' },
+  condition: { type: String, default: 'Good' },
+  status: { type: String, default: 'On Display' },
+  location: { type: String, default: '' },
+  acquisitionDate: { type: String, default: () => new Date().toISOString().slice(0, 10) },
+  donor: { type: String, default: '' },
+  estimatedValue: { type: String, default: '' },
+  description: { type: String, default: '' },
+  notes: { type: String, default: '' },
+  createdAt: { type: String, default: () => new Date().toISOString() },
+  updatedAt: { type: String, default: () => new Date().toISOString() }
+});
+
+const ArtifactLog = mongoose.models.ArtifactLog || mongoose.model('ArtifactLog', artifactLogSchema);
+
+async function all(filter = {}) {
+  let query = {};
 
   if (filter.search) {
     const q = filter.search.toLowerCase();
-    list = list.filter(a =>
-      (a.accessionNo || '').toLowerCase().includes(q) ||
-      (a.name || '').toLowerCase().includes(q) ||
-      (a.category || '').toLowerCase().includes(q) ||
-      (a.location || '').toLowerCase().includes(q) ||
-      (a.donor || '').toLowerCase().includes(q) ||
-      (a.description || '').toLowerCase().includes(q) ||
-      (a.notes || '').toLowerCase().includes(q)
-    );
+    query.$or = [
+      { accessionNo: { $regex: q, $options: 'i' } },
+      { name: { $regex: q, $options: 'i' } },
+      { category: { $regex: q, $options: 'i' } },
+      { location: { $regex: q, $options: 'i' } },
+      { donor: { $regex: q, $options: 'i' } },
+      { description: { $regex: q, $options: 'i' } },
+      { notes: { $regex: q, $options: 'i' } }
+    ];
   }
 
   if (filter.category && filter.category !== 'All') {
-    list = list.filter(a => (a.category || '').toLowerCase() === filter.category.toLowerCase());
+    query.category = filter.category;
   }
 
   if (filter.condition && filter.condition !== 'All') {
-    list = list.filter(a => (a.condition || '').toLowerCase() === filter.condition.toLowerCase());
+    query.condition = filter.condition;
   }
 
   if (filter.status && filter.status !== 'All') {
-    list = list.filter(a => (a.status || '').toLowerCase() === filter.status.toLowerCase());
+    query.status = filter.status;
   }
 
-  // Sort by accession number or updated timestamp
-  return list.slice().sort((a, b) => {
+  const list = await ArtifactLog.find(query).lean();
+  
+  return list.sort((a, b) => {
     return (b.updatedAt || b.createdAt || '').localeCompare(a.updatedAt || a.createdAt || '');
   });
 }
 
-function findById(id) {
-  const data = load();
-  return (data.artifactLogs || []).find(a => a.id === id);
+async function findById(id) {
+  return await ArtifactLog.findOne({ id }).lean();
 }
 
-function generateAccessionNo() {
-  const data = load();
-  const list = data.artifactLogs || [];
+async function generateAccessionNo() {
   const year = new Date().getFullYear();
   const prefix = `MSBN-${year}-`;
+  
+  const list = await ArtifactLog.find({ accessionNo: { $regex: `^${prefix}` } }, { accessionNo: 1 }).lean();
   let maxSeq = 0;
-
+  
   for (const item of list) {
-    if (item.accessionNo && item.accessionNo.startsWith(prefix)) {
-      const numPart = parseInt(item.accessionNo.replace(prefix, ''), 10);
-      if (!isNaN(numPart) && numPart > maxSeq) {
-        maxSeq = numPart;
-      }
+    const numPart = parseInt(item.accessionNo.replace(prefix, ''), 10);
+    if (!isNaN(numPart) && numPart > maxSeq) {
+      maxSeq = numPart;
     }
   }
 
   return `${prefix}${String(maxSeq + 1).padStart(3, '0')}`;
 }
 
-function create(payload) {
-  const data = load();
-  if (!Array.isArray(data.artifactLogs)) data.artifactLogs = [];
-
+async function create(payload) {
   const now = new Date();
-  const accessionNo = (payload.accessionNo || '').trim() || generateAccessionNo();
+  const accessionNo = (payload.accessionNo || '').trim() || await generateAccessionNo();
 
-  const artifact = {
-    id: nanoid(10),
+  const artifact = new ArtifactLog({
     accessionNo,
     name: (payload.name || '').trim(),
     category: payload.category || 'Historical Relic',
@@ -78,55 +91,42 @@ function create(payload) {
     donor: (payload.donor || '').trim(),
     estimatedValue: (payload.estimatedValue || '').trim(),
     description: (payload.description || '').trim(),
-    notes: (payload.notes || '').trim(),
-    createdAt: now.toISOString(),
-    updatedAt: now.toISOString()
-  };
+    notes: (payload.notes || '').trim()
+  });
 
-  data.artifactLogs.push(artifact);
-  save(data);
-  return artifact;
+  await artifact.save();
+  return artifact.toObject();
 }
 
-function update(id, payload) {
-  const data = load();
-  if (!Array.isArray(data.artifactLogs)) data.artifactLogs = [];
-  const idx = data.artifactLogs.findIndex(a => a.id === id);
-  if (idx === -1) return null;
+async function update(id, payload) {
+  const existing = await ArtifactLog.findOne({ id });
+  if (!existing) return null;
 
-  const existing = data.artifactLogs[idx];
-  const updated = {
-    ...existing,
-    accessionNo: payload.accessionNo !== undefined ? payload.accessionNo.trim() : existing.accessionNo,
-    name: payload.name !== undefined ? payload.name.trim() : existing.name,
-    category: payload.category !== undefined ? payload.category : existing.category,
-    condition: payload.condition !== undefined ? payload.condition : existing.condition,
-    status: payload.status !== undefined ? payload.status : existing.status,
-    location: payload.location !== undefined ? payload.location.trim() : existing.location,
-    acquisitionDate: payload.acquisitionDate !== undefined ? payload.acquisitionDate : existing.acquisitionDate,
-    donor: payload.donor !== undefined ? payload.donor.trim() : existing.donor,
-    estimatedValue: payload.estimatedValue !== undefined ? payload.estimatedValue.trim() : existing.estimatedValue,
-    description: payload.description !== undefined ? payload.description.trim() : existing.description,
-    notes: payload.notes !== undefined ? payload.notes.trim() : existing.notes,
-    updatedAt: new Date().toISOString()
-  };
-
-  data.artifactLogs[idx] = updated;
-  save(data);
-  return updated;
+  if (payload.accessionNo !== undefined) existing.accessionNo = payload.accessionNo.trim();
+  if (payload.name !== undefined) existing.name = payload.name.trim();
+  if (payload.category !== undefined) existing.category = payload.category;
+  if (payload.condition !== undefined) existing.condition = payload.condition;
+  if (payload.status !== undefined) existing.status = payload.status;
+  if (payload.location !== undefined) existing.location = payload.location.trim();
+  if (payload.acquisitionDate !== undefined) existing.acquisitionDate = payload.acquisitionDate;
+  if (payload.donor !== undefined) existing.donor = payload.donor.trim();
+  if (payload.estimatedValue !== undefined) existing.estimatedValue = payload.estimatedValue.trim();
+  if (payload.description !== undefined) existing.description = payload.description.trim();
+  if (payload.notes !== undefined) existing.notes = payload.notes.trim();
+  
+  existing.updatedAt = new Date().toISOString();
+  
+  await existing.save();
+  return existing.toObject();
 }
 
-function remove(id) {
-  const data = load();
-  if (!Array.isArray(data.artifactLogs)) return false;
-  const before = data.artifactLogs.length;
-  data.artifactLogs = data.artifactLogs.filter(a => a.id !== id);
-  save(data);
-  return data.artifactLogs.length < before;
+async function remove(id) {
+  const result = await ArtifactLog.deleteOne({ id });
+  return result.deletedCount > 0;
 }
 
-function stats() {
-  const list = load().artifactLogs || [];
+async function stats() {
+  const list = await ArtifactLog.find({}).lean();
 
   let totalArtifacts = list.length;
   let onDisplay = 0;
@@ -170,4 +170,4 @@ function stats() {
   };
 }
 
-module.exports = { all, findById, create, update, remove, stats };
+module.exports = { all, findById, create, update, remove, stats, ArtifactLog };
