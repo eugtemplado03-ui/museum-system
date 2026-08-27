@@ -1634,8 +1634,30 @@ body.sidebar-open {
   border-radius: 999px;
 }
 
-/* ── Gallery Grid ───────────────────────────────────────────────── */
-.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
+/* ── Gallery Grid (3 items per line) ─────────────────────────────── */
+.gallery-grid,
+.content-grid.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  width: 100%;
+}
+
+@media (max-width: 992px) {
+  .gallery-grid,
+  .content-grid.gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .gallery-grid,
+  .content-grid.gallery-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
 .gallery-item {
   position: relative;
   border-radius: 16px;
