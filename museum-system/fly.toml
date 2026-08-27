@@ -1,0 +1,22 @@
+app = "museo-sang-bata"
+primary_region = "sin"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "3000"
+  DATA_DIR = "/data/db"
+  UPLOAD_DIR = "/data/uploads"
+
+[mounts]
+  source = "museo_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]

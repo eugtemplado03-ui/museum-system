@@ -10,10 +10,8 @@ RUN npm ci --only=production || npm install --only=production
 # Copy app source
 COPY . .
 
-# Ensure uploads dir exists and is writable
-RUN mkdir -p uploads && chown -R node:node uploads
-
-USER node
+# Ensure uploads dir exists internally as fallback
+RUN mkdir -p uploads
 
 ENV PORT=3000
 EXPOSE 3000

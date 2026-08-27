@@ -6,7 +6,15 @@
 const fs = require('fs');
 const path = require('path');
 
-const DB_FILE = path.join(__dirname, 'data.json');
+const DB_FILE = process.env.DATA_DIR 
+  ? path.join(process.env.DATA_DIR, 'data.json') 
+  : path.join(__dirname, 'data.json');
+
+// Ensure parent directory exists for volume mounts
+const dbDir = path.dirname(DB_FILE);
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
 
 function defaultData() {
   return { users: [], exhibits: [], categories: [], favorites: [], ratings: [], scanEvents: [], programs: [], events: [], gallery: [], visitors: [], artifactLogs: [] };
