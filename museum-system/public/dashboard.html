@@ -680,19 +680,19 @@
           }
         }
 
-        // 3. Gallery (max 3 — exactly 3 items)
+        // 3. Gallery (max 4 items)
         const gallery = (galleryRes && Array.isArray(galleryRes.gallery)) ? galleryRes.gallery : [];
         const galleryGrid = document.getElementById('homeGalleryGrid');
         if(galleryGrid){
           if(gallery.length === 0){
             galleryGrid.innerHTML = `<div style="color:var(--ink-soft); font-size:13px; grid-column:1/-1;">No photos or media uploaded yet.</div>`;
           } else {
-            const previewGallery = gallery.slice(0, 3);
+            const previewGallery = gallery.slice(0, 4);
             galleryGrid.innerHTML = previewGallery.map(g => {
               const paths = Array.isArray(g.imagePaths) && g.imagePaths.length ? g.imagePaths : (g.imagePath ? [g.imagePath] : []);
               const primary = paths[0] || '';
               return `
-                <a href="/gallery.html" class="home-gallery-mini-item">
+                <a href="/gallery.html?id=${encodeURIComponent(g.id)}" class="home-gallery-mini-item">
                   ${primary ? `<img src="${escapeHtml(primary)}" alt="${escapeHtml(g.title || 'Museum gallery')}" loading="lazy">` : (g.videoUrl ? `<div style="width:100%; height:100%; background:#101d27; display:flex; align-items:center; justify-content:center; color:#fff; font-size:32px;">▶</div>` : `<div style="width:100%; height:100%; background:var(--teal-light); display:flex; align-items:center; justify-content:center; font-size:32px;">📷</div>`)}
                   <div class="home-gallery-mini-overlay">
                     ${g.videoUrl ? `<div style="font-size:10px; font-weight:800; background:rgba(217,79,61,0.9); display:inline-block; align-self:flex-start; padding:1px 6px; border-radius:4px; margin-bottom:4px;">▶ Video</div>` : (paths.length > 1 ? `<div style="font-size:10px; font-weight:800; background:rgba(0,174,189,0.9); display:inline-block; align-self:flex-start; padding:1px 6px; border-radius:4px; margin-bottom:4px;">📷 ${paths.length} photos</div>` : '')}

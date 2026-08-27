@@ -2743,11 +2743,23 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
   gap: 4px;
 }
 
-/* Gallery Mini Grid */
+/* Gallery Mini Grid (4 items per line on Dashboard) */
 .home-gallery-mini-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 14px;
+}
+
+@media (max-width: 960px) {
+  .home-gallery-mini-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .home-gallery-mini-grid {
+    grid-template-columns: 1fr;
+  }
 }
 .home-gallery-mini-item {
   position: relative;
