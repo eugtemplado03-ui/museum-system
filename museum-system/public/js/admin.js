@@ -125,17 +125,17 @@ function renderLogin(){
 let activeTab = 'dashboard';
 
 const SIDEBAR_ITEMS = [
-  { id: 'dashboard',    label: 'Dashboard',     icon: '📊' },
-  { id: 'catalog',      label: 'Catalog',       icon: '🏛️' },
-  { id: 'categories',   label: 'Categories',    icon: '🏷️' },
-  { id: 'visitors',     label: 'Visitor Log',   icon: '📋' },
-  { id: 'artifacts',    label: 'Artifacts Log', icon: '🏺' },
-  { id: 'programs',     label: 'Programs',      icon: '🌱' },
-  { id: 'events',       label: 'Events',        icon: '📅' },
-  { id: 'gallery',      label: 'Gallery',       icon: '🖼️' },
-  { id: 'analytics',    label: 'Analytics',     icon: '📈' },
-  { id: 'feedback',     label: 'Feedback',      icon: '💬' },
-  { id: 'museumInfo',   label: 'Museum Info',   icon: '🏛️' },
+  { id: 'dashboard',    label: 'Dashboard',         icon: '📊' },
+  { id: 'catalog',      label: 'Catalog',           icon: '🏛️' },
+  { id: 'categories',   label: 'Categories',        icon: '🏷️' },
+  { id: 'visitors',     label: 'Visitor History',   icon: '📋' },
+  { id: 'artifacts',    label: 'Artifacts Log',     icon: '🏺' },
+  { id: 'programs',     label: 'Programs',          icon: '🌱' },
+  { id: 'events',       label: 'Events',            icon: '📅' },
+  { id: 'gallery',      label: 'Gallery',           icon: '🖼️' },
+  { id: 'analytics',    label: 'Analytics',         icon: '📈' },
+  { id: 'feedback',     label: 'Feedback',          icon: '💬' },
+  { id: 'museumInfo',   label: 'Museum Info',       icon: '🏛️' },
 ];
 
 function handleSignOut() {
@@ -1544,11 +1544,20 @@ async function renderVisitorsTab(contentEl){
     </div>
 
 <div class="admin-toolbar-wrap">
+      <!-- Quick History Range Filters -->
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">
+        <button class="filter-chip ${!adminVisitorsDateFilter ? 'active' : ''}" id="vHistAll">All History (${visitorsCache.length})</button>
+        <button class="filter-chip ${adminVisitorsDateFilter === new Date().toISOString().slice(0, 10) ? 'active' : ''}" id="vHistToday">Today</button>
+        <button class="filter-chip ${adminVisitorsDateFilter === new Date().toISOString().slice(0, 7) ? 'active' : ''}" id="vHistThisMonth">This Month</button>
+        <button class="filter-chip ${adminVisitorsDateFilter === new Date().toISOString().slice(0, 4) ? 'active' : ''}" id="vHistThisYear">This Year</button>
+      </div>
+
       <div class="admin-toolbar-row">
-        <input type="text" id="adminVisitorsSearchInput" class="admin-search-input" placeholder="Search visitors by name, group, school, phone, guide…" value="${escapeHtml(adminVisitorsSearch)}">
-        <div style="display:flex; gap:8px; align-items:center;">
+        <input type="text" id="adminVisitorsSearchInput" class="admin-search-input" placeholder="Search visitor history by name, school, group, phone, guide, address…" value="${escapeHtml(adminVisitorsSearch)}">
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
           <button class="btn-export" id="exportVisitorsBtn" title="Export current visitor list as CSV">📥 Export CSV</button>
-          <button class="btn btn-primary btn-small" id="addVisitorBtn">+ Log visitor entry</button>
+          <button class="btn btn-ghost dark btn-small" id="printVisitorsReportBtn" title="Print visitor history summary report">🖨 Print Report</button>
+          <button class="btn btn-primary btn-small" id="addVisitorBtn">+ Log visitor</button>
           <button class="btn btn-primary btn-small" id="visitorCheckinQrBtn">📱 Check-in QR</button>
         </div>
       </div>
@@ -1612,6 +1621,24 @@ async function renderVisitorsTab(contentEl){
     });
   }
 
+  // History filter chips
+  document.getElementById('vHistAll')?.addEventListener('click', ()=>{
+    adminVisitorsDateFilter = '';
+    renderVisitorsTab(contentEl);
+  });
+  document.getElementById('vHistToday')?.addEventListener('click', ()=>{
+    adminVisitorsDateFilter = new Date().toISOString().slice(0, 10);
+    renderVisitorsTab(contentEl);
+  });
+  document.getElementById('vHistThisMonth')?.addEventListener('click', ()=>{
+    adminVisitorsDateFilter = new Date().toISOString().slice(0, 7);
+    renderVisitorsTab(contentEl);
+  });
+  document.getElementById('vHistThisYear')?.addEventListener('click', ()=>{
+    adminVisitorsDateFilter = new Date().toISOString().slice(0, 4);
+    renderVisitorsTab(contentEl);
+  });
+
   document.getElementById('adminVisitorsGroupSelect')?.addEventListener('change', (e)=>{
     adminVisitorsGroupFilter = e.target.value;
     renderVisitorsTab(contentEl);
@@ -1632,6 +1659,7 @@ async function renderVisitorsTab(contentEl){
     renderVisitorsTab(contentEl);
   });
   document.getElementById('exportVisitorsBtn')?.addEventListener('click', ()=>exportVisitorsCSV(filtered));
+  document.getElementById('printVisitorsReportBtn')?.addEventListener('click', ()=>printVisitorsHistoryReport(filtered));
   document.getElementById('addVisitorBtn')?.addEventListener('click', ()=>openVisitorModal(null));
   document.getElementById('visitorCheckinQrBtn')?.addEventListener('click', ()=>openVisitorCheckinQrModal());
 
@@ -1729,7 +1757,92 @@ function exportVisitorsCSV(list){
   const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
   const dateStr = new Date().toISOString().slice(0, 10);
   downloadCSV(csv, `msbn-visitors-log-${dateStr}.csv`);
-  toast('Visitor log CSV exported');
+  toast('Visitor history CSV exported');
+}
+
+function printVisitorsHistoryReport(list) {
+  const win = window.open('', '_blank', 'width=900,height=750');
+  if (!win) { toast('Popup blocked. Please allow popups to print.', true); return; }
+  
+  const totalPax = list.reduce((sum, v) => sum + (v.pax || 1), 0);
+  const dateStr = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+  win.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Museo Sang Bata sa Negros — Visitor History Report</title>
+      <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@600&display=swap" rel="stylesheet">
+      <style>
+        body { margin: 30px; font-family: 'Nunito', sans-serif; color: #1e293b; font-size: 12px; }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #007d8a; padding-bottom: 12px; margin-bottom: 16px; }
+        .header h1 { font-size: 20px; font-weight: 900; margin: 0; color: #007d8a; }
+        .header p { margin: 3px 0 0; color: #64748b; font-size: 12px; }
+        .meta-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .meta-item { font-size: 11px; }
+        .meta-val { font-size: 15px; font-weight: 800; color: #0f172a; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11.5px; }
+        th { background: #007d8a; color: #fff; text-align: left; padding: 8px 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; }
+        td { padding: 7px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+        tr:nth-child(even) td { background: #f8fafc; }
+        .mono { font-family: 'IBM Plex Mono', monospace; }
+        @media print { body { margin: 10px; } }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <div>
+          <h1>Museo Sang Bata sa Negros</h1>
+          <p>Official Visitor History & Log Report</p>
+        </div>
+        <div style="text-align: right; font-size: 11px; color: #64748b;">
+          <div>Generated: <strong>${dateStr}</strong></div>
+          <div>Filter: <strong>${escapeHtml(adminVisitorsDateFilter || 'All Time')}</strong></div>
+        </div>
+      </div>
+
+      <div class="meta-grid">
+        <div class="meta-item"><div>Total Entries</div><div class="meta-val">${list.length}</div></div>
+        <div class="meta-item"><div>Total Visitors (Pax)</div><div class="meta-val">${totalPax}</div></div>
+        <div class="meta-item"><div>Group Type Filter</div><div class="meta-val">${escapeHtml(adminVisitorsGroupFilter)}</div></div>
+        <div class="meta-item"><div>Status Filter</div><div class="meta-val">${escapeHtml(adminVisitorsStatusFilter)}</div></div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Date & Time</th>
+            <th>Visitor / Contact</th>
+            <th>Group / Organization</th>
+            <th>Pax</th>
+            <th>Purpose</th>
+            <th>Guide</th>
+            <th>Status</th>
+            <th>Address</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${list.map(v => `
+            <tr>
+              <td><strong>${escapeHtml(v.visitDate || '—')}</strong><br><span style="color:#64748b; font-size:10px;">${escapeHtml(v.visitTime || '')}</span></td>
+              <td><strong>${escapeHtml(v.visitorName)}</strong><br><span style="color:#64748b; font-size:10px;">${escapeHtml(v.contactNumber || v.email || '')}</span></td>
+              <td>${escapeHtml(v.groupName || '—')}<br><span style="color:#64748b; font-size:10px;">${escapeHtml(v.groupType || 'Individual')}</span></td>
+              <td style="font-weight:700;">${v.pax || 1}</td>
+              <td>${escapeHtml(v.purpose || 'General Visit')}</td>
+              <td>${escapeHtml(v.tourGuide || '—')}</td>
+              <td>${escapeHtml(v.status || 'Checked-in')}</td>
+              <td>${escapeHtml(v.address || '—')}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      <script>
+        window.onload = () => { setTimeout(() => { window.print(); }, 300); };
+      <\/script>
+    </body>
+    </html>
+  `);
+  win.document.close();
 }
 
 function openVisitorCheckinQrModal(){
