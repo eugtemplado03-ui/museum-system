@@ -129,19 +129,6 @@
               </div>
               <div class="plaque-accession mono">Accession No. ${exhibit.code}</div>
 
-              <!-- ── QR Code Section under Information ── -->
-              <div class="plaque-qr-section">
-                <div class="plaque-qr-image">
-                  <img src="${Api.qrUrl(exhibit.code)}" alt="QR tag for ${escapeHtml(exhibit.code)}" width="90" height="90" loading="lazy">
-                </div>
-                <div class="plaque-qr-details">
-                  <div class="plaque-qr-badge">Exhibit QR Tag</div>
-                  <div class="plaque-qr-code mono">${exhibit.code}</div>
-                  <div class="plaque-qr-hint">Scan with camera to open this guide directly on-site</div>
-                </div>
-                <a class="btn btn-secondary btn-small plaque-qr-dl" href="${Api.qrUrl(exhibit.code)}" download="${exhibit.code}-tag.png">&#8595; Download QR</a>
-              </div>
-
               <!-- ── Map Section ── -->
               ${(exhibit.lat !== null && exhibit.lat !== undefined && exhibit.lng !== null && exhibit.lng !== undefined) ? `
               <div class="plaque-map-section" style="margin-top:16px; padding-top:16px; border-top:1px solid var(--grey-100);">

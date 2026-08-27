@@ -554,6 +554,108 @@ function confirmDelete(id){
     .catch(err=>toast(err.message, true));
 }
 
+// ─── Exhibit QR Tag Modal (Admin Only) ───
+function openTagModal(code){
+  const ex = exhibitsCache.find(x => x.code === code || x.id === code);
+  if (!ex) { toast('Exhibit not found', true); return; }
+
+  const qrUrl = `/api/exhibits/${encodeURIComponent(ex.code)}/qr`;
+  const exhibitUrl = `${window.location.origin}/exhibit.html?code=${encodeURIComponent(ex.code)}&src=scan`;
+
+  openModal(`
+    <div style="text-align: center; max-width: 480px; margin: 0 auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <span class="cat-pill" style="font-size: 12px;">${escapeHtml(ex.category || 'Exhibit')}</span>
+        <span class="mono" style="font-size: 13px; font-weight: 700; color: var(--teal);">${escapeHtml(ex.code)}</span>
+      </div>
+
+      <h2 style="font-size: 22px; margin: 0 0 4px; color: #fff;">${escapeHtml(ex.title)}</h2>
+      <p style="font-size: 13px; color: #cbd5e1; margin: 0 0 18px;">${escapeHtml(ex.location || 'Museum floor')}</p>
+
+      <!-- Printable Tag Card -->
+      <div id="printableQrTag" style="background: #ffffff; color: #1e293b; padding: 22px 18px; border-radius: 16px; box-shadow: 0 12px 30px rgba(0,0,0,0.35); border: 2px solid #e2e8f0; margin-bottom: 18px; text-align: center;">
+        <div style="font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #007d8a; margin-bottom: 4px;">Museo Sang Bata sa Negros</div>
+        <div style="font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 900; color: #0f172a; margin-bottom: 12px; line-height: 1.3;">${escapeHtml(ex.title)}</div>
+        
+        <div style="background: #f8fafc; padding: 10px; border-radius: 12px; display: inline-block; border: 1.5px solid #e2e8f0; margin-bottom: 12px;">
+          <img src="${qrUrl}" alt="QR Tag for ${escapeHtml(ex.code)}" width="210" height="210" style="display: block; border-radius: 6px;">
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; background: #f1f5f9; border-radius: 8px; font-size: 12px; font-weight: 700;">
+          <span style="color: #64748b;">Scan with camera</span>
+          <span class="mono" style="color: #0f172a; font-size: 13px;">${escapeHtml(ex.code)}</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+          <a class="btn btn-primary" href="${qrUrl}" download="Exhibit-${escapeHtml(ex.code)}-QR-Tag.png" style="flex: 1; min-width: 170px; text-align: center; text-decoration: none; justify-content: center; display: inline-flex; align-items: center; gap: 6px;">
+            ⬇ Download PNG Tag
+          </a>
+          <button type="button" class="btn btn-ghost dark" id="printTagBtn" style="flex: 1; min-width: 130px; justify-content: center; display: inline-flex; align-items: center; gap: 6px;">
+            🖨 Print Tag
+          </button>
+        </div>
+
+        <div style="display: flex; gap: 6px; align-items: center; background: rgba(0, 42, 54, 0.85); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; padding: 6px 10px;">
+          <input type="text" readonly value="${escapeHtml(exhibitUrl)}" id="exhibitDirectUrl" style="flex: 1; background: transparent; border: none; color: #cbd5e1; font-family: monospace; font-size: 12px; padding: 4px; outline: none;">
+          <button type="button" class="btn btn-secondary btn-small" id="copyUrlBtn" style="flex-shrink: 0;">Copy Link</button>
+        </div>
+      </div>
+
+      <div style="margin-top: 18px; display: flex; justify-content: flex-end;">
+        <button type="button" class="btn btn-ghost dark" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  `);
+
+  document.getElementById('copyUrlBtn')?.addEventListener('click', () => {
+    const input = document.getElementById('exhibitDirectUrl');
+    if (input) {
+      input.select();
+      navigator.clipboard.writeText(input.value).then(() => {
+        toast('Direct scan link copied to clipboard!');
+      });
+    }
+  });
+
+  document.getElementById('printTagBtn')?.addEventListener('click', () => {
+    const win = window.open('', '_blank', 'width=600,height=700');
+    if (!win) { toast('Popup blocked. Please allow popups to print.', true); return; }
+    win.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Print QR Tag — ${escapeHtml(ex.code)}</title>
+        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=IBM+Plex+Mono:wght@600&display=swap" rel="stylesheet">
+        <style>
+          body { margin: 40px; font-family: 'Nunito', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 80vh; }
+          .tag-box { border: 2.5px solid #0f172a; border-radius: 18px; padding: 30px; text-align: center; max-width: 320px; width: 100%; box-sizing: border-box; }
+          .mono { font-family: 'IBM Plex Mono', monospace; }
+          @media print { body { margin: 0; } }
+        </style>
+      </head>
+      <body>
+        <div class="tag-box">
+          <div style="font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #007d8a; margin-bottom: 6px;">Museo Sang Bata sa Negros</div>
+          <div style="font-size: 19px; font-weight: 900; color: #0f172a; margin-bottom: 16px; line-height: 1.2;">${escapeHtml(ex.title)}</div>
+          <img src="${qrUrl}" width="230" height="230" style="display: block; margin: 0 auto 14px;">
+          <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; border-top: 1.5px solid #e2e8f0; padding-top: 10px;">
+            <span>Scan with camera</span>
+            <span class="mono">${escapeHtml(ex.code)}</span>
+          </div>
+        </div>
+        <script>
+          window.onload = () => { setTimeout(() => { window.print(); window.close(); }, 300); };
+        <\/script>
+      </body>
+      </html>
+    `);
+    win.document.close();
+  });
+}
+
 // ─── Exhibit Edit/Create Modal (with map coordinates) ───
 function openEditModal(id, defaultCategory){
   const ex = id ? exhibitsCache.find(x=>x.id===id) : null;
