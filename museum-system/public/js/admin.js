@@ -3168,11 +3168,16 @@ if(!Api.updateMuseumInfo){
   Api.updateMuseumInfo = (payload) => request('/api/museum-info', { method: 'PUT', body: JSON.stringify(payload) });
 }
 
-// Global click handler to guarantee sign-out functionality
+// Global click handlers
 document.addEventListener('click', (e) => {
   if (e.target.closest('#signOutBtn, #signOutBtnMobile, .admin-sidebar-signout')) {
     e.preventDefault();
     handleSignOut();
+  }
+  const tagBtn = e.target.closest('[data-tag]');
+  if (tagBtn && tagBtn.dataset.tag) {
+    e.preventDefault();
+    openTagModal(tagBtn.dataset.tag);
   }
 });
 
