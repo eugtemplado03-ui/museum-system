@@ -225,9 +225,10 @@ router.post('/upload-image', requireAuth, (req, res) => {
   upload.single('image')(req, res, (err) => {
     if (err) return res.status(400).json({ error: err.message });
     if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
-    // Cloudinary returns req.file.path as the full URL
-    const path = req.file.path ? req.file.path : `/uploads/${req.file.filename}`;
-    res.json({ path });
+    // Cloudinary returns req.file.path as full https:// URL; local multer returns absolute filesystem path
+    const isCloudinary = req.file.path && (req.file.path.startsWith('http://') || req.file.path.startsWith('https://'));
+    const filePath = isCloudinary ? req.file.path : `/uploads/${req.file.filename}`;
+    res.json({ path: filePath });
   });
 });
 
@@ -235,9 +236,10 @@ router.post('/upload-media', requireAuth, (req, res) => {
   upload.single('file')(req, res, (err) => {
     if (err) return res.status(400).json({ error: err.message });
     if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
-    const isVideo = req.file.mimetype.startsWith('video/');
-    const path = req.file.path ? req.file.path : `/uploads/${req.file.filename}`;
-    res.json({ path, isVideo, mimetype: req.file.mimetype });
+    const isVideo = req.file.mimetype ? req.file.mimetype.startsWith('video/') : false;
+    const isCloudinary = req.file.path && (req.file.path.startsWith('http://') || req.file.path.startsWith('https://'));
+    const filePath = isCloudinary ? req.file.path : `/uploads/${req.file.filename}`;
+    res.json({ path: filePath, isVideo, mimetype: req.file.mimetype });
   });
 });
 
