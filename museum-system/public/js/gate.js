@@ -52,6 +52,12 @@ const Gate = (() => {
       window.location.replace(`/?redirect=${redirectParam}`);
     } else if (isGatePage && isAuthenticated()) {
       const urlParams = new URLSearchParams(window.location.search);
+      
+      // If they explicitly want to view the admin login form, but are not an admin yet, let them stay.
+      if (urlParams.get('tab') === 'admin' && !isAdminLoggedIn()) {
+        return;
+      }
+
       const redirectUrl = urlParams.get('redirect') ? decodeURIComponent(urlParams.get('redirect')) : '/dashboard.html';
       // prevent redirect loop if the redirect url is /
       if (redirectUrl === '/' || redirectUrl === '/index.html') {
