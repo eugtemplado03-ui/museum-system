@@ -127,11 +127,76 @@
         </div>
         <div class="body">
           ${badge ? `<div style="margin-bottom:2px;">${badge}</div>` : ''}
-          ${g.title ? `<h3>${escapeHtml(g.title)}</h3>` : ''}
+          ${g.title ? `<h3 style="cursor:pointer;" onclick="openGalleryDetail('${escapeHtml(g.id)}')">${escapeHtml(g.title)}</h3>` : ''}
           ${g.caption ? `<p class="desc">${escapeHtml(g.caption)}</p>` : ''}
+          <div style="margin-top:auto; padding-top:12px;">
+            <button type="button" class="btn btn-ghost dark btn-small" onclick="openGalleryDetail('${escapeHtml(g.id)}')">View details &rarr;</button>
+          </div>
         </div>
       </div>`;
     }
+
+    // ── Full-Screen Gallery Post Detail Modal ──
+    window.openGalleryDetail = function(id) {
+      const g = allGallery.find(item => item.id === id);
+      if(!g) return;
+
+      const images = getAllImages(g);
+      const hasVideo = Boolean(g.videoUrl && String(g.videoUrl).trim());
+      const hasPhotos = images.length > 0;
+      
+      let badge = '';
+      if (hasVideo && hasPhotos) {
+        badge = `<span class="tag" style="background:rgba(217,79,61,0.2); color:#ff8585; border:1px solid rgba(217,79,61,0.35);">🎬 Video + 📷 ${images.length} Photos</span>`;
+      } else if (hasVideo) {
+        badge = `<span class="tag" style="background:rgba(217,79,61,0.2); color:#ff8585; border:1px solid rgba(217,79,61,0.35);">▶ Video</span>`;
+      } else if (images.length > 1) {
+        badge = `<span class="tag">📷 ${images.length} Photos</span>`;
+      } else if (images.length === 1) {
+        badge = `<span class="tag">📷 Photo</span>`;
+      }
+
+      // Remove existing modal if any
+      const existing = document.getElementById('galleryDetailOverlay');
+      if(existing) existing.remove();
+
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.id = 'galleryDetailOverlay';
+      overlay.style.zIndex = '1000';
+      overlay.innerHTML = `
+        <div class="modal" style="max-width: 720px; padding: 0; overflow: hidden; border-radius: 20px;">
+          <div style="position: relative; width: 100%; aspect-ratio: 16/10; max-height: 420px; background: rgba(0, 16, 24, 0.9);">
+            ${renderMediaBox(images, g.videoUrl, g.title || g.caption || 'Gallery photo', '📷')}
+            <button type="button" class="modal-close-btn" onclick="closeGalleryDetail()" style="position: absolute; top: 12px; right: 12px; z-index: 10; width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.4); background: rgba(0,0,0,0.6); color: #fff; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(6px);">✕</button>
+          </div>
+          <div style="padding: 24px 26px 28px;">
+            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+              ${badge}
+            </div>
+            <h2 style="font-size: 22px; margin: 0 0 10px; color: #fff;">${escapeHtml(g.title || 'Museum Gallery')}</h2>
+            <div style="font-size: 14.5px; color: #e2e8f0; line-height: 1.7; white-space: pre-line; background: rgba(0, 36, 48, 0.6); border: 1px solid rgba(255, 255, 255, 0.12); padding: 14px 16px; border-radius: 12px; margin-top: 10px;">
+              ${escapeHtml(g.caption || 'No additional caption provided.')}
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+              <button type="button" class="btn btn-primary btn-small" onclick="closeGalleryDetail()">Close Details</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      overlay.addEventListener('click', (e) => {
+        if(e.target === overlay) closeGalleryDetail();
+      });
+
+      document.body.appendChild(overlay);
+      initPhotoCarousels(overlay);
+    };
+
+    window.closeGalleryDetail = function() {
+      const overlay = document.getElementById('galleryDetailOverlay');
+      if(overlay) overlay.remove();
+    };
 
     let allGallery = [];
     let searchQuery = '';
@@ -270,6 +335,8 @@
           document.getElementById('emptyState').style.display = 'block';
         } else {
           renderGallery();
+          const targetId = new URLSearchParams(location.search).get('id');
+          if(targetId) openGalleryDetail(targetId);
         }
       }catch(e){
         grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><p>${escapeHtml(e.message)}</p></div>`;
