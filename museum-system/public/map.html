@@ -769,6 +769,28 @@ svg.blueprint-svg {
   color: #fff;
   box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
 }
+
+.btn-dir-info {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  background: rgba(0, 240, 255, 0.12);
+  color: #00f0ff;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 11.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.btn-dir-info:hover {
+  background: rgba(0, 240, 255, 0.25);
+  border-color: #00f0ff;
+}
 .btn-dir-voice.playing:hover {
   background: #dc2626;
   border-color: #dc2626;
@@ -1413,7 +1435,7 @@ svg.blueprint-svg {
     height: calc(100dvh - 124px);
   }
 
-  /* Off-canvas directory sidebar on mobile */
+  /* Off-canvas directory sidebar on mobile (collapsed by default so map is 100% visible) */
   .map-directory-sidebar {
     position: absolute;
     top: 0;
@@ -1423,9 +1445,12 @@ svg.blueprint-svg {
     max-width: 86vw;
     z-index: 85;
     box-shadow: 10px 0 35px rgba(0, 0, 0, 0.85);
-    transform: translateX(0);
+    transform: translateX(-105%) !important;
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     border-right: 1.5px solid var(--sidebar-border);
+  }
+  .map-directory-sidebar.open {
+    transform: translateX(0) !important;
   }
   .map-directory-sidebar.collapsed {
     transform: translateX(-105%) !important;
@@ -1750,6 +1775,7 @@ svg.blueprint-svg {
         <ol class="dir-steps-list" id="dirStepsList"></ol>
         <div class="dir-actions">
           <button class="btn-dir-voice" id="dirVoiceBtn">🔊 Read Aloud</button>
+          <button class="btn-dir-info" id="dirExhibitInfoBtn" style="display:none;">📖 Exhibit Details</button>
         </div>
       </div>
 
@@ -2998,8 +3024,8 @@ svg.blueprint-svg {
 
       // Route to Exhibit's Room
       document.getElementById('btnTriggerRoute').onclick = () => {
-        renderRoute(room.id);
         closeExhibitDrawer();
+        renderRoute(ex.code || room.id);
       };
     }
 
@@ -3291,13 +3317,25 @@ svg.blueprint-svg {
 
     // Dynamic Wayfinding Walking Route Engine
     function renderRoute(routeKey) {
+      if (!routeKey) return;
       activeRouteKey = routeKey;
-      // If routeKey is an exhibit code (e.g. EX-008), find its parent room
+
+      let targetExhibit = null;
+      // If routeKey is an exhibit code (e.g. EX-001), find its parent room
       let route = WAYFINDING_ROUTES[routeKey];
       if (!route) {
         const parentRoom = findRoomForExhibit(routeKey);
         if (parentRoom) {
           route = WAYFINDING_ROUTES[parentRoom.id];
+          targetExhibit = (exhibitsData || []).find(e => (e.code || '').toUpperCase() === routeKey.toUpperCase());
+        }
+      } else {
+        const params = new URLSearchParams(window.location.search);
+        const focusCode = params.get('focus');
+        if (focusCode) {
+          targetExhibit = (exhibitsData || []).find(e => (e.code || '').toUpperCase() === focusCode.toUpperCase());
+        } else if (selectedExhibit) {
+          targetExhibit = selectedExhibit;
         }
       }
       if (!route) return;
@@ -3305,6 +3343,9 @@ svg.blueprint-svg {
       if (currentFloor !== route.floor) {
         switchFloor(route.floor, false);
       }
+
+      // Ensure exhibit drawer is closed so walking path & directions are fully visible
+      closeExhibitDrawer();
 
       const routeLayer = document.getElementById('routeLayer');
       if (!routeLayer) return;
@@ -3322,20 +3363,56 @@ svg.blueprint-svg {
         `;
       }
 
-      // Populate Directions Panel
-      document.getElementById('dirDestName').textContent = `To: ${route.title}`;
+      // Populate Directions Panel Destination Title
+      const destEl = document.getElementById('dirDestName');
+      if (destEl) {
+        if (targetExhibit && targetExhibit.title) {
+          destEl.innerHTML = `<span style="color:#00f0ff;">To: ${escapeHtml(targetExhibit.title)}</span> <span style="font-size:12px; color:#94a3b8; font-weight:600;">(${escapeHtml(route.title)})</span>`;
+        } else {
+          destEl.textContent = `To: ${route.title}`;
+        }
+      }
+
+      // Populate Step-by-Step Directions
       const stepsList = document.getElementById('dirStepsList');
-      stepsList.innerHTML = '';
-      route.steps.forEach((step, idx) => {
-        const li = document.createElement('li');
-        li.className = 'dir-step-item';
-        li.innerHTML = `<span class="dir-step-num">${idx + 1}</span><span>${escapeHtml(step)}</span>`;
-        stepsList.appendChild(li);
-      });
+      if (stepsList) {
+        stepsList.innerHTML = '';
+        let stepsToDisplay = route.steps;
+        if (targetExhibit && targetExhibit.directions) {
+          const exSteps = targetExhibit.directions.split(/(?<=[.?!])\s+/).filter(Boolean);
+          if (exSteps.length > 0) {
+            stepsToDisplay = exSteps;
+          }
+        }
+        stepsToDisplay.forEach((step, idx) => {
+          const li = document.createElement('li');
+          li.className = 'dir-step-item';
+          li.innerHTML = `<span class="dir-step-num">${idx + 1}</span><span>${escapeHtml(step)}</span>`;
+          stepsList.appendChild(li);
+        });
+      }
+
+      // Exhibit Details button in directions panel
+      const infoBtn = document.getElementById('dirExhibitInfoBtn');
+      if (infoBtn) {
+        if (targetExhibit) {
+          infoBtn.style.display = 'inline-flex';
+          infoBtn.onclick = () => {
+            const pRoom = findRoomForExhibit(targetExhibit.code);
+            if (pRoom) openCategoryRoomDrawer(pRoom, targetExhibit.code);
+          };
+        } else {
+          infoBtn.style.display = 'none';
+        }
+      }
 
       directionsPanel.classList.add('active');
-      if (mapViewport.clientWidth < 600) {
-        panY = -35;
+      if (mapViewport.clientWidth < 600 || window.innerWidth <= 768) {
+        mapSidebar.classList.add('collapsed');
+        mapSidebar.classList.remove('open');
+        const btnToggle = document.getElementById('btnToggleSidebar');
+        if (btnToggle) btnToggle.classList.remove('active');
+        panY = -60;
         updateTransform();
       }
     }
@@ -3370,9 +3447,17 @@ svg.blueprint-svg {
 
       // Toggle Directory Sidebar
       document.getElementById('btnToggleSidebar').addEventListener('click', () => {
-        mapSidebar.classList.toggle('collapsed');
-        const isCollapsed = mapSidebar.classList.contains('collapsed');
-        document.getElementById('btnToggleSidebar').classList.toggle('active', !isCollapsed);
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+          const willOpen = !mapSidebar.classList.contains('open');
+          mapSidebar.classList.toggle('open', willOpen);
+          mapSidebar.classList.toggle('collapsed', !willOpen);
+          document.getElementById('btnToggleSidebar').classList.toggle('active', willOpen);
+        } else {
+          mapSidebar.classList.toggle('collapsed');
+          const isCollapsed = mapSidebar.classList.contains('collapsed');
+          document.getElementById('btnToggleSidebar').classList.toggle('active', !isCollapsed);
+        }
         setTimeout(() => fitToScreen(true), 320);
       });
 
@@ -3412,8 +3497,20 @@ svg.blueprint-svg {
           return;
         }
         if (!activeRouteKey) return;
-        const route = WAYFINDING_ROUTES[activeRouteKey] || (findRoomForExhibit(activeRouteKey) && WAYFINDING_ROUTES[findRoomForExhibit(activeRouteKey).id]);
-        if (route && route.steps) {
+        let route = WAYFINDING_ROUTES[activeRouteKey];
+        let targetEx = (exhibitsData || []).find(e => (e.code || '').toUpperCase() === (activeRouteKey || '').toUpperCase());
+        if (!targetEx) {
+          const params = new URLSearchParams(window.location.search);
+          const f = params.get('focus');
+          if (f) targetEx = (exhibitsData || []).find(e => (e.code || '').toUpperCase() === f.toUpperCase());
+        }
+        if (!route) {
+          const parentRoom = findRoomForExhibit(activeRouteKey);
+          if (parentRoom) route = WAYFINDING_ROUTES[parentRoom.id];
+        }
+        if (targetEx && targetEx.directions) {
+          playAudio(`Walking directions to ${targetEx.title}. ${targetEx.directions}`, 'en', 'dir');
+        } else if (route && route.steps) {
           playAudio(`Directions to ${route.title}. ${route.steps.join(' ')}`, 'en', 'dir');
         }
       });
@@ -3744,32 +3841,66 @@ svg.blueprint-svg {
         fitToScreen(false);
       });
 
-      if (roomParam) {
-        const targetRoom = CATEGORY_ROOMS[roomParam];
-        if (targetRoom) {
-          switchFloor(targetRoom.floor, false);
-          openCategoryRoomDrawer(targetRoom);
-          return;
-        }
+      if (window.innerWidth <= 768) {
+        mapSidebar.classList.add('collapsed');
+        mapSidebar.classList.remove('open');
+        const btnToggle = document.getElementById('btnToggleSidebar');
+        if (btnToggle) btnToggle.classList.remove('active');
       }
+
+      const hasRouteIntent = routeParam && (
+        routeParam === '1' || 
+        routeParam === 'true' || 
+        routeParam.toUpperCase() === (focusParam || '').toUpperCase() || 
+        routeParam.toUpperCase() === (roomParam || '').toUpperCase()
+      );
 
       if (focusParam) {
         const exhibitCode = focusParam.toUpperCase();
         const parentRoom = findRoomForExhibit(exhibitCode);
         if (parentRoom) {
           switchFloor(parentRoom.floor, false);
-          openCategoryRoomDrawer(parentRoom, exhibitCode);
-          if (routeParam === '1' || routeParam === 'true' || routeParam === exhibitCode) {
+          if (hasRouteIntent) {
+            closeExhibitDrawer();
+            highlightRoomZone(parentRoom.zoneId);
             setTimeout(() => {
-              renderRoute(parentRoom.id);
-            }, 350);
+              renderRoute(exhibitCode);
+            }, 120);
+            return;
           }
+          openCategoryRoomDrawer(parentRoom, exhibitCode);
+          return;
+        }
+      }
+
+      if (roomParam) {
+        const targetRoom = CATEGORY_ROOMS[roomParam];
+        if (targetRoom) {
+          switchFloor(targetRoom.floor, false);
+          if (hasRouteIntent) {
+            closeExhibitDrawer();
+            highlightRoomZone(targetRoom.zoneId);
+            setTimeout(() => {
+              renderRoute(targetRoom.id);
+            }, 120);
+            return;
+          }
+          openCategoryRoomDrawer(targetRoom);
           return;
         }
       }
 
       if (routeParam) {
-        renderRoute(routeParam.toUpperCase());
+        closeExhibitDrawer();
+        const routeKey = routeParam.toUpperCase();
+        const parentRoom = findRoomForExhibit(routeKey);
+        if (parentRoom) {
+          switchFloor(parentRoom.floor, false);
+          highlightRoomZone(parentRoom.zoneId);
+        }
+        setTimeout(() => {
+          renderRoute(routeKey);
+        }, 120);
         return;
       }
     }
