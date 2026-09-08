@@ -14,6 +14,7 @@
 
   function getActiveNavKey() {
     if (currentPath === '/' || currentPath.endsWith('/index.html') || currentPath === '') return 'home';
+    if (currentPath.includes('map')) return 'map';
     if (currentPath.includes('exhibit')) return 'exhibits';
     if (currentPath.includes('program')) return 'programs';
     if (currentPath.includes('gallery')) return 'gallery';
@@ -97,6 +98,11 @@
             <span class="user-sidebar-icon">🏛️</span>
             <span class="user-sidebar-label">Exhibits</span>
             ${activeKey === 'exhibits' ? '<span class="user-sidebar-indicator"></span>' : ''}
+          </a>
+          <a class="user-sidebar-btn ${activeKey === 'map' ? 'active' : ''}" href="/map.html">
+            <span class="user-sidebar-icon">🗺️</span>
+            <span class="user-sidebar-label">Floor Map</span>
+            ${activeKey === 'map' ? '<span class="user-sidebar-indicator"></span>' : ''}
           </a>
           <a class="user-sidebar-btn ${activeKey === 'programs' ? 'active' : ''}" href="/programs.html">
             <span class="user-sidebar-icon">🌱</span>

@@ -53,6 +53,8 @@ function renderImagePreviewList(paths, containerId){
       if(Number.isFinite(idx)){
         paths.splice(idx, 1);
         renderImagePreviewList(paths, containerId);
+        const status = container.closest('.form-field')?.querySelector('[id$="UploadStatus"]');
+        if(status) status.textContent = paths.length ? `${paths.length} photo${paths.length === 1 ? '' : 's'} ready.` : 'No photos uploaded yet.';
       }
     });
   });
@@ -125,18 +127,18 @@ function renderLogin(){
 let activeTab = 'dashboard';
 
 const SIDEBAR_ITEMS = [
-  { id: 'dashboard',      label: 'Dashboard',         icon: '📊' },
-  { id: 'catalog',        label: 'Catalog',           icon: '🏛️' },
-  { id: 'categories',     label: 'Categories',        icon: '🏷️' },
-  { id: 'visitors',       label: 'Visitor Log',       icon: '🟢' },
-  { id: 'visitorHistory', label: 'Visitor History',   icon: '📋' },
-  { id: 'artifacts',      label: 'Artifacts Log',     icon: '🏺' },
-  { id: 'programs',       label: 'Programs',          icon: '🌱' },
-  { id: 'events',         label: 'Events',            icon: '📅' },
-  { id: 'gallery',        label: 'Gallery',           icon: '🖼️' },
-  { id: 'analytics',      label: 'Analytics',         icon: '📈' },
-  { id: 'feedback',       label: 'Feedback',          icon: '💬' },
-  { id: 'museumInfo',     label: 'Museum Info',       icon: '🏛️' },
+  { id: 'dashboard',      label: 'Dashboard',         icon: '📊', group: 'Overview' },
+  { id: 'analytics',      label: 'Analytics',         icon: '📈', group: 'Overview' },
+  { id: 'catalog',        label: 'Catalog',           icon: '🏛️', group: 'Collections' },
+  { id: 'categories',     label: 'Categories',        icon: '🏷️', group: 'Collections' },
+  { id: 'artifacts',      label: 'Artifacts Log',     icon: '🏺', group: 'Collections' },
+  { id: 'gallery',        label: 'Gallery',           icon: '🖼️', group: 'Collections' },
+  { id: 'visitors',       label: 'Visitor Log',       icon: '🟢', group: 'Operations' },
+  { id: 'visitorHistory', label: 'Visitor History',   icon: '📋', group: 'Operations' },
+  { id: 'programs',       label: 'Programs',          icon: '🌱', group: 'Operations' },
+  { id: 'events',         label: 'Events',            icon: '📅', group: 'Operations' },
+  { id: 'feedback',       label: 'Feedback',          icon: '💬', group: 'System' },
+  { id: 'museumInfo',     label: 'Museum Info',       icon: 'ℹ️', group: 'System' },
 ];
 
 function handleSignOut() {
@@ -152,9 +154,48 @@ async function renderDashboard(){
   if (toggleBtn) toggleBtn.style.display = '';
 
   const activeItem = SIDEBAR_ITEMS.find(s => s.id === activeTab) || SIDEBAR_ITEMS[0];
+
+  // Update Topbar Section Indicator
+  const contextTitleEl = document.getElementById('adminContextTitle');
+  if (contextTitleEl) {
+    contextTitleEl.innerHTML = `<span style="margin-right:4px;">${activeItem.icon}</span> ${escapeHtml(activeItem.label)}`;
+  }
+
+  // Wire Topbar Sign Out
+  const topbarSignOutBtn = document.getElementById('topbarSignOutBtn');
+  if (topbarSignOutBtn && !topbarSignOutBtn._wired) {
+    topbarSignOutBtn._wired = true;
+    topbarSignOutBtn.addEventListener('click', handleSignOut);
+  }
+
+  // Wire Topbar Public View Button (Functional on Mobile & Desktop)
+  const viewSiteBtn = document.getElementById('adminViewSiteBtn') || document.querySelector('.admin-view-site-link');
+  if (viewSiteBtn && !viewSiteBtn._wired) {
+    viewSiteBtn._wired = true;
+    viewSiteBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      try {
+        sessionStorage.setItem('museum_visitor_checked_in', 'true');
+        if (!sessionStorage.getItem('museum_visitor_name')) {
+          sessionStorage.setItem('museum_visitor_name', 'Museum Admin');
+        }
+        localStorage.setItem('museum_visitor_checked_in', 'true');
+      } catch (err) {}
+      window.location.href = '/dashboard.html';
+    });
+  }
+
+  // Grouped Sidebar Items
+  const groups = [
+    { name: 'Overview', items: SIDEBAR_ITEMS.filter(s => s.group === 'Overview') },
+    { name: 'Collections', items: SIDEBAR_ITEMS.filter(s => s.group === 'Collections') },
+    { name: 'Operations', items: SIDEBAR_ITEMS.filter(s => s.group === 'Operations') },
+    { name: 'System', items: SIDEBAR_ITEMS.filter(s => s.group === 'System') }
+  ];
+
   app.innerHTML = `
     <div class="admin-layout">
-      <!-- Sidebar (Slide to Show) -->
+      <!-- Sidebar (Docked on Desktop, Slide Drawer on Mobile) -->
       <aside class="admin-sidebar" id="adminSidebar">
         <div class="admin-sidebar-brand">
           <div class="admin-sidebar-logo">M</div>
@@ -162,12 +203,18 @@ async function renderDashboard(){
           <button type="button" class="admin-sidebar-close" id="adminSidebarCloseBtn" aria-label="Close admin menu">✕</button>
         </div>
         <nav class="admin-sidebar-nav">
-          ${SIDEBAR_ITEMS.map(item => `
-            <button class="admin-sidebar-btn ${activeTab === item.id ? 'active' : ''}" data-tab="${item.id}">
-              <span class="admin-sidebar-icon">${item.icon}</span>
-              <span class="admin-sidebar-label">${item.label}</span>
-              ${activeTab === item.id ? '<span class="admin-sidebar-indicator"></span>' : ''}
-            </button>
+          ${groups.map(grp => `
+            <div class="admin-sidebar-section">
+              <div class="admin-sidebar-section-title">${grp.name}</div>
+              ${grp.items.map(item => `
+                <button class="admin-sidebar-btn ${activeTab === item.id ? 'active' : ''}" data-tab="${item.id}">
+                  <span class="admin-sidebar-icon">${item.icon}</span>
+                  <span class="admin-sidebar-label">${item.label}</span>
+                  ${item.id === 'visitors' ? '<span class="sidebar-badge live">Live</span>' : ''}
+                  ${activeTab === item.id ? '<span class="admin-sidebar-indicator"></span>' : ''}
+                </button>
+              `).join('')}
+            </div>
           `).join('')}
         </nav>
         <div class="admin-sidebar-footer">
@@ -177,17 +224,20 @@ async function renderDashboard(){
         </div>
       </aside>
 
-      <!-- Main Content -->
+      <!-- Main Content Container -->
       <div class="admin-main">
-        <header class="admin-topbar">
-          <div class="admin-topbar-left">
-            <div class="admin-topbar-icon">${activeItem.icon}</div>
-            <div>
-              <h1 class="admin-topbar-title">${activeItem.label}</h1>
-              <p class="admin-topbar-sub">Manage ${activeItem.label.toLowerCase()} content</p>
+        ${activeTab !== 'dashboard' ? `
+          <header class="admin-topbar">
+            <div class="admin-topbar-left">
+              <div class="admin-topbar-icon">${activeItem.icon}</div>
+              <div>
+                <h1 class="admin-topbar-title">${activeItem.label}</h1>
+                <p class="admin-topbar-sub">Manage ${activeItem.label.toLowerCase()} content</p>
+              </div>
             </div>
-          </div>
-        </header>
+          </header>
+        ` : ''}
+
         <div id="tabContent" class="admin-content"></div>
       </div>
     </div>`;
@@ -195,6 +245,7 @@ async function renderDashboard(){
   const signOutBtn = document.getElementById('signOutBtn');
   if (signOutBtn) signOutBtn.addEventListener('click', handleSignOut);
 
+  // Tab switching triggers
   app.querySelectorAll('[data-tab]').forEach(btn=>{
     btn.addEventListener('click', ()=>{ 
       activeTab = btn.dataset.tab; 
@@ -254,7 +305,7 @@ async function renderDashboardHomeTab(contentEl){
     exhibits.forEach(e => { const c = e.category || 'Other'; categoryCounts[c] = (categoryCounts[c] || 0) + 1; });
 
     // Recent visitors (last 5)
-    const recentVisitors = [...visitors].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+    const recentVisitors = [...visitors].sort((a,b) => new Date(b.createdAt || b.visitDate || 0) - new Date(a.createdAt || a.visitDate || 0)).slice(0, 5);
 
     // Upcoming events (next 3)
     const now = new Date();
@@ -264,156 +315,304 @@ async function renderDashboardHomeTab(contentEl){
       .slice(0, 3);
 
     // Recent gallery
-    const recentGallery = [...gallery].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 3);
+    const recentGallery = [...gallery].sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)).slice(0, 3);
 
     contentEl.innerHTML = `
-      <div style="padding:16px 20px; display:flex; flex-direction:column; gap:16px;">
-        <!-- Stats Overview -->
-        <div class="kpi-cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:10px;">
-          <div class="kpi-stat-card" style="padding:10px 12px; cursor:pointer;" data-tab="catalog" title="Open Catalog">
-            <div class="kpi-stat-icon" style="width:28px; height:28px; font-size:14px;">🏛️</div>
-            <div class="kpi-stat-info">
-              <div class="kpi-stat-value" style="font-size:18px;">${exhibits.length}</div>
-              <div class="kpi-stat-label" style="font-size:10px;">Total Exhibits</div>
+      <div class="dash-wrapper">
+        <!-- 1. Executive Control Center Hero Banner -->
+        <div class="dash-hero-banner">
+          <div class="dash-hero-info">
+            <div class="dash-hero-eyebrow">
+              <span>🏛️</span> Museo Sang Bata sa Negros · Admin Console
             </div>
+            <h1 class="dash-hero-title">Executive Control Center</h1>
+            <p class="dash-hero-sub">
+              Real-time operations hub for interactive room collections, floor navigation, visitor intake, and public engagement.
+            </p>
           </div>
-          <div class="kpi-stat-card" style="padding:10px 12px; cursor:pointer;" data-tab="programs" title="Open Programs">
-            <div class="kpi-stat-icon green" style="width:28px; height:28px; font-size:14px;">🌱</div>
-            <div class="kpi-stat-info">
-              <div class="kpi-stat-value" style="font-size:18px;">${programs.length}</div>
-              <div class="kpi-stat-label" style="font-size:10px;">Active Programs</div>
-            </div>
-          </div>
-          <div class="kpi-stat-card" style="padding:10px 12px; cursor:pointer;" data-tab="events" title="Open Events">
-            <div class="kpi-stat-icon orange" style="width:28px; height:28px; font-size:14px;">📅</div>
-            <div class="kpi-stat-info">
-              <div class="kpi-stat-value" style="font-size:18px;">${events.length}</div>
-              <div class="kpi-stat-label" style="font-size:10px;">Events</div>
-            </div>
-          </div>
-          <div class="kpi-stat-card" style="padding:10px 12px; cursor:pointer;" data-tab="gallery" title="Open Gallery">
-            <div class="kpi-stat-icon purple" style="width:28px; height:28px; font-size:14px;">🖼️</div>
-            <div class="kpi-stat-info">
-              <div class="kpi-stat-value" style="font-size:18px;">${gallery.length}</div>
-              <div class="kpi-stat-label" style="font-size:10px;">Gallery Items</div>
-            </div>
-          </div>
-          <div class="kpi-stat-card" style="padding:10px 12px; cursor:pointer;" data-tab="visitors" title="Open Visitor Logs">
-            <div class="kpi-stat-icon blue" style="width:28px; height:28px; font-size:14px;">👥</div>
-            <div class="kpi-stat-info">
-              <div class="kpi-stat-value" style="font-size:18px;">${visitors.length}</div>
-              <div class="kpi-stat-label" style="font-size:10px;">Visitor Logs</div>
-            </div>
-          </div>
-          <div class="kpi-stat-card" style="padding:10px 12px; cursor:pointer;" data-tab="artifacts" title="Open Artifacts Log">
-            <div class="kpi-stat-icon" style="width:28px; height:28px; font-size:14px;">🏺</div>
-            <div class="kpi-stat-info">
-              <div class="kpi-stat-value" style="font-size:18px;">${artifacts.length}</div>
-              <div class="kpi-stat-label" style="font-size:10px;">Artifacts</div>
-            </div>
+          <!-- Quick Action Commands -->
+          <div class="dash-quick-actions">
+            <button type="button" class="dash-action-btn primary" id="dashHeroAddExhibit">
+              <span>+</span> Add Exhibit
+            </button>
+            <button type="button" class="dash-action-btn secondary" id="dashHeroCheckinVisitor">
+              <span>🟢</span> Log Walk-in
+            </button>
+            <button type="button" class="dash-action-btn secondary" id="dashHeroNewEvent">
+              <span>📅</span> Schedule Event
+            </button>
           </div>
         </div>
 
-        <!-- Analytics Summary -->
-        <div class="stat-cards" style="gap:8px;">
-          <div class="stat-card" style="padding:10px 12px;"><div class="num" style="font-size:16px;">${totals.allTime}</div><div class="label" style="font-size:10px;">All-time Views</div></div>
-          <div class="stat-card" style="padding:10px 12px;"><div class="num" style="font-size:16px;">${totals.last7Days}</div><div class="label" style="font-size:10px;">Last 7 Days</div></div>
-          <div class="stat-card" style="padding:10px 12px;"><div class="num" style="font-size:16px;">${totals.last24Hours}</div><div class="label" style="font-size:10px;">Last 24 Hours</div></div>
-        </div>
-
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px; margin-top:8px;">
-          <!-- Exhibits by Category -->
-          <div class="info-card" style="padding:14px 16px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-              <h3 style="margin:0; font-family:'Nunito',sans-serif; font-weight:800; font-size:15px; color:#ffffff; text-shadow:0 1px 3px rgba(0,0,0,0.5);">Exhibits by Category</h3>
-              <a href="#" class="view-all-btn" data-tab="catalog">View All →</a>
+        <!-- 2. Rich KPI Stat Cards Grid -->
+        <div class="dash-kpi-grid">
+          <div class="dash-kpi-card" data-tab="catalog" title="Manage Exhibits & Collections">
+            <div class="dash-kpi-top">
+              <div class="dash-kpi-icon-wrap teal">🏛️</div>
+              <span class="dash-kpi-badge">Collections</span>
             </div>
-            ${Object.entries(categoryCounts).length ? `
-              <ul style="margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px;">
-                ${Object.entries(categoryCounts).sort((a,b)=>b[1]-a[1]).map(([cat, count]) => `
-                  <li style="display:flex; justify-content:space-between; align-items:center; padding:7px 12px; background:rgba(0,42,54,0.80); border:1px solid rgba(255,255,255,0.12); border-radius:8px; color:#ffffff;">
-                    <span style="display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600; color:#ffffff;">
-                      <span style="width:8px; height:8px; border-radius:50%; background:var(--teal); box-shadow:0 0 6px var(--teal);"></span>
-                      ${escapeHtml(cat)}
-                    </span>
-                    <span style="font-weight:700; color:#ffffff; font-size:12px; background:rgba(0,174,189,0.28); border:1px solid rgba(0,174,189,0.4); padding:2px 8px; border-radius:999px;">${count}</span>
-                  </li>
-                `).join('')}
-              </ul>
-            ` : `<p style="color:#cbd5e1; font-size:12px; margin:4px 0 0;">No exhibits yet</p>`}
+            <div class="dash-kpi-val">${exhibits.length}</div>
+            <div class="dash-kpi-lbl">Total Exhibits</div>
+            <div class="dash-kpi-sub">Interactive rooms & tags</div>
+            <div class="dash-kpi-link">Open Catalog →</div>
           </div>
 
-          <!-- Recent Visitors -->
-          <div class="info-card" style="padding:14px 16px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:6px;">
-              <h3 style="margin:0; font-family:'Nunito',sans-serif; font-weight:800; font-size:15px; color:#ffffff; text-shadow:0 1px 3px rgba(0,0,0,0.5);">Recent Visitors</h3>
-              <div style="display:flex; gap:8px;">
-                <a href="#" class="view-all-btn" data-tab="visitors" title="Open Live Visitor Log">🟢 Live Log</a>
-                <a href="#" class="view-all-btn" data-tab="visitorHistory" title="Open Visitor History Archive">📜 History →</a>
+          <div class="dash-kpi-card" data-tab="visitors" title="View Today's Live Visitors">
+            <div class="dash-kpi-top">
+              <div class="dash-kpi-icon-wrap emerald">👥</div>
+              <span class="dash-kpi-badge" style="background:rgba(16,185,129,0.2); color:#6ee7b7;">Live Feed</span>
+            </div>
+            <div class="dash-kpi-val">${visitors.length}</div>
+            <div class="dash-kpi-lbl">Visitor Records</div>
+            <div class="dash-kpi-sub">Walk-ins & tour groups</div>
+            <div class="dash-kpi-link">Open Visitor Log →</div>
+          </div>
+
+          <div class="dash-kpi-card" data-tab="programs" title="Manage Educational Programs">
+            <div class="dash-kpi-top">
+              <div class="dash-kpi-icon-wrap amber">🌱</div>
+              <span class="dash-kpi-badge">Learning</span>
+            </div>
+            <div class="dash-kpi-val">${programs.length}</div>
+            <div class="dash-kpi-lbl">Active Programs</div>
+            <div class="dash-kpi-sub">Workshops & cohorts</div>
+            <div class="dash-kpi-link">View Programs →</div>
+          </div>
+
+          <div class="dash-kpi-card" data-tab="events" title="Manage Museum Events">
+            <div class="dash-kpi-top">
+              <div class="dash-kpi-icon-wrap purple">📅</div>
+              <span class="dash-kpi-badge">Calendar</span>
+            </div>
+            <div class="dash-kpi-val">${events.length}</div>
+            <div class="dash-kpi-lbl">Scheduled Events</div>
+            <div class="dash-kpi-sub">Community gatherings</div>
+            <div class="dash-kpi-link">View Calendar →</div>
+          </div>
+
+          <div class="dash-kpi-card" data-tab="gallery" title="Curate Gallery Media">
+            <div class="dash-kpi-top">
+              <div class="dash-kpi-icon-wrap blue">🖼️</div>
+              <span class="dash-kpi-badge">Media</span>
+            </div>
+            <div class="dash-kpi-val">${gallery.length}</div>
+            <div class="dash-kpi-lbl">Gallery Photos</div>
+            <div class="dash-kpi-sub">Visual archive & tours</div>
+            <div class="dash-kpi-link">Open Gallery →</div>
+          </div>
+
+          <div class="dash-kpi-card" data-tab="artifacts" title="Audit Artifact Logs">
+            <div class="dash-kpi-top">
+              <div class="dash-kpi-icon-wrap rose">🏺</div>
+              <span class="dash-kpi-badge">Audit</span>
+            </div>
+            <div class="dash-kpi-val">${artifacts.length}</div>
+            <div class="dash-kpi-lbl">Artifact Logs</div>
+            <div class="dash-kpi-sub">Preserved specimens</div>
+            <div class="dash-kpi-link">View Artifacts →</div>
+          </div>
+        </div>
+
+        <!-- 3. Traffic & Engagement Banner -->
+        <div class="dash-analytics-card">
+          <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+            <div style="font-size:24px; background:rgba(0,240,255,0.15); width:46px; height:46px; border-radius:12px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(0,240,255,0.3);">📈</div>
+            <div>
+              <div style="font-family:'Nunito',sans-serif; font-weight:800; font-size:16px; color:#ffffff;">Public Traffic & Digital Engagement</div>
+              <div style="font-size:12px; color:#94a3b8;">Analytics tracked across mobile QR scans, exhibit views, and kiosk sessions</div>
+            </div>
+          </div>
+          <div class="dash-analytics-metrics">
+            <div class="dash-metric-item">
+              <div class="dash-metric-num">${totals.allTime.toLocaleString()}</div>
+              <div class="dash-metric-lbl">All-Time Views</div>
+            </div>
+            <div class="dash-metric-item">
+              <div class="dash-metric-num" style="color:#5eead4;">${totals.last7Days.toLocaleString()}</div>
+              <div class="dash-metric-lbl">Last 7 Days</div>
+            </div>
+            <div class="dash-metric-item">
+              <div class="dash-metric-num" style="color:#f59e0b;">${totals.last24Hours.toLocaleString()}</div>
+              <div class="dash-metric-lbl">Last 24 Hours</div>
+            </div>
+            <button type="button" class="dash-panel-action" data-tab="analytics" style="padding:6px 14px; font-size:12px; border:none;">Full Analytics →</button>
+          </div>
+        </div>
+
+        <!-- 4. Two-Column Operational Hub -->
+        <div class="dash-two-col">
+          <!-- Category Breakdown with Animated Progress Bars -->
+          <div class="dash-panel-card">
+            <div class="dash-panel-head">
+              <div>
+                <h3 class="dash-panel-title">🏷️ Exhibits by Category / Room</h3>
+                <div class="dash-panel-sub">Interactive room capacity and collection distribution</div>
+              </div>
+              <button type="button" class="dash-panel-action" data-tab="categories" style="border:none;">Manage Rooms →</button>
+            </div>
+            <div class="dash-cat-list">
+              ${Object.entries(categoryCounts).length ? Object.entries(categoryCounts).sort((a,b)=>b[1]-a[1]).map(([cat, count]) => {
+                const total = exhibits.length || 1;
+                const pct = Math.min(100, Math.round((count / total) * 100));
+                return `
+                  <div class="dash-cat-row" data-tab="catalog" data-cat="${escapeHtml(cat)}" title="View ${count} exhibits in ${escapeHtml(cat)}">
+                    <div class="dash-cat-header">
+                      <span style="display:flex; align-items:center; gap:8px;">
+                        <span style="width:8px; height:8px; border-radius:50%; background:#00f0ff; box-shadow:0 0 6px #00f0ff; display:inline-block;"></span>
+                        ${escapeHtml(cat)}
+                      </span>
+                      <span style="display:flex; align-items:center; gap:6px;">
+                        <span style="font-size:11px; color:#94a3b8;">${pct}%</span>
+                        <span style="background:rgba(0,240,255,0.18); border:1px solid rgba(0,240,255,0.35); color:#ffffff; font-size:11px; font-weight:800; padding:1px 8px; border-radius:999px;">${count}</span>
+                      </span>
+                    </div>
+                    <div class="dash-cat-bar-bg">
+                      <div class="dash-cat-bar-fill" style="width:${pct}%;"></div>
+                    </div>
+                  </div>
+                `;
+              }).join('') : `<p style="color:#94a3b8; font-size:12px;">No categories configured yet.</p>`}
+            </div>
+          </div>
+
+          <!-- Recent Live Visitors -->
+          <div class="dash-panel-card">
+            <div class="dash-panel-head">
+              <div>
+                <h3 class="dash-panel-title">👥 Recent Visitor Check-ins</h3>
+                <div class="dash-panel-sub">Latest registered guests and educational groups</div>
+              </div>
+              <div style="display:flex; gap:6px;">
+                <button type="button" class="dash-panel-action" data-tab="visitors" style="border:none;">Live Log</button>
+                <button type="button" class="dash-panel-action" data-tab="visitorHistory" style="border:none;">Archive →</button>
               </div>
             </div>
-            ${recentVisitors.length ? `
-              <ul style="margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px;">
-                ${recentVisitors.map(v => `
-                  <li style="display:flex; justify-content:space-between; align-items:center; padding:7px 12px; background:rgba(0,42,54,0.80); border:1px solid rgba(255,255,255,0.12); border-radius:8px; color:#ffffff;">
-                    <div>
-                      <div style="font-weight:700; color:#ffffff; font-size:12.5px;">${escapeHtml(v.visitorName)}</div>
-                      <div style="font-size:10.5px; color:#cbd5e1; margin-top:2px;">${escapeHtml(v.visitDate)} · ${v.pax || 1} pax</div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              ${recentVisitors.length ? recentVisitors.map(v => {
+                const initials = (v.visitorName || 'V').split(' ').filter(Boolean).map(n=>n[0]).join('').substring(0,2).toUpperCase();
+                return `
+                  <div class="dash-visitor-row">
+                    <div class="dash-visitor-avatar">${escapeHtml(initials)}</div>
+                    <div class="dash-visitor-meta">
+                      <div class="dash-visitor-name">${escapeHtml(v.visitorName)}</div>
+                      <div class="dash-visitor-time">
+                        ${escapeHtml(v.visitDate || 'Today')}${v.visitTime ? ` · ${escapeHtml(v.visitTime)}` : ''} · <strong>${v.pax || 1} pax</strong>${v.groupName ? ` (${escapeHtml(v.groupName)})` : ''}
+                      </div>
                     </div>
-                    <span class="status-badge ${(v.status || '').toLowerCase().replace(/[^a-z0-9]/g, '-')}" style="font-size:9.5px; padding:2px 7px;">${escapeHtml(v.status || 'Checked-in')}</span>
-                  </li>
-                `).join('')}
-              </ul>
-            ` : `<p style="color:#cbd5e1; font-size:12px; margin:4px 0 0;">No visitors logged yet</p>`}
-          </div>
-
-          <!-- Upcoming Events -->
-          <div class="info-card" style="padding:14px 16px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-              <h3 style="margin:0; font-family:'Nunito',sans-serif; font-weight:800; font-size:15px; color:#ffffff; text-shadow:0 1px 3px rgba(0,0,0,0.5);">Upcoming Events</h3>
-              <a href="#" class="view-all-btn" data-tab="events">View All →</a>
+                    <span class="status-badge ${(v.status || '').toLowerCase().replace(/[^a-z0-9]/g, '-') || 'active'}" style="font-size:10px; padding:2px 8px;">
+                      ${escapeHtml(v.status || 'Checked-in')}
+                    </span>
+                  </div>
+                `;
+              }).join('') : `<p style="color:#94a3b8; font-size:12px;">No recent visitors logged.</p>`}
             </div>
-            ${upcomingEvents.length ? `
-              <ul style="margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px;">
-                ${upcomingEvents.map(e => `
-                  <li style="display:flex; flex-direction:column; gap:3px; padding:8px 12px; background:rgba(0,42,54,0.80); border:1px solid rgba(255,255,255,0.12); border-radius:8px; color:#ffffff;">
-                    <div style="font-weight:700; color:#ffffff; font-size:12.5px;">${escapeHtml(e.title)}</div>
-                    <div style="font-size:10.5px; color:#cbd5e1; display:flex; gap:10px; flex-wrap:wrap; margin-top:2px;">
-                      <span>📅 ${escapeHtml(e.date)}</span>
-                      <span>📍 ${escapeHtml(e.location || 'TBD')}</span>
+          </div>
+        </div>
+
+        <!-- 5. Bottom Two-Column: Upcoming Events & Gallery Showcase -->
+        <div class="dash-two-col">
+          <!-- Upcoming Events -->
+          <div class="dash-panel-card">
+            <div class="dash-panel-head">
+              <div>
+                <h3 class="dash-panel-title">📅 Upcoming Museum Events</h3>
+                <div class="dash-panel-sub">Exhibitions, festivals, and educational workshops</div>
+              </div>
+              <button type="button" class="dash-panel-action" data-tab="events" style="border:none;">View All →</button>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              ${upcomingEvents.length ? upcomingEvents.map(e => {
+                const d = e.date ? new Date(e.date) : null;
+                const day = d && !isNaN(d.getTime()) ? d.getDate() : '—';
+                const month = d && !isNaN(d.getTime()) ? d.toLocaleString('en-US', { month: 'short' }) : 'EVT';
+                return `
+                  <div class="dash-event-row">
+                    <div class="dash-event-date-badge">
+                      <span class="dash-event-day">${day}</span>
+                      <span class="dash-event-month">${month}</span>
                     </div>
-                  </li>
-                `).join('')}
-              </ul>
-            ` : `<p style="color:#cbd5e1; font-size:12px; margin:4px 0 0;">No upcoming events</p>`}
+                    <div class="dash-event-details">
+                      <div class="dash-event-title">${escapeHtml(e.title)}</div>
+                      <div class="dash-event-sub">📍 ${escapeHtml(e.location || 'Museo Sang Bata sa Negros')} · ${escapeHtml(e.date || '')}</div>
+                    </div>
+                    <button type="button" class="dash-panel-action" data-tab="events" style="align-self:center; border:none;">View</button>
+                  </div>
+                `;
+              }).join('') : `
+                <div style="padding:14px; text-align:center; color:#94a3b8; font-size:12px; background:rgba(0,42,54,0.4); border-radius:10px;">
+                  No upcoming events scheduled. Click Schedule Event to add one!
+                </div>
+              `}
+            </div>
           </div>
 
-          <!-- Recent Gallery -->
-          <div class="info-card" style="padding:14px 16px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-              <h3 style="margin:0; font-family:'Nunito',sans-serif; font-weight:800; font-size:15px; color:#ffffff; text-shadow:0 1px 3px rgba(0,0,0,0.5);">Recent Gallery</h3>
-              <a href="#" class="view-all-btn" data-tab="gallery">View All →</a>
+          <!-- Gallery Highlights -->
+          <div class="dash-panel-card">
+            <div class="dash-panel-head">
+              <div>
+                <h3 class="dash-panel-title">🖼️ Gallery Snapshot</h3>
+                <div class="dash-panel-sub">Public media highlights and tour moments</div>
+              </div>
+              <button type="button" class="dash-panel-action" data-tab="gallery" style="border:none;">Manage Media →</button>
             </div>
             ${recentGallery.length ? `
-              <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px;">
+              <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;">
                 ${recentGallery.map(g => {
                   const paths = Array.isArray(g.imagePaths) && g.imagePaths.length ? g.imagePaths : (g.imagePath ? [g.imagePath] : []);
                   const img = paths[0] || '';
                   return `
-                    <a href="#" data-tab="gallery" class="home-gallery-mini-item" style="border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,0.18);">
+                    <div class="home-gallery-mini-item" data-tab="gallery" style="border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,0.18); aspect-ratio:4/3; cursor:pointer;" title="${escapeHtml(g.title || 'Gallery Item')}">
                       ${img ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(g.title || 'Gallery')}" loading="lazy" style="width:100%; height:100%; object-fit:cover; display:block;">` : `<div style="width:100%; height:100%; background:rgba(0,42,54,0.85); display:flex; align-items:center; justify-content:center; font-size:24px;">🖼️</div>`}
                       <div class="home-gallery-mini-overlay">
-                        <div class="home-gallery-mini-caption">${escapeHtml(g.title || g.caption || 'Museum snapshot')}</div>
+                        <div class="home-gallery-mini-caption">${escapeHtml(g.title || g.caption || 'Museum')}</div>
                       </div>
-                    </a>
+                    </div>
                   `;
                 }).join('')}
               </div>
-            ` : `<p style="color:#cbd5e1; font-size:12px; margin:4px 0 0;">No gallery items yet</p>`}
+            ` : `<p style="color:#94a3b8; font-size:12px;">No gallery media uploaded yet.</p>`}
           </div>
         </div>
       </div>
     `;
+
+    // Hook quick action buttons
+    document.getElementById('dashHeroAddExhibit')?.addEventListener('click', async () => {
+      activeTab = 'catalog';
+      await renderDashboard();
+      openEditModal(null);
+    });
+
+    document.getElementById('dashHeroCheckinVisitor')?.addEventListener('click', async () => {
+      activeTab = 'visitors';
+      await renderDashboard();
+      openVisitorWalkinModal();
+    });
+
+    document.getElementById('dashHeroNewEvent')?.addEventListener('click', async () => {
+      activeTab = 'events';
+      await renderDashboard();
+      openEventModal(null);
+    });
+
+    // Hook category breakdown rows to filter Catalog by that category
+    contentEl.querySelectorAll('.dash-cat-row[data-cat]').forEach(el => {
+      el.addEventListener('click', async () => {
+        adminCatalogCategory = el.dataset.cat;
+        activeTab = 'catalog';
+        await renderDashboard();
+      });
+    });
+
+    // Wire tab navigation for any data-tab elements within contentEl
+    contentEl.querySelectorAll('[data-tab]').forEach(el => {
+      if (el.classList.contains('dash-cat-row')) return; // handled above
+      el.addEventListener('click', async () => {
+        activeTab = el.dataset.tab;
+        await renderDashboard();
+      });
+    });
+
   }catch(e){
     contentEl.innerHTML = `<div class="empty-state"><h2>Could not load dashboard</h2><p>${escapeHtml(e.message)}</p></div>`;
   }
@@ -531,11 +730,18 @@ async function renderCatalogTab(contentEl){
           `<img class="img-enhance" src="${escapeHtml(ex.optimizedImagePath || ex.imagePath)}" onerror="this.parentElement.innerHTML='${CATEGORY_ICON[ex.category]||CATEGORY_ICON.Other}'">`+
         `</a>` : (CATEGORY_ICON[ex.category]||CATEGORY_ICON.Other)}</div></td>
       <td class="id-cell" data-label="Code">${ex.code}</td>
-      <td class="title-cell" data-label="Title">${escapeHtml(ex.title)}</td>
+      <td class="title-cell" data-label="Title">
+        ${escapeHtml(ex.title)}
+        ${ex.videoUrl ? '<span class="video-badge" style="font-size:10.5px; margin-left:6px; background:rgba(217,79,61,0.25); color:#ff6b6b; border:1px solid rgba(217,79,61,0.4); border-radius:999px; padding:2px 7px; display:inline-flex; align-items:center; gap:3px;">▶ Video</span>' : ''}
+        ${Array.isArray(ex.imagePaths) && ex.imagePaths.length > 1 ? `<span class="photo-count-badge" style="font-size:10.5px; margin-left:6px; background:rgba(0,174,189,0.25); color:#00f0ff; border:1px solid rgba(0,240,255,0.4); border-radius:999px; padding:2px 7px; display:inline-flex; align-items:center; gap:3px;">📷 ${ex.imagePaths.length} photos</span>` : ''}
+      </td>
       <td data-label="Category"><span class="cat-pill">${escapeHtml(ex.category)}</span></td>
       <td data-label="Rating" style="font-size:12.5px; color:var(--ink-soft);">${ex.ratingCount ? `★ ${ex.ratingAverage} (${ex.ratingCount})` : '—'}</td>
       <td data-label="Favorites" style="font-size:12.5px; color:var(--ink-soft);">${ex.favoriteCount || 0}</td>
-      <td data-label="Location" style="font-size:12.5px; color:var(--ink-soft);">${escapeHtml(ex.location||'—')}</td>
+      <td data-label="Location" style="font-size:12.5px; color:var(--ink-soft);">
+        <div style="font-weight:600; color:#e2e8f0;">${escapeHtml(ex.location||'—')}</div>
+        ${ex.directions ? `<div style="font-size:11px; color:#5eead4; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(ex.directions)}">🧭 ${escapeHtml(ex.directions)}</div>` : ''}
+      </td>
       <td data-label="Actions">
         <div class="row-actions">
           <button class="btn btn-ghost dark btn-small" data-edit="${ex.id}">Edit</button>
@@ -665,8 +871,9 @@ function openTagModal(code){
 function openEditModal(id, defaultCategory){
   const ex = id ? exhibitsCache.find(x=>x.id===id) : null;
   const isEdit = Boolean(ex);
-  let pendingImagePaths = ex ? (Array.isArray(ex.imagePaths) ? [...ex.imagePaths] : (ex.imagePath ? [ex.imagePath] : [])) : [];
+  let pendingImagePaths = ex ? (Array.isArray(ex.imagePaths) && ex.imagePaths.length ? [...ex.imagePaths] : (ex.imagePath ? [ex.imagePath] : [])) : [];
   let pendingMapImagePath = ex ? (ex.mapImagePath || '') : '';
+  let videoUrl = ex && ex.videoUrl ? ex.videoUrl : '';
 
   openModal(`
     <h2>${isEdit ? 'Edit exhibit' : 'Add exhibit'}</h2>
@@ -675,9 +882,38 @@ function openEditModal(id, defaultCategory){
       <div class="form-field"><label>Category *</label><select id="ex-category"><option value="">Select</option>${categoriesCache.map(c=>`<option value="${escapeHtml(c)}" ${ex && ex.category===c?'selected':''} ${defaultCategory && !ex && c===defaultCategory?'selected':''}>${escapeHtml(c)}</option>`).join('')}</select></div>
       <div class="form-field"><label>Origin</label><input type="text" id="ex-origin" value="${ex?escapeHtml(ex.origin):''}" placeholder="e.g. Philippines"></div>
       <div class="form-field"><label>Year</label><input type="text" id="ex-year" value="${ex?escapeHtml(ex.year):''}" placeholder="e.g. 2020"></div>
-      <div class="form-field"><label>Location (display name + directions)</label><input type="text" id="ex-location" value="${ex?escapeHtml(ex.location):''}" placeholder="e.g. Gallery A, Shelf 3 — Right corner, 2nd floor near the windows"></div>
+      <div class="form-field"><label>Location (display name)</label><input type="text" id="ex-location" value="${ex?escapeHtml(ex.location):''}" placeholder="e.g. Marine & Nature Room • Coral Reef Section"></div>
+      <div class="form-field full">
+        <label>Walking Directions (Floor Plan Navigation)</label>
+        <textarea id="ex-directions" rows="2" placeholder="e.g. From the Main Entrance, turn right into the East Wing corridor and enter the first door on the right into the Touch &amp; Play Room.">${ex?escapeHtml(typeof ex.directions === 'object' && ex.directions !== null ? (ex.directions.en || '') : (ex.directions || '')):''}</textarea>
+        <div class="file-hint">Tell visitors clearly how to reach this exhibit from the entrance based on the floor plan.</div>
+      </div>
       <div class="form-field"><label>Latitude (map)</label><input type="number" step="0.000001" id="ex-lat" value="${ex && ex.lat !== null && ex.lat !== undefined ? ex.lat : ''}" placeholder="e.g. 10.945678"></div>
       <div class="form-field"><label>Longitude (map)</label><input type="number" step="0.000001" id="ex-lng" value="${ex && ex.lng !== null && ex.lng !== undefined ? ex.lng : ''}" placeholder="e.g. 123.421345"></div>
+      
+      <!-- Video Section (YouTube link or MP4/WebM Upload - Same as Gallery) -->
+      <div class="form-field full">
+        <label>Video (optional — YouTube link or upload MP4/WebM video)</label>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="text" id="ex-video" value="${escapeHtml(videoUrl)}" placeholder="e.g. https://www.youtube.com/watch?v=... or upload video" style="flex:1;">
+          <button type="button" class="btn btn-ghost dark btn-small" id="ex-upload-video-btn">Upload video</button>
+          <button type="button" class="btn btn-danger btn-small" id="ex-clear-video-btn" style="${videoUrl ? '' : 'display:none;'}">Clear</button>
+          <input type="file" id="ex-video-file" accept="video/mp4,video/webm,video/ogg,video/quicktime" style="display:none;">
+        </div>
+        <div id="exVideoStatus" style="font-size:12px; color:var(--ink-soft); margin-top:4px;"></div>
+        <div id="exVideoPreview"></div>
+      </div>
+
+      <!-- Photos Section (Multiple Photos Swipeable Album - Same as Gallery) -->
+      <div class="form-field full">
+        <label>Photos (you can select multiple for a swipeable album)</label>
+        <input type="file" id="ex-image-file" accept="image/png,image/jpeg,image/webp,image/gif" multiple="multiple" style="display:none;">
+        <div class="file-drop" id="ex-drop">Click or drop photos here (select multiple to create a swipeable album)</div>
+        <div class="file-hint">Tip: you can hold Ctrl/Cmd or Shift to select multiple photos at once.</div>
+        <div class="image-preview-list" id="exImagePreviewList"></div>
+        <div id="exUploadStatus" style="font-size:12px; color:var(--ink-soft);"></div>
+      </div>
+
       <div class="form-field full">
         <label>Floor Plan / Direction Map (optional)</label>
         <input type="file" id="ex-map-file" accept="image/png,image/jpeg,image/webp" style="display:none;">
@@ -686,6 +922,7 @@ function openEditModal(id, defaultCategory){
         <div class="image-preview-list" id="exMapPreviewList"></div>
         <div id="exMapUploadStatus" style="font-size:12px; color:var(--ink-soft);"></div>
       </div>
+
       <div class="form-field full">
         <label>Description (EN)</label>
         <textarea id="ex-desc" rows="3" placeholder="Detailed description in English">${ex?escapeHtml(ex.description):''}</textarea>
@@ -698,23 +935,6 @@ function openEditModal(id, defaultCategory){
         <label>Description (Cebuano)</label>
         <textarea id="ex-desc_cb" rows="2" placeholder="Paglalarawan sa Cebuano">${ex?escapeHtml(ex.description_cb):''}</textarea>
       </div>
-      <div class="form-field full">
-        <label>Photos (multiple for swipeable album)</label>
-        <input type="file" id="ex-image-file" accept="image/png,image/jpeg,image/webp,image/gif" multiple="multiple" style="display:none;">
-        <div class="file-drop" id="ex-drop">Click or drop photos here (Ctrl/Cmd or Shift to select multiple)</div>
-        <div class="file-hint">Tip: you can also hold Ctrl/Cmd or Shift to select multiple files.</div>
-        <div class="image-preview-list" id="exImagePreviewList"></div>
-        <div id="exUploadStatus" style="font-size:12px; color:var(--ink-soft);"></div>
-      </div>
-      <div class="form-field full">
-        <label>Video (optional — YouTube / Vimeo link or upload video)</label>
-        <div style="display:flex; gap:8px; align-items:center;">
-          <input type="text" id="ex-video" value="${ex?escapeHtml(ex.videoUrl):''}" placeholder="e.g. https://www.youtube.com/watch?v=... or upload video">
-          <button type="button" class="btn btn-ghost dark btn-small" id="ex-upload-video-btn">Upload video</button>
-          <input type="file" id="ex-video-file" accept="video/mp4,video/webm,video/ogg,video/quicktime" style="display:none;">
-        </div>
-        <div id="exVideoStatus" style="font-size:12px; color:var(--ink-soft); margin-top:4px;"></div>
-      </div>
       <div class="form-error" id="exError"></div>
     </div>
     <div class="modal-actions">
@@ -724,12 +944,62 @@ function openEditModal(id, defaultCategory){
   `);
 
   ensureMultipleInput('ex-image-file');
-  renderImagePreviewList(ex ? (Array.isArray(ex.imagePaths) ? [...ex.imagePaths] : (ex.imagePath ? [ex.imagePath] : [])) : [], 'exImagePreviewList');
+  renderImagePreviewList(pendingImagePaths, 'exImagePreviewList');
+  if (pendingImagePaths.length) {
+    const status = document.getElementById('exUploadStatus');
+    if (status) status.textContent = `${pendingImagePaths.length} photo${pendingImagePaths.length === 1 ? '' : 's'} ready.`;
+  }
 
+  // ── Video Controls & Live Preview ──
   const exVideoBtn = document.getElementById('ex-upload-video-btn');
   const exVideoFile = document.getElementById('ex-video-file');
   const exVideoInput = document.getElementById('ex-video');
   const exVideoStatus = document.getElementById('exVideoStatus');
+  const exClearVideoBtn = document.getElementById('ex-clear-video-btn');
+  const exVideoPreview = document.getElementById('exVideoPreview');
+
+  function refreshVideoPreview() {
+    const val = (exVideoInput.value || '').trim();
+    if (exClearVideoBtn) exClearVideoBtn.style.display = val ? '' : 'none';
+    if (!exVideoPreview) return;
+    if (!val) {
+      exVideoPreview.innerHTML = '';
+      return;
+    }
+    if (typeof window.parseVideoUrl === 'function') {
+      const parsed = window.parseVideoUrl(val);
+      if (parsed) {
+        if (parsed.type === 'youtube') {
+          exVideoPreview.innerHTML = `
+            <div style="margin-top:8px; border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,0.2); aspect-ratio:16/9; max-height:180px; background:#000;">
+              <iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(parsed.id)}" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>
+            </div>`;
+          return;
+        }
+        if (parsed.type === 'direct') {
+          exVideoPreview.innerHTML = `
+            <div style="margin-top:8px; border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,0.2); max-height:180px; background:#000;">
+              <video src="${escapeHtml(parsed.url)}" controls style="width:100%; max-height:180px; border-radius:12px; display:block;"></video>
+            </div>`;
+          return;
+        }
+      }
+    }
+    exVideoPreview.innerHTML = `<div style="margin-top:6px; font-size:12px; color:#5eead4; display:flex; align-items:center; gap:6px;"><span>▶</span> Video source: <code>${escapeHtml(val)}</code></div>`;
+  }
+
+  refreshVideoPreview();
+  exVideoInput.addEventListener('input', refreshVideoPreview);
+
+  if (exClearVideoBtn) {
+    exClearVideoBtn.addEventListener('click', () => {
+      exVideoInput.value = '';
+      if (exVideoFile) exVideoFile.value = '';
+      if (exVideoStatus) exVideoStatus.textContent = '';
+      refreshVideoPreview();
+    });
+  }
+
   if(exVideoBtn && exVideoFile){
     exVideoBtn.addEventListener('click', ()=>exVideoFile.click());
     exVideoFile.addEventListener('change', async (e)=>{
@@ -740,10 +1010,12 @@ function openEditModal(id, defaultCategory){
         const { path } = await Api.uploadMedia(file);
         exVideoInput.value = path;
         exVideoStatus.textContent = 'Video uploaded successfully!';
+        refreshVideoPreview();
       }catch(err){ exVideoStatus.textContent = 'Upload failed: ' + err.message; }
     });
   }
 
+  // ── Multiple Photos Upload (Drag & Drop + Multi-select) ──
   const exInput = document.getElementById('ex-image-file');
   const exDrop = document.getElementById('ex-drop');
   if(exDrop){
@@ -839,6 +1111,7 @@ function openEditModal(id, defaultCategory){
       origin: document.getElementById('ex-origin').value.trim(),
       year: document.getElementById('ex-year').value.trim(),
       location: document.getElementById('ex-location').value.trim(),
+      directions: document.getElementById('ex-directions') ? document.getElementById('ex-directions').value.trim() : '',
       lat: latNum,
       lng: lngNum,
       mapImagePath: pendingMapImagePath,
@@ -3467,7 +3740,9 @@ async function renderMuseumInfoTab(contentEl){
     </div>
     <div style="padding:20px 26px; display:flex; flex-direction:column; gap:20px;">
       <div class="info-card">
-        <h3 style="margin:0 0 12px; font-family:'Fraunces',serif; font-size:16px;">Basic Information</h3>
+        <h3 class="info-card-header">
+          <span class="info-card-icon">🏛️</span> Basic Information
+        </h3>
         <div class="info-row"><span class="info-label">Name</span><span class="info-value">${escapeHtml(info.name || '—')}</span></div>
         <div class="info-row"><span class="info-label">Tagline</span><span class="info-value">${escapeHtml(info.tagline || '—')}</span></div>
         <div class="info-row"><span class="info-label">Address</span><span class="info-value">${escapeHtml(info.address || '—')}</span></div>
@@ -3476,32 +3751,30 @@ async function renderMuseumInfoTab(contentEl){
       </div>
 
       <div class="info-card">
-        <h3 style="margin:0 0 12px; font-family:'Fraunces',serif; font-size:16px;">About</h3>
-        <div class="info-value" style="white-space:pre-wrap; font-weight:400;">${escapeHtml(info.about || '—')}</div>
+        <h3 class="info-card-header">
+          <span class="info-card-icon">📖</span> About
+        </h3>
+        <div class="info-value" style="white-space:pre-wrap; font-weight:400; line-height:1.65;">${escapeHtml(info.about || '—')}</div>
       </div>
 
       <div class="info-card">
-        <h3 style="margin:0 0 12px; font-family:'Fraunces',serif; font-size:16px;">Entrance Fees</h3>
-        <ul style="margin:0; padding-left:20px;">
-          ${(info.entranceFees || []).map(f => `<li style="margin:6px 0;">${escapeHtml(f)}</li>`).join('')}
+        <h3 class="info-card-header">
+          <span class="info-card-icon">🎟️</span> Entrance Fees
+        </h3>
+        <ul class="info-list">
+          ${(info.entranceFees || []).map(f => `<li>${escapeHtml(f)}</li>`).join('')}
         </ul>
       </div>
 
       <div class="info-card">
-        <h3 style="margin:0 0 12px; font-family:'Fraunces',serif; font-size:16px;">Footer Links</h3>
-        <ul style="margin:0; padding-left:20px;">
-          ${(info.footerLinks || []).map(f => `<li style="margin:6px 0;"><strong>${escapeHtml(f.label)}</strong> → ${escapeHtml(f.href)}</li>`).join('')}
+        <h3 class="info-card-header">
+          <span class="info-card-icon">🔗</span> Footer Links
+        </h3>
+        <ul class="info-list">
+          ${(info.footerLinks || []).map(f => `<li><strong class="info-link-label">${escapeHtml(f.label)}</strong> <span class="info-link-arrow">→</span> <span class="info-link-href">${escapeHtml(f.href)}</span></li>`).join('')}
         </ul>
       </div>
     </div>
-
-    <style>
-      .info-card { background:var(--white); border:1px solid var(--grey-100); border-radius:12px; padding:20px; }
-      .info-row { display:flex; gap:16px; padding:8px 0; border-bottom:1px solid var(--grey-100); align-items:flex-start; }
-      .info-row:last-child { border-bottom:none; }
-      .info-label { font-weight:700; color:var(--ink-soft); min-width:120px; font-size:13px; }
-      .info-value { color:var(--ink); flex:1; font-size:13px; line-height:1.5; }
-    </style>
   `;
 
   document.getElementById('editMuseumInfoBtn')?.addEventListener('click', ()=>openMuseumInfoModal(info));

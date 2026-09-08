@@ -143,7 +143,8 @@ router.post('/', requireAuth, async (req, res) => {
     const created = await exhibits.create(req.body);
     res.status(201).json({ exhibit: created });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to create exhibit.' });
+    console.error('Error creating exhibit:', err);
+    res.status(500).json({ error: err.message || 'Failed to create exhibit.' });
   }
 });
 
@@ -207,7 +208,8 @@ router.put('/:id', requireAuth, async (req, res) => {
     if (!updated) return res.status(404).json({ error: 'Exhibit not found.' });
     res.json({ exhibit: updated });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to update exhibit.' });
+    console.error('Error updating exhibit:', err);
+    res.status(500).json({ error: err.message || 'Failed to update exhibit.' });
   }
 });
 

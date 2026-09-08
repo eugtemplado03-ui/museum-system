@@ -173,6 +173,24 @@
   .exhibits-hero { padding: 28px 22px; flex-direction: column; align-items: flex-start; }
   .exhibits-hero-icon { display: none; }
 }
+
+@media (max-width: 480px) {
+  .tag-card {
+    padding: 14px 14px 12px;
+  }
+  .tag-foot {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .tag-foot .btn-small {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  .tag-dir-hint {
+    font-size: 11px;
+    padding: 5px 8px;
+  }
+}
 </style>
 </head>
 <body>
@@ -195,6 +213,7 @@
     <div class="nav-links">
       <a class="nav-btn" href="/dashboard.html">Home</a>
       <a class="nav-btn active" href="/exhibits.html">Exhibits</a>
+      <a class="nav-btn" href="/map.html">Floor Map</a>
       <a class="nav-btn" href="/programs.html">Programs</a>
       <a class="nav-btn" href="/gallery.html">Gallery</a>
       <a class="nav-btn" href="/events.html">Events</a>
@@ -203,28 +222,73 @@
   </div>
 
   <div class="user-layout">
-    <!-- ── Categories Sidebar (Slide to Show) ───────────────────── -->
+    <!-- ── Categories & Navigation Sidebar (Slide to Show) ──────── -->
     <aside class="user-sidebar" id="userSidebar">
-      <div class="user-sidebar-brand" style="padding: 16px 14px 12px;">
-        <div class="user-sidebar-logo" style="width:32px; height:32px; font-size:14px;">🏷️</div>
-        <div class="user-sidebar-title" style="font-size:13px;">Categories<br><span style="font-size:9px;">Filter exhibits</span></div>
+      <div class="user-sidebar-brand">
+        <div class="user-sidebar-logo">🏛️</div>
+        <div class="user-sidebar-title">Explore Museo<br><span>Navigation</span></div>
         <button type="button" class="user-sidebar-close" id="sidebarCloseBtn" aria-label="Close sidebar">✕</button>
       </div>
 
       <nav class="user-sidebar-nav">
-        <div id="sidebarCategoryNav" style="display:flex; flex-direction:column; gap:2px;">
-          <!-- Dynamically populated -->
-        </div>
+        <div class="user-sidebar-section-title">Navigation</div>
+        <a class="user-sidebar-btn" href="/dashboard.html">
+          <span class="user-sidebar-icon">🏠</span>
+          <span class="user-sidebar-label">Home</span>
+        </a>
+        <a class="user-sidebar-btn active" href="/exhibits.html">
+          <span class="user-sidebar-icon">🏛️</span>
+          <span class="user-sidebar-label">Exhibits</span>
+          <span class="user-sidebar-indicator"></span>
+        </a>
+        <a class="user-sidebar-btn" href="/map.html">
+          <span class="user-sidebar-icon">🗺️</span>
+          <span class="user-sidebar-label">Floor Map</span>
+        </a>
+        <a class="user-sidebar-btn" href="/programs.html">
+          <span class="user-sidebar-icon">🌱</span>
+          <span class="user-sidebar-label">Programs</span>
+        </a>
+        <a class="user-sidebar-btn" href="/gallery.html">
+          <span class="user-sidebar-icon">🖼️</span>
+          <span class="user-sidebar-label">Gallery</span>
+        </a>
+        <a class="user-sidebar-btn" href="/events.html">
+          <span class="user-sidebar-icon">📅</span>
+          <span class="user-sidebar-label">Events</span>
+        </a>
 
-        <div class="user-sidebar-section-title" style="margin-top:8px;">Saved</div>
+        <div class="user-sidebar-section-title" style="margin-top:12px;">Quick Jump</div>
+        <a class="user-sidebar-btn" href="#" onclick="event.preventDefault(); if(window.openVisitorHistoryModal) window.openVisitorHistoryModal(); else window.location.href='/dashboard.html#history';">
+          <span class="user-sidebar-icon">📋</span>
+          <span class="user-sidebar-label">My Visit History</span>
+        </a>
+        <a class="user-sidebar-btn" href="/dashboard.html#scannerSection">
+          <span class="user-sidebar-icon">📷</span>
+          <span class="user-sidebar-label">Tag Scanner</span>
+        </a>
         <button class="user-sidebar-btn" id="sidebarFavoritesBtn" type="button">
-          <span class="user-sidebar-icon" style="color:var(--danger);">♥</span>
+          <span class="user-sidebar-icon" style="color:var(--danger, #ff4d4f);">❤️</span>
           <span class="user-sidebar-label">My Favorites</span>
           <span class="user-sidebar-count" id="sidebarFavCount">0</span>
         </button>
+
+        <div class="user-sidebar-section-title" style="margin-top:12px;">Exhibit Categories</div>
+        <div id="sidebarCategoryNav" style="display:flex; flex-direction:column; gap:2px;">
+          <!-- Dynamically populated -->
+        </div>
       </nav>
 
       <div class="user-sidebar-footer">
+        <div id="sidebarVisitorStatusBox" style="font-size:11.5px; color:rgba(255,255,255,0.75); margin-bottom:8px; padding:6px 8px; background:rgba(0,0,0,0.25); border-radius:8px; display:flex; align-items:center; justify-content:space-between;">
+          <a href="#" id="sidebarVisitorNameLink" onclick="event.preventDefault(); if(window.openVisitorHistoryModal) window.openVisitorHistoryModal(); else window.location.href='/dashboard.html#history';" style="color:#5eead4; text-decoration:none; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">
+            👤 Verified Visitor
+          </a>
+          <a href="/checkin.html" onclick="localStorage.removeItem('museum_visitor_checked_in'); localStorage.removeItem('museum_visitor_name');" style="color:#f87171; text-decoration:none; font-weight:700; font-size:11px; margin-left:6px;" title="Sign out / Switch visitor">Switch</a>
+        </div>
+        <a class="user-sidebar-sublink" href="/donate.html">
+          <span>💖</span> Support Us
+        </a>
         <a class="user-sidebar-sublink" href="/admin.html">
           <span>⚙️</span> Staff Admin
         </a>
@@ -241,7 +305,12 @@
             <div class="exhibits-hero-text">
               <div class="exhibits-hero-eyebrow">Self-guided tour</div>
               <h1>All Exhibits</h1>
-              <p>Browse, search and filter every exhibit catalogued at Museo Sang Bata sa Negros. Tap any card to read its full label, or scan the QR tag on the floor.</p>
+              <p>Browse, search and filter every exhibit catalogued at Museo Sang Bata sa Negros. Tap any card to read its full label, locate it on the floor plan, or scan the QR tag on the floor.</p>
+              <div style="margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <a href="/map.html" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none; padding:8px 18px; font-size:13.5px; border-radius:10px;">
+                  <span>🗺️</span> View Interactive Floor Map
+                </a>
+              </div>
             </div>
             <div class="exhibits-hero-icon">🏛️</div>
           </div>
@@ -355,13 +424,19 @@
         <div class="tag-photo">
           <img src="${escapeHtml(firstImage)}" alt="${escapeHtml(ex.title)}" loading="lazy">
           ${photoCount > 1 ? `<div class="tag-photo-badge">📷 ${photoCount}</div>` : ''}
+          ${ex.videoUrl ? `<div class="tag-photo-badge" style="left:10px; right:auto; background:rgba(217,79,61,0.9);">▶ Video</div>` : ''}
         </div>` : `
         <div class="tag-photo">
           <div class="tag-photo-placeholder">
             <div class="icon">${icon}</div>
             <span>${escapeHtml(ex.category || 'Exhibit')}</span>
           </div>
+          ${ex.videoUrl ? `<div class="tag-photo-badge" style="left:10px; right:auto; background:rgba(217,79,61,0.9);">▶ Video</div>` : ''}
         </div>`;
+
+      const shortDirection = ex.directions ? (
+        ex.directions.split(/(?<=[.?!])\s+/)[0] || ex.directions
+      ) : (ex.location || 'Main gallery');
 
       return `
       <div class="tag-card" data-id="${ex.id}">
@@ -371,10 +446,17 @@
         <div class="tag-cat">${escapeHtml(ex.category)}</div>
         <h3>${escapeHtml(ex.title)}</h3>
         <div class="meta">${escapeHtml(ex.origin || '')}${ex.origin && ex.year ? ' · ' : ''}${escapeHtml(ex.year || '')}</div>
+        <div class="tag-dir-hint" style="font-size:11.5px; color:#5eead4; background:rgba(0,174,189,0.12); border:1px solid rgba(0,174,189,0.25); border-radius:6px; padding:4px 8px; margin:6px 0 8px; display:flex; align-items:flex-start; gap:5px; line-height:1.35;" title="${escapeHtml(ex.directions || shortDirection)}">
+          <span style="font-size:12px; flex-shrink:0;">🧭</span>
+          <span style="display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${escapeHtml(shortDirection)}</span>
+        </div>
         ${ex.ratingCount ? `<div class="rating-badge"><span class="stars">${starString(ex.ratingAverage)}</span> ${ex.ratingAverage} (${ex.ratingCount})</div>` : `<div class="rating-badge">No ratings yet</div>`}
         <div class="tag-foot">
           <span class="tag-id mono">${ex.code}</span>
-          <a class="btn btn-ghost dark btn-small" href="/exhibit.html?code=${encodeURIComponent(ex.code)}">View label &rarr;</a>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <a class="btn btn-ghost dark btn-small" href="/map.html?focus=${encodeURIComponent(ex.code)}&route=1" title="Show walking route on floor map" style="padding:4px 8px; font-size:11.5px;">🧭 Map</a>
+            <a class="btn btn-ghost dark btn-small" href="/exhibit.html?code=${encodeURIComponent(ex.code)}">View label &rarr;</a>
+          </div>
         </div>
       </div>`;
     }
@@ -624,6 +706,13 @@
         renderGrid();
       });
     }
+
+    // Sync visitor name in sidebar footer
+    try {
+      const vName = localStorage.getItem('museum_visitor_name');
+      const vLink = document.getElementById('sidebarVisitorNameLink');
+      if (vLink && vName) vLink.textContent = '👤 ' + vName;
+    } catch (e) {}
   </script>
   <footer id="siteFooter"></footer>
   <script src="/js/sidebar.js"></script>

@@ -137,19 +137,23 @@ router.post('/speak', async (req, res) => {
 
   // Fish Audio integration if key exists
   const fishKey = process.env.FISH_AUDIO_API_KEY;
-  if (fishKey) {
+  if (fishKey && fishKey.trim()) {
     try {
+      const fishPayload = {
+        text: cleanText,
+        format: 'mp3'
+      };
+      if (process.env.FISH_AUDIO_MODEL && process.env.FISH_AUDIO_MODEL !== 's2.1-pro-free') {
+        fishPayload.reference_id = process.env.FISH_AUDIO_MODEL;
+      }
+
       const response = await fetch('https://api.fish.audio/v1/tts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + fishKey,
-          model: process.env.FISH_AUDIO_MODEL || 's2.1-pro-free'
+          Authorization: 'Bearer ' + fishKey.trim()
         },
-        body: JSON.stringify({
-          text: cleanText,
-          format: 'mp3'
-        })
+        body: JSON.stringify(fishPayload)
       });
 
       if (response.ok) {
@@ -158,10 +162,15 @@ router.post('/speak', async (req, res) => {
         audioCache.set(cacheKey, buf);
         res.set('Content-Type', 'audio/mpeg');
         res.set('Content-Length', buf.byteLength);
+        res.set('X-TTS-Provider', 'fish-audio');
+        console.log(`[TTS] Audio successfully generated with Fish Audio (${buf.byteLength} bytes).`);
         return res.send(buf);
+      } else {
+        const errText = await response.text();
+        console.warn(`[TTS] Fish Audio returned ${response.status}: ${errText}. Falling back to natural audio streaming.`);
       }
     } catch (err) {
-      console.error('Fish Audio failed, using high-fidelity fallback:', err);
+      console.error('[TTS] Fish Audio request failed, using high-fidelity fallback:', err.message);
     }
   }
 

@@ -13,10 +13,10 @@
       "id": "8J8l15t-1H",
       "code": "EX-001",
       "title": "Under the Sea",
-      "category": "Toys & Collections",
+      "category": "Marine & Nature",
       "origin": "Museum's main exhibit",
       "year": "Permanent exhibit",
-      "location": "Main Exhibit Hall",
+      "location": "Main Marine Gallery — Under the Sea",
       "imagePath": "https://museosangbata.org/wp-content/uploads/2014/11/under-the-sea-banner-260x170.jpg",
       "description": "The museum's flagship exhibit on the marine environment — how sand forms, how coral reefs grow and the threats facing them, marine mammals, and the role mangroves play along the coast.",
       "additionalDetails": "Shells, sea stars, sea cucumbers, clownfish, and soft corals are highlighted here.\nLook for the shell gallery that explains how each shell is named and why it grows the way it does.\nVisitors can also learn about other sea creatures that share the underwater world, including shrimp, algae, and reef fishes.",
@@ -27,16 +27,21 @@
       "imagePaths": [
         "https://museosangbata.org/wp-content/uploads/2014/11/under-the-sea-banner-260x170.jpg"
       ],
-      "videoPath": "/uploads/3b5faddbc6959cd0b2aef3f3.mp4"
+      "videoPath": "/uploads/3b5faddbc6959cd0b2aef3f3.mp4",
+      "floor": 1,
+      "mapZone": "marine_story",
+      "pinX": 62,
+      "pinY": 34,
+      "directions": "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located in the center and right side, by the coral reef displays."
     },
     {
       "id": "eHOuUiCTyI",
       "code": "EX-002",
       "title": "The River",
-      "category": "Marine Nature Exhibit",
+      "category": "Marine & Nature",
       "origin": "Marine Conservation Education Program",
       "year": "Permanent exhibit",
-      "location": "Main Exhibit Hall",
+      "location": "Main Marine Gallery — River Basin",
       "imagePath": "/uploads/f2594672f504b807e7e37ba5.jpg",
       "description": "One of the museum's eight permanent exhibits, following freshwater systems on their way toward the sea — part of the museum's broader effort to build appreciation for Negros' marine and coastal environment.",
       "description_tl": "Isa sa walong permanenteng eksibit ng museo, sumusubaybay sa mga sistema ng tubig-tabang patungong dagat — bahagi ng mas malawak na pagsisikap ng museo na palaganapin ang pagpapahalaga sa dagat at baybayin ng Negros.",
@@ -47,13 +52,18 @@
         "/uploads/f2594672f504b807e7e37ba5.jpg",
         "/uploads/77be55b9d5f44f3ffea2e486.jpg",
         "/uploads/d18f7d875589fd19788befb4.jpg"
-      ]
+      ],
+      "floor": 1,
+      "mapZone": "marine_story",
+      "pinX": 42,
+      "pinY": 28,
+      "directions": "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located along the left wall by the freshwater river basin."
     },
     {
       "id": "kvsizqpXcT",
       "code": "EX-003",
       "title": "Splash Zone (Touch Pool)",
-      "category": "Other",
+      "category": "Touch & Play",
       "origin": "Live touch-pool exhibit",
       "year": "Permanent exhibit",
       "location": "Splash Zone",
@@ -62,7 +72,12 @@
       "description_tl": "Isang hands-on na touch pool kung saan makikita at maaring maramdam nang maingat ang mga nilalang sa tabing-dagat — sea stars, sea cucumbers, mga suso, at maliliit na isda — paboritong lugar ng mga bata at matatanda.",
       "description_cb": "Usa ka hands-on touch pool diin makakita ug mahimong hinay-hinay hikapon ang mga hayop sa baybayon — sea stars, sea cucumbers, mga suso, ug gagmay nga isda — paboritong hunonganan sa mga bata ug hamtong.",
       "createdAt": "2026-07-24T07:09:34.703Z",
-      "updatedAt": "2026-07-24T07:09:34.703Z"
+      "updatedAt": "2026-07-24T07:09:34.703Z",
+      "floor": 1,
+      "mapZone": "splash_zone",
+      "pinX": 84,
+      "pinY": 52,
+      "directions": "From the Main Entrance, turn right into the East Wing corridor and enter the first door on the right into the Touch & Play Room (Ground Floor). You will find the live touch pool basin in the center."
     },
     {
       "id": "4Kgu3oMucu",
@@ -77,7 +92,12 @@
       "description_tl": "Mga paglalarawan ng ordinaryong tao na tahimik na isinasabuhay ang mga pagpapahalaga tulad ng sipag, pagtipid, kabutihang-loob, katarungan, pagpapatawad at tapang — hinihikayat ang mga bisita na makita ang araw-araw na pagkatao bilang isang uri ng kabayanihan.",
       "description_cb": "Profil sa ordinaryong mga tawo nga hinay-hinay nagpuyo sa mga bili sama sa kugi, pagtipig, pagkamaayo, pagkatarong, pagpasaylo ug kaisog — nag-awhag sa mga bisita nga tan-awon ang matag-adlaw nga pagkatawo isip laing matang sa pagka-hero.",
       "createdAt": "2026-07-24T07:09:34.703Z",
-      "updatedAt": "2026-07-24T07:09:34.703Z"
+      "updatedAt": "2026-07-24T07:09:34.703Z",
+      "floor": 1,
+      "mapZone": "office_extension",
+      "pinX": 20,
+      "pinY": 76,
+      "directions": "From the Main Entrance, turn left down the corridor past the Admin Office into the Library Extension wing, and enter the Character & Heritage Room (Ground Floor). Located along the wall gallery of community heroes."
     },
     {
       "id": "R61RQcd-Ag",
@@ -92,7 +112,12 @@
       "description_tl": "Isang memorial na eksibit para parangalan ang yumaong Gobernador ng Negros Occidental na si Joseph G. Marañon, na pinangangalagaan ang mga memorabilia na konektado sa kanyang buhay at pampublikong paglilingkod.",
       "description_cb": "Usa ka memorial exhibit nga nagpasidungog sa mihimong Gobernador sa Negros Occidental nga si Joseph G. Marañon, nagtipig sa mga memorabilia nga may kalabotan sa iyang kinabuhi ug serbisyo publiko.",
       "createdAt": "2026-07-24T07:09:34.704Z",
-      "updatedAt": "2026-07-24T07:09:34.704Z"
+      "updatedAt": "2026-07-24T07:09:34.704Z",
+      "floor": 1,
+      "mapZone": "office_extension",
+      "pinX": 18,
+      "pinY": 66,
+      "directions": "From the Main Entrance, turn left down the corridor past the Admin Office into the Library Extension wing, and enter the Character & Heritage Room (Ground Floor). Located in the memorial gallery section."
     },
     {
       "id": "FNV2fFLZMU",
@@ -107,28 +132,38 @@
       "description_tl": "Isang koleksyon ng mga katutubong laruan mula sa mahigit 50 bansa, na pinag-isa ni Ms. Mara Montelibano, kasama ang mga donasyong promotional na laruan ng McDonald's at isang koleksyon ng Beanie Babies.",
       "description_cb": "Usa ka koleksyon sa folk toys nga gikan sa kapin 50 ka nasud, gitigum ni Ms. Mara Montelibano, kauban ang gimdonar nga mga promotional toys sa McDonald's ug koleksyon sa Beanie Babies.",
       "createdAt": "2026-07-24T07:09:34.704Z",
-      "updatedAt": "2026-07-24T07:09:34.704Z"
+      "updatedAt": "2026-07-24T07:09:34.704Z",
+      "floor": 2,
+      "mapZone": "second_floor_toys",
+      "pinX": 32,
+      "pinY": 48,
+      "directions": "From the Main Entrance, take the main staircase on the left beside the office up to Level 2 (Second Floor). Turn left through the first door into the Toys & Collections Room."
     },
     {
       "id": "ZowcFn9Udh",
       "code": "EX-007",
       "title": "Biodiversity",
-      "category": "Marine Nature Exhibit",
+      "category": "Marine & Nature",
       "origin": "Marine Conservation Education Program",
       "year": "Permanent exhibit",
-      "location": "Main Exhibit Hall",
+      "location": "Main Marine Gallery — Biodiversity Wall",
       "imagePath": "",
       "description": "One of the museum's eight permanent exhibits, introducing the range of plant and animal life found across Negros' marine and coastal habitats.",
       "description_tl": "Isa sa walong permanenteng eksibit ng museo, ipinapakilala ang hanay ng mga halaman at hayop na matatagpuan sa iba't ibang marine at baybaying tirahan ng Negros.",
       "description_cb": "Usa sa walo ka permanenteng eksibit sa museyo, nagpakita sa lain-laing klase sa tanom ug hayop nga makita sa dagat ug baybayon sa Negros.",
       "createdAt": "2026-07-24T07:09:34.704Z",
-      "updatedAt": "2026-07-24T07:09:34.704Z"
+      "updatedAt": "2026-07-24T07:09:34.704Z",
+      "floor": 1,
+      "mapZone": "marine_story",
+      "pinX": 52,
+      "pinY": 22,
+      "directions": "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located along the rear species wall."
     },
     {
       "id": "kTe0pYLkzk",
       "code": "EX-008",
       "title": "Story of Plastic",
-      "category": "Environmental",
+      "category": "Marine & Nature",
       "origin": "Companion piece to the \"Floating Witches\" art installation",
       "year": "Since 2019",
       "location": "Environmental Gallery",
@@ -137,13 +172,18 @@
       "description_tl": "Isang eksibit na nagpapataas ng kamalayan tungkol sa plastic waste at ang epekto nito sa buhay-dagat sa paligid ng Negros at Sagay, nilikha kasabay ng 'Floating Witches' na gawa sa itinamang lambat ng pangingisda.",
       "description_cb": "Usa ka exhibit nga nagpalambo sa kahibalo bahin sa plastic waste ug ang epekto niini sa dagatnong kinabuhi sa palibot sa Negros ug Sagay, gihimo kauban ang 'Floating Witches' nga gihimo gikan sa gipanglabay nga fishing nets.",
       "createdAt": "2026-07-24T07:09:34.704Z",
-      "updatedAt": "2026-07-24T07:09:34.704Z"
+      "updatedAt": "2026-07-24T07:09:34.704Z",
+      "floor": 1,
+      "mapZone": "marine_story",
+      "pinX": 70,
+      "pinY": 24,
+      "directions": "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located in the eco-conservation corner beside the fishing net art installation."
     },
     {
       "id": "BE29m8zPmZ",
       "code": "EX-009",
       "title": "Carnival (Discovery Room)",
-      "category": "Other",
+      "category": "Touch & Play",
       "origin": "The museum's discovery room",
       "year": "Since 2019",
       "location": "Discovery Room",
@@ -152,7 +192,12 @@
       "description_tl": "Isang masayang discovery room na nakabatay sa ideya na ang paglalaro ay pagkatuto — sinusuportahan ang malusog na pag-unlad ng mga bata sa pamamagitan ng bukas at hands-on na aktibidad.",
       "description_cb": "Usa ka playful discovery room nga gibase sa ideya nga ang pagdula usa ka pamaagi sa pagkat-on — nagsuporta sa himsog nga paglambo sa mga bata pinaagi sa open-ended, hands-on activities.",
       "createdAt": "2026-07-24T07:09:34.704Z",
-      "updatedAt": "2026-07-24T07:09:34.704Z"
+      "updatedAt": "2026-07-24T07:09:34.704Z",
+      "floor": 2,
+      "mapZone": "second_floor_carnival",
+      "pinX": 62,
+      "pinY": 48,
+      "directions": "From the Main Entrance, take the staircase on the left up to Level 2 (Second Floor). Cross the upper corridor walkway overlooking the central hall to the right wing into the Carnival & Discovery Room."
     },
     {
       "id": "L8FAkDqEAr",
@@ -167,13 +212,18 @@
       "description_tl": "Isang espesyal na reading nook para sa mga bata, na pinasinayaan noong Marso 2019 upang himukin ang pagmamahal sa mga libro kasabay ng mga hands-on na eksibit ng museo.",
       "description_cb": "Usa ka dedikadong reading nook para sa mga bata, gibanhigan ug gibuksan sa publiko niadtong Marso 2019 aron dasigon ang paghigugma sa mga libro kauban sa hands-on exhibits sa museyo.",
       "createdAt": "2026-07-24T07:09:34.704Z",
-      "updatedAt": "2026-07-24T07:09:34.704Z"
+      "updatedAt": "2026-07-24T07:09:34.704Z",
+      "floor": 1,
+      "mapZone": "office_extension",
+      "pinX": 20,
+      "pinY": 58,
+      "directions": "From the Main Entrance, turn left down the corridor past the restrooms and staff office, and enter the first door on the left into the Library Extension to find Franco's Reading Corner (Ground Floor)."
     },
     {
       "id": "elWEKuJBSJ",
       "code": "EX-011",
       "title": "Mangrove Walk (Outdoor Exhibit)",
-      "category": "Marine Nature Exhibit",
+      "category": "Marine & Nature",
       "origin": "Outdoor extension of the indoor mangrove exhibit",
       "year": "Permanent exhibit",
       "location": "Outdoor — behind the main building",
@@ -182,7 +232,12 @@
       "description_tl": "Isang maliit na parke ng bakawan at lakaran sa likod ng museo na nagpapakita ng iba't ibang species ng bakawan nang malapitan, ginagamit kasama ng mga seminar ng museo tungkol sa bakawan at indoor exhibit.",
       "description_cb": "Usa ka gamay nga mangrove park ug walkway sa likod sa museyo nga nagpakita sa lain-laing species sa mangrove duol, gigamit kauban ang mangrove seminars sa museyo ug indoor exhibit.",
       "createdAt": "2026-07-24T07:09:34.705Z",
-      "updatedAt": "2026-07-24T07:09:34.705Z"
+      "updatedAt": "2026-07-24T07:09:34.705Z",
+      "floor": 1,
+      "mapZone": "marine_story",
+      "pinX": 50,
+      "pinY": 8,
+      "directions": "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located in the coastal mangrove habitat section."
     }
   ],
   "favorites": [],

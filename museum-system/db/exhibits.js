@@ -16,12 +16,19 @@ const exhibitSchema = new mongoose.Schema({
   location: { type: String, default: '' },
   lat: { type: Number, default: null },
   lng: { type: Number, default: null },
+  floor: { type: Number, default: 1 },
+  pinX: { type: Number, default: null },
+  pinY: { type: Number, default: null },
+  mapZone: { type: String, default: '' },
   mapImagePath: { type: String, default: '' },
   imagePaths: { type: [String], default: [] },
   imagePath: { type: String, default: '' },
+  videoUrl: { type: String, default: '' },
+  directions: { type: String, default: '' },
   description: { type: String, default: '' },
   description_tl: { type: String, default: '' },
   description_cb: { type: String, default: '' },
+  description_hil: { type: String, default: '' },
   createdAt: { type: String, default: () => new Date().toISOString() },
   updatedAt: { type: String, default: () => new Date().toISOString() }
 });
@@ -61,17 +68,91 @@ async function ensureCategories() {
   }
 }
 
+const KNOWN_EXHIBIT_DIRECTIONS = {
+  'EX-001': "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located in the center and right side, by the coral reef displays.",
+  'EX-002': "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located along the left wall by the freshwater river basin.",
+  'EX-003': "From the Main Entrance, turn right into the East Wing corridor and enter the first door on the right into the Touch & Play Room (Ground Floor). You will find the live touch pool basin in the center.",
+  'EX-004': "From the Main Entrance, turn left down the corridor past the Admin Office into the Library Extension wing, and enter the Character & Heritage Room (Ground Floor). Located along the wall gallery of community heroes.",
+  'EX-005': "From the Main Entrance, turn left down the corridor past the Admin Office into the Library Extension wing, and enter the Character & Heritage Room (Ground Floor). Located in the memorial gallery section.",
+  'EX-006': "From the Main Entrance, take the main staircase on the left beside the office up to Level 2 (Second Floor). Turn left through the first door into the Toys & Collections Room.",
+  'EX-007': "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located along the rear species wall.",
+  'EX-008': "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located in the eco-conservation corner beside the fishing net art installation.",
+  'EX-009': "From the Main Entrance, take the staircase on the left up to Level 2 (Second Floor). Cross the upper corridor walkway overlooking the central hall to the right wing into the Carnival & Discovery Room.",
+  'EX-010': "From the Main Entrance, turn left down the corridor past the restrooms and staff office, and enter the first door on the left into the Library Extension to find Franco's Reading Corner (Ground Floor).",
+  'EX-011': "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located in the coastal mangrove habitat section."
+};
+
+function computeDefaultDirections(item) {
+  if (!item) return '';
+  if (item.code && KNOWN_EXHIBIT_DIRECTIONS[item.code.toUpperCase()]) {
+    return KNOWN_EXHIBIT_DIRECTIONS[item.code.toUpperCase()];
+  }
+  const cat = String(item.category || '').toLowerCase();
+  const zone = String(item.mapZone || '').toLowerCase();
+  const floor = item.floor === 2 ? 2 : 1;
+
+  if (cat.includes('marine') || zone === 'marine_story') {
+    return "From the Main Entrance, walk straight across the central Function Hall through the double arched doorway into the Marine & Nature Room (Ground Floor).";
+  }
+  if (cat.includes('touch') || zone === 'splash_zone') {
+    return "From the Main Entrance, turn right into the East Wing corridor and enter the first door on the right into the Touch & Play Room (Ground Floor).";
+  }
+  if (cat.includes('reading') || zone === 'office_extension') {
+    return "From the Main Entrance, turn left past the staff office and enter the first door on the left into the Library Extension (Ground Floor).";
+  }
+  if (cat.includes('character') || cat.includes('heritage')) {
+    return "From the Main Entrance, turn left past the staff office into the Library Extension, and enter the Character & Heritage Room (Ground Floor).";
+  }
+  if (cat.includes('toy') || zone === 'second_floor_toys') {
+    return "From the Main Entrance, take the stairs on the left up to Level 2, turn left through the first door into the Toys & Collections Room (Second Floor).";
+  }
+  if (cat.includes('carnival') || zone === 'second_floor_carnival') {
+    return "From the Main Entrance, take the stairs on the left up to Level 2, cross the upper walkway to the right wing into the Carnival & Discovery Room (Second Floor).";
+  }
+  if (floor === 2) {
+    return "From the Main Entrance, take the staircase on the left up to Level 2 (Second Floor).";
+  }
+  return "From the Main Entrance, proceed through the reception foyer into the main gallery.";
+}
+
+let curatedData = null;
+try {
+  curatedData = require('./data.json');
+} catch (e) {}
+
+function enrichExhibit(doc) {
+  if (!doc) return doc;
+  const obj = typeof doc.toObject === 'function' ? doc.toObject() : { ...doc };
+  if (!obj.directions) {
+    obj.directions = computeDefaultDirections(obj);
+  }
+  if ((!obj.description_tl || !obj.description_cb) && curatedData && Array.isArray(curatedData.exhibits)) {
+    const matched = curatedData.exhibits.find(e => 
+      (e.code && obj.code && e.code.toUpperCase() === obj.code.toUpperCase()) || 
+      (e.id && obj.id && e.id === obj.id)
+    );
+    if (matched) {
+      if (!obj.description_tl && matched.description_tl) obj.description_tl = matched.description_tl;
+      if (!obj.description_cb && matched.description_cb) obj.description_cb = matched.description_cb;
+      if (!obj.description_hil && matched.description_hil) obj.description_hil = matched.description_hil;
+    }
+  }
+  return obj;
+}
+
 async function all() {
   const exhibits = await Exhibit.find({}).lean();
-  return exhibits.sort((a, b) => a.code.localeCompare(b.code));
+  return exhibits.map(enrichExhibit).sort((a, b) => a.code.localeCompare(b.code));
 }
 
 async function findByCode(code) {
-  return await Exhibit.findOne({ code: { $regex: new RegExp(`^${code}$`, 'i') } }).lean();
+  const doc = await Exhibit.findOne({ code: { $regex: new RegExp(`^${code}$`, 'i') } }).lean();
+  return enrichExhibit(doc);
 }
 
 async function findById(id) {
-  return await Exhibit.findOne({ id }).lean();
+  const doc = await Exhibit.findOne({ id }).lean();
+  return enrichExhibit(doc);
 }
 
 async function create(payload) {
@@ -83,17 +164,23 @@ async function create(payload) {
     origin: payload.origin || '',
     year: payload.year || '',
     location: payload.location || '',
-    lat: payload.lat !== undefined && payload.lat !== '' ? parseFloat(payload.lat) : null,
-    lng: payload.lng !== undefined && payload.lng !== '' ? parseFloat(payload.lng) : null,
+    directions: payload.directions !== undefined && payload.directions !== null ? payload.directions : computeDefaultDirections(payload),
+    lat: payload.lat !== undefined && payload.lat !== '' && payload.lat !== null && !isNaN(Number(payload.lat)) ? parseFloat(payload.lat) : null,
+    lng: payload.lng !== undefined && payload.lng !== '' && payload.lng !== null && !isNaN(Number(payload.lng)) ? parseFloat(payload.lng) : null,
+    floor: payload.floor !== undefined && payload.floor !== '' && payload.floor !== null && !isNaN(parseInt(payload.floor, 10)) ? parseInt(payload.floor, 10) : 1,
+    pinX: payload.pinX !== undefined && payload.pinX !== '' && payload.pinX !== null && !isNaN(Number(payload.pinX)) ? parseFloat(payload.pinX) : null,
+    pinY: payload.pinY !== undefined && payload.pinY !== '' && payload.pinY !== null && !isNaN(Number(payload.pinY)) ? parseFloat(payload.pinY) : null,
+    mapZone: payload.mapZone || '',
     mapImagePath: payload.mapImagePath || '',
     imagePaths: paths,
     imagePath: paths[0] || '',
+    videoUrl: payload.videoUrl ? String(payload.videoUrl).trim() : '',
     description: payload.description || '',
     description_tl: payload.description_tl || '',
     description_cb: payload.description_cb || ''
   });
   await exhibit.save();
-  return exhibit.toObject();
+  return enrichExhibit(exhibit);
 }
 
 async function update(id, payload) {
@@ -108,19 +195,36 @@ async function update(id, payload) {
   if (payload.origin !== undefined) existing.origin = payload.origin;
   if (payload.year !== undefined) existing.year = payload.year;
   if (payload.location !== undefined) existing.location = payload.location;
-  if (payload.lat !== undefined && payload.lat !== '') existing.lat = parseFloat(payload.lat);
-  if (payload.lng !== undefined && payload.lng !== '') existing.lng = parseFloat(payload.lng);
+  if (payload.directions !== undefined) existing.directions = payload.directions;
+  
+  if (payload.lat !== undefined) {
+    existing.lat = (payload.lat !== '' && payload.lat !== null && !isNaN(Number(payload.lat))) ? parseFloat(payload.lat) : null;
+  }
+  if (payload.lng !== undefined) {
+    existing.lng = (payload.lng !== '' && payload.lng !== null && !isNaN(Number(payload.lng))) ? parseFloat(payload.lng) : null;
+  }
+  if (payload.floor !== undefined) {
+    existing.floor = (payload.floor !== '' && payload.floor !== null && !isNaN(parseInt(payload.floor, 10))) ? parseInt(payload.floor, 10) : 1;
+  }
+  if (payload.pinX !== undefined) {
+    existing.pinX = (payload.pinX !== '' && payload.pinX !== null && !isNaN(Number(payload.pinX))) ? parseFloat(payload.pinX) : null;
+  }
+  if (payload.pinY !== undefined) {
+    existing.pinY = (payload.pinY !== '' && payload.pinY !== null && !isNaN(Number(payload.pinY))) ? parseFloat(payload.pinY) : null;
+  }
+  if (payload.mapZone !== undefined) existing.mapZone = payload.mapZone;
   if (payload.mapImagePath !== undefined) existing.mapImagePath = payload.mapImagePath;
   
   existing.imagePaths = imagePaths;
   existing.imagePath = imagePaths[0] || '';
+  if (payload.videoUrl !== undefined) existing.videoUrl = String(payload.videoUrl).trim();
   if (payload.description !== undefined) existing.description = payload.description;
   if (payload.description_tl !== undefined) existing.description_tl = payload.description_tl;
   if (payload.description_cb !== undefined) existing.description_cb = payload.description_cb;
   
   existing.updatedAt = new Date().toISOString();
   await existing.save();
-  return existing.toObject();
+  return enrichExhibit(existing);
 }
 
 async function remove(id) {
@@ -221,4 +325,4 @@ async function countDocuments() {
   return await Exhibit.countDocuments();
 }
 
-module.exports = { all, findByCode, findById, create, update, remove, categories, addCategory, updateCategory, deleteCategory, assignExhibitsToCategory, Exhibit, Category, countDocuments };
+module.exports = { all, findByCode, findById, create, update, remove, categories, addCategory, updateCategory, deleteCategory, assignExhibitsToCategory, Exhibit, Category, countDocuments, computeDefaultDirections, KNOWN_EXHIBIT_DIRECTIONS };

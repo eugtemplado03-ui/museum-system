@@ -1,0 +1,3784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive 3D Floor Map &amp; Wayfinding — Museo Sang Bata sa Negros</title>
+<meta name="description" content="Full-screen, high-visibility, interactive 3D and 2D architectural floor plan of Museo Sang Bata sa Negros with auto-fit, wide screen layout, animated walking directions, Franco's Reading Corner, Under the Sea, and 2nd floor Toys & Carnival.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<script src="/js/gate.js"></script>
+<script src="/js/sidebar.js" defer></script>
+<style>
+/* ==========================================================================
+   THEMES & DESIGN SYSTEM (MAXIMUM VISIBILITY & WIDESCREEN EXPERIENCE)
+   ========================================================================== */
+:root {
+  --map-bg: #03131c;
+  --map-board-bg: #051d2a;
+  --map-grid-line: rgba(0, 229, 255, 0.12);
+  --map-wall-ext: #00f0ff;
+  --map-wall-int: #00b4d8;
+  --map-text-color: #f8fafc;
+  --map-panel-bg: rgba(3, 20, 29, 0.96);
+  --map-border: rgba(0, 240, 255, 0.3);
+  --sidebar-bg: rgba(2, 16, 24, 0.95);
+  --sidebar-border: rgba(0, 240, 255, 0.2);
+  --teal-glow: 0 0 20px rgba(0, 240, 255, 0.5);
+}
+
+/* Classic Architectural CAD Blueprint Theme */
+body.theme-cad {
+  --map-bg: #00223d;
+  --map-board-bg: #002d52;
+  --map-grid-line: rgba(255, 255, 255, 0.15);
+  --map-wall-ext: #ffffff;
+  --map-wall-int: #70d6ff;
+  --map-text-color: #ffffff;
+  --map-panel-bg: rgba(0, 36, 68, 0.96);
+  --map-border: rgba(112, 214, 255, 0.4);
+  --sidebar-bg: rgba(0, 28, 54, 0.95);
+  --sidebar-border: rgba(112, 214, 255, 0.25);
+}
+
+/* Daylight / High Contrast Theme for Ultra Visibility */
+body.theme-light {
+  --map-bg: #e2e8f0;
+  --map-board-bg: #ffffff;
+  --map-grid-line: rgba(15, 23, 42, 0.08);
+  --map-wall-ext: #0f172a;
+  --map-wall-int: #1e293b;
+  --map-text-color: #0f172a;
+  --map-panel-bg: rgba(255, 255, 255, 0.96);
+  --map-border: rgba(15, 23, 42, 0.2);
+  --sidebar-bg: rgba(241, 245, 249, 0.98);
+  --sidebar-border: rgba(15, 23, 42, 0.15);
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: 'Open Sans', 'Nunito', sans-serif;
+  user-select: none;
+  background: 
+    linear-gradient(180deg, rgba(8, 28, 36, 0.45) 0%, rgba(5, 20, 26, 0.65) 100%),
+    url('/uploads/header-bg.webp') center / cover no-repeat fixed;
+  background-attachment: fixed;
+  color: #e2e8f0;
+}
+
+/* ==========================================================================
+   COMPACT HEADER & TOOLBAR (SAVING VERTICAL SPACE FOR MAP VIEWPORT)
+   ========================================================================== */
+.map-header {
+  background: linear-gradient(180deg, rgba(0, 36, 46, 0.82) 0%, rgba(0, 24, 32, 0.88) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1.5px solid rgba(0, 174, 189, 0.3);
+  padding: 8px 18px;
+  position: relative;
+  z-index: 50;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+  flex-shrink: 0;
+}
+
+.map-header-inner {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.map-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.map-header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.map-header-title h1 {
+  font-family: 'Nunito', sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.map-header-title p {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.switchers-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Segmented Toggle Buttons */
+.segmented-control {
+  display: inline-flex;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1.5px solid var(--map-border);
+  border-radius: 999px;
+  padding: 2px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+}
+
+.seg-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.seg-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.seg-btn.active {
+  background: #00d2e0;
+  color: #03131c;
+  box-shadow: 0 2px 10px rgba(0, 210, 224, 0.6);
+  font-weight: 900;
+}
+
+.seg-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.3);
+}
+
+.seg-btn.active .seg-badge {
+  background: rgba(0, 0, 0, 0.25);
+  color: #03131c;
+}
+
+/* Second Row: Search + Category Chips + Sidebar Toggle */
+.map-toolbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 10px;
+  overflow-x: auto;
+}
+
+.map-search-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 240px;
+}
+
+.map-search-wrap input {
+  width: 100%;
+  padding: 6px 12px 6px 32px;
+  border-radius: 8px;
+  border: 1px solid var(--map-border);
+  background: rgba(0, 18, 28, 0.8);
+  color: #fff;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+
+.map-search-wrap input:focus {
+  outline: none;
+  border-color: #00f0ff;
+  box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.25);
+}
+
+.map-search-icon {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  font-size: 12px;
+}
+
+.chips-row {
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex: 1;
+}
+.chips-row::-webkit-scrollbar { display: none; }
+
+.chip {
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 11.5px;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #cbd5e1;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.chip:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.chip.active {
+  background: rgba(0, 240, 255, 0.2);
+  border-color: #00f0ff;
+  color: #00f0ff;
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+}
+
+/* ==========================================================================
+   WIDESCREEN LAYOUT (SIDEBAR DIRECTORY + FULL VIEWPORT)
+   ========================================================================== */
+.map-layout-container {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - 105px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Collapsible Room & Exhibit Directory Sidebar */
+.map-directory-sidebar {
+  width: 320px;
+  background: var(--sidebar-bg);
+  border-right: 1.5px solid var(--sidebar-border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s ease;
+  z-index: 35;
+  box-shadow: 4px 0 20px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+
+.map-directory-sidebar.collapsed {
+  width: 0;
+  transform: translateX(-100%);
+  border-right: none;
+}
+
+.sidebar-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--sidebar-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+}
+
+.sidebar-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  color: #00f0ff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sidebar-section-title {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #94a3b8;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.room-dir-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.room-dir-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #e2e8f0;
+}
+
+.room-dir-item:hover {
+  background: rgba(0, 240, 255, 0.12);
+  border-color: #00f0ff;
+  transform: translateX(3px);
+}
+
+.room-dir-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.room-dir-code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(0, 240, 255, 0.15);
+  color: #00f0ff;
+  border: 1px solid rgba(0, 240, 255, 0.3);
+}
+
+/* ==========================================================================
+   VIEWPORT & 3D ISOMETRIC STAGE (FIXED AUTO-FIT & ZOOM)
+   ========================================================================== */
+.map-viewport {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  background: 
+    linear-gradient(180deg, rgba(3, 19, 28, 0.76) 0%, rgba(1, 14, 20, 0.88) 100%),
+    url('/uploads/header-bg.webp') center / cover no-repeat fixed;
+  background-attachment: fixed;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+}
+
+.map-viewport.is-dragging {
+  cursor: grabbing;
+}
+
+.map-stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+/* 3D Isometric View State - Tilts stage container only! */
+.is-3d .svg-wrapper {
+  transform: perspective(1200px) rotateX(50deg) rotateZ(-28deg);
+  box-shadow: -25px 45px 80px rgba(0, 0, 0, 0.85), 0 0 0 2px var(--map-border);
+}
+
+.svg-wrapper {
+  position: relative;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
+  transform-style: preserve-3d;
+  border-radius: 12px;
+  background: var(--map-board-bg);
+  padding: 8px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+}
+
+/* Full Blueprint SVG Geometry */
+svg.blueprint-svg {
+  width: 1000px;
+  height: 1300px;
+  display: block;
+}
+
+/* High Contrast Architectural Elements */
+.wall-solid {
+  stroke: var(--map-wall-ext);
+  stroke-width: 4.5;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+}
+
+.wall-partition {
+  stroke: var(--map-wall-int);
+  stroke-width: 3.5;
+}
+
+.door-swing {
+  fill: none;
+  stroke: #5eead4;
+  stroke-width: 2.5;
+  stroke-dasharray: 4, 3;
+}
+
+/* Room Polygons & High-Visibility Hover */
+.room-poly {
+  transition: fill 0.25s ease, stroke 0.25s ease, filter 0.25s ease;
+  cursor: pointer;
+}
+
+.room-poly:hover {
+  filter: brightness(1.25) drop-shadow(0 0 12px rgba(0, 240, 255, 0.4));
+}
+
+/* Text Halos for 100% Readability */
+.cad-label {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 14px;
+  fill: #ffffff;
+  pointer-events: none;
+  paint-order: stroke fill;
+  stroke: #020b10;
+  stroke-width: 4.5px;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 2px 5px rgba(0,0,0,0.85));
+}
+
+.cad-sub {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  fill: #e2e8f0;
+  pointer-events: none;
+  paint-order: stroke fill;
+  stroke: #020b10;
+  stroke-width: 3.5px;
+  stroke-linejoin: round;
+}
+
+.cad-dimension {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  fill: #38bdf8;
+  pointer-events: none;
+  paint-order: stroke fill;
+  stroke: #020b10;
+  stroke-width: 3px;
+}
+
+/* ==========================================================================
+   ANIMATED WAYFINDING WALKING ROUTE
+   ========================================================================== */
+.walking-route-path {
+  fill: none;
+  stroke: #ffea00;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 12, 8;
+  animation: walkFlow 0.8s linear infinite;
+  filter: drop-shadow(0 0 10px rgba(255, 234, 0, 0.9));
+  pointer-events: none;
+}
+
+.walking-route-glow {
+  fill: none;
+  stroke: rgba(255, 234, 0, 0.35);
+  stroke-width: 16;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+@keyframes walkFlow {
+  from { stroke-dashoffset: 40; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* ==========================================================================
+   HIGH-VISIBILITY EXHIBIT PINS
+   ========================================================================== */
+.exhibit-pin {
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  outline: none;
+}
+
+.exhibit-pin:hover {
+  transform: scale(1.18);
+}
+
+.pin-ring {
+  animation: radarPulse 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  transform-origin: 0 -24px;
+}
+
+@keyframes radarPulse {
+  0% { r: 12px; opacity: 0.9; stroke-width: 3px; }
+  60% { r: 32px; opacity: 0.15; stroke-width: 1.5px; }
+  100% { r: 36px; opacity: 0; stroke-width: 1px; }
+}
+
+/* Tooltip Badge */
+.pin-tooltip {
+  opacity: 0.95;
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+}
+
+.exhibit-pin:hover .pin-tooltip {
+  opacity: 1;
+  transform: translateY(-4px);
+}
+
+/* ==========================================================================
+   FLOATING HUD CONTROLS (FIT TO SCREEN, FIT WIDTH, ZOOM, THEME)
+   ========================================================================== */
+.map-hud-controls {
+  position: absolute;
+  right: 18px;
+  bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 40;
+}
+
+.hud-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--map-border);
+  background: var(--map-panel-bg);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  transition: all 0.2s;
+}
+
+.hud-btn:hover {
+  background: #00d2e0;
+  color: #03131c;
+  transform: scale(1.08);
+  box-shadow: 0 0 16px rgba(0, 210, 224, 0.6);
+}
+
+/* Compass Rose */
+.compass-badge {
+  position: absolute;
+  left: 20px;
+  top: 18px;
+  background: var(--map-panel-bg);
+  border: 1px solid var(--map-border);
+  border-radius: 12px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  z-index: 40;
+  pointer-events: none;
+}
+
+.compass-dial {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #00f0ff;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.compass-dial::before {
+  content: "▲ N";
+  position: absolute;
+  top: -8px;
+  font-size: 8px;
+  font-weight: 900;
+  color: #ff4757;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ==========================================================================
+   FLOATING DIRECTIONS PANEL
+   ========================================================================== */
+.directions-floating-panel {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  width: 330px;
+  max-width: calc(100vw - 36px);
+  background: var(--map-panel-bg);
+  border: 1.5px solid #ffea00;
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.7), 0 0 20px rgba(255, 234, 0, 0.25);
+  z-index: 45;
+  display: none;
+  animation: slideInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(12px);
+}
+
+.directions-floating-panel.active {
+  display: block;
+}
+
+@keyframes slideInDown {
+  from { opacity: 0; transform: translateY(-16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dir-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 234, 0, 0.25);
+}
+
+.dir-title-badge {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 14px;
+  color: #ffea00;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dir-close-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+.dir-close-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
+
+.dir-destination-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+
+.dir-steps-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dir-step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: #cbd5e1;
+  line-height: 1.4;
+}
+
+.dir-step-num {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 234, 0, 0.2);
+  border: 1px solid #ffea00;
+  color: #ffea00;
+  font-weight: 900;
+  font-size: 10.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dir-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-dir-voice {
+  flex: 1;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid #ffea00;
+  background: rgba(255, 234, 0, 0.15);
+  color: #ffea00;
+  font-weight: 800;
+  font-size: 11.5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+.btn-dir-voice:hover { background: #ffea00; color: #000; }
+.btn-dir-voice.playing {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+.btn-dir-voice.playing:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #fff;
+}
+
+/* ==========================================================================
+   EXHIBIT DETAILS SLIDE-OUT DRAWER
+   ========================================================================== */
+.exhibit-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 90;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.exhibit-drawer-backdrop.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.exhibit-drawer {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 440px;
+  max-width: 92vw;
+  background: #02131c;
+  border-left: 2px solid var(--map-border);
+  box-shadow: -15px 0 50px rgba(0,0,0,0.85);
+  z-index: 100;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.exhibit-drawer.open {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  position: relative;
+  height: 220px;
+  background: #010b10;
+  overflow: hidden;
+}
+
+.drawer-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.drawer-header-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(2, 19, 28, 0.95) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px;
+}
+
+.drawer-close-btn {
+  align-self: flex-end;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.drawer-close-btn:hover { background: #ff4757; }
+
+.drawer-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.drawer-code-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700;
+  font-size: 12px;
+  background: rgba(0, 240, 255, 0.15);
+  color: #00f0ff;
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  width: fit-content;
+}
+
+.drawer-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 24px;
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.drawer-location-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Audio Player Widget */
+.drawer-audio-box {
+  background: rgba(0, 28, 38, 0.85);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-audio-play {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  background: #00d2e0;
+  color: #03131c;
+  font-weight: 900;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-audio-play:hover { background: #5eead4; }
+
+/* Multilingual Tabs */
+.lang-selector-tabs {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 8px;
+}
+
+.lang-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.lang-btn.active {
+  background: rgba(0, 240, 255, 0.15);
+  color: #00f0ff;
+  border: 1px solid rgba(0, 240, 255, 0.3);
+}
+
+.drawer-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #cbd5e1;
+  margin: 0;
+}
+
+.drawer-footer-actions {
+  margin-top: auto;
+  padding-top: 16px;
+  display: flex;
+  gap: 10px;
+}
+
+.btn-route-action {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: none;
+  background: #ffea00;
+  color: #000;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 15px rgba(255, 234, 0, 0.4);
+  transition: all 0.2s;
+}
+.btn-route-action:hover { background: #fff266; transform: translateY(-1px); }
+
+.btn-full-details {
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-weight: 800;
+  font-size: 13px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.btn-full-details:hover { background: rgba(255, 255, 255, 0.15); }
+
+/* Category Room & Exhibits Section inside Drawer */
+.section-heading-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+  margin-bottom: 8px;
+}
+
+.section-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.count-pill {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(0, 240, 255, 0.15);
+  color: #00f0ff;
+  border: 1px solid rgba(0, 240, 255, 0.3);
+}
+
+.room-exhibits-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.room-exhibit-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0, 24, 34, 0.75);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 12px;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+}
+
+.room-exhibit-card:hover {
+  background: rgba(0, 36, 52, 0.95);
+  border-color: #00f0ff;
+  transform: translateX(4px);
+  box-shadow: 0 4px 18px rgba(0, 240, 255, 0.25);
+}
+
+.room-exhibit-card-img {
+  width: 54px;
+  height: 54px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+}
+
+.room-exhibit-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.room-exhibit-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+
+.room-exhibit-card-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.room-exhibit-card-code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 800;
+  color: #00f0ff;
+  background: rgba(0, 240, 255, 0.12);
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  flex-shrink: 0;
+}
+
+.room-exhibit-card-sub {
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.room-exhibit-card-arrow {
+  color: #00f0ff;
+  font-size: 16px;
+  font-weight: 900;
+  padding: 0 4px;
+  opacity: 0.7;
+  transition: transform 0.2s;
+}
+.room-exhibit-card:hover .room-exhibit-card-arrow {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+.btn-back-to-room {
+  background: rgba(0, 240, 255, 0.12);
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  color: #00f0ff;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  transition: all 0.2s;
+  margin-bottom: 6px;
+}
+.btn-back-to-room:hover {
+  background: #00d2e0;
+  color: #03131c;
+}
+
+/* ── Sticky Top Return / Navigation Bar in Drawer Views ────── */
+.drawer-sticky-nav {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: rgba(2, 19, 28, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 8px 0 10px;
+  margin-bottom: 6px;
+  border-bottom: 1.5px solid rgba(0, 240, 255, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.btn-return-map-top {
+  background: rgba(0, 240, 255, 0.16);
+  border: 1.5px solid rgba(0, 240, 255, 0.45);
+  color: #00f0ff;
+  border-radius: 9px;
+  padding: 7px 14px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: all 0.2s ease;
+}
+.btn-return-map-top:hover,
+.btn-return-map-top:active {
+  background: #00d2e0;
+  color: #03131c;
+  transform: translateX(-2px);
+}
+
+.btn-close-drawer-pill {
+  background: rgba(255, 255, 255, 0.10);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  color: #e2e8f0;
+  border-radius: 9px;
+  padding: 6px 14px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 12.5px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s;
+}
+.btn-close-drawer-pill:hover,
+.btn-close-drawer-pill:active {
+  background: rgba(255, 71, 87, 0.25);
+  border-color: #ff4757;
+  color: #ffffff;
+}
+
+.btn-return-map-bottom {
+  width: 100%;
+  margin-top: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  color: #e2e8f0;
+  border-radius: 12px;
+  padding: 11px 16px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13.5px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+.btn-return-map-bottom:hover,
+.btn-return-map-bottom:active {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+/* Sidebar Directory Category Room Groups */
+.cat-room-group {
+  margin-bottom: 10px;
+  background: rgba(0, 22, 33, 0.65);
+  border: 1px solid rgba(0, 240, 255, 0.18);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+.cat-room-group:hover {
+  border-color: rgba(0, 240, 255, 0.45);
+}
+.cat-room-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  background: rgba(0, 32, 46, 0.75);
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  transition: background 0.15s;
+}
+.cat-room-header:hover {
+  background: rgba(0, 48, 70, 0.9);
+}
+.cat-room-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cat-room-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.cat-room-name {
+  font-size: 13px;
+  font-weight: 800;
+  color: #ffffff;
+}
+.cat-room-count-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid;
+  background: rgba(0, 0, 0, 0.35);
+}
+.cat-room-exhibits-list {
+  padding: 4px 6px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cat-exhibit-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.cat-exhibit-item:hover {
+  background: rgba(0, 240, 255, 0.15);
+}
+.cat-exhibit-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: #cbd5e1;
+  min-width: 0;
+}
+.cat-exhibit-item:hover .cat-exhibit-info {
+  color: #ffffff;
+}
+.cat-exhibit-bullet {
+  color: #00f0ff;
+  font-size: 11px;
+}
+.cat-exhibit-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cat-exhibit-code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9.5px;
+  color: #64748b;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Category Room Pin Beacon Pulse */
+.category-room-pin {
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  outline: none;
+}
+.category-room-pin:hover {
+  transform: scale(1.15);
+}
+
+/* ==========================================================================
+   RESPONSIVE MOBILE STYLES FOR FLOOR MAP
+   ========================================================================== */
+@media (max-width: 860px) {
+  .map-header {
+    padding: 6px 10px 8px;
+  }
+  .map-header-top {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+  .map-header-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .map-header-title h1 {
+    font-size: 15px;
+    margin: 0;
+  }
+  .map-header-title p {
+    display: none; /* Hide subtitle on mobile to maximize map visibility */
+  }
+  .switchers-group {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+  /* Hide mouse wheel control on touch/mobile screens */
+  .wheel-mode-control {
+    display: none !important;
+  }
+  #btnHudWheelToggle {
+    display: none !important;
+  }
+  .map-toolbar-row {
+    gap: 6px;
+    margin-top: 4px;
+    flex-wrap: nowrap;
+  }
+  .map-search-wrap {
+    width: 160px;
+    min-width: 130px;
+    flex-shrink: 0;
+    height: 32px;
+  }
+  .map-search-wrap input {
+    font-size: 12px;
+    padding: 4px 8px 4px 28px;
+  }
+  .chips-row {
+    flex: 1 1 auto;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 5px;
+    padding: 2px 0;
+  }
+  .chips-row::-webkit-scrollbar {
+    display: none;
+  }
+  .chip {
+    padding: 4px 9px;
+    font-size: 11px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .map-layout-container {
+    height: calc(100vh - 124px);
+    height: calc(100dvh - 124px);
+  }
+
+  /* Off-canvas directory sidebar on mobile */
+  .map-directory-sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(320px, 86vw) !important;
+    max-width: 86vw;
+    z-index: 85;
+    box-shadow: 10px 0 35px rgba(0, 0, 0, 0.85);
+    transform: translateX(0);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border-right: 1.5px solid var(--sidebar-border);
+  }
+  .map-directory-sidebar.collapsed {
+    transform: translateX(-105%) !important;
+    width: min(320px, 86vw) !important;
+  }
+
+  /* Compact HUD Controls in Top-Right on Mobile */
+  .map-hud-controls {
+    right: 10px;
+    top: 10px;
+    bottom: auto;
+    gap: 5px;
+    z-index: 40;
+  }
+  .hud-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+    border-radius: 9px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+  }
+
+  .compass-badge {
+    left: 10px;
+    top: 10px;
+    padding: 4px 8px;
+    gap: 6px;
+  }
+  .compass-dial {
+    width: 22px;
+    height: 22px;
+  }
+  .compass-badge span {
+    font-size: 10px !important;
+  }
+
+  /* SLEEK BOTTOM SHEET FOR WALKING DIRECTIONS ON MOBILE */
+  .directions-floating-panel {
+    position: fixed;
+    top: auto;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    width: auto;
+    max-width: none;
+    max-height: 48vh;
+    max-height: 48dvh;
+    display: none;
+    flex-direction: column;
+    border-radius: 18px;
+    padding: 10px 14px 14px;
+    background: rgba(3, 19, 28, 0.96);
+    border: 1.5px solid #ffea00;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.85), 0 0 25px rgba(255, 234, 0, 0.3);
+    z-index: 80;
+    animation: slideUpMobile 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  .directions-floating-panel.active {
+    display: flex;
+  }
+  .directions-floating-panel::before {
+    content: '';
+    display: block;
+    width: 38px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 234, 0, 0.45);
+    margin: 0 auto 8px;
+    flex-shrink: 0;
+  }
+  .dir-header {
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+  }
+  .dir-title-badge {
+    font-size: 13px;
+  }
+  .dir-destination-name {
+    font-size: 13.5px;
+    margin-bottom: 8px;
+  }
+  .dir-steps-list {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 18vh;
+    max-height: 18dvh;
+    padding-right: 4px;
+    margin-bottom: 10px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 234, 0, 0.35) transparent;
+  }
+  .dir-step-item {
+    font-size: 12px;
+    gap: 8px;
+    line-height: 1.38;
+  }
+  .dir-step-num {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+  }
+  .btn-dir-voice {
+    min-height: 44px;
+    font-size: 13px;
+    border-radius: 10px;
+    padding: 9px 12px;
+  }
+
+  /* Full-width slide-out exhibit drawer on mobile */
+  .exhibit-drawer {
+    width: 100% !important;
+    max-width: 100vw !important;
+    border-left: none;
+    top: 56px !important;
+    height: calc(100% - 56px) !important;
+    height: calc(100dvh - 56px) !important;
+  }
+  .drawer-header {
+    height: 170px;
+  }
+  .drawer-body {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+  .drawer-title {
+    font-size: 20px;
+  }
+  .drawer-directions-box {
+    margin: 4px 0 8px !important;
+    padding: 8px 10px !important;
+  }
+  .drawer-audio-box {
+    padding: 10px 12px;
+  }
+}
+
+@keyframes slideUpMobile {
+  from { opacity: 0; transform: translateY(35px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 480px) {
+  .map-header {
+    padding: 5px 8px 6px;
+  }
+  .seg-btn {
+    padding: 4px 7px;
+    font-size: 10px;
+    gap: 3px;
+  }
+  .seg-badge {
+    padding: 0 4px;
+    font-size: 8.5px;
+  }
+  .map-toolbar-row {
+    flex-wrap: wrap;
+  }
+  .map-search-wrap {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+  .chips-row {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+}
+</style>
+</head>
+<body>
+
+  <!-- ── Top Navigation Bar (Identical to Dashboard) ──────────────── -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle navigation sidebar" title="Open Menu">
+        <span class="toggle-bar"></span>
+        <span class="toggle-bar"></span>
+        <span class="toggle-bar"></span>
+      </button>
+      <a class="brand" href="/dashboard.html">
+        <div class="brand-mark">M</div>
+        <div class="brand-text">
+          <div class="name">Museo Sang Bata sa Negros</div>
+          <div class="tagline" style="font-size: 9px; max-width: 400px;">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
+        </div>
+      </a>
+    </div>
+    <div class="nav-links">
+      <a class="nav-btn" href="/dashboard.html">Home</a>
+      <a class="nav-btn" href="/exhibits.html">Exhibits</a>
+      <a class="nav-btn active" href="/map.html">Floor Map</a>
+      <a class="nav-btn" href="/programs.html">Programs</a>
+      <a class="nav-btn" href="/gallery.html">Gallery</a>
+      <a class="nav-btn" href="/events.html">Events</a>
+      <a class="nav-btn" href="/admin.html">Admin</a>
+    </div>
+  </div>
+
+  <!-- Interactive Map Compact Header & Controls -->
+  <header class="map-header">
+    <div class="map-header-inner">
+      <div class="map-header-top">
+        <div class="map-header-title">
+          <h1>🏛️ Floor Map &amp; Exhibit Wayfinding</h1>
+          <p>Architectural plan from blueprint photo • All rooms &amp; exhibits</p>
+        </div>
+
+        <div class="switchers-group">
+          <!-- Floor Switcher -->
+          <div class="segmented-control" role="tablist" aria-label="Floor Selector">
+            <button class="seg-btn active" id="btnFloor1" role="tab" aria-selected="true">
+              <span>📍 Level 1</span>
+              <span class="seg-badge" id="badgeFloor1">9</span>
+            </button>
+            <button class="seg-btn" id="btnFloor2" role="tab" aria-selected="false">
+              <span>🪜 Level 2</span>
+              <span class="seg-badge" id="badgeFloor2">2</span>
+            </button>
+          </div>
+
+          <!-- 2D / 3D Isometric View Mode -->
+          <div class="segmented-control" role="group" aria-label="View Perspective Mode">
+            <button class="seg-btn active" id="btnMode2D" title="Top-down Architectural 2D Plan">
+              <span>📐 2D CAD</span>
+            </button>
+            <button class="seg-btn" id="btnMode3D" title="Isometric 3D Architectural Model">
+              <span>🎲 3D Model</span>
+            </button>
+          </div>
+
+          <!-- Screen Fit & Width Toggles -->
+          <div class="segmented-control" role="group" aria-label="Zoom Fit Modes">
+            <button class="seg-btn active" id="btnFitAll" title="Fit 100% of the entire building on screen">
+              <span>⛶ Fit</span>
+            </button>
+            <button class="seg-btn" id="btnFitWidth" title="Expand map to full width">
+              <span>⬌ Width</span>
+            </button>
+          </div>
+
+          <!-- Mouse Wheel Mode (Scroll vs Zoom) -->
+          <div class="segmented-control wheel-mode-control" role="group" aria-label="Mouse Wheel Mode">
+            <button class="seg-btn active" id="btnWheelScroll" title="Mouse wheel scrolls/pans map up and down">
+              <span>↕️ Scroll</span>
+            </button>
+            <button class="seg-btn" id="btnWheelZoom" title="Mouse wheel zooms map in and out">
+              <span>🔍 Zoom</span>
+            </button>
+          </div>
+
+          <!-- High-Contrast Theme Switcher -->
+          <div class="segmented-control" role="group" aria-label="Theme Mode">
+            <button class="seg-btn" id="btnThemeToggle" title="Toggle Blueprint / Daylight High-Contrast Mode">
+              <span id="themeToggleLabel">🎨 CAD Theme</span>
+            </button>
+          </div>
+
+          <!-- Sidebar Toggle -->
+          <button class="seg-btn active" id="btnToggleSidebar" style="background: rgba(0, 240, 255, 0.15); border: 1.5px solid var(--map-border); color: #00f0ff;" title="Toggle Rooms Directory Sidebar">
+            <span>📋 Directory</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Secondary Toolbar: Search, Filters & Quick Legend -->
+      <div class="map-toolbar-row">
+        <div class="map-search-wrap">
+          <span class="map-search-icon">🔍</span>
+          <input type="text" id="mapSearchInput" placeholder="Search rooms or exhibits…" aria-label="Search Exhibits">
+        </div>
+
+        <div class="chips-row" role="tablist" aria-label="Filter Rooms by Category">
+          <button class="chip active" data-cat="all">All Category Rooms</button>
+          <button class="chip" data-cat="Marine &amp; Nature">🌊 Marine &amp; Nature (5)</button>
+          <button class="chip" data-cat="Touch &amp; Play">💦 Touch &amp; Play (1)</button>
+          <button class="chip" data-cat="Reading &amp; Learning">📚 Reading &amp; Learning (1)</button>
+          <button class="chip" data-cat="Character &amp; Heritage">🏆 Character &amp; Heritage (2)</button>
+          <button class="chip" data-cat="Toys &amp; Collections">🧸 Toys &amp; Collections (1)</button>
+          <button class="chip" data-cat="Carnival &amp; Discovery">🎡 Carnival &amp; Discovery (1)</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Widescreen Layout Container (Sidebar Directory + Map Viewport) -->
+  <div class="map-layout-container">
+
+    <!-- Interactive Room & Exhibit Directory Sidebar -->
+    <aside class="map-directory-sidebar" id="mapSidebar" aria-label="Exhibit Directory">
+      <div class="sidebar-header">
+        <h3 class="sidebar-title">🏛️ Rooms Directory</h3>
+        <span style="font-size: 11px; color: #94a3b8;" id="sidebarCountLabel">6 Rooms • 11 Exhibits</span>
+      </div>
+      <div class="sidebar-content" id="sidebarList">
+        <!-- Rendered dynamically -->
+      </div>
+    </aside>
+
+    <!-- Main Map Viewport & Stage -->
+    <main class="map-viewport" id="mapViewport" aria-label="Museum Map Viewport">
+      
+      <!-- Compass Rose -->
+      <div class="compass-badge">
+        <div class="compass-dial"></div>
+        <div>
+          <div style="font-size: 11px; font-weight: 800; color: #fff;">ARCHITECTURAL NORTH</div>
+          <div style="font-size: 9.5px; color: #94a3b8;">Rehabilitation Plan</div>
+        </div>
+      </div>
+
+      <!-- Floating Turn-by-Turn Directions Panel -->
+      <div class="directions-floating-panel" id="directionsPanel" role="region" aria-live="polite">
+        <div class="dir-header">
+          <div class="dir-title-badge">
+            <span>🚶 Walking Directions</span>
+          </div>
+          <button class="dir-close-btn" id="dirCloseBtn" aria-label="Close directions">✕</button>
+        </div>
+        <div class="dir-destination-name" id="dirDestName">To Destination</div>
+        <ol class="dir-steps-list" id="dirStepsList"></ol>
+        <div class="dir-actions">
+          <button class="btn-dir-voice" id="dirVoiceBtn">🔊 Read Aloud</button>
+        </div>
+      </div>
+
+      <!-- Map Stage Container (Smooth Dragging and Scaling) -->
+      <div class="map-stage" id="mapStage">
+        <div class="svg-wrapper" id="svgWrapper">
+          <div id="svgMount"></div>
+        </div>
+      </div>
+
+      <!-- HUD Action Controls (Zoom, Fit Screen, Fit Width, Wheel Mode) -->
+      <div class="map-hud-controls">
+        <button class="hud-btn" id="btnZoomIn" title="Zoom In (+)" aria-label="Zoom in">+</button>
+        <button class="hud-btn" id="btnZoomOut" title="Zoom Out (-)" aria-label="Zoom out">−</button>
+        <button class="hud-btn" id="btnZoomReset" title="Fit 100% of Entire Building on Screen" aria-label="Fit to Screen">⛶</button>
+        <button class="hud-btn" id="btnHudFitWidth" title="Expand Map to Full Width" aria-label="Fit Width">⬌</button>
+        <button class="hud-btn" id="btnHudWheelToggle" title="Toggle Mouse Wheel: Scroll vs Zoom" aria-label="Toggle Wheel Mode">↕️</button>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Category Room & Exhibit Details Modal / Drawer -->
+  <div class="exhibit-drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="exhibit-drawer" id="exhibitDrawer" aria-hidden="true" aria-label="Room and Exhibit Details">
+    <div class="drawer-header">
+      <img src="/uploads/under-the-sea-banner-260x170.jpg" alt="Room Banner" class="drawer-img" id="drawerImg">
+      <div class="drawer-header-overlay">
+        <button class="drawer-close-btn" id="drawerCloseBtn" aria-label="Close Drawer">✕</button>
+        <div>
+          <span class="drawer-code-pill" id="drawerCode">ROOM</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode 1: Category Room View -->
+    <div class="drawer-body" id="drawerRoomView">
+      <div class="drawer-sticky-nav">
+        <button class="btn-return-map-top" id="btnReturnToMapTop" type="button" aria-label="Return to Floor Map">
+          <span class="return-arrow">←</span>
+          <span>Return to Floor Map</span>
+        </button>
+        <button class="btn-close-drawer-pill" id="btnCloseRoomTop" type="button" aria-label="Close Room View">
+          ✕ Close
+        </button>
+      </div>
+
+      <div>
+        <span class="seg-badge" id="roomCategoryBadge" style="background: #00d2e0; color: #000; font-weight: 800;">Marine &amp; Nature</span>
+        <h2 class="drawer-title" id="roomTitle" style="margin-top: 6px;">Marine &amp; Nature Room</h2>
+        <div class="drawer-location-badge" id="roomLocation" style="margin-top: 4px;">📍 Ground Floor • The Marine Story Gallery</div>
+      </div>
+
+      <p class="drawer-desc" id="roomDesc">
+        Our flagship exhibition gallery dedicated to marine life, coral reefs, river watersheds, marine plastic awareness, and coastal mangrove conservation.
+      </p>
+
+      <!-- Exhibits inside this Category Room -->
+      <div class="room-exhibits-section">
+        <div class="section-heading-row">
+          <h4 class="section-title">📦 Exhibits in this Room</h4>
+          <span class="count-pill" id="roomExhibitsCount">5 Exhibits</span>
+        </div>
+        <div class="room-exhibits-container" id="roomExhibitsContainer">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <div class="drawer-footer-actions">
+        <button class="btn-route-action" id="btnTriggerRoomRoute">
+          <span>🚶 Show Walking Path to Room</span>
+        </button>
+        <button class="btn-return-map-bottom" id="btnReturnToMapBottom" type="button">
+          <span>← Back to Floor Map</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mode 2: Exhibit Detail View -->
+    <div class="drawer-body" id="drawerExhibitView" style="display: none;">
+      <div class="drawer-sticky-nav">
+        <button class="btn-back-to-room" id="btnBackToRoom" type="button">
+          <span>← Back to Room Overview</span>
+        </button>
+        <button class="btn-close-drawer-pill" id="btnExhibitCloseToMap" type="button" aria-label="Return to Floor Map">
+          ✕ Return to Map
+        </button>
+      </div>
+
+      <div>
+        <span class="seg-badge" id="drawerCat" style="background: #00d2e0; color: #000; font-weight: 800;">Marine &amp; Nature</span>
+        <h2 class="drawer-title" id="drawerTitle" style="margin-top: 6px;">Under the Sea</h2>
+        <div class="drawer-location-badge" id="drawerLocation" style="margin-top: 4px;">📍 Ground Floor — Main Central Gallery</div>
+      </div>
+
+      <!-- Floor Plan Directions Box -->
+      <div class="drawer-directions-box" id="drawerDirectionsBox" style="background: rgba(0, 240, 255, 0.08); border: 1px solid rgba(0, 240, 255, 0.25); border-radius: 10px; padding: 10px 12px; margin: 8px 0 10px;">
+        <div style="font-size: 11px; font-weight: 800; color: #5eead4; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 5px; margin-bottom: 4px;">
+          <span>🧭</span> Floor Plan Directions:
+        </div>
+        <p id="drawerDirectionsText" style="font-size: 12px; color: #e2e8f0; margin: 0; line-height: 1.45; font-weight: 600;"></p>
+      </div>
+
+      <!-- Multilingual Audio Narration -->
+      <div class="drawer-audio-box">
+        <button class="btn-audio-play" id="btnAudioPlay">▶ Play Audio</button>
+        <div style="flex: 1;">
+          <div style="font-size: 11.5px; font-weight: 800; color: #fff;">AUDIO GUIDE</div>
+          <div style="font-size: 10.5px; color: #94a3b8;" id="audioStatus">Listen to exhibit narration</div>
+        </div>
+      </div>
+
+      <!-- Language selector -->
+      <div class="lang-selector-tabs">
+        <button class="lang-btn active" data-lang="en">English</button>
+        <button class="lang-btn" data-lang="tl">Tagalog</button>
+        <button class="lang-btn" data-lang="cb">Cebuano / Bisaya</button>
+      </div>
+
+      <p class="drawer-desc" id="drawerDesc">
+        Exhibit details loading…
+      </p>
+
+      <div class="drawer-footer-actions">
+        <button class="btn-route-action" id="btnTriggerRoute">
+          <span>🚶 Show Walking Path</span>
+        </button>
+        <a href="#" class="btn-full-details" id="drawerFullLink">Full Info →</a>
+        <button class="btn-return-map-bottom" id="btnExhibitReturnToMapBottom" type="button">
+          <span>← Back to Floor Map</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mode 3: Facility View -->
+    <div class="drawer-body" id="drawerFacilityView" style="display: none;">
+      <div class="drawer-sticky-nav">
+        <button class="btn-return-map-top" id="btnFacilityBackToMap" type="button" aria-label="Return to Floor Map">
+          <span class="return-arrow">←</span>
+          <span>Return to Floor Map</span>
+        </button>
+      </div>
+      <div>
+        <span class="seg-badge" style="background: #64748b; color: #fff; font-weight: 800;">Facility / Public Area</span>
+        <h2 class="drawer-title" id="facilityTitle" style="margin-top: 6px;">Facility Name</h2>
+      </div>
+      <p class="drawer-desc" id="facilityDesc"></p>
+      <div class="drawer-footer-actions" id="facilityActions"></div>
+    </div>
+  </aside>
+
+  <!-- Application Logic -->
+  <script>
+  (function() {
+    // ── Application State ──
+    let currentFloor = 1;
+    let is3DMode = false;
+    let currentThemeIndex = 0; // 0: Dark CAD, 1: Classic Blueprint, 2: Daylight Light
+    const THEMES = ['', 'theme-cad', 'theme-light'];
+    const THEME_LABELS = ['🎨 Classic Blueprint', '☀️ Daylight High-Contrast', '🌙 Neon Dark Mode'];
+
+    // ── CATEGORY ROOM DEFINITIONS (Every Category is an Architectural Room that Houses Exhibits) ──
+    const CATEGORY_ROOMS = {
+      'cat_marine_nature': {
+        id: 'cat_marine_nature',
+        zoneId: 'zone_marine_story',
+        category: 'Marine & Nature',
+        title: 'Marine & Nature Room',
+        subtitle: 'The Marine Story Gallery • Flagship Central Hall',
+        floor: 1,
+        pinX: 50,
+        pinY: 34,
+        color: '#00e5ff',
+        icon: '🌊',
+        imagePath: 'https://museosangbata.org/wp-content/uploads/2014/11/under-the-sea-banner-260x170.jpg',
+        description: 'Our flagship exhibition room dedicated to the aquatic ecosystems of Negros. Housed inside this room are five interactive exhibits exploring coral reefs, river watersheds, marine biodiversity, plastic pollution awareness, and coastal mangrove conservation.',
+        exhibitCodes: ['EX-001', 'EX-002', 'EX-007', 'EX-008', 'EX-011']
+      },
+      'cat_touch_play': {
+        id: 'cat_touch_play',
+        zoneId: 'zone_splash_zone',
+        category: 'Touch & Play',
+        title: 'Touch & Play Room',
+        subtitle: 'East Wing • Splash Zone (Touch Pool)',
+        floor: 1,
+        pinX: 83,
+        pinY: 48,
+        color: '#14b8a6',
+        icon: '💦',
+        imagePath: 'https://museosangbata.org/wp-content/uploads/2014/11/splash-banner-260x170.jpg',
+        description: 'A hands-on experiential discovery room housing our live marine touch pool basin where children can gently interact with seashore creatures like sea stars, sea cucumbers, and reef fish.',
+        exhibitCodes: ['EX-003']
+      },
+      'cat_reading_learning': {
+        id: 'cat_reading_learning',
+        zoneId: 'zone_reading_corner',
+        category: 'Reading & Learning',
+        title: 'Reading & Learning Room',
+        subtitle: 'Library Extension Wing • Franco\'s Reading Corner',
+        floor: 1,
+        pinX: 15,
+        pinY: 42,
+        color: '#3b82f6',
+        icon: '📚',
+        imagePath: 'https://museosangbata.org/wp-content/uploads/2019/04/IMG_9526-260x170.jpg',
+        description: 'A cozy, quiet children\'s literacy room filled with storybooks, educational reading materials, and comfortable nooks to foster a love of reading alongside museum exploration.',
+        exhibitCodes: ['EX-010']
+      },
+      'cat_character_heritage': {
+        id: 'cat_character_heritage',
+        zoneId: 'zone_maranon_heritage',
+        category: 'Character & Heritage',
+        title: 'Character & Heritage Room',
+        subtitle: 'Library Extension Wing • Marañon Memorabilia & Everyday Heroes',
+        floor: 1,
+        pinX: 15,
+        pinY: 62,
+        color: '#f59e0b',
+        icon: '🏆',
+        imagePath: 'https://museosangbata.org/wp-content/uploads/2014/09/jgm-banner-260x170.jpg',
+        description: 'A memorial and values-education gallery honoring late Governor Joseph G. Marañon and profiling community everyday heroes who demonstrate Filipino character, integrity, and courage.',
+        exhibitCodes: ['EX-005', 'EX-004']
+      },
+      'cat_toys_collections': {
+        id: 'cat_toys_collections',
+        zoneId: 'zone_second_floor_toys',
+        category: 'Toys & Collections',
+        title: 'Toys & Collections Room',
+        subtitle: 'Second Floor (Mezzanine) • Hampanganan (Toy Room)',
+        floor: 2,
+        pinX: 31,
+        pinY: 30,
+        color: '#ec4899',
+        icon: '🧸',
+        imagePath: 'https://museosangbata.org/wp-content/uploads/2014/09/hampanganan-banner-260x170.jpg',
+        description: 'A wonderland housing the Mara Montelibano folk toy collection from more than 50 countries, alongside vintage McDonald\'s promotional toys and a complete Beanie Babies collection.',
+        exhibitCodes: ['EX-006']
+      },
+      'cat_carnival_play': {
+        id: 'cat_carnival_play',
+        zoneId: 'zone_second_floor_carnival',
+        category: 'Carnival & Discovery',
+        title: 'Carnival & Discovery Room',
+        subtitle: 'Second Floor (Mezzanine) • Discovery Room & Play Lab',
+        floor: 2,
+        pinX: 68,
+        pinY: 30,
+        color: '#a855f7',
+        icon: '🎡',
+        imagePath: 'https://museosangbata.org/wp-content/uploads/2019/01/image2-e1548236620227-260x170.jpeg',
+        description: 'A dynamic, open-ended play laboratory built around the idea that play is learning, featuring interactive game stations, sensory puzzles, and creative hands-on exploration hubs.',
+        exhibitCodes: ['EX-009']
+      }
+    };
+
+    // Fallback Exhibits Data (Enriched dynamically via /api/exhibits)
+    let exhibitsData = [
+      {
+        code: 'EX-001',
+        title: 'Under the Sea',
+        category: 'Marine & Nature',
+        floor: 1,
+        location: 'Marine & Nature Room • Coral Reef Section',
+        imagePath: 'https://museosangbata.org/wp-content/uploads/2014/11/under-the-sea-banner-260x170.jpg',
+        description: "The museum's flagship exhibit on the marine environment — how sand forms, how coral reefs grow and the threats facing them, marine mammals, and the role mangroves play along the coast.",
+        description_tl: "Pangunahing eksibit ng museo tungkol sa karagatan — kung paano nabubuo ang buhangin, paano lumalaki ang mga coral reef at ang mga banta sa mga ito, mga yamang-dagat at ang papel ng mga bakawan sa baybayin.",
+        description_cb: "Pangunang eksibit sa museyo bahin sa dagat — giunsa paghulma ang balas, giunsa pagtubo ang coral reef ug ang mga hulga nga ilang giatubang, mga dagatnong mamalya, ug ang papel sa mangrove sa baybayon."
+      },
+      {
+        code: 'EX-002',
+        title: 'The River',
+        category: 'Marine & Nature',
+        floor: 1,
+        location: 'Marine & Nature Room • River Watershed Section',
+        imagePath: '/uploads/f2594672f504b807e7e37ba5.jpg',
+        description: "Follows freshwater systems on their way toward the sea, fostering appreciation for Negros' watersheds and coastal ecology.",
+        description_tl: "Isa sa walong permanenteng eksibit ng museo, sumusubaybay sa mga sistema ng tubig-tabang patungong dagat — bahagi ng mas malawak na pagsisikap ng museo na palaganapin ang pagpapahalaga sa dagat at baybayin ng Negros.",
+        description_cb: "Usa sa walo ka permanenteng eksibit sa museyo, nagasunod sa freshwater systems padulong sa dagat — bahin sa mas lapad nga paningkamot sa museyo sa pagpahalaga sa dagat ug baybayon sa Negros."
+      },
+      {
+        code: 'EX-003',
+        title: 'Splash Zone (Touch Pool)',
+        category: 'Touch & Play',
+        floor: 1,
+        location: 'Touch & Play Room • East Wing Basin',
+        imagePath: 'https://museosangbata.org/wp-content/uploads/2014/11/splash-banner-260x170.jpg',
+        description: "A hands-on touch pool where visitors can see and gently handle seashore creatures like sea stars, sea cucumbers, snails, and small reef fish.",
+        description_tl: "Isang hands-on na touch pool kung saan makikita at maaring maramdam nang maingat ang mga nilalang sa tabing-dagat — sea stars, sea cucumbers, mga suso, at maliliit na isda — paboritong lugar ng mga bata at matatanda.",
+        description_cb: "Usa ka hands-on touch pool diin makakita ug mahimong hinay-hinay hikapon ang mga hayop sa baybayon — sea stars, sea cucumbers, mga suso, ug gagmay nga isda — paboritong hunonganan sa mga bata ug hamtong."
+      },
+      {
+        code: 'EX-004',
+        title: 'Everyday Heroes',
+        category: 'Character & Heritage',
+        floor: 1,
+        location: 'Character & Heritage Room • Values Showcase',
+        imagePath: 'https://museosangbata.org/wp-content/uploads/2014/11/everyday-heroes-banner-260x170.jpg',
+        description: "Profiles of ordinary people who quietly live out values like hard work, thrift, generosity, fairness, forgiveness, and courage.",
+        description_tl: "Mga paglalarawan ng ordinaryong tao na tahimik na isinasabuhay ang mga pagpapahalaga tulad ng sipag, pagtipid, kabutihang-loob, katarungan, pagpapatawad at tapang — hinihikayat ang mga bisita na makita ang araw-araw na pagkatao bilang isang uri ng kabayanihan.",
+        description_cb: "Profil sa ordinaryong mga tawo nga hinay-hinay nagpuyo sa mga bili sama sa kugi, pagtipig, pagkamaayo, pagkatarong, pagpasaylo ug kaisog — nag-awhag sa mga bisita nga tan-awon ang matag-adlaw nga pagkatawo isip laing matang sa pagka-hero."
+      },
+      {
+        code: 'EX-005',
+        title: 'Joseph G. Marañon Memorabilia',
+        category: 'Character & Heritage',
+        floor: 1,
+        location: 'Character & Heritage Room • Memorial Gallery',
+        imagePath: 'https://museosangbata.org/wp-content/uploads/2014/09/jgm-banner-260x170.jpg',
+        description: "A memorial exhibit honoring the late Negros Occidental Governor Joseph G. Marañon, preserving memorabilia connected to his life and public service.",
+        description_tl: "Isang memorial na eksibit para parangalan ang yumaong Gobernador ng Negros Occidental na si Joseph G. Marañon, na pinangangalagaan ang mga memorabilia na konektado sa kanyang buhay at pampublikong paglilingkod.",
+        description_cb: "Usa ka memorial exhibit nga nagpasidungog sa mihimong Gobernador sa Negros Occidental nga si Joseph G. Marañon, nagtipig sa mga memorabilia nga may kalabotan sa iyang kinabuhi ug serbisyo publiko."
+      },
+      {
+        code: 'EX-006',
+        title: 'Hampanganan (Toy Room)',
+        category: 'Toys & Collections',
+        floor: 2,
+        location: 'Toys & Collections Room • Level 2 Left Wing',
+        imagePath: 'https://museosangbata.org/wp-content/uploads/2014/09/hampanganan-banner-260x170.jpg',
+        description: "A folk toy collection spanning more than 50 countries, alongside donated McDonald's promotional toys and a Beanie Babies collection.",
+        description_tl: "Isang koleksyon ng mga katutubong laruan mula sa mahigit 50 bansa, na pinag-isa ni Ms. Mara Montelibano, kasama ang mga donasyong promotional na laruan ng McDonald's at isang koleksyon ng Beanie Babies.",
+        description_cb: "Usa ka koleksyon sa folk toys nga gikan sa kapin 50 ka nasud, gitigum ni Ms. Mara Montelibano, kauban ang gimdonar nga mga promotional toys sa McDonald's ug koleksyon sa Beanie Babies."
+      },
+      {
+        code: 'EX-007',
+        title: 'Biodiversity',
+        category: 'Marine & Nature',
+        floor: 1,
+        location: 'Marine & Nature Room • Rear Species Wall',
+        imagePath: '',
+        description: "Introduces the diverse range of plant and animal life found across Negros' marine and coastal habitats.",
+        description_tl: "Isa sa walong permanenteng eksibit ng museo, ipinapakilala ang hanay ng mga halaman at hayop na matatagpuan sa iba't ibang marine at baybaying tirahan ng Negros.",
+        description_cb: "Usa sa walo ka permanenteng eksibit sa museyo, nagpakita sa lain-laing klase sa tanom ug hayop nga makita sa dagat ug baybayon sa Negros."
+      },
+      {
+        code: 'EX-008',
+        title: 'Story of Plastic',
+        category: 'Marine & Nature',
+        floor: 1,
+        location: 'Marine & Nature Room • Eco Conservation Corner',
+        imagePath: 'https://museosangbata.org/wp-content/uploads/2019/01/image2-1-e1548236083574-260x170.jpeg',
+        description: "An exhibit raising awareness about plastic waste and its impact on marine life, created alongside the museum's 'Floating Witches' installation made from discarded fishing nets.",
+        description_tl: "Isang eksibit na nagpapataas ng kamalayan tungkol sa plastic waste at ang epekto nito sa buhay-dagat sa paligid ng Negros at Sagay, nilikha kasabay ng 'Floating Witches' na gawa sa itinamang lambat ng pangingisda.",
+        description_cb: "Usa ka exhibit nga nagpalambo sa kahibalo bahin sa plastic waste ug ang epekto niini sa dagatnong kinabuhi sa palibot sa Negros ug Sagay, gihimo kauban ang 'Floating Witches' nga gihimo gikan sa gipanglabay nga fishing nets."
+      },
+      {
+        code: 'EX-009',
+        title: 'Carnival (Discovery Room)',
+        category: 'Carnival & Discovery',
+        floor: 2,
+        location: 'Carnival & Discovery Room • Level 2 Right Wing',
+        imagePath: 'https://museosangbata.org/wp-content/uploads/2019/01/image2-e1548236620227-260x170.jpeg',
+        description: "A playful discovery room built around the idea that play is learning — supporting children's healthy development through open-ended, hands-on activity.",
+        description_tl: "Isang masayang discovery room na nakabatay sa ideya na ang paglalaro ay pagkatuto — sinusuportahan ang malusog na pag-unlad ng mga bata sa pamamagitan ng bukas at hands-on na aktibidad.",
+        description_cb: "Usa ka playful discovery room nga gibase sa ideya nga ang pagdula usa ka pamaagi sa pagkat-on — nagsuporta sa himsog nga paglambo sa mga bata pinaagi sa open-ended, hands-on activities."
+      },
+      {
+        code: 'EX-010',
+        title: "Franco's Reading Corner",
+        category: 'Reading & Learning',
+        floor: 1,
+        location: 'Reading & Learning Room • Library Extension',
+        imagePath: 'https://museosangbata.org/wp-content/uploads/2019/04/IMG_9526-260x170.jpg',
+        description: "A dedicated children's reading nook blessed and opened to encourage a love of books alongside the museum's hands-on exhibits.",
+        description_tl: "Isang espesyal na reading nook para sa mga bata, na pinasinayaan noong Marso 2019 upang himukin ang pagmamahal sa mga libro kasabay ng mga hands-on na eksibit ng museo.",
+        description_cb: "Usa ka dedikadong reading nook para sa mga bata, gibanhigan ug gibuksan sa publiko niadtong Marso 2019 aron dasigon ang paghigugma sa mga libro kauban sa hands-on exhibits sa museyo."
+      },
+      {
+        code: 'EX-011',
+        title: 'Mangrove Walk',
+        category: 'Marine & Nature',
+        floor: 1,
+        location: 'Marine & Nature Room • Mangrove Habitat Section',
+        imagePath: 'https://museosangbata.org/wp-content/uploads/2014/11/mangrove-walk-banner-260x170.jpg',
+        description: "Highlights the vital nursery role of mangrove forests along the Negros coastline and their critical function in protecting coastal communities.",
+        description_tl: "Isang maliit na parke ng bakawan at lakaran sa likod ng museo na nagpapakita ng iba't ibang species ng bakawan nang malapitan, ginagamit kasama ng mga seminar ng museo tungkol sa bakawan at indoor exhibit.",
+        description_cb: "Usa ka gamay nga mangrove park ug walkway sa likod sa museyo nga nagpakita sa lain-laing species sa mangrove duol, gigamit kauban ang mangrove seminars sa museyo ug indoor exhibit."
+      }
+    ];
+
+    let activeCategory = 'all';
+    let searchQuery = '';
+    let selectedRoom = null;
+    let selectedExhibit = null;
+    let activeRouteKey = null;
+    let speechUtterance = null;
+    let isTtsPlaying = false;
+
+    // Viewport transform state
+    let zoomLevel = 1;
+    let panX = 0;
+    let panY = 0;
+
+    // Drag tracking with threshold to prevent click glitch
+    let isPanning = false;
+    let hasDragged = false;
+    let downX = 0;
+    let downY = 0;
+    let startX = 0;
+    let startY = 0;
+
+    const mapStage = document.getElementById('mapStage');
+    const mapViewport = document.getElementById('mapViewport');
+    const svgMount = document.getElementById('svgMount');
+    const directionsPanel = document.getElementById('directionsPanel');
+    const mapSidebar = document.getElementById('mapSidebar');
+
+    // Turn-by-Turn Wayfinding Routes Definitions (Direct to Category Rooms)
+    const WAYFINDING_ROUTES = {
+      'cat_marine_nature': {
+        floor: 1,
+        title: "Marine & Nature Room",
+        pathD: "M 500 1140 L 500 620 L 500 450",
+        steps: [
+          "Enter through the Main Entrance doors into the reception foyer.",
+          "Walk straight across the central Function Hall.",
+          "Pass through the double arched entryway into the Marine & Nature Room.",
+          "You have arrived at the Marine & Nature Room (housing Under the Sea, River Basin, Biodiversity, Story of Plastic, and Mangrove Walk)."
+        ]
+      },
+      'cat_touch_play': {
+        floor: 1,
+        title: "Touch & Play Room (Splash Zone)",
+        pathD: "M 500 1140 L 500 820 L 760 820 L 828 820 L 828 630",
+        steps: [
+          "Enter through the Main Entrance foyer into the Function Hall.",
+          "Turn right toward the East Wing corridor.",
+          "Enter the Touch & Play Room.",
+          "You have arrived at the interactive Splash Zone Touch Pool basin."
+        ]
+      },
+      'cat_reading_learning': {
+        floor: 1,
+        title: "Reading & Learning Room (Franco's Reading Corner)",
+        pathD: "M 500 1140 L 500 1010 L 230 1010 L 230 680 L 150 680 L 150 550",
+        steps: [
+          "Enter through the Main Entrance doors into the reception foyer.",
+          "Turn left down the corridor past the Restrooms (CR) and Staff Office.",
+          "Enter the Library Extension wing on your left.",
+          "You have arrived at Franco's Reading Corner."
+        ]
+      },
+      'cat_character_heritage': {
+        floor: 1,
+        title: "Character & Heritage Room",
+        pathD: "M 500 1140 L 500 1010 L 230 1010 L 230 820 L 150 820",
+        steps: [
+          "Enter through the Main Entrance doors into the reception foyer.",
+          "Turn left down the corridor past the Restrooms and Staff Office into the Library Extension.",
+          "Enter the Character & Heritage Room.",
+          "You have arrived at the Joseph G. Marañon Memorabilia and Everyday Heroes memorial gallery."
+        ]
+      },
+      'cat_toys_collections': {
+        floor: 2,
+        title: "Toys & Collections Room (Hampanganan)",
+        pathD: "M 310 700 L 310 500 L 310 390",
+        steps: [
+          "Enter through the Main Entrance into the Function Hall.",
+          "Take the staircase on the left beside the Staff Office up to Level 2.",
+          "Turn left from the upper landing into the Toys & Collections Room.",
+          "You have arrived at Hampanganan (Toy Room)."
+        ]
+      },
+      'cat_carnival_play': {
+        floor: 2,
+        title: "Carnival & Discovery Room",
+        pathD: "M 310 700 L 500 700 L 500 390 L 685 390",
+        steps: [
+          "Enter through the Main Entrance into the Function Hall.",
+          "Take the staircase on the left up to the Second Floor mezzanine.",
+          "Walk across the upper corridor overlooking the Function Hall toward the right wing.",
+          "You have arrived at the Carnival & Discovery Room."
+        ]
+      }
+    };
+
+    // Helper: Find which Category Room an exhibit belongs to
+    function findRoomForExhibit(code) {
+      for (const room of Object.values(CATEGORY_ROOMS)) {
+        if (room.exhibitCodes.includes(code)) return room;
+      }
+      return null;
+    }
+
+    // Render High-Visibility Architectural Ground Floor Plan (Category-Only Rooms)
+    function renderGroundFloorSvg() {
+      return `
+      <svg class="blueprint-svg" viewBox="0 0 1000 1300" xmlns="http://www.w3.org/2000/svg" id="museumSvg">
+        <defs>
+          <pattern id="cadGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="var(--map-grid-line)" stroke-width="0.9" />
+          </pattern>
+          <linearGradient id="marineStoryGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#023d50" stop-opacity="0.95" />
+            <stop offset="100%" stop-color="#012430" stop-opacity="0.95" />
+          </linearGradient>
+          <linearGradient id="officeExtGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#3d2005" stop-opacity="0.95" />
+            <stop offset="100%" stop-color="#1a0f02" stop-opacity="0.95" />
+          </linearGradient>
+          <linearGradient id="splashZoneGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0b5e58" stop-opacity="0.95" />
+            <stop offset="100%" stop-color="#032c28" stop-opacity="0.95" />
+          </linearGradient>
+          <linearGradient id="hallGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#072b38" stop-opacity="0.9" />
+            <stop offset="100%" stop-color="#021720" stop-opacity="0.9" />
+          </linearGradient>
+        </defs>
+
+        <!-- CAD Grid Background -->
+        <rect width="1000" height="1300" fill="url(#cadGrid)" />
+
+        <!-- EXTERIOR RAIN WATER RESERVOIRS (Exact Circles from Blueprint Photo) -->
+        <g id="reservoirs" opacity="0.85">
+          <!-- Top Right Reservoir -->
+          <circle cx="830" cy="115" r="46" fill="rgba(0,229,255,0.06)" stroke="#00f0ff" stroke-width="2.5" stroke-dasharray="4,4" />
+          <circle cx="830" cy="115" r="38" fill="none" stroke="#00f0ff" stroke-width="1.5" />
+          <text x="830" y="112" text-anchor="middle" font-size="8" font-family="'IBM Plex Mono', monospace" font-weight="700" fill="#5eead4">RAIN WATER</text>
+          <text x="830" y="124" text-anchor="middle" font-size="8" font-family="'IBM Plex Mono', monospace" font-weight="700" fill="#5eead4">RESERVOIR</text>
+
+          <!-- Bottom Right Reservoir -->
+          <circle cx="835" cy="1000" r="46" fill="rgba(0,229,255,0.06)" stroke="#00f0ff" stroke-width="2.5" stroke-dasharray="4,4" />
+          <circle cx="835" cy="1000" r="38" fill="none" stroke="#00f0ff" stroke-width="1.5" />
+          <text x="835" y="997" text-anchor="middle" font-size="8" font-family="'IBM Plex Mono', monospace" font-weight="700" fill="#5eead4">RAIN WATER</text>
+          <text x="835" y="1009" text-anchor="middle" font-size="8" font-family="'IBM Plex Mono', monospace" font-weight="700" fill="#5eead4">RESERVOIR</text>
+        </g>
+
+        <!-- EXTERIOR CONCRETE GUTTER (Top Boundary of Main Building) -->
+        <line x1="240" y1="120" x2="760" y2="120" stroke="#00f0ff" stroke-width="3" stroke-dasharray="8,4" />
+        <text x="500" y="108" text-anchor="middle" class="cad-dimension">EXISTING CONCRETE GUTTER</text>
+
+        <!-- AQUARIUM & TROPICAL REEF WING -->
+        <g id="zone_aquarium" class="room-poly">
+          <polygon points="240,135 760,135 760,265 240,265" fill="#032c3d" stroke="#00f0ff" stroke-width="4.5" />
+          <!-- Partition tanks from drawing -->
+          <line x1="320" y1="135" x2="320" y2="205" stroke="#00f0ff" stroke-width="3.5" />
+          <line x1="320" y1="205" x2="600" y2="205" stroke="#00f0ff" stroke-width="3.5" />
+          <path d="M 600 265 Q 580 240 560 265" class="door-swing" />
+
+          <text x="500" y="175" text-anchor="middle" class="cad-label" fill="#38bdf8">🐠 AQUARIUM &amp; LIVE REEF SYSTEMS</text>
+          <text x="500" y="196" text-anchor="middle" class="cad-sub">Tropical Saltwater Tanks &amp; Coral Habitats</text>
+        </g>
+
+        <!-- 🌊 CATEGORY ROOM: MARINE & NATURE (HOUSES 5 EXHIBITS) -->
+        <g id="zone_marine_story" class="room-poly" data-cat-id="cat_marine_nature">
+          <polygon points="240,265 760,265 760,620 240,620" fill="url(#marineStoryGrad)" stroke="#00f0ff" stroke-width="5" />
+          
+          <text x="500" y="302" text-anchor="middle" class="cad-label" font-size="18" fill="#e0f2fe">🌊 MARINE &amp; NATURE ROOM</text>
+          <text x="500" y="324" text-anchor="middle" class="cad-sub">The Marine Story • Flagship Category Room (5 Exhibits Inside)</text>
+
+          <!-- Gallery Partitions from blueprint -->
+          <line x1="470" y1="350" x2="600" y2="350" stroke="#00f0ff" stroke-width="3" />
+          <line x1="600" y1="350" x2="600" y2="440" stroke="#00f0ff" stroke-width="3" />
+
+          <!-- Internal Gallery Display Indicators -->
+          <rect x="340" y="375" width="150" height="44" rx="6" fill="rgba(0,240,255,0.18)" stroke="#00f0ff" stroke-width="2" />
+          <text x="415" y="402" text-anchor="middle" font-size="11" font-weight="800" fill="#7dd3fc">River Basin Area</text>
+
+          <rect x="550" y="375" width="160" height="44" rx="6" fill="rgba(0,240,255,0.18)" stroke="#00f0ff" stroke-width="2" />
+          <text x="630" y="402" text-anchor="middle" font-size="11" font-weight="800" fill="#7dd3fc">Under the Sea Area</text>
+
+          <!-- Center Category Badge Pill on Floor -->
+          <rect x="390" y="500" width="220" height="32" rx="16" fill="rgba(0, 240, 255, 0.22)" stroke="#00f0ff" stroke-width="1.8" />
+          <text x="500" y="521" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="11" font-weight="900" fill="#ffffff">
+            📦 HOUSES 5 EXHIBITS INSIDE
+          </text>
+
+          <!-- Double Arched Entry Doors -->
+          <path d="M 460 620 Q 480 585 500 620" class="door-swing" stroke-width="3" />
+          <path d="M 540 620 Q 520 585 500 620" class="door-swing" stroke-width="3" />
+          <text x="500" y="610" text-anchor="middle" font-size="10" font-weight="900" fill="#5eead4">DOUBLE ENTRY DOORS</text>
+        </g>
+
+        <!-- 💦 CATEGORY ROOM: TOUCH & PLAY (SPLASH ZONE) -->
+        <g id="zone_splash_zone" class="room-poly" data-cat-id="cat_touch_play">
+          <polygon points="760,440 895,440 895,820 760,820" fill="url(#splashZoneGrad)" stroke="#14b8a6" stroke-width="4.5" />
+          
+          <text x="828" y="475" text-anchor="middle" class="cad-label" fill="#5eead4">💦 TOUCH &amp; PLAY</text>
+          <text x="828" y="495" text-anchor="middle" class="cad-sub">Splash Zone (Touch Pool)</text>
+
+          <!-- Touch pool rectangular basin structure -->
+          <rect x="785" y="525" width="85" height="240" rx="10" fill="rgba(20, 184, 166, 0.3)" stroke="#14b8a6" stroke-width="3" />
+          <rect x="795" y="540" width="65" height="210" rx="6" fill="rgba(0, 240, 255, 0.2)" stroke="#5eead4" stroke-width="2" stroke-dasharray="4,3" />
+          <text x="828" y="640" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="11" fill="#99f6e4">TOUCH POOL</text>
+          <text x="828" y="658" text-anchor="middle" font-size="9.5" font-weight="700" fill="#99f6e4">Live Sea Life</text>
+        </g>
+
+        <!-- FUNCTION HALL (Central Assembly Space) -->
+        <g id="zone_function_hall" class="room-poly">
+          <polygon points="240,620 760,620 760,1000 240,1000" fill="url(#hallGrad)" stroke="#00f0ff" stroke-width="3.5" />
+          <text x="500" y="800" text-anchor="middle" class="cad-label" font-size="19" fill="#f8fafc">🏛️ FUNCTION HALL</text>
+          <text x="500" y="825" text-anchor="middle" class="cad-sub">Main Assembly Hall &amp; Gathering Area</text>
+        </g>
+
+        <!-- STAIRCASE TO LEVEL 2 (Directly Beside Staff Office) -->
+        <g id="zone_stairs" class="room-poly">
+          <rect x="245" y="625" width="135" height="155" rx="5" fill="#1b1704" stroke="#f59e0b" stroke-width="3.5" />
+          <!-- Stair Steps -->
+          <line x1="245" y1="650" x2="380" y2="650" stroke="#f59e0b" stroke-width="2.5" />
+          <line x1="245" y1="672" x2="380" y2="672" stroke="#f59e0b" stroke-width="2.5" />
+          <line x1="245" y1="694" x2="380" y2="694" stroke="#f59e0b" stroke-width="2.5" />
+          <line x1="245" y1="716" x2="380" y2="716" stroke="#f59e0b" stroke-width="2.5" />
+          <line x1="245" y1="738" x2="380" y2="738" stroke="#f59e0b" stroke-width="2.5" />
+          <line x1="245" y1="760" x2="380" y2="760" stroke="#f59e0b" stroke-width="2.5" />
+          
+          <path d="M 312 760 L 312 642 M 304 650 L 312 642 L 320 650" fill="none" stroke="#fcd34d" stroke-width="4" stroke-linecap="round" />
+          <text x="312" y="795" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="12" fill="#fcd34d">▲ STAIRS UP</text>
+          <text x="312" y="812" text-anchor="middle" font-size="10" font-weight="800" fill="#fde68a">To Level 2 (Mezzanine)</text>
+        </g>
+
+        <!-- OFFICE SIDE EXTENSION (LIBRARY WING — Bracketed in Blueprint Photo) -->
+        <g id="zone_office_extension">
+          <!-- Overall Boundary -->
+          <rect x="65" y="440" width="170" height="540" rx="6" fill="url(#officeExtGrad)" stroke="#f59e0b" stroke-width="4" />
+          
+          <!-- Library Header Pill -->
+          <rect x="75" y="452" width="150" height="28" rx="5" fill="#f59e0b" />
+          <text x="150" y="471" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="11" fill="#03131c">LIBRARY EXTENSION</text>
+
+          <!-- 📚 CATEGORY ROOM: READING & LEARNING (Franco's Reading Corner) -->
+          <g id="zone_reading_corner" class="room-poly" data-cat-id="cat_reading_learning">
+            <rect x="72" y="490" width="156" height="185" rx="6" fill="rgba(59, 130, 246, 0.25)" stroke="#3b82f6" stroke-width="2.5" />
+            <text x="150" y="525" text-anchor="middle" class="cad-label" font-size="12" fill="#93c5fd">📚 READING &amp; LEARNING</text>
+            <text x="150" y="546" text-anchor="middle" class="cad-sub" fill="#bfdbfe">Franco's Reading Corner</text>
+            <rect x="85" y="565" width="130" height="42" rx="4" fill="rgba(59,130,246,0.3)" stroke="#3b82f6" stroke-width="1.5" />
+            <text x="150" y="591" text-anchor="middle" font-size="10" font-weight="800" fill="#dbeafe">Children's Books &amp; Nook</text>
+          </g>
+
+          <!-- Divider -->
+          <line x1="72" y1="685" x2="228" y2="685" stroke="rgba(245,158,11,0.5)" stroke-width="2" stroke-dasharray="4,4" />
+
+          <!-- 🏆 CATEGORY ROOM: CHARACTER & HERITAGE (Marañon Memorabilia & Everyday Heroes) -->
+          <g id="zone_maranon_heritage" class="room-poly" data-cat-id="cat_character_heritage">
+            <rect x="72" y="695" width="156" height="275" rx="6" fill="rgba(245, 158, 11, 0.22)" stroke="#f59e0b" stroke-width="2.5" />
+            <text x="150" y="730" text-anchor="middle" class="cad-label" font-size="12" fill="#fde68a">🏆 CHARACTER &amp; HERITAGE</text>
+            <text x="150" y="750" text-anchor="middle" class="cad-sub" fill="#fef08a">Governor Memorabilia</text>
+            <text x="150" y="766" text-anchor="middle" class="cad-sub" fill="#fef08a">&amp; Everyday Heroes</text>
+            
+            <rect x="85" y="790" width="130" height="45" rx="4" fill="rgba(245,158,11,0.3)" stroke="#f59e0b" stroke-width="1.5" />
+            <text x="150" y="812" text-anchor="middle" font-size="10" font-weight="800" fill="#fef3c7">J.G. Marañon Section</text>
+            <text x="150" y="826" text-anchor="middle" font-size="8.5" font-weight="700" fill="#fef3c7">Gov. Memorial Gallery</text>
+
+            <rect x="85" y="850" width="130" height="45" rx="4" fill="rgba(245,158,11,0.2)" stroke="#f59e0b" stroke-width="1.5" />
+            <text x="150" y="872" text-anchor="middle" font-size="10" font-weight="800" fill="#fdba74">Everyday Heroes Section</text>
+            <text x="150" y="886" text-anchor="middle" font-size="8.5" font-weight="700" fill="#fdba74">Values Showcase</text>
+          </g>
+        </g>
+
+        <!-- STAFF OFFICE (With Angled Entry Doorway matching blueprint photo) -->
+        <g id="zone_staff_office" class="room-poly">
+          <polygon points="65,980 235,980 235,1080 160,1110 65,1110" fill="#0a2632" stroke="#00f0ff" stroke-width="3.5" />
+          <path d="M 235 1060 Q 210 1060 210 1080" class="door-swing" stroke-width="2.5" />
+          <text x="150" y="1035" text-anchor="middle" class="cad-label" font-size="13.5" fill="#94a3b8">💼 Staff Office</text>
+          <text x="150" y="1055" text-anchor="middle" class="cad-sub">Museum Administration</text>
+        </g>
+
+        <!-- RESTROOMS (CR) WITH TOILET STALLS & SINKS -->
+        <g id="zone_cr" class="room-poly">
+          <rect x="65" y="1110" width="170" height="115" rx="4" fill="#081e2b" stroke="#64748b" stroke-width="3.5" />
+          
+          <!-- Stall Partitions from Drawing -->
+          <rect x="72" y="1116" width="52" height="48" fill="rgba(255,255,255,0.06)" stroke="#94a3b8" stroke-width="1.8" />
+          <circle cx="98" cy="1138" r="8" fill="none" stroke="#cbd5e1" stroke-width="2" />
+          
+          <rect x="72" y="1168" width="52" height="48" fill="rgba(255,255,255,0.06)" stroke="#94a3b8" stroke-width="1.8" />
+          <circle cx="98" cy="1190" r="8" fill="none" stroke="#cbd5e1" stroke-width="2" />
+
+          <!-- Sinks -->
+          <rect x="150" y="1172" width="32" height="22" rx="5" fill="rgba(255,255,255,0.06)" stroke="#cbd5e1" stroke-width="1.8" />
+          <rect x="192" y="1172" width="32" height="22" rx="5" fill="rgba(255,255,255,0.06)" stroke="#cbd5e1" stroke-width="1.8" />
+
+          <text x="175" y="1140" text-anchor="middle" class="cad-label" font-size="13" fill="#ffffff">🚻 Comfort Rooms (CR)</text>
+          <text x="175" y="1158" text-anchor="middle" class="cad-sub">Restrooms &amp; Washrooms</text>
+        </g>
+
+        <!-- MAIN ENTRANCE, DOUBLE SWING DOORS & RAMP -->
+        <g id="zone_entrance" class="room-poly">
+          <polygon points="240,1000 760,1000 760,1190 240,1190" fill="#052733" stroke="#00f0ff" stroke-width="3.5" />
+          
+          <!-- Double Swing Doors (Curved arcs matching photo) -->
+          <path d="M 455 1190 Q 475 1145 500 1190" class="door-swing" stroke="#5eead4" stroke-width="3.5" />
+          <path d="M 545 1190 Q 525 1145 500 1190" class="door-swing" stroke="#5eead4" stroke-width="3.5" />
+          
+          <text x="500" y="1080" text-anchor="middle" class="cad-label" font-size="20" fill="#5eead4">🚪 MAIN ENTRANCE</text>
+          <text x="500" y="1108" text-anchor="middle" class="cad-sub">Visitor Reception &amp; Ticketing Foyer</text>
+
+          <!-- Exterior Concrete Ramp & Steps -->
+          <rect x="360" y="1190" width="280" height="95" rx="4" fill="#00141c" stroke="#00f0ff" stroke-width="2.5" stroke-dasharray="6,4" />
+          <line x1="360" y1="1215" x2="640" y2="1215" stroke="rgba(0,240,255,0.4)" stroke-width="2" />
+          <line x1="360" y1="1240" x2="640" y2="1240" stroke="rgba(0,240,255,0.4)" stroke-width="2" />
+          <line x1="360" y1="1265" x2="640" y2="1265" stroke="rgba(0,240,255,0.4)" stroke-width="2" />
+          <text x="500" y="1255" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="12" fill="#7dd3fc">▲ ACCESS RAMP &amp; EXTERIOR STEPS</text>
+        </g>
+
+        <!-- DYNAMIC WAYFINDING ROUTE LAYER -->
+        <g id="routeLayer"></g>
+
+        <!-- INTERACTIVE CATEGORY ROOM BEACONS LAYER -->
+        <g id="pinsLayer"></g>
+      </svg>
+      `;
+    }
+
+    // Render High-Visibility Architectural Second Floor Plan (Category-Only Rooms)
+    function renderSecondFloorSvg() {
+      return `
+      <svg class="blueprint-svg" viewBox="0 0 1000 1300" xmlns="http://www.w3.org/2000/svg" id="museumSvg">
+        <defs>
+          <pattern id="cadGrid2" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(236, 72, 153, 0.12)" stroke-width="0.9" />
+          </pattern>
+          <linearGradient id="toysGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#4a0b33" stop-opacity="0.95" />
+            <stop offset="100%" stop-color="#24072b" stop-opacity="0.95" />
+          </linearGradient>
+          <linearGradient id="carnivalGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#3c0859" stop-opacity="0.95" />
+            <stop offset="100%" stop-color="#1b0528" stop-opacity="0.95" />
+          </linearGradient>
+        </defs>
+
+        <rect width="1000" height="1300" fill="url(#cadGrid2)" />
+
+        <!-- Outer Boundary Wall -->
+        <rect x="70" y="60" width="860" height="1140" rx="14" fill="#0d0414" stroke="#ec4899" stroke-width="5" />
+
+        <!-- LEVEL 2 BANNER -->
+        <rect x="240" y="80" width="520" height="60" rx="10" fill="#3b0844" stroke="#ec4899" stroke-width="2.5" />
+        <text x="500" y="118" text-anchor="middle" class="cad-label" font-size="19" fill="#f472b6">🪜 SECOND FLOOR (UPPER MEZZANINE LEVEL)</text>
+
+        <!-- STAIRS LANDING (Down to Ground Floor) -->
+        <g id="zone_stairs_landing" class="room-poly">
+          <rect x="245" y="625" width="135" height="155" rx="5" fill="#1e0930" stroke="#f59e0b" stroke-width="3.5" />
+          <line x1="245" y1="650" x2="380" y2="650" stroke="#f59e0b" stroke-width="2.5" />
+          <line x1="245" y1="672" x2="380" y2="672" stroke="#f59e0b" stroke-width="2.5" />
+          <line x1="245" y1="694" x2="380" y2="694" stroke="#f59e0b" stroke-width="2.5" />
+          <line x1="245" y1="716" x2="380" y2="716" stroke="#f59e0b" stroke-width="2.5" />
+          <line x1="245" y1="738" x2="380" y2="738" stroke="#f59e0b" stroke-width="2.5" />
+          
+          <path d="M 312 642 L 312 760 M 304 752 L 312 760 L 320 752" fill="none" stroke="#fcd34d" stroke-width="4" stroke-linecap="round" />
+          <text x="312" y="795" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="12" fill="#fcd34d">▼ STAIRS DOWN</text>
+          <text x="312" y="812" text-anchor="middle" font-size="10" font-weight="800" fill="#fde68a">To Ground Floor</text>
+        </g>
+
+        <!-- 🧸 CATEGORY ROOM: TOYS & COLLECTIONS (Hampanganan) -->
+        <g id="zone_second_floor_toys" class="room-poly" data-cat-id="cat_toys_collections">
+          <rect x="135" y="175" width="350" height="445" rx="12" fill="url(#toysGrad)" stroke="#ec4899" stroke-width="4.5" />
+          
+          <text x="310" y="235" text-anchor="middle" class="cad-label" font-size="18" fill="#fbcfe8">🧸 TOYS &amp; COLLECTIONS ROOM</text>
+          <text x="310" y="260" text-anchor="middle" class="cad-sub" fill="#f472b6">Hampanganan (Toy Room)</text>
+
+          <!-- Showcase Display Units -->
+          <rect x="165" y="310" width="130" height="65" rx="6" fill="rgba(236, 72, 153, 0.25)" stroke="#ec4899" stroke-width="2" />
+          <text x="230" y="348" text-anchor="middle" font-size="11" font-weight="800" fill="#fbcfe8">Folk Toy Showcase</text>
+
+          <rect x="325" y="310" width="130" height="65" rx="6" fill="rgba(236, 72, 153, 0.25)" stroke="#ec4899" stroke-width="2" />
+          <text x="390" y="348" text-anchor="middle" font-size="11" font-weight="800" fill="#fbcfe8">McDonald's &amp; Beanies</text>
+        </g>
+
+        <!-- 🎡 CATEGORY ROOM: CARNIVAL & DISCOVERY -->
+        <g id="zone_second_floor_carnival" class="room-poly" data-cat-id="cat_carnival_play">
+          <rect x="510" y="175" width="355" height="445" rx="12" fill="url(#carnivalGrad)" stroke="#a855f7" stroke-width="4.5" />
+          
+          <text x="685" y="235" text-anchor="middle" class="cad-label" font-size="18" fill="#e9d5ff">🎡 CARNIVAL &amp; DISCOVERY ROOM</text>
+          <text x="685" y="260" text-anchor="middle" class="cad-sub" fill="#c084fc">Discovery Room &amp; Hands-on Play Lab</text>
+
+          <!-- Circular Play Stations -->
+          <circle cx="610" cy="350" r="42" fill="rgba(168, 85, 247, 0.25)" stroke="#a855f7" stroke-width="2.5" />
+          <text x="610" y="355" text-anchor="middle" font-size="10.5" font-weight="800" fill="#e9d5ff">Game Hub</text>
+
+          <circle cx="750" cy="350" r="42" fill="rgba(168, 85, 247, 0.25)" stroke="#a855f7" stroke-width="2.5" />
+          <text x="750" y="355" text-anchor="middle" font-size="10.5" font-weight="800" fill="#e9d5ff">Sensory Lab</text>
+        </g>
+
+        <!-- MEZZANINE BALCONY / VOID OVERLOOKING FUNCTION HALL -->
+        <g id="zone_mezzanine_void" class="room-poly">
+          <polygon points="140,620 860,620 860,1130 140,1130" fill="rgba(6, 2, 12, 0.9)" stroke="#ec4899" stroke-width="3" stroke-dasharray="10,6" />
+          <!-- Balcony Safety Handrail -->
+          <rect x="170" y="640" width="660" height="450" rx="8" fill="none" stroke="rgba(236,72,153,0.35)" stroke-width="2" />
+          <text x="500" y="860" text-anchor="middle" class="cad-label" font-size="20" fill="#f472b6">👀 MEZZANINE VOID</text>
+          <text x="500" y="890" text-anchor="middle" class="cad-sub" fill="#fbcfe8">Open-to-Below Balcony Overlooking Function Hall</text>
+        </g>
+
+        <!-- DYNAMIC WAYFINDING ROUTE LAYER -->
+        <g id="routeLayer"></g>
+
+        <!-- INTERACTIVE CATEGORY ROOM BEACONS LAYER -->
+        <g id="pinsLayer"></g>
+      </svg>
+      `;
+    }
+
+    // Render High-Visibility Category Room Pins (One Beacon per Category Room)
+    function renderPins() {
+      const pinsLayer = document.getElementById('pinsLayer');
+      if (!pinsLayer) return;
+      pinsLayer.innerHTML = '';
+
+      const roomsOnFloor = Object.values(CATEGORY_ROOMS).filter(r => r.floor === currentFloor);
+
+      roomsOnFloor.forEach(room => {
+        // Category Filter
+        if (activeCategory !== 'all' && activeCategory !== room.category) return;
+
+        // Search Filter: Matches room title, subtitle, or any exhibits inside
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase();
+          const matchRoom = room.title.toLowerCase().includes(q) || room.subtitle.toLowerCase().includes(q) || room.category.toLowerCase().includes(q);
+          const matchExhibit = room.exhibitCodes.some(code => {
+            const ex = exhibitsData.find(e => e.code === code);
+            return ex && (ex.title.toLowerCase().includes(q) || ex.code.toLowerCase().includes(q));
+          });
+          if (!matchRoom && !matchExhibit) return;
+        }
+
+        const posX = (room.pinX / 100) * 1000;
+        const posY = (room.pinY / 100) * 1300;
+        const color = room.color;
+        const count = room.exhibitCodes.length;
+        const countText = count === 1 ? '1 Exhibit' : `${count} Exhibits`;
+
+        const pinG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        pinG.setAttribute('class', 'category-room-pin');
+        pinG.setAttribute('id', `pin_${room.id}`);
+        pinG.setAttribute('transform', `translate(${posX}, ${posY})`);
+        pinG.setAttribute('tabindex', '0');
+        pinG.setAttribute('role', 'button');
+        pinG.setAttribute('aria-label', `${room.title} (${countText})`);
+
+        pinG.innerHTML = `
+          <!-- Pulsing Radar Wave Ring -->
+          <circle cx="0" cy="-28" r="18" fill="none" stroke="${color}" stroke-width="2.5" class="pin-ring" />
+
+          <!-- Beacon Pin Shape -->
+          <path d="M 0 0 C -6 -6 -24 -24 -24 -38 C -24 -52 -13 -62 0 -62 C 13 -62 24 -52 24 -38 C 24 -24 6 -6 0 0 Z" 
+                fill="${color}" stroke="#ffffff" stroke-width="2.5" filter="drop-shadow(0 5px 15px rgba(0,0,0,0.85))" />
+          
+          <!-- Center White Core -->
+          <circle cx="0" cy="-38" r="14" fill="#ffffff" />
+          
+          <!-- Category Icon -->
+          <text x="0" y="-33" text-anchor="middle" font-size="14">
+            ${room.icon}
+          </text>
+
+          <!-- Category Badge Label Below Beacon -->
+          <g class="pin-tooltip">
+            <rect x="-85" y="-95" width="170" height="26" rx="7" fill="rgba(2, 19, 28, 0.96)" stroke="${color}" stroke-width="1.8" />
+            <text x="0" y="-78" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="11" fill="#ffffff">
+              ${room.icon} ${escapeHtml(room.category)} (${count})
+            </text>
+          </g>
+        `;
+
+        // Click Handler with Drag Gate to prevent misfires during pan
+        pinG.addEventListener('click', (e) => {
+          if (hasDragged) return;
+          e.stopPropagation();
+          e.preventDefault();
+          openCategoryRoomDrawer(room);
+        });
+
+        pinsLayer.appendChild(pinG);
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str == null ? '' : str).replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
+    }
+
+    // Render Sidebar Directory (Grouped cleanly by Category Rooms)
+    function renderSidebar() {
+      const list = document.getElementById('sidebarList');
+      if (!list) return;
+
+      const roomsOnFloor = Object.values(CATEGORY_ROOMS).filter(r => r.floor === currentFloor);
+      const totalExhibits = roomsOnFloor.reduce((acc, r) => acc + r.exhibitCodes.length, 0);
+
+      document.getElementById('sidebarCountLabel').textContent = `${roomsOnFloor.length} Rooms • ${totalExhibits} Exhibits`;
+
+      let html = `
+        <div class="sidebar-section-title">
+          <span>Category Rooms (Level ${currentFloor})</span>
+          <span>${roomsOnFloor.length}</span>
+        </div>
+        <div class="category-rooms-dir-list">
+      `;
+
+      roomsOnFloor.forEach(room => {
+        const isFilteredOut = activeCategory !== 'all' && activeCategory !== room.category;
+        if (isFilteredOut) return;
+
+        html += `
+          <div class="cat-room-group" data-room-id="${room.id}">
+            <div class="cat-room-header" data-room-id="${room.id}" title="View ${room.title}">
+              <div class="cat-room-title-wrap">
+                <span class="cat-room-dot" style="background:${room.color}; box-shadow:0 0 8px ${room.color};"></span>
+                <span class="cat-room-name">${room.icon} ${escapeHtml(room.category)}</span>
+              </div>
+              <span class="cat-room-count-badge" style="border-color:${room.color}; color:${room.color};">
+                ${room.exhibitCodes.length} ${room.exhibitCodes.length === 1 ? 'Exhibit' : 'Exhibits'}
+              </span>
+            </div>
+            <div class="cat-room-exhibits-list">
+        `;
+
+        room.exhibitCodes.forEach(code => {
+          const ex = exhibitsData.find(e => e.code === code);
+          if (!ex) return;
+          html += `
+            <div class="cat-exhibit-item" data-room-id="${room.id}" data-code="${ex.code}">
+              <div class="cat-exhibit-info">
+                <span class="cat-exhibit-bullet">↳</span>
+                <span class="cat-exhibit-title">${escapeHtml(ex.title)}</span>
+              </div>
+              <span class="cat-exhibit-code">${ex.code}</span>
+            </div>
+          `;
+        });
+
+        html += `
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+
+      // Public Facilities & Architectural Wings
+      if (currentFloor === 1) {
+        html += `
+          <div class="sidebar-section-title" style="margin-top:14px;">
+            <span>Facilities &amp; Public Wings</span>
+          </div>
+          <div class="room-dir-list">
+            <div class="room-dir-item" data-zone="zone_entrance">
+              <div class="room-dir-info"><span>🚪</span><span>Main Entrance &amp; Foyer</span></div>
+              <span style="font-size:10px; color:#94a3b8;">Entry</span>
+            </div>
+            <div class="room-dir-item" data-zone="zone_cr">
+              <div class="room-dir-info"><span>🚻</span><span>Comfort Rooms (CR)</span></div>
+              <span style="font-size:10px; color:#94a3b8;">Restrooms</span>
+            </div>
+            <div class="room-dir-item" data-zone="zone_staff_office">
+              <div class="room-dir-info"><span>💼</span><span>Staff Administration Office</span></div>
+              <span style="font-size:10px; color:#94a3b8;">Admin</span>
+            </div>
+            <div class="room-dir-item" data-zone="zone_function_hall">
+              <div class="room-dir-info"><span>🏛️</span><span>Central Function Hall</span></div>
+              <span style="font-size:10px; color:#94a3b8;">Great Hall</span>
+            </div>
+            <div class="room-dir-item" data-zone="zone_stairs">
+              <div class="room-dir-info"><span>🪜</span><span>Staircase to Level 2</span></div>
+              <span style="font-size:10px; color:#f59e0b;">Stairs Up</span>
+            </div>
+            <div class="room-dir-item" data-zone="zone_aquarium">
+              <div class="room-dir-info"><span>🐠</span><span>Aquarium &amp; Live Reef</span></div>
+              <span style="font-size:10px; color:#38bdf8;">Tanks</span>
+            </div>
+          </div>
+        `;
+      } else {
+        html += `
+          <div class="sidebar-section-title" style="margin-top:14px;">
+            <span>Mezzanine Features</span>
+          </div>
+          <div class="room-dir-list">
+            <div class="room-dir-item" data-zone="zone_stairs_landing">
+              <div class="room-dir-info"><span>🪜</span><span>Stairs Down to Ground</span></div>
+              <span style="font-size:10px; color:#f59e0b;">Landing</span>
+            </div>
+            <div class="room-dir-item" data-zone="zone_mezzanine_void">
+              <div class="room-dir-info"><span>👀</span><span>Mezzanine Void Balcony</span></div>
+              <span style="font-size:10px; color:#ec4899;">Overlook</span>
+            </div>
+          </div>
+        `;
+      }
+
+      list.innerHTML = html;
+
+      // Click on category room header opens room in drawer
+      list.querySelectorAll('.cat-room-header').forEach(header => {
+        header.addEventListener('click', () => {
+          const roomId = header.dataset.roomId;
+          const room = CATEGORY_ROOMS[roomId];
+          if (room) openCategoryRoomDrawer(room);
+        });
+      });
+
+      // Click on an exhibit item under the room opens the room drawer showing that specific exhibit
+      list.querySelectorAll('.cat-exhibit-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const roomId = item.dataset.roomId;
+          const code = item.dataset.code;
+          const room = CATEGORY_ROOMS[roomId];
+          if (room) openCategoryRoomDrawer(room, code);
+        });
+      });
+
+      // Facilities click listeners
+      list.querySelectorAll('.room-dir-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const zoneId = item.dataset.zone;
+          if (zoneId) {
+            highlightRoomZone(zoneId);
+            const el = document.getElementById(zoneId);
+            if (el) el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+          }
+        });
+      });
+    }
+
+    // Focus on a category room: center map and scale smoothly
+    function focusCategoryRoom(room) {
+      if (currentFloor !== room.floor) {
+        switchFloor(room.floor, false);
+      }
+      
+      const posX = (room.pinX / 100) * 1000;
+      const posY = (room.pinY / 100) * 1300;
+
+      zoomLevel = Math.max(zoomLevel, 0.88);
+      panX = -(posX - 500) * zoomLevel;
+      panY = -(posY - 650) * zoomLevel;
+      
+      mapStage.style.transition = 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+      updateTransform();
+    }
+
+    function highlightRoomZone(zoneId) {
+      const el = document.getElementById(zoneId);
+      if (el) {
+        el.style.filter = 'brightness(1.6) drop-shadow(0 0 20px #00f0ff)';
+        setTimeout(() => {
+          el.style.filter = '';
+        }, 1500);
+      }
+    }
+
+    // Switch Floor
+    function switchFloor(floorNum, clearDirections = true) {
+      currentFloor = floorNum;
+      
+      document.getElementById('btnFloor1').classList.toggle('active', currentFloor === 1);
+      document.getElementById('btnFloor2').classList.toggle('active', currentFloor === 2);
+      document.getElementById('btnFloor1').setAttribute('aria-selected', currentFloor === 1);
+      document.getElementById('btnFloor2').setAttribute('aria-selected', currentFloor === 2);
+
+      svgMount.innerHTML = currentFloor === 1 ? renderGroundFloorSvg() : renderSecondFloorSvg();
+      
+      if (clearDirections) clearRoute();
+      else if (activeRouteKey) renderRoute(activeRouteKey);
+
+      renderPins();
+      renderSidebar();
+      setupRoomClicks();
+    }
+
+    // Setup Room Polygon Click Listeners with Drag Gate
+    function setupRoomClicks() {
+      const roomZoneMap = {
+        'zone_marine_story': 'cat_marine_nature',
+        'zone_splash_zone': 'cat_touch_play',
+        'zone_reading_corner': 'cat_reading_learning',
+        'zone_maranon_heritage': 'cat_character_heritage',
+        'zone_second_floor_toys': 'cat_toys_collections',
+        'zone_second_floor_carnival': 'cat_carnival_play'
+      };
+
+      Object.entries(roomZoneMap).forEach(([zoneId, catRoomId]) => {
+        const el = document.getElementById(zoneId);
+        if (el) {
+          el.addEventListener('click', (e) => {
+            if (hasDragged) return; // User was panning the map, not clicking room!
+            const room = CATEGORY_ROOMS[catRoomId];
+            if (room) openCategoryRoomDrawer(room);
+          });
+        }
+      });
+
+      // Facilities click listeners
+      const facilities = {
+        'zone_entrance': { title: '🚪 Main Entrance & Foyer', desc: 'Visitor reception, ticketing foyer, access ramp, and museum entrance doors.' },
+        'zone_cr': { title: '🚻 Comfort Rooms (CR)', desc: 'Clean, accessible restrooms and washrooms for visitors and school tour groups.' },
+        'zone_staff_office': { title: '💼 Staff Administration Office', desc: 'Museum staff offices, administrative control center, and guide headquarters.' },
+        'zone_function_hall': { title: '🏛️ Central Function Hall', desc: 'Main assembly hall for student orientations, workshops, storytelling sessions, and assemblies.' },
+        'zone_stairs': { title: '🪜 Staircase to Level 2', desc: 'Direct access staircase leading to the Second Floor (Toys & Carnival).', actionLabel: 'Go to Second Floor 🪜', action: () => switchFloor(2) },
+        'zone_stairs_landing': { title: '🪜 Stairs Down to Ground Floor', desc: 'Upper landing staircase descending to the Ground Floor Function Hall.', actionLabel: 'Go to Ground Floor 📍', action: () => switchFloor(1) },
+        'zone_aquarium': { title: '🐠 Aquarium & Live Reef Systems', desc: 'Live tropical saltwater aquarium tanks displaying coral reef marine life.' },
+        'zone_mezzanine_void': { title: '👀 Mezzanine Void Balcony', desc: 'Open architectural balcony overlooking the Ground Floor Central Function Hall.' }
+      };
+
+      Object.entries(facilities).forEach(([zoneId, info]) => {
+        const el = document.getElementById(zoneId);
+        if (el) {
+          el.addEventListener('click', (e) => {
+            if (hasDragged) return;
+            highlightRoomZone(zoneId);
+            openFacilityDrawer(info);
+          });
+        }
+      });
+    }
+
+    // Open Category Room Drawer
+    function openCategoryRoomDrawer(room, specificExhibitCode = null) {
+      selectedRoom = room;
+      const drawer = document.getElementById('exhibitDrawer');
+      const backdrop = document.getElementById('drawerBackdrop');
+
+      highlightRoomZone(room.zoneId);
+      focusCategoryRoom(room);
+
+      if (specificExhibitCode) {
+        const ex = exhibitsData.find(e => e.code === specificExhibitCode);
+        if (ex) {
+          showExhibitView(room, ex);
+        } else {
+          showRoomView(room);
+        }
+      } else {
+        showRoomView(room);
+      }
+
+      drawer.classList.add('open');
+      drawer.setAttribute('aria-hidden', 'false');
+      backdrop.classList.add('open');
+      drawer.scrollTop = 0;
+    }
+
+    // Show Category Room View in Drawer (Lists all exhibits inside this room)
+    function showRoomView(room) {
+      document.getElementById('drawerRoomView').style.display = 'flex';
+      document.getElementById('drawerExhibitView').style.display = 'none';
+      document.getElementById('drawerFacilityView').style.display = 'none';
+
+      document.getElementById('drawerImg').src = room.imagePath || '/uploads/under-the-sea-banner-260x170.jpg';
+      document.getElementById('drawerImg').alt = room.title;
+      document.getElementById('drawerCode').textContent = 'CATEGORY ROOM';
+
+      const badge = document.getElementById('roomCategoryBadge');
+      badge.textContent = `${room.icon} ${room.category}`;
+      badge.style.background = room.color;
+      badge.style.color = '#03131c';
+
+      document.getElementById('roomTitle').textContent = room.title;
+      document.getElementById('roomLocation').textContent = `📍 Level ${room.floor} • ${room.subtitle}`;
+      document.getElementById('roomDesc').textContent = room.description;
+
+      const exhibitsCount = room.exhibitCodes.length;
+      document.getElementById('roomExhibitsCount').textContent = exhibitsCount === 1 ? '1 Exhibit Inside' : `${exhibitsCount} Exhibits Inside`;
+
+      // Render Exhibits Cards List Inside Room
+      const container = document.getElementById('roomExhibitsContainer');
+      container.innerHTML = '';
+
+      room.exhibitCodes.forEach(code => {
+        const ex = exhibitsData.find(e => e.code === code) || { code, title: code, description: '' };
+        const card = document.createElement('div');
+        card.className = 'room-exhibit-card';
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('aria-label', `View exhibit ${ex.title}`);
+
+        const imgPath = ex.imagePath || (Array.isArray(ex.imagePaths) && ex.imagePaths[0]) || room.imagePath;
+
+        card.innerHTML = `
+          <img src="${imgPath}" alt="${escapeHtml(ex.title)}" class="room-exhibit-card-img" onerror="this.src='/uploads/ex1.jpeg'">
+          <div class="room-exhibit-card-body">
+            <div class="room-exhibit-card-header">
+              <h5 class="room-exhibit-card-title">${escapeHtml(ex.title)}</h5>
+              <span class="room-exhibit-card-code">${ex.code}</span>
+            </div>
+            <p class="room-exhibit-card-sub">${escapeHtml(ex.description || 'Interactive educational exhibit.')}</p>
+          </div>
+          <span class="room-exhibit-card-arrow">›</span>
+        `;
+
+        card.addEventListener('click', () => {
+          showExhibitView(room, ex);
+        });
+
+        container.appendChild(card);
+      });
+
+      // Hook up Route Button to Category Room
+      document.getElementById('btnTriggerRoomRoute').onclick = () => {
+        renderRoute(room.id);
+        closeExhibitDrawer();
+      };
+    }
+
+    // Show Specific Exhibit View inside Category Room
+    function showExhibitView(room, ex) {
+      const fullEx = exhibitsData.find(e => e.code === ex.code) || {};
+      selectedExhibit = Object.assign({}, ex, fullEx);
+      document.getElementById('drawerRoomView').style.display = 'none';
+      document.getElementById('drawerExhibitView').style.display = 'flex';
+      document.getElementById('drawerFacilityView').style.display = 'none';
+
+      const imgPath = ex.imagePath || (Array.isArray(ex.imagePaths) && ex.imagePaths[0]) || room.imagePath || '/uploads/ex1.jpeg';
+      document.getElementById('drawerImg').src = imgPath;
+      document.getElementById('drawerImg').alt = ex.title;
+      document.getElementById('drawerCode').textContent = ex.code;
+
+      document.getElementById('drawerCat').textContent = `Inside ${room.category} Room`;
+      document.getElementById('drawerCat').style.background = room.color;
+      document.getElementById('drawerCat').style.color = '#03131c';
+
+      document.getElementById('drawerTitle').textContent = ex.title;
+      document.getElementById('drawerLocation').textContent = `📍 ${ex.location || room.subtitle}`;
+
+      const directionsEl = document.getElementById('drawerDirectionsText');
+      if (directionsEl) {
+        directionsEl.textContent = ex.directions || (
+          ex.code === 'EX-003'
+            ? 'From the Main Entrance, turn right into the East Wing corridor and enter the first door on the right into the Touch & Play Room. You will find the live touch pool basin in the center.'
+            : (room.floor === 2
+                ? 'From the Main Entrance, take the staircase on the left up to Level 2 (Second Floor).'
+                : 'From the Main Entrance, walk straight across the central Function Hall into the room.')
+        );
+      }
+
+      // Reset Language Tabs
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+      const enTab = document.querySelector('.lang-btn[data-lang="en"]');
+      if (enTab) enTab.classList.add('active');
+
+      document.getElementById('drawerDesc').textContent = ex.description || 'Interactive educational exhibit at Museo Sang Bata sa Negros.';
+      document.getElementById('drawerFullLink').href = `/exhibit.html?code=${encodeURIComponent(ex.code)}`;
+
+      stopAudio();
+      document.getElementById('audioStatus').textContent = 'Listen to exhibit narration';
+      document.getElementById('btnAudioPlay').textContent = '▶ Play Audio';
+
+      // Back to Room button
+      document.getElementById('btnBackToRoom').onclick = () => {
+        showRoomView(room);
+      };
+
+      // Route to Exhibit's Room
+      document.getElementById('btnTriggerRoute').onclick = () => {
+        renderRoute(room.id);
+        closeExhibitDrawer();
+      };
+    }
+
+    // Show Facility Details in Drawer
+    function openFacilityDrawer(info) {
+      const drawer = document.getElementById('exhibitDrawer');
+      const backdrop = document.getElementById('drawerBackdrop');
+
+      document.getElementById('drawerRoomView').style.display = 'none';
+      document.getElementById('drawerExhibitView').style.display = 'none';
+      const fView = document.getElementById('drawerFacilityView');
+      fView.style.display = 'flex';
+
+      document.getElementById('drawerImg').src = '/uploads/header-bg.webp';
+      document.getElementById('drawerCode').textContent = 'FACILITY';
+
+      document.getElementById('facilityTitle').textContent = info.title;
+      document.getElementById('facilityDesc').textContent = info.desc;
+
+      const actions = document.getElementById('facilityActions');
+      actions.innerHTML = '';
+
+      if (info.action) {
+        const btn = document.createElement('button');
+        btn.className = 'btn-route-action';
+        btn.textContent = info.actionLabel || 'Action';
+        btn.onclick = () => {
+          info.action();
+          closeExhibitDrawer();
+        };
+        actions.appendChild(btn);
+      }
+
+      drawer.classList.add('open');
+      drawer.setAttribute('aria-hidden', 'false');
+      backdrop.classList.add('open');
+    }
+
+    function closeExhibitDrawer() {
+      stopAudio();
+      const drawer = document.getElementById('exhibitDrawer');
+      const backdrop = document.getElementById('drawerBackdrop');
+      drawer.classList.remove('open');
+      drawer.setAttribute('aria-hidden', 'true');
+      backdrop.classList.remove('open');
+    }
+
+    let _mapAudioEl = null;
+    let _mapAudioBlobUrl = null;
+    let _mapAudioSeq = 0;
+    let _mapAudioSource = null; // 'dir' | 'drawer' | null
+    let _mapAudioAbortCtrl = null;
+
+    // Stop and cleanly unload any audio (prevents duplicate voices, unbinds error handlers)
+    function stopAudio() {
+      _mapAudioSeq++;
+      if (_mapAudioAbortCtrl) {
+        try { _mapAudioAbortCtrl.abort(); } catch (e) {}
+        _mapAudioAbortCtrl = null;
+      }
+
+      // Detach handlers BEFORE pausing/clearing to avoid firing error events
+      if (_mapAudioEl) {
+        _mapAudioEl.onplay = null;
+        _mapAudioEl.onended = null;
+        _mapAudioEl.onerror = null;
+        try { _mapAudioEl.pause(); } catch (e) {}
+        try { _mapAudioEl.removeAttribute('src'); } catch (e) {}
+        _mapAudioEl = null;
+      }
+
+      if (_mapAudioBlobUrl) {
+        try { URL.revokeObjectURL(_mapAudioBlobUrl); } catch (e) {}
+        _mapAudioBlobUrl = null;
+      }
+
+      // Cancel any browser speech synthesis defensively so ONLY Fish Audio / server voice plays
+      if ('speechSynthesis' in window) {
+        try { window.speechSynthesis.cancel(); } catch (e) {}
+      }
+
+      isTtsPlaying = false;
+      _mapAudioSource = null;
+
+      const dirBtn = document.getElementById('dirVoiceBtn');
+      if (dirBtn) {
+        dirBtn.textContent = '🔊 Read Aloud';
+        dirBtn.disabled = false;
+        dirBtn.classList.remove('playing');
+      }
+
+      const drawerBtn = document.getElementById('btnAudioPlay');
+      if (drawerBtn) {
+        drawerBtn.textContent = '▶ Play Audio';
+        drawerBtn.disabled = false;
+      }
+
+      const st = document.getElementById('audioStatus');
+      if (st && (st.textContent.includes('Playing') || st.textContent.includes('Loading'))) {
+        st.textContent = 'Listen to exhibit narration';
+      }
+    }
+
+    // Audio Narration (Powered by Fish Audio / Server Natural Voice)
+    async function playAudio(text, lang = 'en', source = 'drawer') {
+      if (!text || !text.trim()) return;
+
+      // If user clicked the same audio button while playing/loading, toggle STOP cleanly
+      if (_mapAudioSource === source && (_mapAudioEl || _mapAudioAbortCtrl)) {
+        stopAudio();
+        return;
+      }
+
+      // Stop any prior audio from either source
+      stopAudio();
+
+      const currentSeq = ++_mapAudioSeq;
+      _mapAudioSource = source;
+      isTtsPlaying = true;
+      _mapAudioAbortCtrl = new AbortController();
+
+      const dirBtn = document.getElementById('dirVoiceBtn');
+      const drawerBtn = document.getElementById('btnAudioPlay');
+      const st = document.getElementById('audioStatus');
+
+      if (source === 'dir') {
+        if (dirBtn) {
+          dirBtn.textContent = '■ Stop (Loading…)';
+          dirBtn.disabled = false;
+        }
+      } else {
+        if (drawerBtn) {
+          drawerBtn.textContent = '■ Stop (Loading…)';
+          drawerBtn.disabled = false;
+        }
+        if (st) st.textContent = '⏳ Loading natural voice audio…';
+      }
+
+      try {
+        const resp = await fetch('/api/tts/speak', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, lang }),
+          signal: _mapAudioAbortCtrl.signal
+        });
+
+        // Cancelled while waiting for response
+        if (currentSeq !== _mapAudioSeq) return;
+
+        if (!resp.ok) throw new Error(`Server returned ${resp.status}`);
+
+        const blob = await resp.blob();
+        if (currentSeq !== _mapAudioSeq) return;
+
+        _mapAudioBlobUrl = URL.createObjectURL(blob);
+        _mapAudioEl = new Audio(_mapAudioBlobUrl);
+
+        _mapAudioEl.onplay = () => {
+          if (currentSeq !== _mapAudioSeq) {
+            stopAudio();
+            return;
+          }
+          if (source === 'dir') {
+            if (dirBtn) {
+              dirBtn.textContent = '■ Stop Directions';
+              dirBtn.disabled = false;
+              dirBtn.classList.add('playing');
+            }
+          } else {
+            if (drawerBtn) {
+              drawerBtn.textContent = '■ Stop';
+              drawerBtn.disabled = false;
+            }
+            if (st) st.textContent = '🔊 Playing voice narration…';
+          }
+        };
+
+        _mapAudioEl.onended = () => {
+          if (currentSeq === _mapAudioSeq) {
+            stopAudio();
+            if (source === 'drawer' && st) {
+              st.textContent = 'Finished audio narration';
+              setTimeout(() => {
+                if (st && st.textContent === 'Finished audio narration') {
+                  st.textContent = 'Listen to exhibit narration';
+                }
+              }, 2500);
+            }
+          }
+        };
+
+        _mapAudioEl.onerror = () => {
+          if (currentSeq === _mapAudioSeq) {
+            console.warn('[Map Audio] playback error');
+            stopAudio();
+            if (source === 'drawer' && st) st.textContent = 'Audio playback error.';
+          }
+        };
+
+        await _mapAudioEl.play();
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+        if (currentSeq === _mapAudioSeq) {
+          console.warn('[Map Audio] voice request failed:', err.message);
+          stopAudio();
+          if (source === 'drawer' && st) st.textContent = 'Voice audio unavailable.';
+        }
+      }
+    }
+
+    // Pan and Zoom Transforms
+    function updateTransform() {
+      mapStage.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`;
+    }
+
+    function zoom(delta) {
+      mapStage.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+      zoomLevel = Math.min(Math.max(0.35, zoomLevel + delta), 2.8);
+      updateTransform();
+    }
+
+    // AUTO-FIT TO SCREEN: Guarantees 100% of the entire building is visible on screen
+    function fitToScreen(animate = true) {
+      const vW = mapViewport.clientWidth;
+      const vH = mapViewport.clientHeight;
+      if (!vW || !vH) return;
+
+      if (animate) {
+        mapStage.style.transition = 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)';
+      } else {
+        mapStage.style.transition = 'none';
+      }
+
+      const isMobile = vW < 600;
+      const padX = isMobile ? 12 : 40;
+      const padY = isMobile ? 12 : 30;
+      const availW = vW - padX;
+      const availH = vH - padY;
+
+      // Base SVG viewBox dimensions: 1000 x 1300
+      const baseW = 1000;
+      const baseH = 1300;
+      const heightFactor = is3DMode ? 0.88 : 1.0;
+
+      const fitScale = Math.min(availW / baseW, availH / (baseH * heightFactor));
+      zoomLevel = Math.max(0.35, fitScale);
+      panX = 0;
+      panY = 0;
+      updateTransform();
+
+      const btnFit = document.getElementById('btnFitAll');
+      if (btnFit) btnFit.classList.add('active');
+      const btnW = document.getElementById('btnFitWidth');
+      if (btnW) btnW.classList.remove('active');
+    }
+
+    // FIT WIDTH: Expands map to full width across widescreen monitors
+    function fitToWidth(animate = true) {
+      const vW = mapViewport.clientWidth;
+      if (!vW) return;
+
+      if (animate) {
+        mapStage.style.transition = 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)';
+      } else {
+        mapStage.style.transition = 'none';
+      }
+
+      const padX = 24;
+      const baseW = 1000;
+      zoomLevel = Math.max(0.5, (vW - padX) / baseW);
+      panX = 0;
+      panY = 0;
+      updateTransform();
+
+      const btnW = document.getElementById('btnFitWidth');
+      if (btnW) btnW.classList.add('active');
+      const btnFit = document.getElementById('btnFitAll');
+      if (btnFit) btnFit.classList.remove('active');
+    }
+
+    // 3D Isometric View Mode
+    function set3DMode(enabled) {
+      is3DMode = enabled;
+      document.body.classList.toggle('is-3d', is3DMode);
+      document.getElementById('btnMode2D').classList.toggle('active', !is3DMode);
+      document.getElementById('btnMode3D').classList.toggle('active', is3DMode);
+      fitToScreen(true);
+    }
+
+    // Dynamic Wayfinding Walking Route Engine
+    function renderRoute(routeKey) {
+      activeRouteKey = routeKey;
+      // If routeKey is an exhibit code (e.g. EX-008), find its parent room
+      let route = WAYFINDING_ROUTES[routeKey];
+      if (!route) {
+        const parentRoom = findRoomForExhibit(routeKey);
+        if (parentRoom) {
+          route = WAYFINDING_ROUTES[parentRoom.id];
+        }
+      }
+      if (!route) return;
+
+      if (currentFloor !== route.floor) {
+        switchFloor(route.floor, false);
+      }
+
+      const routeLayer = document.getElementById('routeLayer');
+      if (!routeLayer) return;
+      routeLayer.innerHTML = '';
+
+      if (route.pathD) {
+        routeLayer.innerHTML = `
+          <!-- Glow underlay -->
+          <path d="${route.pathD}" class="walking-route-glow" />
+          <!-- Animated walking path -->
+          <path d="${route.pathD}" class="walking-route-path" />
+          <!-- Start marker at Main Entrance -->
+          <circle cx="500" cy="1140" r="10" fill="#ffea00" stroke="#000" stroke-width="2" />
+          <text x="500" y="1170" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="12" fill="#ffea00">START HERE</text>
+        `;
+      }
+
+      // Populate Directions Panel
+      document.getElementById('dirDestName').textContent = `To: ${route.title}`;
+      const stepsList = document.getElementById('dirStepsList');
+      stepsList.innerHTML = '';
+      route.steps.forEach((step, idx) => {
+        const li = document.createElement('li');
+        li.className = 'dir-step-item';
+        li.innerHTML = `<span class="dir-step-num">${idx + 1}</span><span>${escapeHtml(step)}</span>`;
+        stepsList.appendChild(li);
+      });
+
+      directionsPanel.classList.add('active');
+      if (mapViewport.clientWidth < 600) {
+        panY = -35;
+        updateTransform();
+      }
+    }
+
+    function clearRoute() {
+      activeRouteKey = null;
+      directionsPanel.classList.remove('active');
+      const routeLayer = document.getElementById('routeLayer');
+      if (routeLayer) routeLayer.innerHTML = '';
+      stopAudio();
+      if (mapViewport.clientWidth < 600) {
+        panY = 0;
+        updateTransform();
+      }
+    }
+
+    // Setup All Events with Drag/Click Separation & Responsive Fit
+    function initEvents() {
+      // Floor Switcher
+      document.getElementById('btnFloor1').addEventListener('click', () => switchFloor(1));
+      document.getElementById('btnFloor2').addEventListener('click', () => switchFloor(2));
+
+      // Perspective Mode Toggle (2D / 3D)
+      document.getElementById('btnMode2D').addEventListener('click', () => set3DMode(false));
+      document.getElementById('btnMode3D').addEventListener('click', () => set3DMode(true));
+
+      // Fit Screen & Fit Width
+      document.getElementById('btnFitAll').addEventListener('click', () => fitToScreen(true));
+      document.getElementById('btnFitWidth').addEventListener('click', () => fitToWidth(true));
+      document.getElementById('btnZoomReset').addEventListener('click', () => fitToScreen(true));
+      document.getElementById('btnHudFitWidth').addEventListener('click', () => fitToWidth(true));
+
+      // Toggle Directory Sidebar
+      document.getElementById('btnToggleSidebar').addEventListener('click', () => {
+        mapSidebar.classList.toggle('collapsed');
+        const isCollapsed = mapSidebar.classList.contains('collapsed');
+        document.getElementById('btnToggleSidebar').classList.toggle('active', !isCollapsed);
+        setTimeout(() => fitToScreen(true), 320);
+      });
+
+      // High-Contrast Theme Switcher
+      document.getElementById('btnThemeToggle').addEventListener('click', () => {
+        THEMES.forEach(t => { if (t) document.body.classList.remove(t); });
+        currentThemeIndex = (currentThemeIndex + 1) % THEMES.length;
+        const newTheme = THEMES[currentThemeIndex];
+        if (newTheme) document.body.classList.add(newTheme);
+        document.getElementById('themeToggleLabel').textContent = THEME_LABELS[currentThemeIndex];
+      });
+
+      // Zoom Controls
+      document.getElementById('btnZoomIn').addEventListener('click', () => zoom(0.2));
+      document.getElementById('btnZoomOut').addEventListener('click', () => zoom(-0.2));
+
+      // Window Resize Listener (Auto-adjusts scale so it stays 100% visible)
+      let resizeTimer = null;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          if (document.getElementById('btnFitWidth').classList.contains('active')) {
+            fitToWidth(false);
+          } else {
+            fitToScreen(false);
+          }
+        }, 120);
+      });
+
+      // Directions close
+      document.getElementById('dirCloseBtn').addEventListener('click', clearRoute);
+      
+      // Voice directions read aloud
+      document.getElementById('dirVoiceBtn').addEventListener('click', () => {
+        if (_mapAudioSource === 'dir') {
+          stopAudio();
+          return;
+        }
+        if (!activeRouteKey) return;
+        const route = WAYFINDING_ROUTES[activeRouteKey] || (findRoomForExhibit(activeRouteKey) && WAYFINDING_ROUTES[findRoomForExhibit(activeRouteKey).id]);
+        if (route && route.steps) {
+          playAudio(`Directions to ${route.title}. ${route.steps.join(' ')}`, 'en', 'dir');
+        }
+      });
+
+      // Category Chips
+      const chips = document.querySelectorAll('.chip');
+      chips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          chips.forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          activeCategory = chip.dataset.cat;
+          renderPins();
+          renderSidebar();
+        });
+      });
+
+      // Search Box
+      const searchInput = document.getElementById('mapSearchInput');
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value;
+        renderPins();
+        renderSidebar();
+      });
+
+      // Drawer Close & Return to Map Handlers
+      [
+        'drawerCloseBtn',
+        'drawerBackdrop',
+        'btnReturnToMapTop',
+        'btnCloseRoomTop',
+        'btnReturnToMapBottom',
+        'btnExhibitCloseToMap',
+        'btnExhibitReturnToMapBottom',
+        'btnFacilityBackToMap'
+      ].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('click', closeExhibitDrawer);
+      });
+
+      // Set Drawer Language with Instant Display + AI Translation Fallback
+      async function setDrawerLanguage(lang) {
+        if (!selectedExhibit) return;
+        stopAudio();
+
+        document.querySelectorAll('.lang-btn').forEach(t => {
+          t.classList.toggle('active', t.dataset.lang === lang);
+        });
+
+        const descEl = document.getElementById('drawerDesc');
+        if (!descEl) return;
+
+        if (lang === 'en') {
+          descEl.textContent = selectedExhibit.description || 'No description available.';
+          return;
+        }
+
+        const field = lang === 'tl' ? 'description_tl' : (lang === 'cb' ? 'description_cb' : 'description_' + lang);
+
+        // 1. Check if already present on selectedExhibit
+        if (selectedExhibit[field] && selectedExhibit[field].trim()) {
+          descEl.textContent = selectedExhibit[field].trim();
+          return;
+        }
+
+        // 2. Check in-memory translation cache
+        if (selectedExhibit['_trans_' + lang]) {
+          descEl.textContent = selectedExhibit['_trans_' + lang];
+          return;
+        }
+
+        // 3. Check fallback in exhibitsData array
+        const match = exhibitsData.find(e => e.code === selectedExhibit.code);
+        if (match && match[field] && match[field].trim()) {
+          selectedExhibit[field] = match[field].trim();
+          descEl.textContent = match[field].trim();
+          return;
+        }
+
+        // 4. Dynamic translation fallback via /api/tts/translate
+        const orig = selectedExhibit.description || selectedExhibit.title;
+        if (!orig || !orig.trim()) {
+          descEl.textContent = 'No description available.';
+          return;
+        }
+
+        const langName = lang === 'tl' ? 'Tagalog' : (lang === 'cb' ? 'Cebuano / Bisaya' : lang);
+        descEl.textContent = `⏳ Translating narration to ${langName}…`;
+
+        try {
+          const resp = await fetch('/api/tts/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: orig, targetLang: lang })
+          });
+          if (!resp.ok) throw new Error('Translation failed');
+          const data = await resp.json();
+          if (data && data.translatedText) {
+            selectedExhibit[field] = data.translatedText;
+            selectedExhibit['_trans_' + lang] = data.translatedText;
+            const activeTab = document.querySelector('.lang-btn.active');
+            if (activeTab && activeTab.dataset.lang === lang) {
+              descEl.textContent = data.translatedText;
+            }
+          } else {
+            descEl.textContent = orig;
+          }
+        } catch (err) {
+          console.warn('[Map Translation] translation error:', err);
+          descEl.textContent = orig;
+        }
+      }
+
+      // Audio Button in Drawer (Reads currently displayed text in selected language)
+      document.getElementById('btnAudioPlay').addEventListener('click', () => {
+        if (_mapAudioSource === 'drawer' && (_mapAudioEl || _mapAudioAbortCtrl)) {
+          stopAudio();
+          return;
+        }
+        if (!selectedExhibit) return;
+        const currentLangTab = document.querySelector('.lang-btn.active');
+        const lang = currentLangTab ? currentLangTab.dataset.lang : 'en';
+
+        const descEl = document.getElementById('drawerDesc');
+        let textToSpeak = (descEl && descEl.textContent) ? descEl.textContent.trim() : '';
+
+        // Avoid speaking "translating..." loading placeholder
+        if (!textToSpeak || textToSpeak.startsWith('⏳ Translating')) {
+          if (lang === 'tl' && selectedExhibit.description_tl) textToSpeak = selectedExhibit.description_tl;
+          else if (lang === 'cb' && selectedExhibit.description_cb) textToSpeak = selectedExhibit.description_cb;
+          else textToSpeak = selectedExhibit.description || selectedExhibit.title;
+        }
+
+        playAudio(textToSpeak, lang, 'drawer');
+      });
+
+      // Multilingual Tabs
+      document.querySelectorAll('.lang-btn').forEach(tab => {
+        tab.addEventListener('click', () => {
+          setDrawerLanguage(tab.dataset.lang);
+        });
+      });
+
+      // DRAG TO PAN (With strict movement threshold to fix click glitch)
+      mapViewport.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return; // Primary left button only
+        isPanning = true;
+        hasDragged = false;
+        downX = e.clientX;
+        downY = e.clientY;
+        startX = e.clientX - panX;
+        startY = e.clientY - panY;
+        mapStage.style.transition = 'none'; // Zero lag during active drag
+        mapViewport.classList.add('is-dragging');
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isPanning) return;
+        const dist = Math.hypot(e.clientX - downX, e.clientY - downY);
+        if (dist > 5) {
+          hasDragged = true;
+        }
+        if (hasDragged) {
+          panX = e.clientX - startX;
+          panY = e.clientY - startY;
+          updateTransform();
+        }
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (!isPanning) return;
+        isPanning = false;
+        mapViewport.classList.remove('is-dragging');
+        mapStage.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+        // Reset hasDragged after click events have finished bubbling
+        if (hasDragged) {
+          setTimeout(() => {
+            hasDragged = false;
+          }, 80);
+        }
+      });
+
+      // Mouse Wheel Action: Scroll Down / Up (Default) or Zoom
+      let wheelMode = 'scroll';
+
+      function setWheelMode(mode) {
+        wheelMode = mode;
+        const isScroll = wheelMode === 'scroll';
+        const btnScroll = document.getElementById('btnWheelScroll');
+        const btnZoom = document.getElementById('btnWheelZoom');
+        if (btnScroll) btnScroll.classList.toggle('active', isScroll);
+        if (btnZoom) btnZoom.classList.toggle('active', !isScroll);
+        const hudToggle = document.getElementById('btnHudWheelToggle');
+        if (hudToggle) {
+          hudToggle.textContent = isScroll ? '↕️' : '🔍';
+          hudToggle.title = isScroll ? 'Wheel Mode: Scroll Down/Up (Click to switch to Zoom)' : 'Wheel Mode: Zoom (Click to switch to Scroll)';
+        }
+      }
+
+      const btnScrollEl = document.getElementById('btnWheelScroll');
+      if (btnScrollEl) btnScrollEl.addEventListener('click', () => setWheelMode('scroll'));
+      const btnZoomEl = document.getElementById('btnWheelZoom');
+      if (btnZoomEl) btnZoomEl.addEventListener('click', () => setWheelMode('zoom'));
+      const hudWheelToggle = document.getElementById('btnHudWheelToggle');
+      if (hudWheelToggle) hudWheelToggle.addEventListener('click', () => {
+        setWheelMode(wheelMode === 'scroll' ? 'zoom' : 'scroll');
+      });
+
+      // Mouse Wheel: Scrolls down smoothly by default, or zooms if holding Ctrl or in Zoom mode
+      mapViewport.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        if (e.ctrlKey || e.metaKey || wheelMode === 'zoom') {
+          const delta = e.deltaY > 0 ? -0.12 : 0.12;
+          zoom(delta);
+        } else {
+          mapStage.style.transition = 'none';
+          panY -= e.deltaY * 0.9;
+          if (e.deltaX) {
+            panX -= e.deltaX * 0.9;
+          }
+          updateTransform();
+        }
+      }, { passive: false });
+
+      // Touch Pan & Pinch with Drag Gate
+      let touchDownX = 0;
+      let touchDownY = 0;
+      let initialDist = 0;
+
+      mapViewport.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          isPanning = true;
+          hasDragged = false;
+          touchDownX = e.touches[0].clientX;
+          touchDownY = e.touches[0].clientY;
+          startX = e.touches[0].clientX - panX;
+          startY = e.touches[0].clientY - panY;
+          mapStage.style.transition = 'none';
+        } else if (e.touches.length === 2) {
+          initialDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+        }
+      }, { passive: true });
+
+      mapViewport.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 1 && isPanning) {
+          const dist = Math.hypot(e.touches[0].clientX - touchDownX, e.touches[0].clientY - touchDownY);
+          if (dist > 6) {
+            hasDragged = true;
+          }
+          if (hasDragged) {
+            panX = e.touches[0].clientX - startX;
+            panY = e.touches[0].clientY - startY;
+            updateTransform();
+          }
+        } else if (e.touches.length === 2) {
+          hasDragged = true;
+          const dist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          if (initialDist > 0) {
+            const factor = dist / initialDist;
+            zoomLevel = Math.min(Math.max(0.35, zoomLevel * (factor > 1 ? 1.02 : 0.98)), 2.8);
+            updateTransform();
+          }
+        }
+      }, { passive: true });
+
+      mapViewport.addEventListener('touchend', () => {
+        isPanning = false;
+        initialDist = 0;
+        mapStage.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+        if (hasDragged) {
+          setTimeout(() => {
+            hasDragged = false;
+          }, 80);
+        }
+      });
+    }
+
+    // Load Exhibits Data from Backend API
+    async function loadData() {
+      try {
+        const res = await fetch('/api/exhibits');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.exhibits) && data.exhibits.length > 0) {
+            exhibitsData = data.exhibits;
+            if (selectedExhibit) {
+              const fresh = exhibitsData.find(e => e.code === selectedExhibit.code);
+              if (fresh) {
+                Object.assign(selectedExhibit, fresh);
+                const activeTab = document.querySelector('.lang-btn.active');
+                if (activeTab) {
+                  setDrawerLanguage(activeTab.dataset.lang || 'en');
+                }
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Could not fetch /api/exhibits, using local data', e);
+      }
+
+      // Update badge counts
+      const c1 = Object.values(CATEGORY_ROOMS).filter(r => r.floor === 1).length;
+      const c2 = Object.values(CATEGORY_ROOMS).filter(r => r.floor === 2).length;
+      document.getElementById('badgeFloor1').textContent = `${c1} Rooms`;
+      document.getElementById('badgeFloor2').textContent = `${c2} Rooms`;
+
+      // Check URL parameters: ?focus=EX-008 or ?room=cat_marine_nature or ?route=EX-008 or ?view=3d
+      const params = new URLSearchParams(window.location.search);
+      const focusParam = params.get('focus');
+      const roomParam = params.get('room');
+      const routeParam = params.get('route');
+      const viewParam = params.get('view');
+
+      if (viewParam === '3d') {
+        set3DMode(true);
+      }
+
+      switchFloor(1);
+
+      // Auto-fit after DOM render
+      requestAnimationFrame(() => {
+        fitToScreen(false);
+      });
+
+      if (roomParam) {
+        const targetRoom = CATEGORY_ROOMS[roomParam];
+        if (targetRoom) {
+          switchFloor(targetRoom.floor, false);
+          openCategoryRoomDrawer(targetRoom);
+          return;
+        }
+      }
+
+      if (focusParam) {
+        const exhibitCode = focusParam.toUpperCase();
+        const parentRoom = findRoomForExhibit(exhibitCode);
+        if (parentRoom) {
+          switchFloor(parentRoom.floor, false);
+          openCategoryRoomDrawer(parentRoom, exhibitCode);
+          if (routeParam === '1' || routeParam === 'true' || routeParam === exhibitCode) {
+            setTimeout(() => {
+              renderRoute(parentRoom.id);
+            }, 350);
+          }
+          return;
+        }
+      }
+
+      if (routeParam) {
+        renderRoute(routeParam.toUpperCase());
+        return;
+      }
+    }
+
+    // Initialize Page
+    initEvents();
+    loadData();
+
+  })();
+  </script>
+</body>
+</html>

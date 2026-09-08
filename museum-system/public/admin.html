@@ -6,32 +6,56 @@
 <title>Admin — Museo Sang Bata sa Negros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/style.css?v=18">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
-<body>
-  <div class="topbar">
+<body class="admin-portal-body">
+  <!-- Dedicated Admin Management Topbar (Replaces public visitor navigation) -->
+  <div class="topbar admin-topbar-header">
     <div class="topbar-left">
       <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle admin sidebar" title="Open Admin Menu">
         <span class="toggle-bar"></span>
         <span class="toggle-bar"></span>
         <span class="toggle-bar"></span>
       </button>
-      <a class="brand" href="/dashboard.html">
+      <a class="brand admin-brand" href="/admin.html">
         <div class="brand-mark">M</div>
         <div class="brand-text">
           <div class="name">Museo Sang Bata sa Negros</div>
-          <div class="tagline" style="font-size: 9px; max-width: 400px;">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
+          <div class="admin-badge-row">
+            <span class="admin-badge-pill">🛡️ Admin</span>
+            <span class="admin-badge-sub hide-mobile">Management Console</span>
+          </div>
         </div>
       </a>
     </div>
-    <div class="nav-links">
-      <a class="nav-btn" href="/dashboard.html">Home</a>
-      <a class="nav-btn" href="/exhibits.html">Exhibits</a>
-      <a class="nav-btn" href="/programs.html">Programs</a>
-      <a class="nav-btn" href="/gallery.html">Gallery</a>
-      <a class="nav-btn" href="/events.html">Events</a>
-      <a class="nav-btn active" href="/admin.html">Admin</a>
+
+    <!-- Management Context & Header Actions -->
+    <div class="admin-header-right">
+      <!-- Active Section Context Indicator (Desktop/Tablet) -->
+      <div class="admin-context-pill hide-mobile" id="adminContextPill" title="Current Active Section">
+        <span class="context-pulse-dot"></span>
+        <span id="adminContextTitle" class="context-label">📊 Dashboard Overview</span>
+      </div>
+
+      <!-- Quick Action: Preview Public Visitor Site -->
+      <a class="admin-view-site-link" id="adminViewSiteBtn" href="/dashboard.html" title="View live public museum website">
+        <span class="site-icon">🌐</span>
+        <span class="site-label hide-mobile">View Public Site</span>
+        <span class="site-arrow hide-mobile">↗</span>
+      </a>
+
+      <!-- Curator Profile Chip -->
+      <div class="admin-curator-chip hide-mobile">
+        <span class="curator-avatar">👤</span>
+        <span class="curator-role">Curator</span>
+      </div>
+
+      <!-- Sign Out Button -->
+      <button type="button" class="admin-header-signout-btn" id="topbarSignOutBtn" title="Sign out of Admin Portal">
+        <span>⎋</span>
+        <span class="signout-label hide-mobile">Sign Out</span>
+      </button>
     </div>
   </div>
 
@@ -42,7 +66,8 @@
   <script src="/js/image-enhance.js"></script>
   <script src="/js/lightbox.js"></script>
   <script src="/js/sidebar.js"></script>
-  <script src="/js/admin.js?v=13"></script>
+  <script src="/js/carousel.js"></script>
+  <script src="/js/admin.js?v=20"></script>
   <script src="/js/footer.js"></script>
 </body>
 </html>

@@ -13,6 +13,177 @@
   .leaflet-container { font-family: 'Open Sans', 'Nunito', sans-serif; }
   .leaflet-popup-content-wrapper { border-radius: 8px; }
   .leaflet-popup-content { margin: 10px 14px; }
+
+  /* ── Walking Directions Responsive Card ── */
+  .exhibit-directions-card {
+    margin-top: 20px;
+    padding: 18px 20px;
+    background: linear-gradient(135deg, rgba(3, 29, 41, 0.95) 0%, rgba(2, 20, 29, 0.98) 100%);
+    border: 1.5px solid rgba(0, 240, 255, 0.35);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+  .dir-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .dir-title-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .dir-icon-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(0, 240, 255, 0.15);
+    border: 1px solid #00f0ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .dir-title-area h3 {
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+    line-height: 1.25;
+  }
+  .dir-title-area span {
+    font-size: 11.5px;
+    color: #94a3b8;
+  }
+  .dir-badges-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .dir-steps-box {
+    background: rgba(0,0,0,0.45);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  .dir-steps-heading {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #5eead4;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dir-steps-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .dir-step-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13.5px;
+    color: #e2e8f0;
+    line-height: 1.5;
+  }
+  .dir-step-pill {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(0,240,255,0.18);
+    border: 1px solid #00f0ff;
+    color: #00f0ff;
+    font-weight: 800;
+    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .dir-actions-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .dir-voice-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .dir-map-button {
+    text-decoration: none;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: 0 2px 12px rgba(0,174,189,0.4);
+    border-radius: 10px;
+  }
+
+  @media (max-width: 600px) {
+    .exhibit-directions-card {
+      padding: 12px 14px;
+      margin-top: 14px;
+      border-radius: 14px;
+    }
+    .dir-card-header {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+    .dir-badges-group {
+      width: 100%;
+    }
+    .dir-steps-box {
+      padding: 10px 12px;
+      margin-bottom: 12px;
+    }
+    .dir-step-row {
+      font-size: 12.5px;
+      line-height: 1.45;
+      gap: 8px;
+    }
+    .dir-actions-bar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+    }
+    .dir-voice-controls {
+      width: 100%;
+      justify-content: flex-start;
+    }
+    .dir-map-button {
+      width: 100%;
+      min-height: 44px;
+      font-size: 13.5px;
+      padding: 10px 14px;
+    }
+    #dirVoicePlayBtn, #dirVoiceStopBtn {
+      min-height: 40px;
+      padding: 8px 14px;
+      font-size: 12.5px;
+    }
+  }
 </style>
 </head>
 <body>
@@ -35,6 +206,7 @@
     <div class="nav-links">
       <a class="nav-btn" href="/dashboard.html">Home</a>
       <a class="nav-btn active" href="/exhibits.html">Exhibits</a>
+      <a class="nav-btn" href="/map.html">Floor Map</a>
       <a class="nav-btn" href="/programs.html">Programs</a>
       <a class="nav-btn" href="/gallery.html">Gallery</a>
       <a class="nav-btn" href="/events.html">Events</a>
@@ -86,6 +258,14 @@
         document.title = exhibit.title + ' — Museo Sang Bata sa Negros';
         Api.trackView(code, src);
         const images = getAllImages(exhibit);
+        const directionsText = exhibit.directions || (
+          exhibit.code === 'EX-003'
+            ? 'From the Main Entrance, turn right into the East Wing corridor and enter the first door on the right into the Touch & Play Room. You will find the live touch pool basin in the center.'
+            : (exhibit.floor === 2
+                ? 'From the Main Entrance, take the staircase on the left up to Level 2 (Second Floor).'
+                : 'From the Main Entrance, proceed through the central Function Hall into the main gallery.')
+        );
+        const dirSteps = directionsText.split(/(?<=[.?!])\s+/).filter(Boolean);
 
         content.innerHTML = `
           <div class="plaque">
@@ -128,6 +308,54 @@
                 <div id="ttsStatus" style="font-size:13px; color:var(--ink-soft);"></div>
               </div>
               <div class="plaque-accession mono">Accession No. ${exhibit.code}</div>
+
+              <!-- ── Floor Plan Walking Directions Card ── -->
+              <div class="exhibit-directions-card">
+                <div class="dir-card-header">
+                  <div class="dir-title-area">
+                    <div class="dir-icon-badge">🧭</div>
+                    <div>
+                      <h3>How to Find This Exhibit</h3>
+                      <span>Floor Plan Wayfinding &amp; Walking Guide</span>
+                    </div>
+                  </div>
+                  <div class="dir-badges-group">
+                    <span style="background:rgba(0, 240, 255, 0.15); border:1px solid rgba(0, 240, 255, 0.4); color:#00f0ff; font-size:11px; font-weight:800; padding:3px 8px; border-radius:999px;">
+                      ${exhibit.floor === 2 ? 'Level 2 (Second Floor)' : 'Level 1 (Ground Floor)'}
+                    </span>
+                    ${exhibit.location ? `<span style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#e2e8f0; font-size:11px; font-weight:700; padding:3px 8px; border-radius:999px;">📍 ${escapeHtml(exhibit.location)}</span>` : ''}
+                  </div>
+                </div>
+
+                <div class="dir-steps-box">
+                  <div class="dir-steps-heading">
+                    <span>🚶</span> Walking Directions from Main Entrance:
+                  </div>
+                  <ul class="dir-steps-list">
+                    ${dirSteps.map((step, idx) => `
+                      <li class="dir-step-row">
+                        <span class="dir-step-pill">${idx + 1}</span>
+                        <span>${escapeHtml(step)}</span>
+                      </li>
+                    `).join('')}
+                  </ul>
+                </div>
+
+                <div class="dir-actions-bar">
+                  <div class="dir-voice-controls">
+                    <button type="button" class="btn btn-secondary btn-small" id="dirVoicePlayBtn">
+                      <span>🔊</span> Listen to Directions
+                    </button>
+                    <button type="button" class="btn btn-ghost btn-small" id="dirVoiceStopBtn" style="display:none;">
+                      ■ Stop
+                    </button>
+                    <span id="dirVoiceStatus" style="font-size:11.5px; color:#94a3b8;"></span>
+                  </div>
+                  <a href="/map.html?focus=${encodeURIComponent(exhibit.code)}&route=1" class="btn btn-primary btn-small dir-map-button">
+                    <span>🗺️</span> View Animated Route on Floor Map &rarr;
+                  </a>
+                </div>
+              </div>
 
               <!-- ── Map Section ── -->
               ${(exhibit.lat !== null && exhibit.lat !== undefined && exhibit.lng !== null && exhibit.lng !== undefined) ? `
@@ -208,11 +436,129 @@
         wireFavorite(exhibit);
         wireRatings(exhibit, code);
         wireTTS(exhibit);
+        wireDirectionVoice(directionsText);
         initMap(exhibit);
       }catch(e){
         console.error('Exhibit load error:', e);
         content.innerHTML = `<div class="empty-state"><h2>Tag not recognized</h2><p>No exhibit matches code "${escapeHtml(code)}". It may have been moved or retired.</p><a class="btn btn-primary" href="/exhibits.html">Browse all exhibits</a></div>`;
       }
+    }
+
+    // ── Walking Directions Voice Guidance (Powered by Fish Audio / Natural TTS) ──
+    let _dirAudioEl = null;
+    let _dirAudioUrl = null;
+    let _dirVoiceSeq = 0;
+    let _dirVoiceAbortCtrl = null;
+
+    function stopDirVoice() {
+      _dirVoiceSeq++;
+      if (_dirVoiceAbortCtrl) {
+        try { _dirVoiceAbortCtrl.abort(); } catch (e) {}
+        _dirVoiceAbortCtrl = null;
+      }
+      if (_dirAudioEl) {
+        _dirAudioEl.onplay = null;
+        _dirAudioEl.onended = null;
+        _dirAudioEl.onerror = null;
+        try { _dirAudioEl.pause(); } catch (e) {}
+        try { _dirAudioEl.removeAttribute('src'); } catch (e) {}
+        _dirAudioEl = null;
+      }
+      if (_dirAudioUrl) {
+        try { URL.revokeObjectURL(_dirAudioUrl); } catch (e) {}
+        _dirAudioUrl = null;
+      }
+      if ('speechSynthesis' in window) {
+        try { window.speechSynthesis.cancel(); } catch (e) {}
+      }
+      const playBtn = document.getElementById('dirVoicePlayBtn');
+      const stopBtn = document.getElementById('dirVoiceStopBtn');
+      const statusEl = document.getElementById('dirVoiceStatus');
+      if (playBtn) {
+        playBtn.style.display = 'inline-flex';
+        playBtn.disabled = false;
+      }
+      if (stopBtn) stopBtn.style.display = 'none';
+      if (statusEl) statusEl.textContent = '';
+    }
+
+    function wireDirectionVoice(text) {
+      const playBtn = document.getElementById('dirVoicePlayBtn');
+      const stopBtn = document.getElementById('dirVoiceStopBtn');
+      const statusEl = document.getElementById('dirVoiceStatus');
+      if (!playBtn || !stopBtn || !text) return;
+
+      playBtn.addEventListener('click', async () => {
+        if (typeof window.stopExhibitDescAudio === 'function') {
+          window.stopExhibitDescAudio();
+        }
+        stopDirVoice();
+        const currentSeq = ++_dirVoiceSeq;
+        _dirVoiceAbortCtrl = new AbortController();
+
+        playBtn.disabled = true;
+        if (statusEl) statusEl.textContent = '⏳ Loading natural voice directions…';
+
+        try {
+          const resp = await fetch('/api/tts/speak', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, lang: 'en' }),
+            signal: _dirVoiceAbortCtrl.signal
+          });
+
+          // Aborted or superseded while waiting
+          if (currentSeq !== _dirVoiceSeq) return;
+
+          if (!resp.ok) throw new Error(`Server returned ${resp.status}`);
+
+          const audioBlob = await resp.blob();
+          if (currentSeq !== _dirVoiceSeq) return;
+
+          _dirAudioUrl = URL.createObjectURL(audioBlob);
+          _dirAudioEl = new Audio(_dirAudioUrl);
+
+          _dirAudioEl.onplay = () => {
+            if (currentSeq !== _dirVoiceSeq) {
+              stopDirVoice();
+              return;
+            }
+            playBtn.style.display = 'none';
+            playBtn.disabled = false;
+            stopBtn.style.display = 'inline-flex';
+            if (statusEl) statusEl.textContent = '🔊 Playing voice directions…';
+          };
+
+          _dirAudioEl.onended = () => {
+            if (currentSeq === _dirVoiceSeq) {
+              stopDirVoice();
+              if (statusEl) {
+                statusEl.textContent = 'Finished directions';
+                setTimeout(() => { if (statusEl && statusEl.textContent === 'Finished directions') statusEl.textContent = ''; }, 2500);
+              }
+            }
+          };
+
+          _dirAudioEl.onerror = () => {
+            if (currentSeq === _dirVoiceSeq) {
+              console.warn('[Direction Voice] audio playback error');
+              stopDirVoice();
+              if (statusEl) statusEl.textContent = 'Audio playback error.';
+            }
+          };
+
+          await _dirAudioEl.play();
+        } catch (err) {
+          if (err.name === 'AbortError') return;
+          if (currentSeq === _dirVoiceSeq) {
+            console.warn('[Direction Voice] request failed:', err.message);
+            stopDirVoice();
+            if (statusEl) statusEl.textContent = 'Voice audio unavailable.';
+          }
+        }
+      });
+
+      stopBtn.addEventListener('click', stopDirVoice);
     }
 
     // ── Map Initialization ────────────────────────────────────────────
@@ -256,6 +602,9 @@
       };
       let _currentText = _cache.original;
       let _audioEl = null;   // currently playing <audio> element
+      let _audioUrl = null;
+      let _ttsSeq = 0;
+      let _ttsAbortCtrl = null;
 
       function setStatus(msg, isLoading) {
         statusEl.textContent = msg;
@@ -264,13 +613,30 @@
       }
 
       function stopAudio() {
+        _ttsSeq++;
+        if (_ttsAbortCtrl) {
+          try { _ttsAbortCtrl.abort(); } catch (e) {}
+          _ttsAbortCtrl = null;
+        }
         if (_audioEl) {
-          _audioEl.pause();
-          _audioEl.src = '';
+          _audioEl.onplay = null;
+          _audioEl.onended = null;
+          _audioEl.onerror = null;
+          try { _audioEl.pause(); } catch (e) {}
+          try { _audioEl.removeAttribute('src'); } catch (e) {}
           _audioEl = null;
+        }
+        if (_audioUrl) {
+          try { URL.revokeObjectURL(_audioUrl); } catch (e) {}
+          _audioUrl = null;
+        }
+        if ('speechSynthesis' in window) {
+          try { window.speechSynthesis.cancel(); } catch (e) {}
         }
         setStatus('', false);
       }
+
+      window.stopExhibitDescAudio = stopAudio;
 
       // ── Translate via OpenRouter or use pre-stored curated translation ──
       async function fetchTranslation(targetLang) {
@@ -301,13 +667,16 @@
 
       // ── Speak text using high-fidelity natural voice streaming ──────────
       async function speakCurrent() {
+        stopDirVoice();
         stopAudio();
         const textToSpeak = _currentText || _cache.original;
         if (!textToSpeak || !textToSpeak.trim()) {
           setStatus('No description to read.', false);
           return;
         }
-        // Try server TTS first, fallback to browser speech synthesis
+        const currentSeq = ++_ttsSeq;
+        _ttsAbortCtrl = new AbortController();
+
         try {
           setStatus('⏳ Generating audio…', true);
           const currentLang = (langSelect && langSelect.value !== 'original') ? langSelect.value : 'en';
@@ -315,29 +684,34 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ text: textToSpeak, lang: currentLang }),
+            signal: _ttsAbortCtrl.signal
           });
+          if (currentSeq !== _ttsSeq) return;
           if (!resp.ok) throw new Error('TTS API error ' + resp.status);
 
           const blob = await resp.blob();
-          const url  = URL.createObjectURL(blob);
-          _audioEl   = new Audio(url);
-          _audioEl.onplay  = () => setStatus('🔊 Playing…', true);
-          _audioEl.onended = () => { URL.revokeObjectURL(url); _audioEl = null; setStatus('', false); };
-          _audioEl.onerror = () => { URL.revokeObjectURL(url); _audioEl = null; setStatus('Playback error.', false); };
+          if (currentSeq !== _ttsSeq) return;
+          _audioUrl  = URL.createObjectURL(blob);
+          _audioEl   = new Audio(_audioUrl);
+          _audioEl.onplay  = () => {
+            if (currentSeq !== _ttsSeq) { stopAudio(); return; }
+            setStatus('🔊 Playing…', true);
+          };
+          _audioEl.onended = () => {
+            if (currentSeq === _ttsSeq) stopAudio();
+          };
+          _audioEl.onerror = () => {
+            if (currentSeq === _ttsSeq) {
+              stopAudio();
+              setStatus('Playback error.', false);
+            }
+          };
           await _audioEl.play();
         } catch (e) {
-          console.warn('[TTS speak] server TTS failed, trying browser fallback:', e);
-          // Fallback: browser built-in speech synthesis
-          try {
-            setStatus('🔊 Playing (browser voice)…', true);
-            const utter = new SpeechSynthesisUtterance(textToSpeak);
-            utter.lang = (langSelect?.value === 'tl' || langSelect?.value === 'cb' || langSelect?.value === 'hil') ? 'fil-PH' : 'en-US';
-            utter.onend = () => setStatus('', false);
-            utter.onerror = () => setStatus('Audio unavailable.', false);
-            window.speechSynthesis.cancel();
-            window.speechSynthesis.speak(utter);
-          } catch (e2) {
-            console.error('[TTS speak] both failed:', e2);
+          if (e.name === 'AbortError') return;
+          if (currentSeq === _ttsSeq) {
+            console.warn('[TTS speak] server TTS failed:', e);
+            stopAudio();
             setStatus('Audio unavailable — check connection.', false);
           }
         }
