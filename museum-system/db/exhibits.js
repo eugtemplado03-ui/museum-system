@@ -78,7 +78,7 @@ const KNOWN_EXHIBIT_DIRECTIONS = {
   'EX-007': "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located along the rear species wall.",
   'EX-008': "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located in the eco-conservation corner beside the fishing net art installation.",
   'EX-009': "From the Main Entrance, take the staircase on the left up to Level 2 (Second Floor). Cross the upper corridor walkway overlooking the central hall to the right wing into the Carnival & Discovery Room.",
-  'EX-010': "From the Main Entrance, turn left down the corridor past the restrooms, and enter the first door on the left into the Library Extension to find Franco's Reading Corner (Ground Floor).",
+  'EX-010': "From the Main Entrance, turn left down the corridor, and enter the first door on the left into the Library Extension to find Franco's Reading Corner (Ground Floor).",
   'EX-011': "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located in the coastal mangrove habitat section."
 };
 

@@ -892,7 +892,6 @@ function detectRoomFromCoords(floor, pinX, pinY) {
     if (x >= 24 && x <= 38 && y >= 60 && y <= 76) return 'Staff Office (Under Stairs)';
     if (x >= 23 && x <= 77 && y >= 47 && y <= 77) return 'Central Function Hall';
     if (x >= 23 && x <= 77 && y >= 76 && y <= 93) return 'Main Entrance Foyer';
-    if (x >= 5 && x <= 25 && y >= 74 && y <= 95) return 'Restrooms (Comfort Rooms)';
     if (y < 21) return 'Aquarium & Reef Systems';
     return 'Ground Floor Gallery';
   }
@@ -1077,10 +1076,6 @@ function renderMiniBlueprintSvg(floor) {
       <polygon points="245,785 380,785 380,980 245,980" fill="#092532" stroke="#00f0ff" stroke-width="3" />
       <text x="312" y="870" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="13" fill="#38bdf8">💼 STAFF OFFICE</text>
       <text x="312" y="890" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="10" fill="#94a3b8">Administration</text>
-
-      <!-- Restrooms (CR) -->
-      <polygon points="65,980 240,980 240,1190 65,1190" fill="#16202c" stroke="#64748b" stroke-width="3" />
-      <text x="152" y="1085" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="14" fill="#ffffff">🚻 COMFORT ROOMS</text>
 
       <!-- Main Entrance & Reception Foyer -->
       <polygon points="240,1000 760,1000 760,1190 240,1190" fill="#052733" stroke="#00f0ff" stroke-width="4" />

@@ -2253,7 +2253,7 @@ svg.blueprint-svg {
         pathD: "M 500 1140 L 500 1010 L 230 1010 L 230 680 L 150 680 L 150 550",
         steps: [
           "Enter through the Main Entrance doors into the reception foyer.",
-          "Turn left down the corridor past the Restrooms (CR).",
+          "Turn left down the corridor into the Library Extension.",
           "Enter the Library Extension wing on your left.",
           "You have arrived at Franco's Reading Corner."
         ]
@@ -2502,25 +2502,6 @@ svg.blueprint-svg {
             <text x="150" y="872" text-anchor="middle" font-size="10" font-weight="800" fill="#fdba74">Everyday Heroes Section</text>
             <text x="150" y="886" text-anchor="middle" font-size="8.5" font-weight="700" fill="#fdba74">Values Showcase</text>
           </g>
-        </g>
-
-        <!-- RESTROOMS (CR) WITH TOILET STALLS & SINKS -->
-        <g id="zone_cr" class="room-poly">
-          <rect x="65" y="1110" width="170" height="115" rx="4" fill="#081e2b" stroke="#64748b" stroke-width="3.5" />
-          
-          <!-- Stall Partitions from Drawing -->
-          <rect x="72" y="1116" width="52" height="48" fill="rgba(255,255,255,0.06)" stroke="#94a3b8" stroke-width="1.8" />
-          <circle cx="98" cy="1138" r="8" fill="none" stroke="#cbd5e1" stroke-width="2" />
-          
-          <rect x="72" y="1168" width="52" height="48" fill="rgba(255,255,255,0.06)" stroke="#94a3b8" stroke-width="1.8" />
-          <circle cx="98" cy="1190" r="8" fill="none" stroke="#cbd5e1" stroke-width="2" />
-
-          <!-- Sinks -->
-          <rect x="150" y="1172" width="32" height="22" rx="5" fill="rgba(255,255,255,0.06)" stroke="#cbd5e1" stroke-width="1.8" />
-          <rect x="192" y="1172" width="32" height="22" rx="5" fill="rgba(255,255,255,0.06)" stroke="#cbd5e1" stroke-width="1.8" />
-
-          <text x="175" y="1140" text-anchor="middle" class="cad-label" font-size="13" fill="#ffffff">🚻 Comfort Rooms (CR)</text>
-          <text x="175" y="1158" text-anchor="middle" class="cad-sub">Restrooms &amp; Washrooms</text>
         </g>
 
         <!-- MAIN ENTRANCE, DOUBLE SWING DOORS & RAMP -->
@@ -2905,10 +2886,6 @@ svg.blueprint-svg {
               <div class="room-dir-info"><span>🚪</span><span>Main Entrance &amp; Foyer</span></div>
               <span style="font-size:10px; color:#94a3b8;">Entry</span>
             </div>
-            <div class="room-dir-item" data-zone="zone_cr">
-              <div class="room-dir-info"><span>🚻</span><span>Comfort Rooms (CR)</span></div>
-              <span style="font-size:10px; color:#94a3b8;">Restrooms</span>
-            </div>
             <div class="room-dir-item" data-zone="zone_staff_office">
               <div class="room-dir-info"><span>💼</span><span>Staff Office (Under Stairs)</span></div>
               <span style="font-size:10px; color:#38bdf8;">Admin</span>
@@ -3111,7 +3088,6 @@ svg.blueprint-svg {
       // Facilities click listeners
       const facilities = {
         'zone_entrance': { title: '🚪 Main Entrance & Foyer', desc: 'Visitor reception, ticketing foyer, access ramp, and museum entrance doors.' },
-        'zone_cr': { title: '🚻 Comfort Rooms (CR)', desc: 'Clean, accessible restrooms and washrooms for visitors and school tour groups.' },
         'zone_staff_office': { title: '💼 Staff Administration Office', desc: 'Museum staff offices and administration control center located inside the Function Hall under the staircase, beside the J.G. Marañon section.' },
         'zone_function_hall': { title: '🏛️ Central Function Hall', desc: 'Main assembly hall for student orientations, workshops, storytelling sessions, and assemblies.' },
         'zone_stairs': { title: '🪜 Staircase to Level 2', desc: 'Direct access staircase leading to the Second Floor (Toys & Carnival).', actionLabel: 'Go to Second Floor 🪜', action: () => switchFloor(2) },
