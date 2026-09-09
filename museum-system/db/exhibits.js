@@ -72,13 +72,13 @@ const KNOWN_EXHIBIT_DIRECTIONS = {
   'EX-001': "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located in the center and right side, by the coral reef displays.",
   'EX-002': "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located along the left wall by the freshwater river basin.",
   'EX-003': "From the Main Entrance, turn right into the East Wing corridor and enter the first door on the right into the Touch & Play Room (Ground Floor). You will find the live touch pool basin in the center.",
-  'EX-004': "From the Main Entrance, turn left down the West Wing corridor into the Library Extension wing, and enter the Character & Heritage Room (Ground Floor). Located along the wall gallery of community heroes.",
-  'EX-005': "From the Main Entrance, turn left down the West Wing corridor into the Library Extension wing, and enter the Character & Heritage Room (Ground Floor, beside the Staff Office). Located in the memorial gallery section.",
+  'EX-004': "From the Main Entrance, turn left down the corridor into the Library Extension wing, and enter the Character & Heritage Room (Ground Floor). Located along the wall gallery of community heroes.",
+  'EX-005': "From the Main Entrance, turn left down the corridor into the Library Extension wing, and enter the Character & Heritage Room (Ground Floor, beside the Staff Office). Located in the memorial gallery section.",
   'EX-006': "From the Main Entrance, take the main staircase on the left (above the Staff Office) up to Level 2 (Second Floor). Turn left through the first door into the Toys & Collections Room.",
   'EX-007': "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located along the rear species wall.",
   'EX-008': "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located in the eco-conservation corner beside the fishing net art installation.",
   'EX-009': "From the Main Entrance, take the staircase on the left up to Level 2 (Second Floor). Cross the upper corridor walkway overlooking the central hall to the right wing into the Carnival & Discovery Room.",
-  'EX-010': "From the Main Entrance, turn left down the West Wing corridor past the restrooms, and enter the first door on the left into the Library Extension to find Franco's Reading Corner (Ground Floor).",
+  'EX-010': "From the Main Entrance, turn left down the corridor past the restrooms, and enter the first door on the left into the Library Extension to find Franco's Reading Corner (Ground Floor).",
   'EX-011': "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located in the coastal mangrove habitat section."
 };
 
@@ -98,10 +98,10 @@ function computeDefaultDirections(item) {
     return "From the Main Entrance, turn right into the East Wing corridor and enter the first door on the right into the Touch & Play Room (Ground Floor).";
   }
   if (cat.includes('reading') || zone === 'office_extension') {
-    return "From the Main Entrance, turn left down the West Wing corridor and enter the first door on the left into the Library Extension (Ground Floor).";
+    return "From the Main Entrance, turn left down the corridor and enter the first door on the left into the Library Extension (Ground Floor).";
   }
   if (cat.includes('character') || cat.includes('heritage')) {
-    return "From the Main Entrance, turn left down the West Wing corridor into the Library Extension, and enter the Character & Heritage Room (Ground Floor).";
+    return "From the Main Entrance, turn left down the corridor into the Library Extension, and enter the Character & Heritage Room (Ground Floor).";
   }
   if (cat.includes('toy') || zone === 'second_floor_toys') {
     return "From the Main Entrance, take the stairs on the left up to Level 2, turn left through the first door into the Toys & Collections Room (Second Floor).";

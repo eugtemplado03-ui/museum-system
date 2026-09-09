@@ -892,8 +892,7 @@ function detectRoomFromCoords(floor, pinX, pinY) {
     if (x >= 24 && x <= 38 && y >= 60 && y <= 76) return 'Staff Office (Under Stairs)';
     if (x >= 23 && x <= 77 && y >= 47 && y <= 77) return 'Central Function Hall';
     if (x >= 23 && x <= 77 && y >= 76 && y <= 93) return 'Main Entrance Foyer';
-    if (x >= 5 && x <= 25 && y >= 74 && y <= 85) return 'West Wing Corridor';
-    if (x >= 5 && x <= 25 && y >= 85 && y <= 95) return 'Restrooms (Comfort Rooms)';
+    if (x >= 5 && x <= 25 && y >= 74 && y <= 95) return 'Restrooms (Comfort Rooms)';
     if (y < 21) return 'Aquarium & Reef Systems';
     return 'Ground Floor Gallery';
   }

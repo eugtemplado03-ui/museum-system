@@ -2253,7 +2253,7 @@ svg.blueprint-svg {
         pathD: "M 500 1140 L 500 1010 L 230 1010 L 230 680 L 150 680 L 150 550",
         steps: [
           "Enter through the Main Entrance doors into the reception foyer.",
-          "Turn left down the West Wing corridor past the Restrooms (CR).",
+          "Turn left down the corridor past the Restrooms (CR).",
           "Enter the Library Extension wing on your left.",
           "You have arrived at Franco's Reading Corner."
         ]
@@ -2264,7 +2264,7 @@ svg.blueprint-svg {
         pathD: "M 500 1140 L 500 1010 L 230 1010 L 230 820 L 150 820",
         steps: [
           "Enter through the Main Entrance doors into the reception foyer.",
-          "Turn left down the West Wing corridor into the Library Extension.",
+          "Turn left down the corridor into the Library Extension.",
           "Enter the Character & Heritage Room (beside the Function Hall and Staff Office).",
           "You have arrived at the Joseph G. Marañon Memorabilia and Everyday Heroes memorial gallery."
         ]
@@ -2502,14 +2502,6 @@ svg.blueprint-svg {
             <text x="150" y="872" text-anchor="middle" font-size="10" font-weight="800" fill="#fdba74">Everyday Heroes Section</text>
             <text x="150" y="886" text-anchor="middle" font-size="8.5" font-weight="700" fill="#fdba74">Values Showcase</text>
           </g>
-        </g>
-
-        <!-- WEST WING ACCESS CORRIDOR / FOYER (Connecting Restrooms, Library Wing, & Main Entrance) -->
-        <g id="zone_west_corridor" class="room-poly">
-          <polygon points="65,980 235,980 235,1080 160,1110 65,1110" fill="#061a24" stroke="rgba(0,240,255,0.45)" stroke-width="2.5" stroke-dasharray="6,4" />
-          <path d="M 150 1075 L 150 1010 M 143 1020 L 150 1010 L 157 1020" fill="none" stroke="rgba(0,240,255,0.4)" stroke-width="2" stroke-linecap="round" />
-          <text x="150" y="1040" text-anchor="middle" class="cad-label" font-size="11.5" fill="#94a3b8">🚪 West Wing Corridor</text>
-          <text x="150" y="1058" text-anchor="middle" class="cad-sub" font-size="9" fill="#64748b">Library &amp; Restroom Access</text>
         </g>
 
         <!-- RESTROOMS (CR) WITH TOILET STALLS & SINKS -->
@@ -2917,10 +2909,6 @@ svg.blueprint-svg {
               <div class="room-dir-info"><span>🚻</span><span>Comfort Rooms (CR)</span></div>
               <span style="font-size:10px; color:#94a3b8;">Restrooms</span>
             </div>
-            <div class="room-dir-item" data-zone="zone_west_corridor">
-              <div class="room-dir-info"><span>🚪</span><span>West Wing Corridor</span></div>
-              <span style="font-size:10px; color:#94a3b8;">Hallway</span>
-            </div>
             <div class="room-dir-item" data-zone="zone_staff_office">
               <div class="room-dir-info"><span>💼</span><span>Staff Office (Under Stairs)</span></div>
               <span style="font-size:10px; color:#38bdf8;">Admin</span>
@@ -3124,7 +3112,6 @@ svg.blueprint-svg {
       const facilities = {
         'zone_entrance': { title: '🚪 Main Entrance & Foyer', desc: 'Visitor reception, ticketing foyer, access ramp, and museum entrance doors.' },
         'zone_cr': { title: '🚻 Comfort Rooms (CR)', desc: 'Clean, accessible restrooms and washrooms for visitors and school tour groups.' },
-        'zone_west_corridor': { title: '🚪 West Wing Corridor', desc: 'Connecting hallway between Main Entrance, Restrooms (CR), and Library Extension wing.' },
         'zone_staff_office': { title: '💼 Staff Administration Office', desc: 'Museum staff offices and administration control center located inside the Function Hall under the staircase, beside the J.G. Marañon section.' },
         'zone_function_hall': { title: '🏛️ Central Function Hall', desc: 'Main assembly hall for student orientations, workshops, storytelling sessions, and assemblies.' },
         'zone_stairs': { title: '🪜 Staircase to Level 2', desc: 'Direct access staircase leading to the Second Floor (Toys & Carnival).', actionLabel: 'Go to Second Floor 🪜', action: () => switchFloor(2) },
