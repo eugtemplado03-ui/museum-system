@@ -2253,7 +2253,7 @@ svg.blueprint-svg {
         pathD: "M 500 1140 L 500 1010 L 230 1010 L 230 680 L 150 680 L 150 550",
         steps: [
           "Enter through the Main Entrance doors into the reception foyer.",
-          "Turn left down the corridor past the Restrooms (CR) and Staff Office.",
+          "Turn left down the West Wing corridor past the Restrooms (CR).",
           "Enter the Library Extension wing on your left.",
           "You have arrived at Franco's Reading Corner."
         ]
@@ -2264,8 +2264,8 @@ svg.blueprint-svg {
         pathD: "M 500 1140 L 500 1010 L 230 1010 L 230 820 L 150 820",
         steps: [
           "Enter through the Main Entrance doors into the reception foyer.",
-          "Turn left down the corridor past the Restrooms and Staff Office into the Library Extension.",
-          "Enter the Character & Heritage Room.",
+          "Turn left down the West Wing corridor into the Library Extension.",
+          "Enter the Character & Heritage Room (beside the Function Hall and Staff Office).",
           "You have arrived at the Joseph G. Marañon Memorabilia and Everyday Heroes memorial gallery."
         ]
       },
@@ -2275,7 +2275,7 @@ svg.blueprint-svg {
         pathD: "M 310 700 L 310 500 L 310 390",
         steps: [
           "Enter through the Main Entrance into the Function Hall.",
-          "Take the staircase on the left beside the Staff Office up to Level 2.",
+          "Take the staircase on the left (above the Staff Office) up to Level 2.",
           "Turn left from the upper landing into the Toys & Collections Room.",
           "You have arrived at Hampanganan (Toy Room)."
         ]
@@ -2419,11 +2419,11 @@ svg.blueprint-svg {
         <!-- FUNCTION HALL (Central Assembly Space) -->
         <g id="zone_function_hall" class="room-poly">
           <polygon points="240,620 760,620 760,1000 240,1000" fill="url(#hallGrad)" stroke="#00f0ff" stroke-width="3.5" />
-          <text x="500" y="800" text-anchor="middle" class="cad-label" font-size="19" fill="#f8fafc">🏛️ FUNCTION HALL</text>
-          <text x="500" y="825" text-anchor="middle" class="cad-sub">Main Assembly Hall &amp; Gathering Area</text>
+          <text x="570" y="800" text-anchor="middle" class="cad-label" font-size="19" fill="#f8fafc">🏛️ FUNCTION HALL</text>
+          <text x="570" y="825" text-anchor="middle" class="cad-sub">Main Assembly Hall &amp; Gathering Area</text>
         </g>
 
-        <!-- STAIRCASE TO LEVEL 2 (Directly Beside Staff Office) -->
+        <!-- STAIRCASE TO LEVEL 2 (Directly Above Staff Office) -->
         <g id="zone_stairs" class="room-poly">
           <rect x="245" y="625" width="135" height="155" rx="5" fill="#1b1704" stroke="#f59e0b" stroke-width="3.5" />
           <!-- Stair Steps -->
@@ -2434,9 +2434,36 @@ svg.blueprint-svg {
           <line x1="245" y1="738" x2="380" y2="738" stroke="#f59e0b" stroke-width="2.5" />
           <line x1="245" y1="760" x2="380" y2="760" stroke="#f59e0b" stroke-width="2.5" />
           
-          <path d="M 312 760 L 312 642 M 304 650 L 312 642 L 320 650" fill="none" stroke="#fcd34d" stroke-width="4" stroke-linecap="round" />
-          <text x="312" y="795" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="12" fill="#fcd34d">▲ STAIRS UP</text>
-          <text x="312" y="812" text-anchor="middle" font-size="10" font-weight="800" fill="#fde68a">To Level 2 (Mezzanine)</text>
+          <path d="M 312 755 L 312 642 M 304 650 L 312 642 L 320 650" fill="none" stroke="#fcd34d" stroke-width="4" stroke-linecap="round" />
+          <rect x="258" y="700" width="108" height="24" rx="4" fill="rgba(27,23,4,0.92)" stroke="#f59e0b" stroke-width="1.2" />
+          <text x="312" y="716" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="11" fill="#fcd34d">▲ STAIRS UP (L2)</text>
+        </g>
+
+        <!-- STAFF OFFICE (Inside Function Hall, Under Stairs, Beside J.G. Marañon Section) -->
+        <g id="zone_staff_office" class="room-poly">
+          <rect x="245" y="785" width="135" height="195" rx="6" fill="#092532" stroke="#00f0ff" stroke-width="3.5" />
+          
+          <!-- Office Header Tag -->
+          <rect x="255" y="795" width="115" height="24" rx="4" fill="rgba(0, 240, 255, 0.18)" stroke="#00f0ff" stroke-width="1.2" />
+          <text x="312" y="811" text-anchor="middle" class="cad-label" font-size="11" fill="#38bdf8">💼 STAFF OFFICE</text>
+          <text x="312" y="830" text-anchor="middle" class="cad-sub" font-size="8.5" fill="#94a3b8">Administration</text>
+          <text x="312" y="842" text-anchor="middle" font-size="8" font-weight="700" fill="#5eead4">Under-Stairs Wing</text>
+          
+          <!-- Workstations / Desks in CAD Style -->
+          <rect x="258" y="856" width="48" height="30" rx="3" fill="rgba(0,240,255,0.1)" stroke="#5eead4" stroke-width="1.2" />
+          <rect x="268" y="863" width="28" height="14" rx="2" fill="rgba(0,240,255,0.25)" stroke="#5eead4" stroke-width="1" />
+          <circle cx="282" cy="894" r="4.5" fill="none" stroke="#94a3b8" stroke-width="1.2" />
+          
+          <rect x="320" y="856" width="48" height="30" rx="3" fill="rgba(0,240,255,0.1)" stroke="#5eead4" stroke-width="1.2" />
+          <rect x="330" y="863" width="28" height="14" rx="2" fill="rgba(0,240,255,0.25)" stroke="#5eead4" stroke-width="1" />
+          <circle cx="344" cy="894" r="4.5" fill="none" stroke="#94a3b8" stroke-width="1.2" />
+
+          <text x="312" y="920" text-anchor="middle" font-size="8.5" font-weight="700" fill="#cbd5e1">Staff Workstations</text>
+          <text x="312" y="933" text-anchor="middle" font-size="7.5" font-weight="600" fill="#64748b">&amp; Control Center</text>
+
+          <!-- Office Entry Doorway facing Function Hall -->
+          <path d="M 380 955 Q 355 955 355 980" class="door-swing" stroke="#5eead4" stroke-width="2.5" />
+          <text x="368" y="972" text-anchor="end" font-size="7.5" font-weight="700" fill="#5eead4">DOOR</text>
         </g>
 
         <!-- OFFICE SIDE EXTENSION (LIBRARY WING — Bracketed in Blueprint Photo) -->
@@ -2477,12 +2504,12 @@ svg.blueprint-svg {
           </g>
         </g>
 
-        <!-- STAFF OFFICE (With Angled Entry Doorway matching blueprint photo) -->
-        <g id="zone_staff_office" class="room-poly">
-          <polygon points="65,980 235,980 235,1080 160,1110 65,1110" fill="#0a2632" stroke="#00f0ff" stroke-width="3.5" />
-          <path d="M 235 1060 Q 210 1060 210 1080" class="door-swing" stroke-width="2.5" />
-          <text x="150" y="1035" text-anchor="middle" class="cad-label" font-size="13.5" fill="#94a3b8">💼 Staff Office</text>
-          <text x="150" y="1055" text-anchor="middle" class="cad-sub">Museum Administration</text>
+        <!-- WEST WING ACCESS CORRIDOR / FOYER (Connecting Restrooms, Library Wing, & Main Entrance) -->
+        <g id="zone_west_corridor" class="room-poly">
+          <polygon points="65,980 235,980 235,1080 160,1110 65,1110" fill="#061a24" stroke="rgba(0,240,255,0.45)" stroke-width="2.5" stroke-dasharray="6,4" />
+          <path d="M 150 1075 L 150 1010 M 143 1020 L 150 1010 L 157 1020" fill="none" stroke="rgba(0,240,255,0.4)" stroke-width="2" stroke-linecap="round" />
+          <text x="150" y="1040" text-anchor="middle" class="cad-label" font-size="11.5" fill="#94a3b8">🚪 West Wing Corridor</text>
+          <text x="150" y="1058" text-anchor="middle" class="cad-sub" font-size="9" fill="#64748b">Library &amp; Restroom Access</text>
         </g>
 
         <!-- RESTROOMS (CR) WITH TOILET STALLS & SINKS -->
@@ -2890,9 +2917,13 @@ svg.blueprint-svg {
               <div class="room-dir-info"><span>🚻</span><span>Comfort Rooms (CR)</span></div>
               <span style="font-size:10px; color:#94a3b8;">Restrooms</span>
             </div>
+            <div class="room-dir-item" data-zone="zone_west_corridor">
+              <div class="room-dir-info"><span>🚪</span><span>West Wing Corridor</span></div>
+              <span style="font-size:10px; color:#94a3b8;">Hallway</span>
+            </div>
             <div class="room-dir-item" data-zone="zone_staff_office">
-              <div class="room-dir-info"><span>💼</span><span>Staff Administration Office</span></div>
-              <span style="font-size:10px; color:#94a3b8;">Admin</span>
+              <div class="room-dir-info"><span>💼</span><span>Staff Office (Under Stairs)</span></div>
+              <span style="font-size:10px; color:#38bdf8;">Admin</span>
             </div>
             <div class="room-dir-item" data-zone="zone_function_hall">
               <div class="room-dir-info"><span>🏛️</span><span>Central Function Hall</span></div>
@@ -3093,7 +3124,8 @@ svg.blueprint-svg {
       const facilities = {
         'zone_entrance': { title: '🚪 Main Entrance & Foyer', desc: 'Visitor reception, ticketing foyer, access ramp, and museum entrance doors.' },
         'zone_cr': { title: '🚻 Comfort Rooms (CR)', desc: 'Clean, accessible restrooms and washrooms for visitors and school tour groups.' },
-        'zone_staff_office': { title: '💼 Staff Administration Office', desc: 'Museum staff offices, administrative control center, and guide headquarters.' },
+        'zone_west_corridor': { title: '🚪 West Wing Corridor', desc: 'Connecting hallway between Main Entrance, Restrooms (CR), and Library Extension wing.' },
+        'zone_staff_office': { title: '💼 Staff Administration Office', desc: 'Museum staff offices and administration control center located inside the Function Hall under the staircase, beside the J.G. Marañon section.' },
         'zone_function_hall': { title: '🏛️ Central Function Hall', desc: 'Main assembly hall for student orientations, workshops, storytelling sessions, and assemblies.' },
         'zone_stairs': { title: '🪜 Staircase to Level 2', desc: 'Direct access staircase leading to the Second Floor (Toys & Carnival).', actionLabel: 'Go to Second Floor 🪜', action: () => switchFloor(2) },
         'zone_stairs_landing': { title: '🪜 Stairs Down to Ground Floor', desc: 'Upper landing staircase descending to the Ground Floor Function Hall.', actionLabel: 'Go to Ground Floor 📍', action: () => switchFloor(1) },

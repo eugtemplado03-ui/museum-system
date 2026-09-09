@@ -889,10 +889,11 @@ function detectRoomFromCoords(floor, pinX, pinY) {
     if (x >= 75 && x <= 97 && y >= 37 && y <= 58) return 'Touch & Play Room (Splash Zone)';
     if (x >= 5 && x <= 25 && y >= 33 && y <= 52) return 'Reading & Learning Room (Franco\'s Corner)';
     if (x >= 5 && x <= 25 && y >= 51 && y <= 73) return 'Character & Heritage Room';
+    if (x >= 24 && x <= 38 && y >= 60 && y <= 76) return 'Staff Office (Under Stairs)';
     if (x >= 23 && x <= 77 && y >= 47 && y <= 77) return 'Central Function Hall';
     if (x >= 23 && x <= 77 && y >= 76 && y <= 93) return 'Main Entrance Foyer';
-    if (x >= 5 && x <= 25 && y >= 72 && y <= 93) return 'Restrooms (Comfort Rooms)';
-    if (x >= 75 && x <= 97 && y >= 57 && y <= 77) return 'Staff Office';
+    if (x >= 5 && x <= 25 && y >= 74 && y <= 85) return 'West Wing Corridor';
+    if (x >= 5 && x <= 25 && y >= 85 && y <= 95) return 'Restrooms (Comfort Rooms)';
     if (y < 21) return 'Aquarium & Reef Systems';
     return 'Ground Floor Gallery';
   }
@@ -911,6 +912,7 @@ function detectRoomZone(floor, pinX, pinY) {
     if (x >= 75 && x <= 97 && y >= 37 && y <= 58) return 'splash_zone';
     if (x >= 5 && x <= 25 && y >= 33 && y <= 52) return 'reading_corner';
     if (x >= 5 && x <= 25 && y >= 51 && y <= 73) return 'maranon_heritage';
+    if (x >= 24 && x <= 38 && y >= 60 && y <= 76) return 'staff_office';
     if (x >= 23 && x <= 77 && y >= 47 && y <= 77) return 'function_hall';
     if (x >= 23 && x <= 77 && y >= 76 && y <= 93) return 'entrance';
     return 'ground_floor';
@@ -1061,8 +1063,8 @@ function renderMiniBlueprintSvg(floor) {
       <!-- Central Function Hall -->
       <g id="mini_zone_hall">
         <polygon points="240,620 760,620 760,1000 240,1000" fill="#06212d" stroke="#00f0ff" stroke-width="4" />
-        <text x="500" y="770" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="22" fill="#ffffff">🏛️ FUNCTION HALL</text>
-        <text x="500" y="800" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="14" fill="#7dd3fc">Central Multi-Purpose Gathering Area</text>
+        <text x="560" y="770" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="22" fill="#ffffff">🏛️ FUNCTION HALL</text>
+        <text x="560" y="800" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="14" fill="#7dd3fc">Central Multi-Purpose Gathering Area</text>
       </g>
 
       <!-- Stairs to 2nd floor -->
@@ -1072,13 +1074,14 @@ function renderMiniBlueprintSvg(floor) {
         <text x="312" y="720" text-anchor="middle" font-size="10" font-weight="700" fill="#fef3c7">To Level 2</text>
       </g>
 
-      <!-- Staff Office -->
-      <polygon points="760,750 955,750 955,1000 760,1000" fill="#1b1712" stroke="#d97706" stroke-width="3" />
-      <text x="857" y="865" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="15" fill="#fef3c7">💼 STAFF OFFICE</text>
+      <!-- Staff Office (Inside Function Hall, Under Stairs, Beside J.G. Marañon Section) -->
+      <polygon points="245,785 380,785 380,980 245,980" fill="#092532" stroke="#00f0ff" stroke-width="3" />
+      <text x="312" y="870" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="13" fill="#38bdf8">💼 STAFF OFFICE</text>
+      <text x="312" y="890" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="10" fill="#94a3b8">Administration</text>
 
       <!-- Restrooms (CR) -->
-      <polygon points="65,940 240,940 240,1190 65,1190" fill="#16202c" stroke="#64748b" stroke-width="3" />
-      <text x="152" y="1065" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="14" fill="#ffffff">🚻 COMFORT ROOMS</text>
+      <polygon points="65,980 240,980 240,1190 65,1190" fill="#16202c" stroke="#64748b" stroke-width="3" />
+      <text x="152" y="1085" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="14" fill="#ffffff">🚻 COMFORT ROOMS</text>
 
       <!-- Main Entrance & Reception Foyer -->
       <polygon points="240,1000 760,1000 760,1190 240,1190" fill="#052733" stroke="#00f0ff" stroke-width="4" />

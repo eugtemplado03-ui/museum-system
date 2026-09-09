@@ -97,7 +97,7 @@
       "mapZone": "office_extension",
       "pinX": 20,
       "pinY": 76,
-      "directions": "From the Main Entrance, turn left down the corridor past the Admin Office into the Library Extension wing, and enter the Character & Heritage Room (Ground Floor). Located along the wall gallery of community heroes."
+      "directions": "From the Main Entrance, turn left down the West Wing corridor into the Library Extension wing, and enter the Character & Heritage Room (Ground Floor). Located along the wall gallery of community heroes."
     },
     {
       "id": "R61RQcd-Ag",
@@ -117,7 +117,7 @@
       "mapZone": "office_extension",
       "pinX": 18,
       "pinY": 66,
-      "directions": "From the Main Entrance, turn left down the corridor past the Admin Office into the Library Extension wing, and enter the Character & Heritage Room (Ground Floor). Located in the memorial gallery section."
+      "directions": "From the Main Entrance, turn left down the West Wing corridor into the Library Extension wing, and enter the Character & Heritage Room (Ground Floor, beside the Staff Office). Located in the memorial gallery section."
     },
     {
       "id": "FNV2fFLZMU",
@@ -137,7 +137,7 @@
       "mapZone": "second_floor_toys",
       "pinX": 32,
       "pinY": 48,
-      "directions": "From the Main Entrance, take the main staircase on the left beside the office up to Level 2 (Second Floor). Turn left through the first door into the Toys & Collections Room."
+      "directions": "From the Main Entrance, take the main staircase on the left (above the Staff Office) up to Level 2 (Second Floor). Turn left through the first door into the Toys & Collections Room."
     },
     {
       "id": "ZowcFn9Udh",
@@ -217,7 +217,7 @@
       "mapZone": "office_extension",
       "pinX": 20,
       "pinY": 58,
-      "directions": "From the Main Entrance, turn left down the corridor past the restrooms and staff office, and enter the first door on the left into the Library Extension to find Franco's Reading Corner (Ground Floor)."
+      "directions": "From the Main Entrance, turn left down the West Wing corridor past the restrooms, and enter the first door on the left into the Library Extension to find Franco's Reading Corner (Ground Floor)."
     },
     {
       "id": "elWEKuJBSJ",
