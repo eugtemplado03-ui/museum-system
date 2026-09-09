@@ -1604,10 +1604,6 @@ svg.blueprint-svg {
   .drawer-title {
     font-size: 20px;
   }
-  .drawer-directions-box {
-    margin: 4px 0 8px !important;
-    padding: 8px 10px !important;
-  }
   .drawer-audio-box {
     padding: 10px 12px;
   }
@@ -1899,14 +1895,6 @@ svg.blueprint-svg {
         <span class="seg-badge" id="drawerCat" style="background: #00d2e0; color: #000; font-weight: 800;">Marine &amp; Nature</span>
         <h2 class="drawer-title" id="drawerTitle" style="margin-top: 6px;">Under the Sea</h2>
         <div class="drawer-location-badge" id="drawerLocation" style="margin-top: 4px;">📍 Ground Floor — Main Central Gallery</div>
-      </div>
-
-      <!-- Floor Plan Directions Box -->
-      <div class="drawer-directions-box" id="drawerDirectionsBox" style="background: rgba(0, 240, 255, 0.08); border: 1px solid rgba(0, 240, 255, 0.25); border-radius: 10px; padding: 10px 12px; margin: 8px 0 10px;">
-        <div style="font-size: 11px; font-weight: 800; color: #5eead4; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 5px; margin-bottom: 4px;">
-          <span>🧭</span> Floor Plan Directions:
-        </div>
-        <p id="drawerDirectionsText" style="font-size: 12px; color: #e2e8f0; margin: 0; line-height: 1.45; font-weight: 600;"></p>
       </div>
 
       <!-- Multilingual Audio Narration -->
@@ -3195,16 +3183,6 @@ svg.blueprint-svg {
       document.getElementById('drawerTitle').textContent = ex.title;
       document.getElementById('drawerLocation').textContent = `📍 ${ex.location || room.subtitle}`;
 
-      const directionsEl = document.getElementById('drawerDirectionsText');
-      if (directionsEl) {
-        directionsEl.textContent = ex.directions || (
-          ex.code === 'EX-003'
-            ? 'From the Main Entrance, turn right into the East Wing corridor and enter the first door on the right into the Touch & Play Room. You will find the live touch pool basin in the center.'
-            : (room.floor === 2
-                ? 'From the Main Entrance, take the staircase on the left up to Level 2 (Second Floor).'
-                : 'From the Main Entrance, walk straight across the central Function Hall into the room.')
-        );
-      }
 
       // Reset Language Tabs
       document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
