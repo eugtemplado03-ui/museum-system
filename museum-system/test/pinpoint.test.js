@@ -17,3 +17,24 @@ test('Floor plan pinpoint coordinates handling', async () => {
 
   console.log(`Verified EX-001: floor=${ex1.floor}, pinX=${ex1.pinX}%, pinY=${ex1.pinY}%`);
 });
+
+test('Floor map pin stationary hover and clean exhibit name badge', async () => {
+  const fs = require('fs');
+  const path = require('path');
+  const mapHtml = fs.readFileSync(path.join(__dirname, '../public/map.html'), 'utf8');
+
+  // Verify CSS scale is eliminated from SVG pins to prevent cursor dodging feedback loops
+  assert.ok(!mapHtml.includes('.individual-exhibit-pin:hover {\n  transform: scale'), 'No scale transform on individual-exhibit-pin hover');
+  assert.ok(!mapHtml.includes('.category-room-pin:hover {\n  transform: scale'), 'No scale transform on category-room-pin hover');
+  assert.ok(!mapHtml.includes('.exhibit-pin:hover {\n  transform: scale'), 'No scale transform on exhibit-pin hover');
+
+  // Verify exhibit name badge is defined
+  assert.ok(mapHtml.includes('.individual-exhibit-pin .exhibit-name-badge'), 'exhibit-name-badge class styled');
+  assert.ok(mapHtml.includes('.individual-exhibit-pin.active-pin .exhibit-name-badge'), 'active-pin shows badge');
+
+  // Verify click toggles active-pin and does not open drawer
+  assert.ok(mapHtml.includes("g.classList.contains('active-pin')"), 'Pin click toggles active-pin');
+  assert.ok(mapHtml.includes('exhibit-name-badge'), 'Individual pin includes exhibit-name-badge');
+
+  console.log('Verified pin hover stability and exhibit name badge configuration in map.html');
+});

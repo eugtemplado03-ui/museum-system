@@ -532,16 +532,24 @@ svg.blueprint-svg {
 }
 
 /* ==========================================================================
-   HIGH-VISIBILITY EXHIBIT PINS
+   HIGH-VISIBILITY EXHIBIT PINS (ZERO GLITCH / NON-AVOIDING)
    ========================================================================== */
-.exhibit-pin {
+.exhibit-pin,
+.individual-exhibit-pin {
   cursor: pointer;
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   outline: none;
+  /* Crucial: DO NOT apply CSS transform: scale() to SVG pins! CSS transform overrides
+     the SVG transform="translate(x, y)" coordinate position and causes coordinate
+     reset to (0,0) resulting in flickering ("avoiding cursor" feedback loop). */
+  transition: filter 0.18s ease;
 }
 
-.exhibit-pin:hover {
-  transform: scale(1.18);
+.exhibit-pin:hover,
+.exhibit-pin:focus,
+.individual-exhibit-pin:hover,
+.individual-exhibit-pin:focus,
+.individual-exhibit-pin.active-pin {
+  filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.95)) brightness(1.16);
 }
 
 .pin-ring {
@@ -555,38 +563,27 @@ svg.blueprint-svg {
   100% { r: 36px; opacity: 0; stroke-width: 1px; }
 }
 
-/* Tooltip Badge */
+/* Tooltip Badge for Category Pins */
 .pin-tooltip {
   opacity: 0.95;
-  transition: opacity 0.2s, transform 0.2s;
+  transition: opacity 0.2s;
   pointer-events: none;
 }
 
-.exhibit-pin:hover .pin-tooltip {
-  opacity: 1;
-  transform: translateY(-4px);
-}
-
-/* Individual Exhibit Pinpoints */
-.individual-exhibit-pin {
-  cursor: pointer;
-  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
-  outline: none;
-}
-.individual-exhibit-pin:hover {
-  transform: scale(1.22);
-}
-.individual-exhibit-pin .exhibit-pin-tooltip {
+/* Exhibit Name Badge: ONLY shows when cursor hits it (hover/focus) or clicking (.active-pin) */
+.individual-exhibit-pin .exhibit-name-badge {
   opacity: 0;
-  transform: translateY(6px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
   pointer-events: none;
+  transition: opacity 0.18s ease;
 }
-.individual-exhibit-pin:hover .exhibit-pin-tooltip,
-.individual-exhibit-pin:focus .exhibit-pin-tooltip {
+
+.individual-exhibit-pin:hover .exhibit-name-badge,
+.individual-exhibit-pin:focus .exhibit-name-badge,
+.individual-exhibit-pin.active-pin .exhibit-name-badge {
   opacity: 1;
-  transform: translateY(0);
+  pointer-events: auto;
 }
+
 .exhibit-pin-halo {
   animation: radarPulse 2.4s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
   transform-origin: 0 -20px;
@@ -1373,11 +1370,12 @@ svg.blueprint-svg {
 /* Category Room Pin Beacon Pulse */
 .category-room-pin {
   cursor: pointer;
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   outline: none;
+  transition: filter 0.18s ease;
 }
-.category-room-pin:hover {
-  transform: scale(1.15);
+.category-room-pin:hover,
+.category-room-pin:focus {
+  filter: drop-shadow(0 0 14px rgba(0, 240, 255, 0.95)) brightness(1.15);
 }
 
 /* ==========================================================================
@@ -2735,6 +2733,13 @@ svg.blueprint-svg {
         g.setAttribute('aria-label', `${ex.code || ''}: ${ex.title}`);
         g.style.cursor = 'pointer';
 
+        const displayTitle = (ex.title || ex.code || 'Exhibit').trim();
+        // Dynamic badge width so exhibit name is clearly displayed without clipping
+        const badgeWidth = Math.max(90, Math.min(270, displayTitle.length * 8.5 + 26));
+        const badgeHeight = 26;
+        const badgeX = -badgeWidth / 2;
+        const badgeY = -56;
+
         g.innerHTML = `
           <!-- Pulsing Ambient Ring -->
           <circle cx="0" cy="-20" r="16" fill="none" stroke="${pinColor}" stroke-width="2.5" opacity="0.85" class="exhibit-pin-halo" />
@@ -2747,35 +2752,39 @@ svg.blueprint-svg {
           <circle cx="0" cy="-28" r="8" fill="${pinColor}" />
           <circle cx="0" cy="-28" r="3.5" fill="#ffffff" />
 
-          <!-- Exhibit Accession Code Tag -->
-          <g class="exhibit-pin-tag-group">
-            <rect x="-35" y="-66" width="70" height="18" rx="6" fill="rgba(3, 19, 28, 0.95)" stroke="${pinColor}" stroke-width="1.6" filter="drop-shadow(0 2px 6px rgba(0,0,0,0.8))" />
-            <text x="0" y="-53" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" font-weight="700" fill="#ffffff">
-              ${escapeHtml(ex.code || 'EX')}
-            </text>
-          </g>
-
-          <!-- Hover Tooltip with Full Title & Click to View -->
-          <g class="exhibit-pin-tooltip" pointer-events="none">
-            <rect x="-105" y="-116" width="210" height="44" rx="8" fill="rgba(2, 16, 25, 0.98)" stroke="${pinColor}" stroke-width="2" filter="drop-shadow(0 8px 20px rgba(0,0,0,0.95))" />
-            <text x="0" y="-96" text-anchor="middle" font-family="'Nunito', sans-serif" font-weight="900" font-size="12" fill="#ffffff">
-              ${escapeHtml(ex.title.length > 25 ? ex.title.slice(0, 23) + '…' : ex.title)}
-            </text>
-            <text x="0" y="-79" text-anchor="middle" font-family="'Open Sans', sans-serif" font-size="10" font-weight="700" fill="#5eead4">
-              📍 Click to View Exhibit
+          <!-- Exhibit Name Badge (Shown ONLY when cursor hits pin or on click) -->
+          <g class="exhibit-name-badge">
+            <rect x="${badgeX}" y="${badgeY}" width="${badgeWidth}" height="${badgeHeight}" rx="7"
+                  fill="rgba(3, 19, 28, 0.96)" stroke="${pinColor}" stroke-width="1.8"
+                  filter="drop-shadow(0 4px 12px rgba(0,0,0,0.85))" />
+            <text x="0" y="${badgeY + 17}" text-anchor="middle"
+                  font-family="'Nunito', sans-serif" font-weight="900" font-size="11.5" fill="#ffffff"
+                  letter-spacing="0.2px">
+              ${escapeHtml(displayTitle.length > 32 ? displayTitle.slice(0, 30) + '…' : displayTitle)}
             </text>
           </g>
         `;
 
+        // Click Handler: Clicking pin toggles showing ONLY the exhibit name on the map
         g.addEventListener('click', (e) => {
           if (hasDragged) return;
           e.stopPropagation();
           e.preventDefault();
-          if (parentRoom) {
-            openCategoryRoomDrawer(parentRoom, ex.code);
-          } else {
-            const fallbackRoom = Object.values(CATEGORY_ROOMS)[0];
-            openCategoryRoomDrawer(fallbackRoom, ex.code);
+          
+          const isCurrentActive = g.classList.contains('active-pin');
+          document.querySelectorAll('.individual-exhibit-pin.active-pin').forEach(el => {
+            el.classList.remove('active-pin');
+          });
+          if (!isCurrentActive) {
+            g.classList.add('active-pin');
+          }
+        });
+
+        // Keyboard accessibility
+        g.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            g.classList.toggle('active-pin');
           }
         });
 
@@ -3841,6 +3850,16 @@ svg.blueprint-svg {
           setTimeout(() => {
             hasDragged = false;
           }, 80);
+        }
+      });
+
+      // Map background click: deselect active exhibit pins
+      mapViewport.addEventListener('click', (e) => {
+        if (hasDragged) return;
+        if (!e.target.closest('.individual-exhibit-pin')) {
+          document.querySelectorAll('.individual-exhibit-pin.active-pin').forEach(el => {
+            el.classList.remove('active-pin');
+          });
         }
       });
 
