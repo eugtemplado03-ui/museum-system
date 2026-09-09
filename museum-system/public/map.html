@@ -2822,7 +2822,7 @@ svg.blueprint-svg {
 
         html += `
           <div class="cat-room-group" data-room-id="${room.id}">
-            <div class="cat-room-header" data-room-id="${room.id}" title="View ${room.title}">
+            <div class="cat-room-header" data-room-id="${room.id}" title="View walking route to ${escapeHtml(room.title)}">
               <div class="cat-room-title-wrap">
                 <span class="cat-room-dot" style="background:${room.color}; box-shadow:0 0 8px ${room.color};"></span>
                 <span class="cat-room-name">${room.icon} ${escapeHtml(room.category)}</span>
@@ -2838,9 +2838,9 @@ svg.blueprint-svg {
           const ex = exhibitsData.find(e => e.code === code);
           if (!ex) return;
           html += `
-            <div class="cat-exhibit-item" data-room-id="${room.id}" data-code="${ex.code}">
+            <div class="cat-exhibit-item" data-room-id="${room.id}" data-code="${ex.code}" title="View walking directions to ${escapeHtml(ex.title)}">
               <div class="cat-exhibit-info">
-                <span class="cat-exhibit-bullet">↳</span>
+                <span class="cat-exhibit-bullet">📍</span>
                 <span class="cat-exhibit-title">${escapeHtml(ex.title)}</span>
               </div>
               <span class="cat-exhibit-code">${ex.code}</span>
@@ -2909,23 +2909,75 @@ svg.blueprint-svg {
 
       list.innerHTML = html;
 
-      // Click on category room header opens room in drawer
+      // Click on category room header directs straight to walking path view on the floor map
       list.querySelectorAll('.cat-room-header').forEach(header => {
         header.addEventListener('click', () => {
           const roomId = header.dataset.roomId;
           const room = CATEGORY_ROOMS[roomId];
-          if (room) openCategoryRoomDrawer(room);
+          if (!room) return;
+
+          // Suppress/close exhibit drawer as requested
+          closeExhibitDrawer();
+
+          // Switch floor if needed
+          if (currentFloor !== room.floor) {
+            switchFloor(room.floor, false);
+          }
+          highlightRoomZone(room.zoneId);
+
+          // Direct immediately to walking path route
+          renderRoute(room.id);
+
+          // On mobile, collapse directory so walking route is visible
+          if (window.innerWidth <= 768) {
+            mapSidebar.classList.add('collapsed');
+            mapSidebar.classList.remove('open');
+            const btnToggle = document.getElementById('btnToggleSidebar');
+            if (btnToggle) btnToggle.classList.remove('active');
+          }
         });
       });
 
-      // Click on an exhibit item under the room opens the room drawer showing that specific exhibit
+      // Click on an exhibit item under the room directs straight to walking path view on the floor map
       list.querySelectorAll('.cat-exhibit-item').forEach(item => {
         item.addEventListener('click', (e) => {
           e.stopPropagation();
           const roomId = item.dataset.roomId;
           const code = item.dataset.code;
           const room = CATEGORY_ROOMS[roomId];
-          if (room) openCategoryRoomDrawer(room, code);
+
+          // Suppress/close exhibit drawer as requested
+          closeExhibitDrawer();
+
+          // Switch floor if needed
+          if (room && currentFloor !== room.floor) {
+            switchFloor(room.floor, false);
+          }
+          if (room) {
+            highlightRoomZone(room.zoneId);
+          }
+
+          // Direct immediately to walking path view for this exhibit
+          renderRoute(code);
+
+          // Highlight the exhibit pin on the map and display its name
+          setTimeout(() => {
+            document.querySelectorAll('.individual-exhibit-pin.active-pin').forEach(el => {
+              el.classList.remove('active-pin');
+            });
+            const pinEl = document.getElementById(`ex_pin_${code}`);
+            if (pinEl) {
+              pinEl.classList.add('active-pin');
+            }
+          }, 80);
+
+          // On mobile, collapse directory so walking route is visible
+          if (window.innerWidth <= 768) {
+            mapSidebar.classList.add('collapsed');
+            mapSidebar.classList.remove('open');
+            const btnToggle = document.getElementById('btnToggleSidebar');
+            if (btnToggle) btnToggle.classList.remove('active');
+          }
         });
       });
 
