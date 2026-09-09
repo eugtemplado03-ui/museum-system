@@ -2668,11 +2668,17 @@ svg.blueprint-svg {
         `;
 
         // Click Handler with Drag Gate to prevent misfires during pan
+        // Directs straight to walking path view on the floor map without opening drawer
         pinG.addEventListener('click', (e) => {
           if (hasDragged) return;
           e.stopPropagation();
           e.preventDefault();
-          openCategoryRoomDrawer(room);
+          closeExhibitDrawer();
+          if (currentFloor !== room.floor) {
+            switchFloor(room.floor, false);
+          }
+          highlightRoomZone(room.zoneId);
+          renderRoute(room.id);
         });
 
         pinsLayer.appendChild(pinG);
@@ -3046,7 +3052,14 @@ svg.blueprint-svg {
           el.addEventListener('click', (e) => {
             if (hasDragged) return; // User was panning the map, not clicking room!
             const room = CATEGORY_ROOMS[catRoomId];
-            if (room) openCategoryRoomDrawer(room);
+            if (room) {
+              closeExhibitDrawer();
+              if (currentFloor !== room.floor) {
+                switchFloor(room.floor, false);
+              }
+              highlightRoomZone(room.zoneId);
+              renderRoute(room.id);
+            }
           });
         }
       });
@@ -3069,36 +3082,44 @@ svg.blueprint-svg {
           el.addEventListener('click', (e) => {
             if (hasDragged) return;
             highlightRoomZone(zoneId);
-            openFacilityDrawer(info);
+            if (info.action) {
+              info.action();
+            } else {
+              closeExhibitDrawer();
+            }
           });
         }
       });
     }
 
-    // Open Category Room Drawer
+    // Open Category Room Drawer (or direct to walking route if generic room)
     function openCategoryRoomDrawer(room, specificExhibitCode = null) {
+      if (!room) return;
       selectedRoom = room;
-      const drawer = document.getElementById('exhibitDrawer');
-      const backdrop = document.getElementById('drawerBackdrop');
-
-      highlightRoomZone(room.zoneId);
-      focusCategoryRoom(room);
 
       if (specificExhibitCode) {
+        const drawer = document.getElementById('exhibitDrawer');
+        const backdrop = document.getElementById('drawerBackdrop');
+        highlightRoomZone(room.zoneId);
+        focusCategoryRoom(room);
         const ex = exhibitsData.find(e => e.code === specificExhibitCode);
         if (ex) {
           showExhibitView(room, ex);
-        } else {
-          showRoomView(room);
+          drawer.classList.add('open');
+          drawer.setAttribute('aria-hidden', 'false');
+          backdrop.classList.add('open');
+          drawer.scrollTop = 0;
+          return;
         }
-      } else {
-        showRoomView(room);
       }
 
-      drawer.classList.add('open');
-      drawer.setAttribute('aria-hidden', 'false');
-      backdrop.classList.add('open');
-      drawer.scrollTop = 0;
+      // Suppress drawer and direct to walking path view on floor map
+      closeExhibitDrawer();
+      if (currentFloor !== room.floor) {
+        switchFloor(room.floor, false);
+      }
+      highlightRoomZone(room.zoneId);
+      renderRoute(room.id);
     }
 
     // Show Category Room View in Drawer (Lists all exhibits inside this room)
@@ -3883,9 +3904,10 @@ svg.blueprint-svg {
         }
       });
 
-      // Map background click: deselect active exhibit pins
+      // Map background click: close drawer and deselect active exhibit pins
       mapViewport.addEventListener('click', (e) => {
         if (hasDragged) return;
+        closeExhibitDrawer();
         if (!e.target.closest('.individual-exhibit-pin')) {
           document.querySelectorAll('.individual-exhibit-pin.active-pin').forEach(el => {
             el.classList.remove('active-pin');
