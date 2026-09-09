@@ -41,16 +41,22 @@ app.use('/api/visitors', visitorsRoutes);
 app.use('/api/artifact-logs', artifactLogsRoutes);
 app.use('/api/museum-info', museumInfoRoutes);
 
-app.get('/api/health', (req, res) => res.json({ ok: true }));
-
 const mongoose = require('mongoose');
+
+app.get('/api/health', (req, res) => {
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  res.json({ ok: true, database: dbStatus });
+});
+
+const DEFAULT_MONGODB_URI = "mongodb+srv://museumadmin:museum2026@cluster0.8h7x0p7.mongodb.net/museum?retryWrites=true&w=majority&appName=Cluster0";
 
 // Auto-seed initial catalog if database is empty on fresh deployment
 async function startServer() {
   try {
-    if (process.env.MONGODB_URI) {
+    const mongoUri = process.env.MONGODB_URI || DEFAULT_MONGODB_URI;
+    if (mongoUri) {
       console.log('Connecting to MongoDB...');
-      await mongoose.connect(process.env.MONGODB_URI);
+      await mongoose.connect(mongoUri);
       console.log('Connected to MongoDB successfully.');
     } else {
       console.warn('MONGODB_URI is not set. Using in-memory MongoDB for local development.');

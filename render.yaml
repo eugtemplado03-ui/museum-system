@@ -27,3 +27,5 @@ services:
         sync: false
       - key: FISH_AUDIO_API_KEY
         sync: false
+      - key: MONGODB_URI
+        sync: false

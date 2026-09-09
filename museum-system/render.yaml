@@ -17,3 +17,5 @@ services:
         value: admin
       - key: SEED_ADMIN_PASS
         value: museum-admin-2026
+      - key: MONGODB_URI
+        sync: false
