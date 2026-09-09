@@ -526,6 +526,28 @@ svg.blueprint-svg {
   pointer-events: none;
 }
 
+.walking-route-arrival-marker {
+  pointer-events: none;
+}
+
+.walking-route-arrival-pulse {
+  animation: arrivalPulse 1.6s ease-out infinite;
+  transform-origin: center;
+}
+
+@keyframes arrivalPulse {
+  0% {
+    r: 6;
+    opacity: 1;
+    stroke-width: 3.5;
+  }
+  100% {
+    r: 30;
+    opacity: 0;
+    stroke-width: 1;
+  }
+}
+
 @keyframes walkFlow {
   from { stroke-dashoffset: 40; }
   to { stroke-dashoffset: 0; }
@@ -2759,7 +2781,7 @@ svg.blueprint-svg {
           </g>
         `;
 
-        // Click Handler: Clicking pin toggles showing ONLY the exhibit name on the map
+        // Click Handler: Clicking pin toggles showing name and aligns walking path directly to pin
         g.addEventListener('click', (e) => {
           if (hasDragged) return;
           e.stopPropagation();
@@ -2771,6 +2793,9 @@ svg.blueprint-svg {
           });
           if (!isCurrentActive) {
             g.classList.add('active-pin');
+            renderRoute(ex.code);
+          } else {
+            clearRoute();
           }
         });
 
@@ -3515,33 +3540,91 @@ svg.blueprint-svg {
       fitToScreen(true);
     }
 
-    // Dynamic Wayfinding Walking Route Engine
+    // Generate precise architectural walking path aligned to the exact exhibit pinpoint
+    function generateExhibitWalkingPath(ex, parentRoom) {
+      if (!ex || ex.pinX == null || ex.pinY == null) {
+        return parentRoom ? (WAYFINDING_ROUTES[parentRoom.id]?.pathD || null) : null;
+      }
+
+      const destX = Math.round((Number(ex.pinX) / 100) * 1000);
+      const destY = Math.round((Number(ex.pinY) / 100) * 1300);
+      const floor = Number(ex.floor) === 2 ? 2 : (parentRoom?.floor === 2 ? 2 : 1);
+
+      if (floor === 2) {
+        // Second Floor (Starts from Stairs Landing 312, 700)
+        if (destX <= 500) {
+          // Left Wing: Toys & Collections (Hampanganan)
+          return `M 312 700 L 312 ${destY} L ${destX} ${destY}`;
+        } else {
+          // Right Wing: Carnival & Discovery Room
+          const midY = Math.min(500, destY);
+          return `M 312 700 L 500 700 L 500 ${midY} L ${destX} ${midY} L ${destX} ${destY}`;
+        }
+      }
+
+      // Ground Floor (Level 1, Starts from Main Entrance 500, 1140)
+      if (destX < 240) {
+        // West Wing (Library Extension: Franco's Reading Corner, Marañon Memorabilia, Everyday Heroes)
+        return `M 500 1140 L 500 1010 L 230 1010 L 230 ${destY} L ${destX} ${destY}`;
+      } else if (destX > 760) {
+        // East Wing (Touch & Play / Splash Zone)
+        return `M 500 1140 L 500 820 L 828 820 L 828 ${destY} L ${destX} ${destY}`;
+      } else if (destY < 620) {
+        // North Wing (Marine & Nature Room, Aquarium, Mangrove Walk)
+        if (destY < 200) {
+          return `M 500 1140 L 500 620 L 500 240 L ${destX} 240 L ${destX} ${destY}`;
+        }
+        const midY = destY > 500 ? destY : 480;
+        if (destX === 500) {
+          return `M 500 1140 L 500 ${destY}`;
+        }
+        return `M 500 1140 L 500 620 L 500 ${midY} L ${destX} ${midY} L ${destX} ${destY}`;
+      } else {
+        // Central Function Hall
+        return `M 500 1140 L 500 ${destY} L ${destX} ${destY}`;
+      }
+    }
+
+    // Dynamic Wayfinding Walking Route Engine (Aligned to Exact Exhibit Pinpoint)
     function renderRoute(routeKey) {
       if (!routeKey) return;
       activeRouteKey = routeKey;
 
-      let targetExhibit = null;
-      // If routeKey is an exhibit code (e.g. EX-001), find its parent room
-      let route = WAYFINDING_ROUTES[routeKey];
-      if (!route) {
-        const parentRoom = findRoomForExhibit(routeKey);
-        if (parentRoom) {
-          route = WAYFINDING_ROUTES[parentRoom.id];
-          targetExhibit = (exhibitsData || []).find(e => (e.code || '').toUpperCase() === routeKey.toUpperCase());
-        }
-      } else {
-        const params = new URLSearchParams(window.location.search);
-        const focusCode = params.get('focus');
-        if (focusCode) {
-          targetExhibit = (exhibitsData || []).find(e => (e.code || '').toUpperCase() === focusCode.toUpperCase());
-        } else if (selectedExhibit) {
+      let targetExhibit = (exhibitsData || []).find(e => 
+        (e.code && e.code.toUpperCase() === String(routeKey).toUpperCase()) ||
+        (e.id && String(e.id) === String(routeKey)) ||
+        (e.title && e.title.toLowerCase() === String(routeKey).toLowerCase())
+      );
+
+      if (!targetExhibit && selectedExhibit) {
+        if (routeKey === selectedExhibit.code || routeKey === selectedExhibit.category) {
           targetExhibit = selectedExhibit;
         }
       }
+
+      let parentRoom = null;
+      if (targetExhibit) {
+        parentRoom = findRoomForExhibit(targetExhibit.code) || findRoomForExhibit(targetExhibit);
+      } else if (CATEGORY_ROOMS[routeKey]) {
+        parentRoom = CATEGORY_ROOMS[routeKey];
+      }
+
+      let route = WAYFINDING_ROUTES[routeKey];
+      if (!route && parentRoom) {
+        route = WAYFINDING_ROUTES[parentRoom.id];
+      }
+      if (!route && targetExhibit) {
+        const pRoom = findRoomForExhibit(targetExhibit);
+        if (pRoom) route = WAYFINDING_ROUTES[pRoom.id];
+      }
       if (!route) return;
 
-      if (currentFloor !== route.floor) {
-        switchFloor(route.floor, false);
+      const routeFloor = (targetExhibit && targetExhibit.floor)
+        ? Number(targetExhibit.floor)
+        : (route.floor || (parentRoom ? parentRoom.floor : 1));
+
+      if (currentFloor !== routeFloor) {
+        switchFloor(routeFloor, false);
       }
 
       // Ensure exhibit drawer is closed so walking path & directions are fully visible
@@ -3551,16 +3634,59 @@ svg.blueprint-svg {
       if (!routeLayer) return;
       routeLayer.innerHTML = '';
 
-      if (route.pathD) {
+      let finalPathD = route.pathD;
+      let destX = null;
+      let destY = null;
+
+      if (targetExhibit && targetExhibit.pinX != null && targetExhibit.pinY != null) {
+        finalPathD = generateExhibitWalkingPath(targetExhibit, parentRoom);
+        destX = Math.round((Number(targetExhibit.pinX) / 100) * 1000);
+        destY = Math.round((Number(targetExhibit.pinY) / 100) * 1300);
+      } else if (parentRoom && parentRoom.pinX != null && parentRoom.pinY != null) {
+        destX = Math.round((Number(parentRoom.pinX) / 100) * 1000);
+        destY = Math.round((Number(parentRoom.pinY) / 100) * 1300);
+      }
+
+      if (finalPathD) {
+        const startX = routeFloor === 2 ? 312 : 500;
+        const startY = routeFloor === 2 ? 700 : 1140;
+        const startLabel = routeFloor === 2 ? 'STAIRS' : 'START HERE';
+
+        let arrivalMarkerHtml = '';
+        if (destX != null && destY != null) {
+          arrivalMarkerHtml = `
+            <!-- Arrival Destination Target Marker at Exact Exhibit Pinpoint -->
+            <g class="walking-route-arrival-marker" transform="translate(${destX}, ${destY})">
+              <circle cx="0" cy="0" r="24" fill="none" stroke="#00f0ff" stroke-width="2.5" class="walking-route-arrival-pulse" />
+              <circle cx="0" cy="0" r="14" fill="rgba(0, 240, 255, 0.25)" stroke="#00f0ff" stroke-width="2" />
+              <circle cx="0" cy="0" r="5" fill="#ffffff" />
+            </g>
+          `;
+        }
+
         routeLayer.innerHTML = `
           <!-- Glow underlay -->
-          <path d="${route.pathD}" class="walking-route-glow" />
+          <path d="${finalPathD}" class="walking-route-glow" />
           <!-- Animated walking path -->
-          <path d="${route.pathD}" class="walking-route-path" />
-          <!-- Start marker at Main Entrance -->
-          <circle cx="500" cy="1140" r="10" fill="#ffea00" stroke="#000" stroke-width="2" />
-          <text x="500" y="1170" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="12" fill="#ffea00">START HERE</text>
+          <path d="${finalPathD}" class="walking-route-path" />
+          <!-- Start marker at Main Entrance or Stairs -->
+          <circle cx="${startX}" cy="${startY}" r="10" fill="#ffea00" stroke="#000" stroke-width="2" />
+          <text x="${startX}" y="${startY + 26}" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="12" fill="#ffea00">${startLabel}</text>
+          ${arrivalMarkerHtml}
         `;
+      }
+
+      // Automatically activate and highlight the destination exhibit pin on the map
+      if (targetExhibit && targetExhibit.code) {
+        setTimeout(() => {
+          document.querySelectorAll('.individual-exhibit-pin.active-pin').forEach(el => {
+            el.classList.remove('active-pin');
+          });
+          const targetPin = document.getElementById(`ex_pin_${targetExhibit.code}`);
+          if (targetPin) {
+            targetPin.classList.add('active-pin');
+          }
+        }, 60);
       }
 
       // Populate Directions Panel Destination Title
@@ -3622,12 +3748,19 @@ svg.blueprint-svg {
       directionsPanel.classList.remove('active');
       const routeLayer = document.getElementById('routeLayer');
       if (routeLayer) routeLayer.innerHTML = '';
+      document.querySelectorAll('.individual-exhibit-pin.active-pin').forEach(el => {
+        el.classList.remove('active-pin');
+      });
       stopAudio();
       if (mapViewport.clientWidth < 600) {
         panY = 0;
         updateTransform();
       }
     }
+
+    // Expose for external navigation and integration
+    window.renderRoute = renderRoute;
+    window.clearRoute = clearRoute;
 
     // Setup All Events with Drag/Click Separation & Responsive Fit
     function initEvents() {
