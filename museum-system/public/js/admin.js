@@ -740,7 +740,13 @@ async function renderCatalogTab(contentEl){
       <td data-label="Favorites" style="font-size:12.5px; color:var(--ink-soft);">${ex.favoriteCount || 0}</td>
       <td data-label="Location" style="font-size:12.5px; color:var(--ink-soft);">
         <div style="font-weight:600; color:#e2e8f0;">${escapeHtml(ex.location||'—')}</div>
-        ${ex.directions ? `<div style="font-size:11px; color:#5eead4; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(ex.directions)}">🧭 ${escapeHtml(ex.directions)}</div>` : ''}
+        ${ex.pinX !== null && ex.pinX !== undefined && ex.pinY !== null && ex.pinY !== undefined ? `
+          <div style="font-size:11px; color:#38bdf8; font-family:'IBM Plex Mono',monospace; margin-top:2px; display:inline-flex; align-items:center; gap:4px; background:rgba(0,240,255,0.1); border:1px solid rgba(0,240,255,0.25); border-radius:4px; padding:1px 5px;">
+            <span>📍 Level ${ex.floor === 2 ? 2 : 1}</span>
+            <span>(${Math.round(ex.pinX)}%, ${Math.round(ex.pinY)}%)</span>
+          </div>
+        ` : ''}
+        ${ex.directions ? `<div style="font-size:11px; color:#5eead4; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;" title="${escapeHtml(ex.directions)}">🧭 ${escapeHtml(ex.directions)}</div>` : ''}
       </td>
       <td data-label="Actions">
         <div class="row-actions">
@@ -867,6 +873,223 @@ function openTagModal(code){
   });
 }
 
+// ─── Interactive Floor Plan Pinpoint Picker Helpers ───
+function detectRoomFromCoords(floor, pinX, pinY) {
+  if (pinX == null || pinY == null) return 'No pinpoint placed';
+  const x = Number(pinX);
+  const y = Number(pinY);
+  if (floor === 2) {
+    if (x >= 12 && x <= 49 && y >= 12 && y <= 49) return 'Toys & Collections Room (Hampanganan)';
+    if (x >= 50 && x <= 88 && y >= 12 && y <= 49) return 'Carnival & Discovery Room';
+    if (x >= 24 && x <= 39 && y >= 47 && y <= 62) return 'Stairs Landing (To Ground Floor)';
+    if (y > 47) return 'Mezzanine Balcony Void';
+    return 'Second Floor (Mezzanine Level)';
+  } else {
+    if (x >= 23 && x <= 77 && y >= 20 && y <= 48) return 'Marine & Nature Room (The Marine Story)';
+    if (x >= 75 && x <= 97 && y >= 37 && y <= 58) return 'Touch & Play Room (Splash Zone)';
+    if (x >= 5 && x <= 25 && y >= 33 && y <= 52) return 'Reading & Learning Room (Franco\'s Corner)';
+    if (x >= 5 && x <= 25 && y >= 51 && y <= 73) return 'Character & Heritage Room';
+    if (x >= 23 && x <= 77 && y >= 47 && y <= 77) return 'Central Function Hall';
+    if (x >= 23 && x <= 77 && y >= 76 && y <= 93) return 'Main Entrance Foyer';
+    if (x >= 5 && x <= 25 && y >= 72 && y <= 93) return 'Restrooms (Comfort Rooms)';
+    if (x >= 75 && x <= 97 && y >= 57 && y <= 77) return 'Staff Office';
+    if (y < 21) return 'Aquarium & Reef Systems';
+    return 'Ground Floor Gallery';
+  }
+}
+
+function detectRoomZone(floor, pinX, pinY) {
+  if (pinX == null || pinY == null) return '';
+  const x = Number(pinX);
+  const y = Number(pinY);
+  if (floor === 2) {
+    if (x >= 12 && x <= 49 && y >= 12 && y <= 49) return 'second_floor_toys';
+    if (x >= 50 && x <= 88 && y >= 12 && y <= 49) return 'second_floor_carnival';
+    return 'second_floor';
+  } else {
+    if (x >= 23 && x <= 77 && y >= 20 && y <= 48) return 'marine_story';
+    if (x >= 75 && x <= 97 && y >= 37 && y <= 58) return 'splash_zone';
+    if (x >= 5 && x <= 25 && y >= 33 && y <= 52) return 'reading_corner';
+    if (x >= 5 && x <= 25 && y >= 51 && y <= 73) return 'maranon_heritage';
+    if (x >= 23 && x <= 77 && y >= 47 && y <= 77) return 'function_hall';
+    if (x >= 23 && x <= 77 && y >= 76 && y <= 93) return 'entrance';
+    return 'ground_floor';
+  }
+}
+
+function getRoomCenterForCategory(cat) {
+  const c = String(cat || '').toLowerCase();
+  if (c.includes('toy')) {
+    return { floor: 2, pinX: 31, pinY: 30, name: 'Toys & Collections Room' };
+  }
+  if (c.includes('carnival') || c.includes('discovery') || c.includes('play lab')) {
+    return { floor: 2, pinX: 68, pinY: 30, name: 'Carnival & Discovery Room' };
+  }
+  if (c.includes('touch') || c.includes('splash')) {
+    return { floor: 1, pinX: 83, pinY: 48, name: 'Touch & Play Room' };
+  }
+  if (c.includes('reading') || c.includes('learning')) {
+    return { floor: 1, pinX: 15, pinY: 42, name: 'Reading & Learning Room' };
+  }
+  if (c.includes('character') || c.includes('heritage') || c.includes('hero')) {
+    return { floor: 1, pinX: 15, pinY: 62, name: 'Character & Heritage Room' };
+  }
+  return { floor: 1, pinX: 50, pinY: 34, name: 'Marine & Nature Room' };
+}
+
+function renderMiniBlueprintSvg(floor) {
+  if (floor === 2) {
+    return `
+      <svg viewBox="0 0 1000 1300" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%; display:block;">
+        <defs>
+          <pattern id="miniCadGrid2" width="50" height="50" patternUnits="userSpaceOnUse">
+            <path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(236,72,153,0.15)" stroke-width="1" />
+          </pattern>
+        </defs>
+        <rect width="1000" height="1300" fill="#0c0414" />
+        <rect width="1000" height="1300" fill="url(#miniCadGrid2)" />
+        <rect x="70" y="60" width="860" height="1140" rx="14" fill="#140620" stroke="#ec4899" stroke-width="4" />
+        
+        <!-- Header banner -->
+        <rect x="240" y="80" width="520" height="55" rx="8" fill="#3b0844" stroke="#ec4899" stroke-width="2" />
+        <text x="500" y="115" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="20" fill="#f472b6">🪜 LEVEL 2 — MEZZANINE FLOOR</text>
+
+        <!-- Toys & Collections Room -->
+        <g id="mini_zone_toys">
+          <rect x="135" y="175" width="350" height="445" rx="10" fill="#3d0b28" stroke="#ec4899" stroke-width="4" />
+          <text x="310" y="240" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="19" fill="#fbcfe8">🧸 TOYS &amp; COLLECTIONS</text>
+          <text x="310" y="270" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="14" fill="#f472b6">Hampanganan Room</text>
+          <rect x="165" y="320" width="130" height="65" rx="6" fill="rgba(236,72,153,0.25)" stroke="#ec4899" stroke-width="1.8" />
+          <text x="230" y="358" text-anchor="middle" font-size="12" font-weight="800" fill="#fbcfe8">Folk Toys</text>
+          <rect x="325" y="320" width="130" height="65" rx="6" fill="rgba(236,72,153,0.25)" stroke="#ec4899" stroke-width="1.8" />
+          <text x="390" y="358" text-anchor="middle" font-size="12" font-weight="800" fill="#fbcfe8">Beanies &amp; Vintage</text>
+        </g>
+
+        <!-- Carnival & Discovery Room -->
+        <g id="mini_zone_carnival">
+          <rect x="510" y="175" width="355" height="445" rx="10" fill="#2b063d" stroke="#a855f7" stroke-width="4" />
+          <text x="685" y="240" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="19" fill="#e9d5ff">🎡 CARNIVAL &amp; DISCOVERY</text>
+          <text x="685" y="270" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="14" fill="#c084fc">Discovery Room &amp; Play Lab</text>
+          <circle cx="610" cy="355" r="42" fill="rgba(168,85,247,0.25)" stroke="#a855f7" stroke-width="2" />
+          <text x="610" y="360" text-anchor="middle" font-size="12" font-weight="800" fill="#e9d5ff">Games Hub</text>
+          <circle cx="750" cy="355" r="42" fill="rgba(168,85,247,0.25)" stroke="#a855f7" stroke-width="2" />
+          <text x="750" y="360" text-anchor="middle" font-size="12" font-weight="800" fill="#e9d5ff">Sensory Lab</text>
+        </g>
+
+        <!-- Stairs Landing -->
+        <g id="mini_zone_stairs2">
+          <rect x="245" y="625" width="135" height="155" rx="5" fill="#1e0930" stroke="#f59e0b" stroke-width="3" />
+          <line x1="245" y1="655" x2="380" y2="655" stroke="#f59e0b" stroke-width="2" />
+          <line x1="245" y1="680" x2="380" y2="680" stroke="#f59e0b" stroke-width="2" />
+          <line x1="245" y1="705" x2="380" y2="705" stroke="#f59e0b" stroke-width="2" />
+          <line x1="245" y1="730" x2="380" y2="730" stroke="#f59e0b" stroke-width="2" />
+          <text x="312" y="760" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="12" fill="#fcd34d">▼ STAIRS</text>
+        </g>
+
+        <!-- Mezzanine Void -->
+        <polygon points="140,620 860,620 860,1130 140,1130" fill="rgba(6,2,12,0.85)" stroke="#ec4899" stroke-width="3" stroke-dasharray="10,6" />
+        <rect x="170" y="640" width="660" height="450" rx="8" fill="none" stroke="rgba(236,72,153,0.3)" stroke-width="2" />
+        <text x="500" y="860" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="22" fill="#f472b6">👀 MEZZANINE VOID</text>
+        <text x="500" y="895" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="15" fill="#fbcfe8">Open-to-Below Balcony Overlooking Function Hall</text>
+      </svg>
+    `;
+  }
+
+  // Floor 1 (Ground Floor)
+  return `
+    <svg viewBox="0 0 1000 1300" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%; display:block;">
+      <defs>
+        <pattern id="miniCadGrid1" width="50" height="50" patternUnits="userSpaceOnUse">
+          <path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(0,240,255,0.12)" stroke-width="1" />
+        </pattern>
+      </defs>
+      <rect width="1000" height="1300" fill="#03131c" />
+      <rect width="1000" height="1300" fill="url(#miniCadGrid1)" />
+
+      <!-- Reservoirs & Gutter -->
+      <line x1="240" y1="120" x2="760" y2="120" stroke="#00f0ff" stroke-width="2.5" stroke-dasharray="6,4" />
+      <text x="500" y="108" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" font-weight="700" fill="#38bdf8">EXISTING CONCRETE GUTTER</text>
+
+      <!-- Aquarium & Live Reef Section -->
+      <polygon points="240,135 760,135 760,265 240,265" fill="#032c3d" stroke="#00f0ff" stroke-width="3.5" />
+      <text x="500" y="185" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="16" fill="#38bdf8">🐠 AQUARIUM &amp; LIVE REEF SYSTEMS</text>
+      <text x="500" y="208" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="12" fill="#94a3b8">Tropical Saltwater Tanks</text>
+
+      <!-- Marine & Nature Room (Flagship) -->
+      <g id="mini_zone_marine">
+        <polygon points="240,265 760,265 760,620 240,620" fill="#023040" stroke="#00f0ff" stroke-width="4.5" />
+        <text x="500" y="305" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="20" fill="#e0f2fe">🌊 MARINE &amp; NATURE ROOM</text>
+        <text x="500" y="330" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="13" fill="#7dd3fc">The Marine Story Gallery</text>
+        
+        <!-- Display zones inside Marine room -->
+        <rect x="330" y="375" width="160" height="46" rx="6" fill="rgba(0,240,255,0.18)" stroke="#00f0ff" stroke-width="1.8" />
+        <text x="410" y="403" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="12" font-weight="800" fill="#7dd3fc">River Basin Area</text>
+
+        <rect x="530" y="375" width="170" height="46" rx="6" fill="rgba(0,240,255,0.18)" stroke="#00f0ff" stroke-width="1.8" />
+        <text x="615" y="403" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="12" font-weight="800" fill="#7dd3fc">Under the Sea Area</text>
+        
+        <rect x="390" y="495" width="220" height="32" rx="16" fill="rgba(0,240,255,0.22)" stroke="#00f0ff" stroke-width="1.5" />
+        <text x="500" y="516" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="11" font-weight="900" fill="#ffffff">HOUSES 5 EXHIBITS</text>
+      </g>
+
+      <!-- Touch & Play Room (Splash Zone - East Wing) -->
+      <g id="mini_zone_touch">
+        <polygon points="760,490 955,490 955,750 760,750" fill="#0b5e58" stroke="#14b8a6" stroke-width="4" />
+        <text x="857" y="560" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="17" fill="#ccfbf1">💦 TOUCH &amp; PLAY</text>
+        <text x="857" y="585" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="12" fill="#5eead4">Splash Zone</text>
+        <circle cx="857" cy="660" r="42" fill="rgba(20,184,166,0.3)" stroke="#14b8a6" stroke-width="2.5" />
+        <text x="857" y="665" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="11" font-weight="900" fill="#ffffff">Touch Pool</text>
+      </g>
+
+      <!-- Reading & Learning Room (Library Extension - West Wing Top) -->
+      <g id="mini_zone_reading">
+        <polygon points="65,440 240,440 240,670 65,670" fill="#0c2b42" stroke="#3b82f6" stroke-width="4" />
+        <text x="152" y="525" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="16" fill="#bfdbfe">📚 READING CORNER</text>
+        <text x="152" y="550" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="12" fill="#93c5fd">Franco's Corner</text>
+        <rect x="85" y="575" width="135" height="42" rx="6" fill="rgba(59,130,246,0.22)" stroke="#3b82f6" stroke-width="1.8" />
+        <text x="152" y="601" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="11" font-weight="800" fill="#dbeafe">Storybook Library</text>
+      </g>
+
+      <!-- Character & Heritage Room (West Wing Mid) -->
+      <g id="mini_zone_heritage">
+        <polygon points="65,670 240,670 240,940 65,940" fill="#382205" stroke="#f59e0b" stroke-width="4" />
+        <text x="152" y="760" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="16" fill="#fef3c7">🏆 CHARACTER</text>
+        <text x="152" y="785" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="15" fill="#fef3c7">&amp; HERITAGE</text>
+        <text x="152" y="810" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="12" fill="#fcd34d">Marañon Memorabilia</text>
+      </g>
+
+      <!-- Central Function Hall -->
+      <g id="mini_zone_hall">
+        <polygon points="240,620 760,620 760,1000 240,1000" fill="#06212d" stroke="#00f0ff" stroke-width="4" />
+        <text x="500" y="770" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="22" fill="#ffffff">🏛️ FUNCTION HALL</text>
+        <text x="500" y="800" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="14" fill="#7dd3fc">Central Multi-Purpose Gathering Area</text>
+      </g>
+
+      <!-- Stairs to 2nd floor -->
+      <g id="mini_zone_stairs1">
+        <polygon points="245,625 380,625 380,780 245,780" fill="#1e1302" stroke="#f59e0b" stroke-width="3" />
+        <text x="312" y="700" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="12" fill="#fcd34d">▲ STAIRS UP</text>
+        <text x="312" y="720" text-anchor="middle" font-size="10" font-weight="700" fill="#fef3c7">To Level 2</text>
+      </g>
+
+      <!-- Staff Office -->
+      <polygon points="760,750 955,750 955,1000 760,1000" fill="#1b1712" stroke="#d97706" stroke-width="3" />
+      <text x="857" y="865" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="15" fill="#fef3c7">💼 STAFF OFFICE</text>
+
+      <!-- Restrooms (CR) -->
+      <polygon points="65,940 240,940 240,1190 65,1190" fill="#16202c" stroke="#64748b" stroke-width="3" />
+      <text x="152" y="1065" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="14" fill="#ffffff">🚻 COMFORT ROOMS</text>
+
+      <!-- Main Entrance & Reception Foyer -->
+      <polygon points="240,1000 760,1000 760,1190 240,1190" fill="#052733" stroke="#00f0ff" stroke-width="4" />
+      <text x="500" y="1085" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="22" fill="#5eead4">🚪 MAIN ENTRANCE</text>
+      <text x="500" y="1115" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="14" fill="#94a3b8">Visitor Reception &amp; Ticketing</text>
+      <rect x="360" y="1190" width="280" height="95" rx="4" fill="#00141c" stroke="#00f0ff" stroke-width="2" stroke-dasharray="6,4" />
+      <text x="500" y="1255" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="12" fill="#7dd3fc">▲ ACCESS RAMP</text>
+    </svg>
+  `;
+}
+
 // ─── Exhibit Edit/Create Modal (with map coordinates) ───
 function openEditModal(id, defaultCategory){
   const ex = id ? exhibitsCache.find(x=>x.id===id) : null;
@@ -874,6 +1097,16 @@ function openEditModal(id, defaultCategory){
   let pendingImagePaths = ex ? (Array.isArray(ex.imagePaths) && ex.imagePaths.length ? [...ex.imagePaths] : (ex.imagePath ? [ex.imagePath] : [])) : [];
   let pendingMapImagePath = ex ? (ex.mapImagePath || '') : '';
   let videoUrl = ex && ex.videoUrl ? ex.videoUrl : '';
+
+  let currentFloor = (ex && ex.floor === 2) ? 2 : (defaultCategory && (defaultCategory.toLowerCase().includes('toy') || defaultCategory.toLowerCase().includes('carnival')) ? 2 : 1);
+  let currentPinX = (ex && ex.pinX !== null && ex.pinX !== undefined && !isNaN(Number(ex.pinX))) ? Number(ex.pinX) : null;
+  let currentPinY = (ex && ex.pinY !== null && ex.pinY !== undefined && !isNaN(Number(ex.pinY))) ? Number(ex.pinY) : null;
+  if (!isEdit && currentPinX === null && defaultCategory) {
+    const center = getRoomCenterForCategory(defaultCategory);
+    currentFloor = center.floor;
+    currentPinX = center.pinX;
+    currentPinY = center.pinY;
+  }
 
   openModal(`
     <h2>${isEdit ? 'Edit exhibit' : 'Add exhibit'}</h2>
@@ -890,6 +1123,38 @@ function openEditModal(id, defaultCategory){
       </div>
       <div class="form-field"><label>Latitude (map)</label><input type="number" step="0.000001" id="ex-lat" value="${ex && ex.lat !== null && ex.lat !== undefined ? ex.lat : ''}" placeholder="e.g. 10.945678"></div>
       <div class="form-field"><label>Longitude (map)</label><input type="number" step="0.000001" id="ex-lng" value="${ex && ex.lng !== null && ex.lng !== undefined ? ex.lng : ''}" placeholder="e.g. 123.421345"></div>
+
+      <!-- Interactive Floor Plan Pinpoint Picker -->
+      <div class="form-field full floor-picker-section">
+        <div class="floor-picker-header">
+          <h4 class="floor-picker-title">
+            <span>📍 Architectural Floor Plan Pinpoint</span>
+            <span style="font-size:11px; font-weight:600; color:#94a3b8;">(Click anywhere on map to drop exact exhibit pin)</span>
+          </h4>
+          <div class="floor-toggle-group">
+            <button type="button" class="btn-floor-toggle ${currentFloor === 1 ? 'active' : ''}" id="exFloor1Btn">Level 1 (Ground)</button>
+            <button type="button" class="btn-floor-toggle ${currentFloor === 2 ? 'active' : ''}" id="exFloor2Btn">Level 2 (Mezzanine)</button>
+          </div>
+        </div>
+
+        <div class="floor-picker-viewport" id="exFloorViewport" title="Click anywhere on the floor map to pinpoint this exhibit">
+          <div class="floor-picker-svg-wrap" id="exFloorSvgWrap"></div>
+          <div class="floor-picker-pin" id="exFloorPin" style="${currentPinX !== null && currentPinY !== null ? `left:${currentPinX}%; top:${currentPinY}%; display:flex;` : 'display:none;'}">
+            <div class="picker-pin-icon">📍</div>
+            <div class="picker-pin-badge" id="exFloorPinBadge">${escapeHtml(ex ? ex.title || 'Exhibit' : 'New Exhibit')}</div>
+          </div>
+        </div>
+
+        <div class="floor-picker-footer">
+          <div class="pin-coords-badge" id="exPinCoordsBadge">
+            ${currentPinX !== null && currentPinY !== null ? `Floor: <strong>L${currentFloor}</strong> • Pin: <strong>X: ${Math.round(currentPinX)}%, Y: ${Math.round(currentPinY)}%</strong> • <span class="room-tag">${detectRoomFromCoords(currentFloor, currentPinX, currentPinY)}</span>` : '<span style="color:#94a3b8;">No pin placed yet. Click anywhere on the map above to drop a pinpoint.</span>'}
+          </div>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <button type="button" class="btn btn-ghost dark btn-small" id="btnAutoPinToRoom" title="Automatically place pinpoint in center of selected category room">Snap to Room Center</button>
+            <button type="button" class="btn btn-danger btn-small" id="btnClearPin" style="${currentPinX !== null && currentPinY !== null ? '' : 'display:none;'}">Clear Pin</button>
+          </div>
+        </div>
+      </div>
       
       <!-- Video Section (YouTube link or MP4/WebM Upload - Same as Gallery) -->
       <div class="form-field full">
@@ -1092,6 +1357,118 @@ function openEditModal(id, defaultCategory){
     }catch(err){ status.textContent = 'Upload failed: ' + err.message; }
   });
 
+  // ── Floor Plan Pinpoint Picker Interactive Logic ──
+  const exFloorSvgWrap = document.getElementById('exFloorSvgWrap');
+  const exFloorViewport = document.getElementById('exFloorViewport');
+  const exFloorPin = document.getElementById('exFloorPin');
+  const exFloorPinBadge = document.getElementById('exFloorPinBadge');
+  const exPinCoordsBadge = document.getElementById('exPinCoordsBadge');
+  const exFloor1Btn = document.getElementById('exFloor1Btn');
+  const exFloor2Btn = document.getElementById('exFloor2Btn');
+  const btnAutoPinToRoom = document.getElementById('btnAutoPinToRoom');
+  const btnClearPin = document.getElementById('btnClearPin');
+
+  function updatePinUi() {
+    if (exFloorSvgWrap) exFloorSvgWrap.innerHTML = renderMiniBlueprintSvg(currentFloor);
+    if (exFloor1Btn) exFloor1Btn.classList.toggle('active', currentFloor === 1);
+    if (exFloor2Btn) exFloor2Btn.classList.toggle('active', currentFloor === 2);
+
+    if (currentPinX !== null && currentPinY !== null) {
+      if (exFloorPin) {
+        exFloorPin.style.left = `${currentPinX}%`;
+        exFloorPin.style.top = `${currentPinY}%`;
+        exFloorPin.style.display = 'flex';
+      }
+      const roomName = detectRoomFromCoords(currentFloor, currentPinX, currentPinY);
+      if (exPinCoordsBadge) {
+        exPinCoordsBadge.innerHTML = `Floor: <strong>L${currentFloor}</strong> • Pin: <strong>X: ${Math.round(currentPinX)}%, Y: ${Math.round(currentPinY)}%</strong> • <span class="room-tag">${escapeHtml(roomName)}</span>`;
+      }
+      if (btnClearPin) btnClearPin.style.display = 'inline-block';
+    } else {
+      if (exFloorPin) exFloorPin.style.display = 'none';
+      if (exPinCoordsBadge) {
+        exPinCoordsBadge.innerHTML = `<span style="color:#94a3b8;">No pin placed yet. Click anywhere on the map above to drop a pinpoint.</span>`;
+      }
+      if (btnClearPin) btnClearPin.style.display = 'none';
+    }
+  }
+
+  updatePinUi();
+
+  if (exFloor1Btn) {
+    exFloor1Btn.addEventListener('click', () => {
+      currentFloor = 1;
+      updatePinUi();
+    });
+  }
+  if (exFloor2Btn) {
+    exFloor2Btn.addEventListener('click', () => {
+      currentFloor = 2;
+      updatePinUi();
+    });
+  }
+
+  if (exFloorViewport) {
+    exFloorViewport.addEventListener('click', (e) => {
+      const rect = exFloorViewport.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+      let pctX = Math.round(((clickX / rect.width) * 100) * 10) / 10;
+      let pctY = Math.round(((clickY / rect.height) * 100) * 10) / 10;
+      pctX = Math.max(2, Math.min(98, pctX));
+      pctY = Math.max(2, Math.min(98, pctY));
+      currentPinX = pctX;
+      currentPinY = pctY;
+      updatePinUi();
+
+      const locInput = document.getElementById('ex-location');
+      if (locInput && !locInput.value.trim()) {
+        locInput.value = `${detectRoomFromCoords(currentFloor, currentPinX, currentPinY)}`;
+      }
+    });
+  }
+
+  if (btnAutoPinToRoom) {
+    btnAutoPinToRoom.addEventListener('click', () => {
+      const selectedCat = document.getElementById('ex-category').value;
+      const center = getRoomCenterForCategory(selectedCat);
+      currentFloor = center.floor;
+      currentPinX = center.pinX;
+      currentPinY = center.pinY;
+      updatePinUi();
+      toast(`Pinned to ${center.name}`);
+    });
+  }
+
+  if (btnClearPin) {
+    btnClearPin.addEventListener('click', () => {
+      currentPinX = null;
+      currentPinY = null;
+      updatePinUi();
+      toast('Pinpoint cleared');
+    });
+  }
+
+  const titleInput = document.getElementById('ex-title');
+  if (titleInput && exFloorPinBadge) {
+    titleInput.addEventListener('input', () => {
+      exFloorPinBadge.textContent = titleInput.value.trim() || 'Exhibit Pin';
+    });
+  }
+
+  const catSelect = document.getElementById('ex-category');
+  if (catSelect) {
+    catSelect.addEventListener('change', () => {
+      if (currentPinX === null && catSelect.value) {
+        const center = getRoomCenterForCategory(catSelect.value);
+        currentFloor = center.floor;
+        currentPinX = center.pinX;
+        currentPinY = center.pinY;
+        updatePinUi();
+      }
+    });
+  }
+
   document.getElementById('exCancel').addEventListener('click', closeModal);
   document.getElementById('exSave').addEventListener('click', async ()=>{
     const errorEl = document.getElementById('exError');
@@ -1114,6 +1491,10 @@ function openEditModal(id, defaultCategory){
       directions: document.getElementById('ex-directions') ? document.getElementById('ex-directions').value.trim() : '',
       lat: latNum,
       lng: lngNum,
+      floor: currentFloor,
+      pinX: currentPinX !== null ? currentPinX : null,
+      pinY: currentPinY !== null ? currentPinY : null,
+      mapZone: detectRoomZone(currentFloor, currentPinX, currentPinY),
       mapImagePath: pendingMapImagePath,
       description: document.getElementById('ex-desc').value.trim(),
       description_tl: document.getElementById('ex-desc_tl').value.trim(),

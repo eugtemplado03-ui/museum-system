@@ -567,6 +567,31 @@ svg.blueprint-svg {
   transform: translateY(-4px);
 }
 
+/* Individual Exhibit Pinpoints */
+.individual-exhibit-pin {
+  cursor: pointer;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  outline: none;
+}
+.individual-exhibit-pin:hover {
+  transform: scale(1.22);
+}
+.individual-exhibit-pin .exhibit-pin-tooltip {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+.individual-exhibit-pin:hover .exhibit-pin-tooltip,
+.individual-exhibit-pin:focus .exhibit-pin-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+.exhibit-pin-halo {
+  animation: radarPulse 2.4s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  transform-origin: 0 -20px;
+}
+
 /* ==========================================================================
    FLOATING HUD CONTROLS (FIT TO SCREEN, FIT WIDTH, ZOOM, THEME)
    ========================================================================== */
@@ -1703,6 +1728,13 @@ svg.blueprint-svg {
             </button>
           </div>
 
+          <!-- Exhibit Pins Toggle -->
+          <div class="segmented-control" role="group" aria-label="Exhibit Pinpoints Visibility">
+            <button class="seg-btn active" id="btnToggleExhibitPins" title="Toggle individual exhibit pinpoints on the floor map">
+              <span>📍 Exhibits</span>
+            </button>
+          </div>
+
           <!-- High-Contrast Theme Switcher -->
           <div class="segmented-control" role="group" aria-label="Theme Mode">
             <button class="seg-btn" id="btnThemeToggle" title="Toggle Blueprint / Daylight High-Contrast Mode">
@@ -2254,9 +2286,20 @@ svg.blueprint-svg {
     };
 
     // Helper: Find which Category Room an exhibit belongs to
-    function findRoomForExhibit(code) {
-      for (const room of Object.values(CATEGORY_ROOMS)) {
-        if (room.exhibitCodes.includes(code)) return room;
+    function findRoomForExhibit(codeOrExhibit) {
+      if (!codeOrExhibit) return null;
+      const code = typeof codeOrExhibit === 'object' ? codeOrExhibit.code : codeOrExhibit;
+      const ex = typeof codeOrExhibit === 'object' ? codeOrExhibit : exhibitsData.find(e => e.code === code);
+      if (code) {
+        for (const room of Object.values(CATEGORY_ROOMS)) {
+          if (room.exhibitCodes.includes(code)) return room;
+        }
+      }
+      if (ex && ex.category) {
+        const catClean = ex.category.trim().toLowerCase();
+        for (const room of Object.values(CATEGORY_ROOMS)) {
+          if (room.category.trim().toLowerCase() === catClean) return room;
+        }
       }
       return null;
     }
@@ -2477,6 +2520,9 @@ svg.blueprint-svg {
 
         <!-- INTERACTIVE CATEGORY ROOM BEACONS LAYER -->
         <g id="pinsLayer"></g>
+
+        <!-- INTERACTIVE INDIVIDUAL EXHIBIT PINPOINTS LAYER -->
+        <g id="exhibitPinsLayer"></g>
       </svg>
       `;
     }
@@ -2566,6 +2612,9 @@ svg.blueprint-svg {
 
         <!-- INTERACTIVE CATEGORY ROOM BEACONS LAYER -->
         <g id="pinsLayer"></g>
+
+        <!-- INTERACTIVE INDIVIDUAL EXHIBIT PINPOINTS LAYER -->
+        <g id="exhibitPinsLayer"></g>
       </svg>
       `;
     }
@@ -2641,6 +2690,96 @@ svg.blueprint-svg {
         });
 
         pinsLayer.appendChild(pinG);
+      });
+    }
+
+    let showExhibitPins = true;
+
+    // Render Exact Individual Exhibit Pinpoint Markers on Floor Plan
+    function renderExhibitPins() {
+      const exPinsLayer = document.getElementById('exhibitPinsLayer');
+      if (!exPinsLayer) return;
+      exPinsLayer.innerHTML = '';
+
+      if (!showExhibitPins) return;
+
+      const exhibitsOnFloor = exhibitsData.filter(e => {
+        const f = e.floor === 2 ? 2 : 1;
+        return f === currentFloor && e.pinX !== null && e.pinX !== undefined && e.pinY !== null && e.pinY !== undefined;
+      });
+
+      exhibitsOnFloor.forEach(ex => {
+        // Category Filter
+        if (activeCategory !== 'all' && activeCategory !== ex.category) return;
+
+        // Search Filter
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase();
+          const matchTitle = (ex.title || '').toLowerCase().includes(q);
+          const matchCode = (ex.code || '').toLowerCase().includes(q);
+          const matchCat = (ex.category || '').toLowerCase().includes(q);
+          if (!matchTitle && !matchCode && !matchCat) return;
+        }
+
+        const posX = (Number(ex.pinX) / 100) * 1000;
+        const posY = (Number(ex.pinY) / 100) * 1300;
+        const parentRoom = findRoomForExhibit(ex);
+        const pinColor = parentRoom ? parentRoom.color : '#00f0ff';
+
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('class', 'individual-exhibit-pin');
+        g.setAttribute('id', `ex_pin_${ex.code || ex.id}`);
+        g.setAttribute('transform', `translate(${posX}, ${posY})`);
+        g.setAttribute('tabindex', '0');
+        g.setAttribute('role', 'button');
+        g.setAttribute('aria-label', `${ex.code || ''}: ${ex.title}`);
+        g.style.cursor = 'pointer';
+
+        g.innerHTML = `
+          <!-- Pulsing Ambient Ring -->
+          <circle cx="0" cy="-20" r="16" fill="none" stroke="${pinColor}" stroke-width="2.5" opacity="0.85" class="exhibit-pin-halo" />
+          
+          <!-- Pin Drop Shape -->
+          <path d="M 0 0 C -4 -5 -16 -18 -16 -28 C -16 -38 -9 -46 0 -46 C 9 -46 16 -38 16 -28 C 16 -18 4 -5 0 0 Z"
+                fill="#ffffff" stroke="${pinColor}" stroke-width="3" filter="drop-shadow(0 4px 12px rgba(0,0,0,0.9))" />
+          
+          <!-- Inner Core Color Dot -->
+          <circle cx="0" cy="-28" r="8" fill="${pinColor}" />
+          <circle cx="0" cy="-28" r="3.5" fill="#ffffff" />
+
+          <!-- Exhibit Accession Code Tag -->
+          <g class="exhibit-pin-tag-group">
+            <rect x="-35" y="-66" width="70" height="18" rx="6" fill="rgba(3, 19, 28, 0.95)" stroke="${pinColor}" stroke-width="1.6" filter="drop-shadow(0 2px 6px rgba(0,0,0,0.8))" />
+            <text x="0" y="-53" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" font-weight="700" fill="#ffffff">
+              ${escapeHtml(ex.code || 'EX')}
+            </text>
+          </g>
+
+          <!-- Hover Tooltip with Full Title & Click to View -->
+          <g class="exhibit-pin-tooltip" pointer-events="none">
+            <rect x="-105" y="-116" width="210" height="44" rx="8" fill="rgba(2, 16, 25, 0.98)" stroke="${pinColor}" stroke-width="2" filter="drop-shadow(0 8px 20px rgba(0,0,0,0.95))" />
+            <text x="0" y="-96" text-anchor="middle" font-family="'Nunito', sans-serif" font-weight="900" font-size="12" fill="#ffffff">
+              ${escapeHtml(ex.title.length > 25 ? ex.title.slice(0, 23) + '…' : ex.title)}
+            </text>
+            <text x="0" y="-79" text-anchor="middle" font-family="'Open Sans', sans-serif" font-size="10" font-weight="700" fill="#5eead4">
+              📍 Click to View Exhibit
+            </text>
+          </g>
+        `;
+
+        g.addEventListener('click', (e) => {
+          if (hasDragged) return;
+          e.stopPropagation();
+          e.preventDefault();
+          if (parentRoom) {
+            openCategoryRoomDrawer(parentRoom, ex.code);
+          } else {
+            const fallbackRoom = Object.values(CATEGORY_ROOMS)[0];
+            openCategoryRoomDrawer(fallbackRoom, ex.code);
+          }
+        });
+
+        exPinsLayer.appendChild(g);
       });
     }
 
@@ -2836,6 +2975,7 @@ svg.blueprint-svg {
       else if (activeRouteKey) renderRoute(activeRouteKey);
 
       renderPins();
+      renderExhibitPins();
       renderSidebar();
       setupRoomClicks();
     }
@@ -3515,6 +3655,16 @@ svg.blueprint-svg {
         }
       });
 
+      // Exhibit Pins Toggle
+      const btnToggleExhibitPins = document.getElementById('btnToggleExhibitPins');
+      if (btnToggleExhibitPins) {
+        btnToggleExhibitPins.addEventListener('click', () => {
+          showExhibitPins = !showExhibitPins;
+          btnToggleExhibitPins.classList.toggle('active', showExhibitPins);
+          renderExhibitPins();
+        });
+      }
+
       // Category Chips
       const chips = document.querySelectorAll('.chip');
       chips.forEach(chip => {
@@ -3523,6 +3673,7 @@ svg.blueprint-svg {
           chip.classList.add('active');
           activeCategory = chip.dataset.cat;
           renderPins();
+          renderExhibitPins();
           renderSidebar();
         });
       });
@@ -3532,6 +3683,7 @@ svg.blueprint-svg {
       searchInput.addEventListener('input', (e) => {
         searchQuery = e.target.value;
         renderPins();
+        renderExhibitPins();
         renderSidebar();
       });
 
@@ -3801,6 +3953,9 @@ svg.blueprint-svg {
           const data = await res.json();
           if (Array.isArray(data.exhibits) && data.exhibits.length > 0) {
             exhibitsData = data.exhibits;
+            renderPins();
+            renderExhibitPins();
+            renderSidebar();
             if (selectedExhibit) {
               const fresh = exhibitsData.find(e => e.code === selectedExhibit.code);
               if (fresh) {
