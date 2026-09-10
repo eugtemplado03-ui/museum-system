@@ -76,44 +76,22 @@ function buildSystemPrompt(context, language) {
 
   const feesBlock = (info.entranceFees || []).map(f => `- ${f}`).join('\n');
 
-  let langInstruction = `TRILINGUAL ANSWER REQUIREMENT:
-- You fluently understand, speak, and write three languages:
+  let langInstruction = `STRICT LANGUAGE MATCHING RULE:
+- You fluently understand and speak three languages:
   1. English
   2. Tagalog / Filipino
   3. Bisaya / Hiligaynon / Cebuano (the native regional language of Sagay City, Negros Occidental)
-- The user requires that you ALWAYS provide answers in Tagalog and Bisaya in addition to English:
-  • If the user inquires in English or default mode:
-    [Complete, detailed English answer]
-
-    ---
-    🇵🇭 **Sa Tagalog:**
-    [Complete, natural Filipino translation of the answer]
-
-    🏝️ **Sa Bisaya:**
-    [Complete, authentic Visayan/Hiligaynon translation of the answer]
-  • If the user inquires in Tagalog:
-    [Complete, detailed Tagalog answer]
-
-    ---
-    🏝️ **Sa Bisaya:**
-    [Complete, authentic Bisaya translation of the answer]
-
-    🌐 **In English:**
-    [Complete English translation of the answer]
-  • If the user inquires in Bisaya:
-    [Complete, detailed Bisaya answer]
-
-    ---
-    🇵🇭 **Sa Tagalog:**
-    [Complete Tagalog translation of the answer]
-
-    🌐 **In English:**
-    [Complete English translation of the answer]`;
+- CRITICAL INSTRUCTION: You MUST ALWAYS reply ONLY in the language the user asked in:
+  • When a user writes or asks in Tagalog, reply ONLY in Tagalog. Do NOT include English or Bisaya translations unless explicitly requested.
+  • When a user writes or asks in English, reply ONLY in English. Do NOT include Tagalog or Bisaya translations unless explicitly requested.
+  • When a user writes or asks in Bisaya / Hiligaynon, reply ONLY in Bisaya / Hiligaynon. Do NOT include Tagalog or English translations unless explicitly requested.`;
 
   if (language === 'tl') {
-    langInstruction += `\n- USER PREFERRED LANGUAGE: Tagalog / Filipino. Put the Tagalog response first, followed by Bisaya and English.`;
+    langInstruction += `\n- USER PREFERRED LANGUAGE: Tagalog / Filipino. Formulate your entire response ONLY in clear, natural Tagalog.`;
   } else if (language === 'bis' || language === 'ceb') {
-    langInstruction += `\n- USER PREFERRED LANGUAGE: Bisaya / Hiligaynon. Put the Bisaya response first, followed by Tagalog and English.`;
+    langInstruction += `\n- USER PREFERRED LANGUAGE: Bisaya / Hiligaynon. Formulate your entire response ONLY in warm, natural Bisaya.`;
+  } else if (language === 'en') {
+    langInstruction += `\n- USER PREFERRED LANGUAGE: English. Formulate your response ONLY in English.`;
   }
 
   return `You are "Bata Guide", the friendly, knowledgeable AI visitor assistant and translator for ${info.name}, located in Barangay Old Sagay, Sagay City, Negros Occidental, Philippines.
@@ -175,24 +153,23 @@ ${eventBlock || 'Regular interactive tours.'}
 
 ANSWERING INSTRUCTIONS:
 - Answer ALL user questions clearly and helpfully using the information above.
-- Always include the Tagalog and Bisaya translations/answers as specified in the TRILINGUAL ANSWER REQUIREMENT.
+- Always reply ONLY in the language the user asked in (Tagalog -> only Tagalog; English -> only English; Bisaya -> only Bisaya).
 - Use clear markdown with bullet points or bold text where appropriate so the response is easy to read.`;
 }
 
-// ─── Helper to format Trilingual responses (English, Tagalog, Bisaya) ───
-function formatTrilingualReply({ en, tl, bis }, targetLang = 'auto') {
+// ─── Helper to format response in the matched language only ───
+function formatTrilingualReply({ en, tl, bis }, targetLang = 'en') {
   const cleanEn = (en || '').trim();
   const cleanTl = (tl || '').trim();
   const cleanBis = (bis || '').trim();
 
   if (targetLang === 'tl') {
-    return `${cleanTl}\n\n---\n🏝️ **Sa Bisaya:**\n${cleanBis}\n\n🌐 **In English:**\n${cleanEn}`;
+    return cleanTl;
   }
   if (targetLang === 'bis' || targetLang === 'ceb') {
-    return `${cleanBis}\n\n---\n🇵🇭 **Sa Tagalog:**\n${cleanTl}\n\n🌐 **In English:**\n${cleanEn}`;
+    return cleanBis;
   }
-  // Default (Auto or English): English first, then Tagalog, then Bisaya
-  return `${cleanEn}\n\n---\n🇵🇭 **Sa Tagalog:**\n${cleanTl}\n\n🏝️ **Sa Bisaya:**\n${cleanBis}`;
+  return cleanEn;
 }
 
 // ─── Intelligent Local Fallback Engine (Answers & Translates Offline / Resilient) ───
@@ -207,15 +184,29 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
   const hasBisayaWords = /\b(unsa|unsang|asa|asan|dapit|tagpila|pila|ninyo|nato|atong|inyong|nako|nimo|kami|kita|diin|hain|adlaw|kabataan|palihug|palihog|ngano|nganong|kaayo|mokaon|magkaon|moinum|mag-inom|adto|moadto|pag-adto|unsaon|gani|kamo|sulod|pasulod|hagdanan|diri|didto|kinsa|maayong|udto|gabii|bisaya|hiligaynon|ilonggo|cebuano|ayaw|way|adunay|naa|naay|hubad|ihubad|tapad|ilalom|ibabaw|salog|abli|hikap|mohikap|sultihi|tudloi)\b/i.test(msg);
   const hasTagalogWords = /\b(ano|anong|saan|nasaan|nasa|san|magkano|paano|kailan|meron|may|mayroon|po|opo|ba|namin|ninyo|natin|atin|inyo|ako|ko|kami|tayo|pwede|pede|pumunta|punta|kuha|kumuha|larawan|pagkain|inumin|kumain|uminom|sino|bakit|kumusta|kamusta|salamat|umaga|tanghali|tagalog|filipino|paki|pakisabi|sabihin|ikwento|kwento|huwag|bawal|walang|isalin|salin|katabi|itaas|palapag|bukas|sarado|mag-aaral|papasok|pasok)\b/i.test(msg);
 
-  let activeLang = preferredLang;
-  if (activeLang === 'auto') {
-    if (/\b(magkano|saan|nasaan|ano|anong|paano|kailan|po|opo)\b/i.test(msg)) activeLang = 'tl';
-    else if (/\b(tagpila|asa|unsa|unsang|diin|hain|ngano|naa|naay)\b/i.test(msg)) activeLang = 'bis';
-    else if (hasBisayaWords && !hasTagalogWords) activeLang = 'bis';
-    else if (hasTagalogWords && !hasBisayaWords) activeLang = 'tl';
-    else if (hasBisayaWords) activeLang = 'bis';
-    else if (hasTagalogWords) activeLang = 'tl';
-    else activeLang = 'auto';
+  let activeLang = 'en';
+  if (isTagalogExplicit) {
+    activeLang = 'tl';
+  } else if (isBisayaExplicit) {
+    activeLang = 'bis';
+  } else if (isEnglishExplicit) {
+    activeLang = 'en';
+  } else {
+    if (/\b(magkano|saan|nasaan|ano|anong|paano|kailan|po|opo|kamusta|kumusta|salamat|paki|pakiusap|pwede|pede|walang|meron|mayroon|bawal|pumunta|kuha|larawan|pagkain|inumin|mag-aaral|ikwento|sabihin)\b/i.test(msg)) {
+      activeLang = 'tl';
+    } else if (/\b(tagpila|asa|asan|unsa|unsang|diin|hain|ngano|nganong|naa|naay|pila|palihug|palihog|kaayo|mokaon|magkaon|moinum|mag-inom|adto|moadto|pag-adto|unsaon|sulod|hagdanan|diri|didto|maayong|udto|gabii|bisaya|hiligaynon|ayaw|way|adunay|hubad|ihubad|tapad|ilalom|salog|abli|hikap|mohikap|sultihi|tudloi)\b/i.test(msg)) {
+      activeLang = 'bis';
+    } else if (hasTagalogWords && !hasBisayaWords) {
+      activeLang = 'tl';
+    } else if (hasBisayaWords && !hasTagalogWords) {
+      activeLang = 'bis';
+    } else if (hasTagalogWords) {
+      activeLang = 'tl';
+    } else if (hasBisayaWords) {
+      activeLang = 'bis';
+    } else {
+      activeLang = 'en';
+    }
   }
 
   // ── TRANSLATION REQUESTS ──
@@ -247,12 +238,12 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
     }
 
     if (toBisaya) {
-      return `🌐 **Hubad sa Bisaya (Translation to Bisaya):**\n"${bisText}"\n\n---\n🇵🇭 **Sa Tagalog:**\n"${tlText}"\n\n🌐 **In English:**\n"${enText}"`;
+      return `🌐 **Hubad sa Bisaya (Translation to Bisaya):**\n"${bisText}"`;
     }
     if (toTagalog) {
-      return `🌐 **Salin sa Tagalog (Translation to Tagalog):**\n"${tlText}"\n\n---\n🏝️ **Sa Bisaya:**\n"${bisText}"\n\n🌐 **In English:**\n"${enText}"`;
+      return `🌐 **Salin sa Tagalog (Translation to Tagalog):**\n"${tlText}"`;
     }
-    return formatTrilingualReply({ en: enText, tl: tlText, bis: bisText }, activeLang);
+    return `🌐 **English Translation:**\n"${enText}"`;
   }
 
   // 1. Staff Office Location
