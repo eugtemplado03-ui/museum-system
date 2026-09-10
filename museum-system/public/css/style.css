@@ -2161,6 +2161,18 @@ footer .footer-brand { font-weight: 800; color: var(--white); font-family: 'Nuni
   line-height: 1; transition: all 0.15s;
 }
 .chat-head-btn:hover { background: rgba(255, 255, 255, 0.3); transform: rotate(45deg); }
+.chat-lang-bar {
+  display: flex; align-items: center; gap: 6px; padding: 7px 14px;
+  background: rgba(2, 22, 32, 0.95); border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+.chat-lang-label { font-size: 11px; font-weight: 700; color: #94a3b8; margin-right: 2px; }
+.chat-lang-btn {
+  background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #cbd5e1; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 3px 9px;
+  cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 3px;
+}
+.chat-lang-btn:hover { background: rgba(0, 240, 255, 0.18); color: #ffffff; border-color: rgba(0, 240, 255, 0.4); }
+.chat-lang-btn.active { background: var(--teal); border-color: var(--teal); color: #ffffff; box-shadow: 0 0 10px rgba(0, 174, 189, 0.45); }
 .chat-messages { flex: 1; overflow-y: auto; padding: 14px 14px 6px; display: flex; flex-direction: column; gap: 10px; }
 .chat-msg { max-width: 88%; font-size: 13.5px; line-height: 1.55; padding: 9px 12px; border-radius: 12px; word-break: break-word; }
 .chat-msg a { color: #38bdf8; text-decoration: underline; font-weight: 700; }
