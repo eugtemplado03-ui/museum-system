@@ -879,20 +879,22 @@ function detectRoomFromCoords(floor, pinX, pinY) {
   const x = Number(pinX);
   const y = Number(pinY);
   if (floor === 2) {
-    if (x >= 12 && x <= 49 && y >= 12 && y <= 49) return 'Toys & Collections Room (Hampanganan)';
-    if (x >= 50 && x <= 88 && y >= 12 && y <= 49) return 'Carnival & Discovery Room';
-    if (x >= 24 && x <= 39 && y >= 47 && y <= 62) return 'Stairs Landing (To Ground Floor)';
-    if (y > 47) return 'Mezzanine Balcony Void';
+    if (x >= 13 && x <= 49 && y >= 13 && y <= 48) return 'Toys & Collections Room (Hampanganan)';
+    if (x >= 50 && x <= 87 && y >= 13 && y <= 48) return 'Carnival & Discovery Room';
+    if (x >= 24 && x <= 38 && y >= 48 && y <= 60) return 'Stairs Landing (To Ground Floor)';
+    if (x >= 14 && x <= 86 && y >= 48 && y <= 87) return 'Mezzanine Balcony Void';
     return 'Second Floor (Mezzanine Level)';
   } else {
-    if (x >= 23 && x <= 77 && y >= 20 && y <= 48) return 'Marine & Nature Room (The Marine Story)';
-    if (x >= 75 && x <= 97 && y >= 37 && y <= 58) return 'Touch & Play Room (Splash Zone)';
-    if (x >= 5 && x <= 25 && y >= 33 && y <= 52) return 'Reading & Learning Room (Franco\'s Corner)';
-    if (x >= 5 && x <= 25 && y >= 51 && y <= 73) return 'Character & Heritage Room';
+    if (x >= 24 && x <= 76 && y >= 10 && y <= 20) return 'Aquarium & Reef Systems';
+    if (x >= 24 && x <= 76 && y >= 20 && y <= 48) return 'Marine & Nature Room (The Marine Story)';
+    if (x >= 76 && x <= 90 && y >= 33 && y <= 64) return 'Touch & Play Room (Splash Zone)';
+    if (x >= 6 && x <= 24 && y >= 34 && y <= 53) return 'Reading & Learning Room (Franco\'s Corner)';
+    if (x >= 6 && x <= 24 && y >= 53 && y <= 76) return 'Character & Heritage Room';
+    if (x >= 24 && x <= 38 && y >= 48 && y <= 60) return 'Stairs (To Level 2)';
     if (x >= 24 && x <= 38 && y >= 60 && y <= 76) return 'Staff Office (Under Stairs)';
-    if (x >= 23 && x <= 77 && y >= 47 && y <= 77) return 'Central Function Hall';
-    if (x >= 23 && x <= 77 && y >= 76 && y <= 93) return 'Main Entrance Foyer';
-    if (y < 21) return 'Aquarium & Reef Systems';
+    if (x >= 24 && x <= 76 && y >= 48 && y <= 77) return 'Central Function Hall';
+    if (x >= 24 && x <= 76 && y >= 77 && y <= 92) return 'Main Entrance Foyer';
+    if (y >= 92) return 'Main Entrance Ramp & Steps';
     return 'Ground Floor Gallery';
   }
 }
@@ -902,17 +904,17 @@ function detectRoomZone(floor, pinX, pinY) {
   const x = Number(pinX);
   const y = Number(pinY);
   if (floor === 2) {
-    if (x >= 12 && x <= 49 && y >= 12 && y <= 49) return 'second_floor_toys';
-    if (x >= 50 && x <= 88 && y >= 12 && y <= 49) return 'second_floor_carnival';
+    if (x >= 13 && x <= 49 && y >= 13 && y <= 48) return 'second_floor_toys';
+    if (x >= 50 && x <= 87 && y >= 13 && y <= 48) return 'second_floor_carnival';
     return 'second_floor';
   } else {
-    if (x >= 23 && x <= 77 && y >= 20 && y <= 48) return 'marine_story';
-    if (x >= 75 && x <= 97 && y >= 37 && y <= 58) return 'splash_zone';
-    if (x >= 5 && x <= 25 && y >= 33 && y <= 52) return 'reading_corner';
-    if (x >= 5 && x <= 25 && y >= 51 && y <= 73) return 'maranon_heritage';
+    if (x >= 24 && x <= 76 && y >= 20 && y <= 48) return 'marine_story';
+    if (x >= 76 && x <= 90 && y >= 33 && y <= 64) return 'splash_zone';
+    if (x >= 6 && x <= 24 && y >= 34 && y <= 53) return 'reading_corner';
+    if (x >= 6 && x <= 24 && y >= 53 && y <= 76) return 'maranon_heritage';
     if (x >= 24 && x <= 38 && y >= 60 && y <= 76) return 'staff_office';
-    if (x >= 23 && x <= 77 && y >= 47 && y <= 77) return 'function_hall';
-    if (x >= 23 && x <= 77 && y >= 76 && y <= 93) return 'entrance';
+    if (x >= 24 && x <= 76 && y >= 48 && y <= 77) return 'function_hall';
+    if (x >= 24 && x <= 76 && y >= 77 && y <= 92) return 'entrance';
     return 'ground_floor';
   }
 }
@@ -942,147 +944,233 @@ function renderMiniBlueprintSvg(floor) {
     return `
       <svg viewBox="0 0 1000 1300" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%; display:block;">
         <defs>
-          <pattern id="miniCadGrid2" width="50" height="50" patternUnits="userSpaceOnUse">
-            <path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(236,72,153,0.15)" stroke-width="1" />
+          <pattern id="miniCadGrid2" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(236,72,153,0.15)" stroke-width="0.9" />
           </pattern>
         </defs>
-        <rect width="1000" height="1300" fill="#0c0414" />
+        <rect width="1000" height="1300" fill="#0d0414" />
         <rect width="1000" height="1300" fill="url(#miniCadGrid2)" />
-        <rect x="70" y="60" width="860" height="1140" rx="14" fill="#140620" stroke="#ec4899" stroke-width="4" />
+        
+        <!-- Outer Boundary Wall -->
+        <rect x="70" y="60" width="860" height="1140" rx="14" fill="#0d0414" stroke="#ec4899" stroke-width="4.5" />
         
         <!-- Header banner -->
-        <rect x="240" y="80" width="520" height="55" rx="8" fill="#3b0844" stroke="#ec4899" stroke-width="2" />
-        <text x="500" y="115" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="20" fill="#f472b6">🪜 LEVEL 2 — MEZZANINE FLOOR</text>
+        <rect x="240" y="80" width="520" height="60" rx="10" fill="#3b0844" stroke="#ec4899" stroke-width="2.5" />
+        <text x="500" y="118" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="19" fill="#f472b6">🪜 SECOND FLOOR (UPPER MEZZANINE LEVEL)</text>
 
-        <!-- Toys & Collections Room -->
+        <!-- Stairs Landing (Down to Ground Floor) -->
+        <g id="mini_zone_stairs2">
+          <rect x="245" y="625" width="135" height="155" rx="5" fill="#1e0930" stroke="#f59e0b" stroke-width="3.5" />
+          <line x1="245" y1="650" x2="380" y2="650" stroke="#f59e0b" stroke-width="2.5" />
+          <line x1="245" y1="672" x2="380" y2="672" stroke="#f59e0b" stroke-width="2.5" />
+          <line x1="245" y1="694" x2="380" y2="694" stroke="#f59e0b" stroke-width="2.5" />
+          <line x1="245" y1="716" x2="380" y2="716" stroke="#f59e0b" stroke-width="2.5" />
+          <line x1="245" y1="738" x2="380" y2="738" stroke="#f59e0b" stroke-width="2.5" />
+          <path d="M 312 642 L 312 760 M 304 752 L 312 760 L 320 752" fill="none" stroke="#fcd34d" stroke-width="3.5" stroke-linecap="round" />
+          <text x="312" y="795" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="12" fill="#fcd34d">▼ STAIRS DOWN</text>
+          <text x="312" y="812" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="10" font-weight="800" fill="#fde68a">To Ground Floor</text>
+        </g>
+
+        <!-- Toys & Collections Room (Hampanganan) -->
         <g id="mini_zone_toys">
-          <rect x="135" y="175" width="350" height="445" rx="10" fill="#3d0b28" stroke="#ec4899" stroke-width="4" />
-          <text x="310" y="240" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="19" fill="#fbcfe8">🧸 TOYS &amp; COLLECTIONS</text>
-          <text x="310" y="270" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="14" fill="#f472b6">Hampanganan Room</text>
-          <rect x="165" y="320" width="130" height="65" rx="6" fill="rgba(236,72,153,0.25)" stroke="#ec4899" stroke-width="1.8" />
-          <text x="230" y="358" text-anchor="middle" font-size="12" font-weight="800" fill="#fbcfe8">Folk Toys</text>
-          <rect x="325" y="320" width="130" height="65" rx="6" fill="rgba(236,72,153,0.25)" stroke="#ec4899" stroke-width="1.8" />
-          <text x="390" y="358" text-anchor="middle" font-size="12" font-weight="800" fill="#fbcfe8">Beanies &amp; Vintage</text>
+          <rect x="135" y="175" width="350" height="445" rx="12" fill="#4a0b33" stroke="#ec4899" stroke-width="4.5" />
+          <text x="310" y="235" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="18" fill="#fbcfe8">🧸 TOYS &amp; COLLECTIONS ROOM</text>
+          <text x="310" y="260" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="13" fill="#f472b6">Hampanganan (Toy Room)</text>
+          <rect x="165" y="310" width="130" height="65" rx="6" fill="rgba(236,72,153,0.25)" stroke="#ec4899" stroke-width="2" />
+          <text x="230" y="348" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="11" font-weight="800" fill="#fbcfe8">Folk Toy Showcase</text>
+          <rect x="325" y="310" width="130" height="65" rx="6" fill="rgba(236,72,153,0.25)" stroke="#ec4899" stroke-width="2" />
+          <text x="390" y="348" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="11" font-weight="800" fill="#fbcfe8">McDonald's &amp; Beanies</text>
         </g>
 
         <!-- Carnival & Discovery Room -->
         <g id="mini_zone_carnival">
-          <rect x="510" y="175" width="355" height="445" rx="10" fill="#2b063d" stroke="#a855f7" stroke-width="4" />
-          <text x="685" y="240" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="19" fill="#e9d5ff">🎡 CARNIVAL &amp; DISCOVERY</text>
-          <text x="685" y="270" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="14" fill="#c084fc">Discovery Room &amp; Play Lab</text>
-          <circle cx="610" cy="355" r="42" fill="rgba(168,85,247,0.25)" stroke="#a855f7" stroke-width="2" />
-          <text x="610" y="360" text-anchor="middle" font-size="12" font-weight="800" fill="#e9d5ff">Games Hub</text>
-          <circle cx="750" cy="355" r="42" fill="rgba(168,85,247,0.25)" stroke="#a855f7" stroke-width="2" />
-          <text x="750" y="360" text-anchor="middle" font-size="12" font-weight="800" fill="#e9d5ff">Sensory Lab</text>
+          <rect x="510" y="175" width="355" height="445" rx="12" fill="#3c0859" stroke="#a855f7" stroke-width="4.5" />
+          <text x="685" y="235" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="18" fill="#e9d5ff">🎡 CARNIVAL &amp; DISCOVERY ROOM</text>
+          <text x="685" y="260" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="13" fill="#c084fc">Discovery Room &amp; Hands-on Play Lab</text>
+          <circle cx="610" cy="350" r="42" fill="rgba(168,85,247,0.25)" stroke="#a855f7" stroke-width="2.5" />
+          <text x="610" y="355" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="10.5" font-weight="800" fill="#e9d5ff">Game Hub</text>
+          <circle cx="750" cy="350" r="42" fill="rgba(168,85,247,0.25)" stroke="#a855f7" stroke-width="2.5" />
+          <text x="750" y="355" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="10.5" font-weight="800" fill="#e9d5ff">Sensory Lab</text>
         </g>
 
-        <!-- Stairs Landing -->
-        <g id="mini_zone_stairs2">
-          <rect x="245" y="625" width="135" height="155" rx="5" fill="#1e0930" stroke="#f59e0b" stroke-width="3" />
-          <line x1="245" y1="655" x2="380" y2="655" stroke="#f59e0b" stroke-width="2" />
-          <line x1="245" y1="680" x2="380" y2="680" stroke="#f59e0b" stroke-width="2" />
-          <line x1="245" y1="705" x2="380" y2="705" stroke="#f59e0b" stroke-width="2" />
-          <line x1="245" y1="730" x2="380" y2="730" stroke="#f59e0b" stroke-width="2" />
-          <text x="312" y="760" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="12" fill="#fcd34d">▼ STAIRS</text>
+        <!-- Mezzanine Balcony / Void Overlooking Function Hall -->
+        <g id="mini_zone_mezzanine_void">
+          <polygon points="140,620 860,620 860,1130 140,1130" fill="rgba(6,2,12,0.9)" stroke="#ec4899" stroke-width="3" stroke-dasharray="10,6" />
+          <rect x="170" y="640" width="660" height="450" rx="8" fill="none" stroke="rgba(236,72,153,0.35)" stroke-width="2" />
+          <text x="500" y="860" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="20" fill="#f472b6">👀 MEZZANINE VOID</text>
+          <text x="500" y="890" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="14" fill="#fbcfe8">Open-to-Below Balcony Overlooking Function Hall</text>
         </g>
-
-        <!-- Mezzanine Void -->
-        <polygon points="140,620 860,620 860,1130 140,1130" fill="rgba(6,2,12,0.85)" stroke="#ec4899" stroke-width="3" stroke-dasharray="10,6" />
-        <rect x="170" y="640" width="660" height="450" rx="8" fill="none" stroke="rgba(236,72,153,0.3)" stroke-width="2" />
-        <text x="500" y="860" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="22" fill="#f472b6">👀 MEZZANINE VOID</text>
-        <text x="500" y="895" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="15" fill="#fbcfe8">Open-to-Below Balcony Overlooking Function Hall</text>
       </svg>
     `;
   }
 
-  // Floor 1 (Ground Floor)
+  // Floor 1 (Ground Floor) - Exact Architectural Blueprint Matching map.html
   return `
     <svg viewBox="0 0 1000 1300" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%; display:block;">
       <defs>
-        <pattern id="miniCadGrid1" width="50" height="50" patternUnits="userSpaceOnUse">
-          <path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(0,240,255,0.12)" stroke-width="1" />
+        <pattern id="miniCadGrid1" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0,240,255,0.12)" stroke-width="0.9" />
         </pattern>
       </defs>
       <rect width="1000" height="1300" fill="#03131c" />
       <rect width="1000" height="1300" fill="url(#miniCadGrid1)" />
 
-      <!-- Reservoirs & Gutter -->
-      <line x1="240" y1="120" x2="760" y2="120" stroke="#00f0ff" stroke-width="2.5" stroke-dasharray="6,4" />
-      <text x="500" y="108" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="11" font-weight="700" fill="#38bdf8">EXISTING CONCRETE GUTTER</text>
+      <!-- Exterior Rain Water Reservoirs -->
+      <g id="mini_reservoirs" opacity="0.85">
+        <circle cx="830" cy="115" r="46" fill="rgba(0,229,255,0.06)" stroke="#00f0ff" stroke-width="2.5" stroke-dasharray="4,4" />
+        <circle cx="830" cy="115" r="38" fill="none" stroke="#00f0ff" stroke-width="1.5" />
+        <text x="830" y="112" text-anchor="middle" font-size="8" font-family="'IBM Plex Mono', monospace" font-weight="700" fill="#5eead4">RAIN WATER</text>
+        <text x="830" y="124" text-anchor="middle" font-size="8" font-family="'IBM Plex Mono', monospace" font-weight="700" fill="#5eead4">RESERVOIR</text>
+
+        <circle cx="835" cy="1000" r="46" fill="rgba(0,229,255,0.06)" stroke="#00f0ff" stroke-width="2.5" stroke-dasharray="4,4" />
+        <circle cx="835" cy="1000" r="38" fill="none" stroke="#00f0ff" stroke-width="1.5" />
+        <text x="835" y="997" text-anchor="middle" font-size="8" font-family="'IBM Plex Mono', monospace" font-weight="700" fill="#5eead4">RAIN WATER</text>
+        <text x="835" y="1009" text-anchor="middle" font-size="8" font-family="'IBM Plex Mono', monospace" font-weight="700" fill="#5eead4">RESERVOIR</text>
+      </g>
+
+      <!-- Exterior Concrete Gutter -->
+      <line x1="240" y1="120" x2="760" y2="120" stroke="#00f0ff" stroke-width="3" stroke-dasharray="8,4" />
+      <text x="500" y="108" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="10" font-weight="700" fill="#38bdf8">EXISTING CONCRETE GUTTER</text>
 
       <!-- Aquarium & Live Reef Section -->
-      <polygon points="240,135 760,135 760,265 240,265" fill="#032c3d" stroke="#00f0ff" stroke-width="3.5" />
-      <text x="500" y="185" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="16" fill="#38bdf8">🐠 AQUARIUM &amp; LIVE REEF SYSTEMS</text>
-      <text x="500" y="208" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="12" fill="#94a3b8">Tropical Saltwater Tanks</text>
+      <g id="mini_zone_aquarium">
+        <polygon points="240,135 760,135 760,265 240,265" fill="#032c3d" stroke="#00f0ff" stroke-width="4.5" />
+        <line x1="320" y1="135" x2="320" y2="205" stroke="#00f0ff" stroke-width="3.5" />
+        <line x1="320" y1="205" x2="600" y2="205" stroke="#00f0ff" stroke-width="3.5" />
+        <path d="M 600 265 Q 580 240 560 265" fill="none" stroke="#5eead4" stroke-width="2.5" stroke-dasharray="4,3" />
+        <text x="500" y="175" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="16" fill="#38bdf8">🐠 AQUARIUM &amp; LIVE REEF SYSTEMS</text>
+        <text x="500" y="196" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="12" fill="#94a3b8">Tropical Saltwater Tanks &amp; Coral Habitats</text>
+      </g>
 
       <!-- Marine & Nature Room (Flagship) -->
       <g id="mini_zone_marine">
-        <polygon points="240,265 760,265 760,620 240,620" fill="#023040" stroke="#00f0ff" stroke-width="4.5" />
-        <text x="500" y="305" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="20" fill="#e0f2fe">🌊 MARINE &amp; NATURE ROOM</text>
-        <text x="500" y="330" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="13" fill="#7dd3fc">The Marine Story Gallery</text>
+        <polygon points="240,265 760,265 760,620 240,620" fill="#023040" stroke="#00f0ff" stroke-width="5" />
+        <text x="500" y="302" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="18" fill="#e0f2fe">🌊 MARINE &amp; NATURE ROOM</text>
+        <text x="500" y="324" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="12" fill="#7dd3fc">The Marine Story • Flagship Category Room (5 Exhibits Inside)</text>
         
-        <!-- Display zones inside Marine room -->
-        <rect x="330" y="375" width="160" height="46" rx="6" fill="rgba(0,240,255,0.18)" stroke="#00f0ff" stroke-width="1.8" />
-        <text x="410" y="403" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="12" font-weight="800" fill="#7dd3fc">River Basin Area</text>
+        <line x1="470" y1="350" x2="600" y2="350" stroke="#00f0ff" stroke-width="3" />
+        <line x1="600" y1="350" x2="600" y2="440" stroke="#00f0ff" stroke-width="3" />
 
-        <rect x="530" y="375" width="170" height="46" rx="6" fill="rgba(0,240,255,0.18)" stroke="#00f0ff" stroke-width="1.8" />
-        <text x="615" y="403" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="12" font-weight="800" fill="#7dd3fc">Under the Sea Area</text>
-        
-        <rect x="390" y="495" width="220" height="32" rx="16" fill="rgba(0,240,255,0.22)" stroke="#00f0ff" stroke-width="1.5" />
-        <text x="500" y="516" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="11" font-weight="900" fill="#ffffff">HOUSES 5 EXHIBITS</text>
+        <rect x="340" y="375" width="150" height="44" rx="6" fill="rgba(0,240,255,0.18)" stroke="#00f0ff" stroke-width="2" />
+        <text x="415" y="402" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="11" font-weight="800" fill="#7dd3fc">River Basin Area</text>
+
+        <rect x="550" y="375" width="160" height="44" rx="6" fill="rgba(0,240,255,0.18)" stroke="#00f0ff" stroke-width="2" />
+        <text x="630" y="402" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="11" font-weight="800" fill="#7dd3fc">Under the Sea Area</text>
+
+        <rect x="390" y="500" width="220" height="32" rx="16" fill="rgba(0,240,255,0.22)" stroke="#00f0ff" stroke-width="1.8" />
+        <text x="500" y="521" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="11" font-weight="900" fill="#ffffff">HOUSES 5 EXHIBITS INSIDE</text>
+
+        <path d="M 460 620 Q 480 585 500 620" fill="none" stroke="#5eead4" stroke-width="3" stroke-dasharray="4,3" />
+        <path d="M 540 620 Q 520 585 500 620" fill="none" stroke="#5eead4" stroke-width="3" stroke-dasharray="4,3" />
+        <text x="500" y="610" text-anchor="middle" font-size="9.5" font-weight="900" fill="#5eead4">DOUBLE ENTRY DOORS</text>
       </g>
 
       <!-- Touch & Play Room (Splash Zone - East Wing) -->
       <g id="mini_zone_touch">
-        <polygon points="760,490 955,490 955,750 760,750" fill="#0b5e58" stroke="#14b8a6" stroke-width="4" />
-        <text x="857" y="560" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="17" fill="#ccfbf1">💦 TOUCH &amp; PLAY</text>
-        <text x="857" y="585" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="12" fill="#5eead4">Splash Zone</text>
-        <circle cx="857" cy="660" r="42" fill="rgba(20,184,166,0.3)" stroke="#14b8a6" stroke-width="2.5" />
-        <text x="857" y="665" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="11" font-weight="900" fill="#ffffff">Touch Pool</text>
+        <polygon points="760,440 895,440 895,820 760,820" fill="#0b5e58" stroke="#14b8a6" stroke-width="4.5" />
+        <text x="828" y="475" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="16" fill="#5eead4">💦 TOUCH &amp; PLAY</text>
+        <text x="828" y="495" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="11.5" fill="#ccfbf1">Splash Zone (Touch Pool)</text>
+
+        <rect x="785" y="525" width="85" height="240" rx="10" fill="rgba(20,184,166,0.3)" stroke="#14b8a6" stroke-width="3" />
+        <rect x="795" y="540" width="65" height="210" rx="6" fill="rgba(0,240,255,0.2)" stroke="#5eead4" stroke-width="2" stroke-dasharray="4,3" />
+        <text x="828" y="640" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="11" fill="#99f6e4">TOUCH POOL</text>
+        <text x="828" y="658" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="9.5" font-weight="700" fill="#99f6e4">Live Sea Life</text>
       </g>
 
-      <!-- Reading & Learning Room (Library Extension - West Wing Top) -->
-      <g id="mini_zone_reading">
-        <polygon points="65,440 240,440 240,670 65,670" fill="#0c2b42" stroke="#3b82f6" stroke-width="4" />
-        <text x="152" y="525" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="16" fill="#bfdbfe">📚 READING CORNER</text>
-        <text x="152" y="550" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="12" fill="#93c5fd">Franco's Corner</text>
-        <rect x="85" y="575" width="135" height="42" rx="6" fill="rgba(59,130,246,0.22)" stroke="#3b82f6" stroke-width="1.8" />
-        <text x="152" y="601" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="11" font-weight="800" fill="#dbeafe">Storybook Library</text>
+      <!-- Library Extension Wing (West Wing) -->
+      <g id="mini_zone_library_wing">
+        <rect x="65" y="440" width="170" height="540" rx="6" fill="#1a0f02" stroke="#f59e0b" stroke-width="4" />
+        
+        <rect x="75" y="452" width="150" height="28" rx="5" fill="#f59e0b" />
+        <text x="150" y="471" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="11" fill="#03131c">LIBRARY EXTENSION</text>
+
+        <!-- Reading & Learning Room (Franco's Corner) -->
+        <g id="mini_zone_reading">
+          <rect x="72" y="490" width="156" height="185" rx="6" fill="rgba(59,130,246,0.25)" stroke="#3b82f6" stroke-width="2.5" />
+          <text x="150" y="525" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="12" fill="#93c5fd">📚 READING &amp; LEARNING</text>
+          <text x="150" y="546" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="10.5" fill="#bfdbfe">Franco's Reading Corner</text>
+          <rect x="85" y="565" width="130" height="42" rx="4" fill="rgba(59,130,246,0.3)" stroke="#3b82f6" stroke-width="1.5" />
+          <text x="150" y="591" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="10" font-weight="800" fill="#dbeafe">Children's Books &amp; Nook</text>
+        </g>
+
+        <!-- Divider -->
+        <line x1="72" y1="685" x2="228" y2="685" stroke="rgba(245,158,11,0.5)" stroke-width="2" stroke-dasharray="4,4" />
+
+        <!-- Character & Heritage Room -->
+        <g id="mini_zone_heritage">
+          <rect x="72" y="695" width="156" height="275" rx="6" fill="rgba(245,158,11,0.22)" stroke="#f59e0b" stroke-width="2.5" />
+          <text x="150" y="730" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="12" fill="#fde68a">🏆 CHARACTER &amp; HERITAGE</text>
+          <text x="150" y="750" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="10.5" fill="#fef08a">Governor Memorabilia</text>
+          <text x="150" y="766" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="10.5" fill="#fef08a">&amp; Everyday Heroes</text>
+          
+          <rect x="85" y="790" width="130" height="45" rx="4" fill="rgba(245,158,11,0.3)" stroke="#f59e0b" stroke-width="1.5" />
+          <text x="150" y="812" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="10" font-weight="800" fill="#fef3c7">J.G. Marañon Section</text>
+          <text x="150" y="826" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="8.5" font-weight="700" fill="#fef3c7">Gov. Memorial Gallery</text>
+
+          <rect x="85" y="850" width="130" height="45" rx="4" fill="rgba(245,158,11,0.2)" stroke="#f59e0b" stroke-width="1.5" />
+          <text x="150" y="872" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="10" font-weight="800" fill="#fdba74">Everyday Heroes Section</text>
+          <text x="150" y="886" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="8.5" font-weight="700" fill="#fdba74">Values Showcase</text>
+        </g>
       </g>
 
-      <!-- Character & Heritage Room (West Wing Mid) -->
-      <g id="mini_zone_heritage">
-        <polygon points="65,670 240,670 240,940 65,940" fill="#382205" stroke="#f59e0b" stroke-width="4" />
-        <text x="152" y="760" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="16" fill="#fef3c7">🏆 CHARACTER</text>
-        <text x="152" y="785" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="15" fill="#fef3c7">&amp; HERITAGE</text>
-        <text x="152" y="810" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="12" fill="#fcd34d">Marañon Memorabilia</text>
-      </g>
-
-      <!-- Central Function Hall -->
+      <!-- Function Hall -->
       <g id="mini_zone_hall">
-        <polygon points="240,620 760,620 760,1000 240,1000" fill="#06212d" stroke="#00f0ff" stroke-width="4" />
-        <text x="560" y="770" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="22" fill="#ffffff">🏛️ FUNCTION HALL</text>
-        <text x="560" y="800" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="14" fill="#7dd3fc">Central Multi-Purpose Gathering Area</text>
+        <polygon points="240,620 760,620 760,1000 240,1000" fill="#072b38" stroke="#00f0ff" stroke-width="3.5" />
+        <text x="570" y="800" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="19" fill="#f8fafc">🏛️ FUNCTION HALL</text>
+        <text x="570" y="825" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="13" fill="#7dd3fc">Main Assembly Hall &amp; Gathering Area</text>
       </g>
 
-      <!-- Stairs to 2nd floor -->
+      <!-- Stairs to Level 2 -->
       <g id="mini_zone_stairs1">
-        <polygon points="245,625 380,625 380,780 245,780" fill="#1e1302" stroke="#f59e0b" stroke-width="3" />
-        <text x="312" y="700" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="12" fill="#fcd34d">▲ STAIRS UP</text>
-        <text x="312" y="720" text-anchor="middle" font-size="10" font-weight="700" fill="#fef3c7">To Level 2</text>
+        <rect x="245" y="625" width="135" height="155" rx="5" fill="#1b1704" stroke="#f59e0b" stroke-width="3.5" />
+        <line x1="245" y1="650" x2="380" y2="650" stroke="#f59e0b" stroke-width="2.5" />
+        <line x1="245" y1="672" x2="380" y2="672" stroke="#f59e0b" stroke-width="2.5" />
+        <line x1="245" y1="694" x2="380" y2="694" stroke="#f59e0b" stroke-width="2.5" />
+        <line x1="245" y1="716" x2="380" y2="716" stroke="#f59e0b" stroke-width="2.5" />
+        <line x1="245" y1="738" x2="380" y2="738" stroke="#f59e0b" stroke-width="2.5" />
+        <line x1="245" y1="760" x2="380" y2="760" stroke="#f59e0b" stroke-width="2.5" />
+        <path d="M 312 755 L 312 642 M 304 650 L 312 642 L 320 650" fill="none" stroke="#fcd34d" stroke-width="3.5" stroke-linecap="round" />
+        <rect x="258" y="700" width="108" height="24" rx="4" fill="rgba(27,23,4,0.92)" stroke="#f59e0b" stroke-width="1.2" />
+        <text x="312" y="716" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="11" fill="#fcd34d">▲ STAIRS UP (L2)</text>
       </g>
 
       <!-- Staff Office (Inside Function Hall, Under Stairs, Beside J.G. Marañon Section) -->
-      <polygon points="245,785 380,785 380,980 245,980" fill="#092532" stroke="#00f0ff" stroke-width="3" />
-      <text x="312" y="870" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="13" fill="#38bdf8">💼 STAFF OFFICE</text>
-      <text x="312" y="890" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="10" fill="#94a3b8">Administration</text>
+      <g id="mini_zone_staff_office">
+        <rect x="245" y="785" width="135" height="195" rx="6" fill="#092532" stroke="#00f0ff" stroke-width="3.5" />
+        <rect x="255" y="795" width="115" height="24" rx="4" fill="rgba(0,240,255,0.18)" stroke="#00f0ff" stroke-width="1.2" />
+        <text x="312" y="811" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="11" fill="#38bdf8">💼 STAFF OFFICE</text>
+        <text x="312" y="830" text-anchor="middle" font-family="'Nunito',sans-serif" font-size="8.5" font-weight="700" fill="#94a3b8">Administration</text>
+        <text x="312" y="842" text-anchor="middle" font-size="8" font-weight="700" fill="#5eead4">Under-Stairs Wing</text>
 
-      <!-- Main Entrance & Reception Foyer -->
-      <polygon points="240,1000 760,1000 760,1190 240,1190" fill="#052733" stroke="#00f0ff" stroke-width="4" />
-      <text x="500" y="1085" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="22" fill="#5eead4">🚪 MAIN ENTRANCE</text>
-      <text x="500" y="1115" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="14" fill="#94a3b8">Visitor Reception &amp; Ticketing</text>
-      <rect x="360" y="1190" width="280" height="95" rx="4" fill="#00141c" stroke="#00f0ff" stroke-width="2" stroke-dasharray="6,4" />
-      <text x="500" y="1255" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="12" fill="#7dd3fc">▲ ACCESS RAMP</text>
+        <rect x="258" y="856" width="48" height="30" rx="3" fill="rgba(0,240,255,0.1)" stroke="#5eead4" stroke-width="1.2" />
+        <rect x="268" y="863" width="28" height="14" rx="2" fill="rgba(0,240,255,0.25)" stroke="#5eead4" stroke-width="1" />
+        <circle cx="282" cy="894" r="4.5" fill="none" stroke="#94a3b8" stroke-width="1.2" />
+
+        <rect x="320" y="856" width="48" height="30" rx="3" fill="rgba(0,240,255,0.1)" stroke="#5eead4" stroke-width="1.2" />
+        <rect x="330" y="863" width="28" height="14" rx="2" fill="rgba(0,240,255,0.25)" stroke="#5eead4" stroke-width="1" />
+        <circle cx="344" cy="894" r="4.5" fill="none" stroke="#94a3b8" stroke-width="1.2" />
+
+        <text x="312" y="920" text-anchor="middle" font-size="8.5" font-weight="700" fill="#cbd5e1">Staff Workstations</text>
+        <text x="312" y="933" text-anchor="middle" font-size="7.5" font-weight="600" fill="#64748b">&amp; Control Center</text>
+
+        <path d="M 380 955 Q 355 955 355 980" fill="none" stroke="#5eead4" stroke-width="2.5" stroke-dasharray="4,3" />
+        <text x="368" y="972" text-anchor="end" font-size="7.5" font-weight="700" fill="#5eead4">DOOR</text>
+      </g>
+
+      <!-- Main Entrance & Ramp -->
+      <g id="mini_zone_entrance">
+        <polygon points="240,1000 760,1000 760,1190 240,1190" fill="#052733" stroke="#00f0ff" stroke-width="3.5" />
+        <path d="M 455 1190 Q 475 1145 500 1190" fill="none" stroke="#5eead4" stroke-width="3.5" stroke-dasharray="4,3" />
+        <path d="M 545 1190 Q 525 1145 500 1190" fill="none" stroke="#5eead4" stroke-width="3.5" stroke-dasharray="4,3" />
+        <text x="500" y="1080" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="20" fill="#5eead4">🚪 MAIN ENTRANCE</text>
+        <text x="500" y="1108" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="13" fill="#94a3b8">Visitor Reception &amp; Ticketing Foyer</text>
+
+        <rect x="360" y="1190" width="280" height="95" rx="4" fill="#00141c" stroke="#00f0ff" stroke-width="2.5" stroke-dasharray="6,4" />
+        <line x1="360" y1="1215" x2="640" y2="1215" stroke="rgba(0,240,255,0.4)" stroke-width="2" />
+        <line x1="360" y1="1240" x2="640" y2="1240" stroke="rgba(0,240,255,0.4)" stroke-width="2" />
+        <line x1="360" y1="1265" x2="640" y2="1265" stroke="rgba(0,240,255,0.4)" stroke-width="2" />
+        <text x="500" y="1255" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="12" fill="#7dd3fc">▲ ACCESS RAMP &amp; STEPS</text>
+      </g>
     </svg>
   `;
 }
@@ -1126,19 +1214,40 @@ function openEditModal(id, defaultCategory){
         <div class="floor-picker-header">
           <h4 class="floor-picker-title">
             <span>📍 Architectural Floor Plan Pinpoint</span>
-            <span style="font-size:11px; font-weight:600; color:#94a3b8;">(Click anywhere on map to drop exact exhibit pin)</span>
+            <span style="font-size:11px; font-weight:600; color:#94a3b8;">(Click anywhere on map to drop or move exhibit pin)</span>
           </h4>
-          <div class="floor-toggle-group">
-            <button type="button" class="btn-floor-toggle ${currentFloor === 1 ? 'active' : ''}" id="exFloor1Btn">Level 1 (Ground)</button>
-            <button type="button" class="btn-floor-toggle ${currentFloor === 2 ? 'active' : ''}" id="exFloor2Btn">Level 2 (Mezzanine)</button>
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <button type="button" class="btn btn-ghost dark btn-small active" id="btnToggleOtherPins" style="font-size:11px; padding:4px 9px; display:inline-flex; align-items:center; gap:5px;" title="Toggle seeing all other existing exhibit pins on this floor">
+              <span>👁️ All Pins (<span id="otherPinsCountNum">0</span>)</span>
+            </button>
+            <div class="floor-toggle-group">
+              <button type="button" class="btn-floor-toggle ${currentFloor === 1 ? 'active' : ''}" id="exFloor1Btn">Level 1 (Ground)</button>
+              <button type="button" class="btn-floor-toggle ${currentFloor === 2 ? 'active' : ''}" id="exFloor2Btn">Level 2 (Mezzanine)</button>
+            </div>
           </div>
         </div>
 
         <div class="floor-picker-viewport" id="exFloorViewport" title="Click anywhere on the floor map to pinpoint this exhibit">
           <div class="floor-picker-svg-wrap" id="exFloorSvgWrap"></div>
-          <div class="floor-picker-pin" id="exFloorPin" style="${currentPinX !== null && currentPinY !== null ? `left:${currentPinX}%; top:${currentPinY}%; display:flex;` : 'display:none;'}">
+          <div class="floor-picker-other-pins-wrap" id="exFloorOtherPinsWrap"></div>
+          <div class="floor-picker-pin current-active-pin" id="exFloorPin" style="${currentPinX !== null && currentPinY !== null ? `left:${currentPinX}%; top:${currentPinY}%; display:flex;` : 'display:none;'}">
+            <div class="current-pin-radar-ring"></div>
             <div class="picker-pin-icon">📍</div>
-            <div class="picker-pin-badge" id="exFloorPinBadge">${escapeHtml(ex ? ex.title || 'Exhibit' : 'New Exhibit')}</div>
+            <div class="picker-pin-badge" id="exFloorPinBadge">${escapeHtml(ex ? ex.title || 'Exhibit' : 'New Exhibit')} (Selected)</div>
+          </div>
+        </div>
+
+        <!-- Informative Visual Pinpoint Legend -->
+        <div class="floor-picker-legend">
+          <div class="floor-picker-legend-item">
+            <span class="legend-dot active"></span>
+            <span style="color:#ffffff; font-weight:700;">Active Selected Pin</span>
+            <span style="color:#94a3b8;">(Click map to drop or reposition)</span>
+          </div>
+          <div class="floor-picker-legend-item">
+            <span class="legend-dot other"></span>
+            <span style="color:#38bdf8; font-weight:700;">Existing Exhibit Pins</span>
+            <span style="color:#94a3b8;">(Reference locations on this floor)</span>
           </div>
         </div>
 
@@ -1357,24 +1466,68 @@ function openEditModal(id, defaultCategory){
   // ── Floor Plan Pinpoint Picker Interactive Logic ──
   const exFloorSvgWrap = document.getElementById('exFloorSvgWrap');
   const exFloorViewport = document.getElementById('exFloorViewport');
+  const exFloorOtherPinsWrap = document.getElementById('exFloorOtherPinsWrap');
   const exFloorPin = document.getElementById('exFloorPin');
   const exFloorPinBadge = document.getElementById('exFloorPinBadge');
   const exPinCoordsBadge = document.getElementById('exPinCoordsBadge');
   const exFloor1Btn = document.getElementById('exFloor1Btn');
   const exFloor2Btn = document.getElementById('exFloor2Btn');
+  const btnToggleOtherPins = document.getElementById('btnToggleOtherPins');
+  const otherPinsCountNum = document.getElementById('otherPinsCountNum');
   const btnAutoPinToRoom = document.getElementById('btnAutoPinToRoom');
   const btnClearPin = document.getElementById('btnClearPin');
+
+  let showOtherPins = true;
 
   function updatePinUi() {
     if (exFloorSvgWrap) exFloorSvgWrap.innerHTML = renderMiniBlueprintSvg(currentFloor);
     if (exFloor1Btn) exFloor1Btn.classList.toggle('active', currentFloor === 1);
     if (exFloor2Btn) exFloor2Btn.classList.toggle('active', currentFloor === 2);
 
+    // Filter all other exhibits on this floor
+    const otherExhibits = (exhibitsCache || []).filter(item => {
+      if (ex && (item.id === ex.id || (ex.code && item.code === ex.code))) return false;
+      const f = item.floor === 2 ? 2 : 1;
+      return f === currentFloor &&
+             item.pinX !== null && item.pinX !== undefined && !isNaN(Number(item.pinX)) &&
+             item.pinY !== null && item.pinY !== undefined && !isNaN(Number(item.pinY));
+    });
+
+    if (otherPinsCountNum) {
+      otherPinsCountNum.textContent = otherExhibits.length;
+    }
+
+    if (exFloorOtherPinsWrap) {
+      if (showOtherPins && otherExhibits.length > 0) {
+        exFloorOtherPinsWrap.innerHTML = otherExhibits.map(item => {
+          const itemTitle = item.title || 'Exhibit';
+          const itemCode = item.code ? `${item.code}: ` : '';
+          const label = `${itemCode}${itemTitle}`;
+          return `
+            <div class="floor-picker-pin other-pin" style="left:${item.pinX}%; top:${item.pinY}%;" title="${escapeHtml(label)} (${Math.round(item.pinX)}%, ${Math.round(item.pinY)}%)">
+              <div class="other-pin-icon">📍</div>
+              <div class="other-pin-badge">${escapeHtml(label)}</div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        exFloorOtherPinsWrap.innerHTML = '';
+      }
+    }
+
+    if (btnToggleOtherPins) {
+      btnToggleOtherPins.classList.toggle('active', showOtherPins);
+    }
+
     if (currentPinX !== null && currentPinY !== null) {
       if (exFloorPin) {
         exFloorPin.style.left = `${currentPinX}%`;
         exFloorPin.style.top = `${currentPinY}%`;
         exFloorPin.style.display = 'flex';
+      }
+      const titleText = (document.getElementById('ex-title')?.value || (ex ? ex.title : '') || 'New Exhibit').trim();
+      if (exFloorPinBadge) {
+        exFloorPinBadge.textContent = `${titleText} (Selected)`;
       }
       const roomName = detectRoomFromCoords(currentFloor, currentPinX, currentPinY);
       if (exPinCoordsBadge) {
@@ -1391,6 +1544,23 @@ function openEditModal(id, defaultCategory){
   }
 
   updatePinUi();
+
+  // If exhibitsCache is empty, fetch fresh exhibits and re-render pins
+  if (!exhibitsCache || exhibitsCache.length === 0) {
+    Api.listExhibits().then(res => {
+      if (res && Array.isArray(res.exhibits)) {
+        exhibitsCache = res.exhibits;
+        updatePinUi();
+      }
+    }).catch(() => {});
+  }
+
+  if (btnToggleOtherPins) {
+    btnToggleOtherPins.addEventListener('click', () => {
+      showOtherPins = !showOtherPins;
+      updatePinUi();
+    });
+  }
 
   if (exFloor1Btn) {
     exFloor1Btn.addEventListener('click', () => {
@@ -1449,7 +1619,7 @@ function openEditModal(id, defaultCategory){
   const titleInput = document.getElementById('ex-title');
   if (titleInput && exFloorPinBadge) {
     titleInput.addEventListener('input', () => {
-      exFloorPinBadge.textContent = titleInput.value.trim() || 'Exhibit Pin';
+      exFloorPinBadge.textContent = `${titleInput.value.trim() || 'New Exhibit'} (Selected)`;
     });
   }
 

@@ -4866,6 +4866,13 @@ body.admin-portal-body {
   display: block;
 }
 
+.floor-picker-other-pins-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 15;
+}
+
 .floor-picker-pin {
   position: absolute;
   transform: translate(-50%, -100%);
@@ -4875,6 +4882,45 @@ body.admin-portal-body {
   flex-direction: column;
   align-items: center;
   transition: left 0.15s cubic-bezier(0.16, 1, 0.3, 1), top 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.floor-picker-pin.other-pin {
+  z-index: 15;
+  animation: otherPinFadeIn 0.3s ease-out;
+}
+
+@keyframes otherPinFadeIn {
+  from { opacity: 0; transform: translate(-50%, -80%) scale(0.85); }
+  to { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+}
+
+.floor-picker-pin.other-pin .other-pin-icon {
+  font-size: 19px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 8px rgba(0, 240, 255, 0.75));
+}
+
+.floor-picker-pin.other-pin .other-pin-badge {
+  background: rgba(3, 20, 29, 0.94);
+  color: #e0f2fe;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 9.5px;
+  padding: 1.5px 7px;
+  border-radius: 999px;
+  border: 1.2px solid #00f0ff;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.75);
+  white-space: nowrap;
+  margin-top: -2px;
+  letter-spacing: 0.2px;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  backdrop-filter: blur(4px);
+}
+
+.floor-picker-pin.current-active-pin {
+  z-index: 30;
   animation: pinBounce 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -4882,6 +4928,89 @@ body.admin-portal-body {
   0% { transform: translate(-50%, -160%) scale(1.3); opacity: 0; }
   60% { transform: translate(-50%, -90%) scale(0.95); opacity: 1; }
   100% { transform: translate(-50%, -100%) scale(1); opacity: 1; }
+}
+
+.floor-picker-pin.current-active-pin .picker-pin-icon {
+  font-size: 26px;
+  filter: drop-shadow(0 0 12px rgba(255, 0, 85, 0.95)) drop-shadow(0 4px 10px rgba(0,0,0,0.8));
+  line-height: 1;
+  animation: activePinBounce 1.8s infinite ease-in-out;
+}
+
+@keyframes activePinBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.floor-picker-pin.current-active-pin .picker-pin-badge {
+  background: linear-gradient(135deg, #ff0055 0%, #d946ef 100%);
+  color: #ffffff;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 10.5px;
+  padding: 2.5px 9px;
+  border-radius: 999px;
+  border: 1.5px solid #ffffff;
+  box-shadow: 0 4px 16px rgba(255, 0, 85, 0.7);
+  white-space: nowrap;
+  margin-top: -3px;
+  letter-spacing: 0.3px;
+}
+
+.current-pin-radar-ring {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #ff0055;
+  background: rgba(255, 0, 85, 0.2);
+  animation: currentRadarPulse 1.6s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes currentRadarPulse {
+  0% { transform: translateX(-50%) scale(0.5); opacity: 1; border-width: 2.5px; }
+  100% { transform: translateX(-50%) scale(2.2); opacity: 0; border-width: 1px; }
+}
+
+.floor-picker-legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 6px 12px;
+  background: rgba(0, 24, 34, 0.6);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 8px;
+  margin-top: 6px;
+  font-size: 11px;
+  flex-wrap: wrap;
+}
+
+.floor-picker-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.legend-dot.active {
+  background: #ff0055;
+  box-shadow: 0 0 6px #ff0055;
+}
+
+.legend-dot.other {
+  background: #00f0ff;
+  box-shadow: 0 0 6px #00f0ff;
 }
 
 .picker-pin-icon {
@@ -4937,4 +5066,5 @@ body.admin-portal-body {
   font-weight: 700;
   font-family: 'Nunito', sans-serif;
 }
+
 
