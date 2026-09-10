@@ -4611,26 +4611,75 @@ body.admin-portal-body {
   font-weight: 600;
 }
 
-/* ── Analytics Bar Card ─────────────────────────────────────────────── */
-.dash-analytics-card {
+/* ── Featured Analytics & Quad Hub Layout (Bigger Analytics + 4 Smaller Boxes) ─── */
+.dash-analytics-quad-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.25fr);
+  gap: 14px;
+  align-items: stretch;
+  margin-top: 14px;
+  margin-bottom: 20px;
+}
+
+/* Bigger Analytics Featured Card */
+.dash-analytics-featured-card {
   background: rgba(0, 42, 54, 0.80) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
   border: 1.5px solid rgba(255, 255, 255, 0.16);
-  border-radius: 16px;
-  padding: 16px 20px;
+  border-radius: 14px;
+  padding: 16px 18px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.dash-analytics-featured-card:hover {
+  border-color: rgba(0, 240, 255, 0.35);
+  box-shadow: 0 12px 32px rgba(0, 240, 255, 0.12);
+}
+.dash-analytics-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   flex-wrap: wrap;
-  gap: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  padding-bottom: 10px;
 }
-.dash-analytics-metrics {
+.dash-analytics-icon {
+  font-size: 22px;
+  background: rgba(0, 240, 255, 0.15);
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
-  gap: 24px;
-  flex-wrap: wrap;
+  justify-content: center;
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  flex-shrink: 0;
+}
+.dash-analytics-title {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  color: #ffffff;
+}
+.dash-analytics-sub {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 1px;
+}
+
+.dash-analytics-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(85px, 1fr));
+  gap: 10px;
+  background: rgba(0, 26, 36, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px 14px;
 }
 .dash-metric-item {
   display: flex;
@@ -4639,24 +4688,79 @@ body.admin-portal-body {
 }
 .dash-metric-num {
   font-family: 'Nunito', sans-serif;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 900;
   color: #ffffff;
   line-height: 1;
 }
 .dash-metric-lbl {
-  font-size: 10.5px;
+  font-size: 9.5px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   color: #94a3b8;
 }
 
-/* ── Two-Column Operations Layout ──────────────────────────────────── */
-.dash-two-col {
+/* Normal-sized Analytics Traffic Graph */
+.dash-traffic-chart-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+.dash-traffic-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.dash-traffic-chart-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #5eead4;
+  letter-spacing: 0.4px;
+}
+.dash-traffic-toggles {
+  display: inline-flex;
+  background: rgba(0, 20, 28, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+}
+.dash-traffic-toggle-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.dash-traffic-toggle-btn:hover {
+  color: #ffffff;
+}
+.dash-traffic-toggle-btn.active {
+  background: rgba(0, 240, 255, 0.22);
+  color: #00f0ff;
+  box-shadow: 0 1px 4px rgba(0, 240, 255, 0.2);
+}
+.dash-traffic-canvas-wrap {
+  position: relative;
+  height: 180px;
+  width: 100%;
+}
+
+/* ── 4 Smaller Boxes (2x2 Grid) Next to Analytics ───────────────────── */
+.dash-quad-boxes-col {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .dash-panel-card {
@@ -4664,21 +4768,190 @@ body.admin-portal-body {
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
   border: 1.5px solid rgba(255, 255, 255, 0.16);
-  border-radius: 16px;
-  padding: 16px 18px;
+  border-radius: 14px;
+  padding: 14px 16px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+}
+.dash-panel-card.compact {
+  padding: 11px 12px !important;
+  gap: 7px !important;
+  border-radius: 12px !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
 }
 .dash-panel-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
+  gap: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 7px;
+}
+.dash-panel-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dash-panel-sub {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 1px;
+}
+.dash-panel-action {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #00f0ff;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.dash-panel-action:hover {
+  color: #5eead4;
+  text-decoration: underline;
+}
+
+/* Compact Lists for the 4 Boxes */
+.dash-cat-list.compact {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.dash-cat-row.compact {
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.dash-cat-row.compact:hover {
+  background: rgba(0, 240, 255, 0.10);
+}
+.dash-cat-row.compact .dash-cat-header {
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+.dash-cat-bar-bg.compact {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.10);
+  overflow: hidden;
+}
+
+.dash-visitor-list.compact {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.dash-visitor-row.compact {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 0;
+}
+.dash-visitor-avatar.compact {
+  width: 24px;
+  height: 24px;
+  font-size: 9.5px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, rgba(0,240,255,0.25) 0%, rgba(16,185,129,0.3) 100%);
+  border: 1px solid rgba(0,240,255,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+.dash-visitor-name.compact {
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 88px;
+}
+.dash-visitor-time.compact {
+  font-size: 9px;
+  color: #94a3b8;
+}
+.status-badge.compact {
+  font-size: 9px !important;
+  padding: 1px 6px !important;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.dash-event-list.compact {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.dash-event-row.compact {
+  display: flex;
+  align-items: center;
   gap: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
-  padding-bottom: 10px;
+  padding: 3px 0;
+}
+.dash-event-date-badge.compact {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: rgba(168, 85, 247, 0.2);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.dash-event-day.compact {
+  font-size: 11px;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1;
+}
+.dash-event-month.compact {
+  font-size: 7.5px;
+  font-weight: 700;
+  color: #c084fc;
+  text-transform: uppercase;
+}
+.dash-event-title.compact {
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 105px;
+}
+.dash-event-sub.compact {
+  font-size: 9px;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 110px;
+}
+
+.home-gallery-mini-item.compact {
+  border-radius: 7px !important;
+}
+
+/* ── Two-Column Operations Layout (Fallback / Legacy) ──────────────── */
+.dash-two-col {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 14px;
 }
 .dash-panel-title {
   font-family: 'Nunito', sans-serif;
@@ -5008,24 +5281,30 @@ body.admin-portal-body {
   .dash-pie-chart-wrap {
     height: 155px !important;
   }
-  .dash-analytics-card {
-    padding: 14px !important;
+  .dash-analytics-quad-layout {
+    grid-template-columns: 1fr !important;
     gap: 12px !important;
   }
-  .dash-analytics-metrics {
-    width: 100% !important;
-    justify-content: space-between !important;
+  .dash-quad-boxes-col {
+    grid-template-columns: repeat(2, 1fr) !important;
     gap: 8px !important;
   }
-  .dash-metric-num {
-    font-size: 18px !important;
+  .dash-analytics-featured-card {
+    padding: 12px 14px !important;
   }
-  .dash-metric-lbl {
-    font-size: 9.5px !important;
+  .dash-traffic-canvas-wrap {
+    height: 155px !important;
   }
   .dash-two-col {
     grid-template-columns: 1fr !important;
     gap: 12px !important;
+  }
+}
+
+@media (max-width: 580px) {
+  .dash-quad-boxes-col {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
   }
 }
 

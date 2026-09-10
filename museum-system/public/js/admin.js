@@ -330,14 +330,15 @@ let adminCategorySearch = '';
 async function renderDashboardHomeTab(contentEl){
   contentEl.innerHTML = `<div class="empty-state" style="color:var(--ink-soft);"><p>Loading dashboard…</p></div>`;
   try{
-    const [exhibitRes, progRes, eventRes, galleryRes, visitorRes, artifactRes, analyticsRes] = await Promise.all([
+    const [exhibitRes, progRes, eventRes, galleryRes, visitorRes, artifactRes, analyticsRes, dailyRes] = await Promise.all([
       Api.listExhibits().catch(()=>({ exhibits: [] })),
       Api.listPrograms().catch(()=>({ programs: [] })),
       Api.listEvents().catch(()=>({ events: [] })),
       Api.listGallery().catch(()=>({ gallery: [] })),
       Api.listVisitors().catch(()=>({ visitors: [] })),
       Api.listArtifactLogs().catch(()=>({ logs: [] })),
-      Api.adminAnalytics().catch(()=>({ totals: { allTime: 0, last7Days: 0, last24Hours: 0 } }))
+      Api.adminAnalytics().catch(()=>({ totals: { allTime: 0, last7Days: 0, last24Hours: 0 } })),
+      Api.adminDailyStats(14).catch(()=>({ daily: [] }))
     ]);
 
     const exhibits = (exhibitRes && Array.isArray(exhibitRes.exhibits)) ? exhibitRes.exhibits : [];
@@ -347,6 +348,7 @@ async function renderDashboardHomeTab(contentEl){
     const visitors = (visitorRes && Array.isArray(visitorRes.visitors)) ? visitorRes.visitors : [];
     const artifacts = (artifactRes && Array.isArray(artifactRes.logs)) ? artifactRes.logs : [];
     const totals = analyticsRes?.totals || { allTime: 0, last7Days: 0, last24Hours: 0 };
+    const dailyData = (dailyRes && Array.isArray(dailyRes.daily)) ? dailyRes.daily : [];
 
     // Count by category
     const categoryCounts = {};
@@ -506,164 +508,178 @@ async function renderDashboardHomeTab(contentEl){
           </div>
         </div>
 
-        <!-- 3. Traffic & Engagement Banner -->
-        <div class="dash-analytics-card">
-          <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
-            <div style="font-size:24px; background:rgba(0,240,255,0.15); width:46px; height:46px; border-radius:12px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(0,240,255,0.3);">📈</div>
-            <div>
-              <div style="font-family:'Nunito',sans-serif; font-weight:800; font-size:16px; color:#ffffff;">Public Traffic & Digital Engagement</div>
-              <div style="font-size:12px; color:#94a3b8;">Analytics tracked across mobile QR scans, exhibit views, and kiosk sessions</div>
-            </div>
-          </div>
-          <div class="dash-analytics-metrics">
-            <div class="dash-metric-item">
-              <div class="dash-metric-num">${totals.allTime.toLocaleString()}</div>
-              <div class="dash-metric-lbl">All-Time Views</div>
-            </div>
-            <div class="dash-metric-item">
-              <div class="dash-metric-num" style="color:#5eead4;">${totals.last7Days.toLocaleString()}</div>
-              <div class="dash-metric-lbl">Last 7 Days</div>
-            </div>
-            <div class="dash-metric-item">
-              <div class="dash-metric-num" style="color:#f59e0b;">${totals.last24Hours.toLocaleString()}</div>
-              <div class="dash-metric-lbl">Last 24 Hours</div>
-            </div>
-            <button type="button" class="dash-panel-action" data-tab="analytics" style="padding:6px 14px; font-size:12px; border:none;">Full Analytics →</button>
-          </div>
-        </div>
-
-        <!-- 4. Two-Column Operational Hub -->
-        <div class="dash-two-col">
-          <!-- Category Breakdown with Animated Progress Bars -->
-          <div class="dash-panel-card">
-            <div class="dash-panel-head">
-              <div>
-                <h3 class="dash-panel-title">🏷️ Exhibits by Category / Room</h3>
-                <div class="dash-panel-sub">Interactive room capacity and collection distribution</div>
-              </div>
-              <button type="button" class="dash-panel-action" data-tab="categories" style="border:none;">Manage Rooms →</button>
-            </div>
-            <div class="dash-cat-list">
-              ${Object.entries(categoryCounts).length ? Object.entries(categoryCounts).sort((a,b)=>b[1]-a[1]).map(([cat, count]) => {
-                const total = exhibits.length || 1;
-                const pct = Math.min(100, Math.round((count / total) * 100));
-                return `
-                  <div class="dash-cat-row" data-tab="catalog" data-cat="${escapeHtml(cat)}" title="View ${count} exhibits in ${escapeHtml(cat)}">
-                    <div class="dash-cat-header">
-                      <span style="display:flex; align-items:center; gap:8px;">
-                        <span style="width:8px; height:8px; border-radius:50%; background:#00f0ff; box-shadow:0 0 6px #00f0ff; display:inline-block;"></span>
-                        ${escapeHtml(cat)}
-                      </span>
-                      <span style="display:flex; align-items:center; gap:6px;">
-                        <span style="font-size:11px; color:#94a3b8;">${pct}%</span>
-                        <span style="background:rgba(0,240,255,0.18); border:1px solid rgba(0,240,255,0.35); color:#ffffff; font-size:11px; font-weight:800; padding:1px 8px; border-radius:999px;">${count}</span>
-                      </span>
-                    </div>
-                    <div class="dash-cat-bar-bg">
-                      <div class="dash-cat-bar-fill" style="width:${pct}%;"></div>
-                    </div>
-                  </div>
-                `;
-              }).join('') : `<p style="color:#94a3b8; font-size:12px;">No categories configured yet.</p>`}
-            </div>
-          </div>
-
-          <!-- Recent Live Visitors -->
-          <div class="dash-panel-card">
-            <div class="dash-panel-head">
-              <div>
-                <h3 class="dash-panel-title">👥 Recent Visitor Check-ins</h3>
-                <div class="dash-panel-sub">Latest registered guests and educational groups</div>
-              </div>
-              <div style="display:flex; gap:6px;">
-                <button type="button" class="dash-panel-action" data-tab="visitors" style="border:none;">Live Log</button>
-                <button type="button" class="dash-panel-action" data-tab="visitorHistory" style="border:none;">Archive →</button>
-              </div>
-            </div>
-            <div style="display:flex; flex-direction:column; gap:8px;">
-              ${recentVisitors.length ? recentVisitors.map(v => {
-                const initials = (v.visitorName || 'V').split(' ').filter(Boolean).map(n=>n[0]).join('').substring(0,2).toUpperCase();
-                return `
-                  <div class="dash-visitor-row">
-                    <div class="dash-visitor-avatar">${escapeHtml(initials)}</div>
-                    <div class="dash-visitor-meta">
-                      <div class="dash-visitor-name">${escapeHtml(v.visitorName)}</div>
-                      <div class="dash-visitor-time">
-                        ${escapeHtml(v.visitDate || 'Today')}${v.visitTime ? ` · ${escapeHtml(v.visitTime)}` : ''} · <strong>${v.pax || 1} pax</strong>${v.groupName ? ` (${escapeHtml(v.groupName)})` : ''}
-                      </div>
-                    </div>
-                    <span class="status-badge ${(v.status || '').toLowerCase().replace(/[^a-z0-9]/g, '-') || 'active'}" style="font-size:10px; padding:2px 8px;">
-                      ${escapeHtml(v.status || 'Checked-in')}
-                    </span>
-                  </div>
-                `;
-              }).join('') : `<p style="color:#94a3b8; font-size:12px;">No recent visitors logged.</p>`}
-            </div>
-          </div>
-        </div>
-
-        <!-- 5. Bottom Two-Column: Upcoming Events & Gallery Showcase -->
-        <div class="dash-two-col">
-          <!-- Upcoming Events -->
-          <div class="dash-panel-card">
-            <div class="dash-panel-head">
-              <div>
-                <h3 class="dash-panel-title">📅 Upcoming Museum Events</h3>
-                <div class="dash-panel-sub">Exhibitions, festivals, and educational workshops</div>
-              </div>
-              <button type="button" class="dash-panel-action" data-tab="events" style="border:none;">View All →</button>
-            </div>
-            <div style="display:flex; flex-direction:column; gap:8px;">
-              ${upcomingEvents.length ? upcomingEvents.map(e => {
-                const d = e.date ? new Date(e.date) : null;
-                const day = d && !isNaN(d.getTime()) ? d.getDate() : '—';
-                const month = d && !isNaN(d.getTime()) ? d.toLocaleString('en-US', { month: 'short' }) : 'EVT';
-                return `
-                  <div class="dash-event-row">
-                    <div class="dash-event-date-badge">
-                      <span class="dash-event-day">${day}</span>
-                      <span class="dash-event-month">${month}</span>
-                    </div>
-                    <div class="dash-event-details">
-                      <div class="dash-event-title">${escapeHtml(e.title)}</div>
-                      <div class="dash-event-sub">📍 ${escapeHtml(e.location || 'Museo Sang Bata sa Negros')} · ${escapeHtml(e.date || '')}</div>
-                    </div>
-                    <button type="button" class="dash-panel-action" data-tab="events" style="align-self:center; border:none;">View</button>
-                  </div>
-                `;
-              }).join('') : `
-                <div style="padding:14px; text-align:center; color:#94a3b8; font-size:12px; background:rgba(0,42,54,0.4); border-radius:10px;">
-                  No upcoming events scheduled. Click Schedule Event to add one!
+        <!-- 3. Featured Analytics & 4 Compact Operational Boxes Side-by-Side -->
+        <div class="dash-analytics-quad-layout">
+          <!-- Featured Analytics Card with Normal-Sized Traffic Graph -->
+          <div class="dash-analytics-featured-card">
+            <div class="dash-analytics-head">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div class="dash-analytics-icon">📈</div>
+                <div>
+                  <div class="dash-analytics-title">Public Traffic & Digital Engagement</div>
+                  <div class="dash-analytics-sub">Analytics tracked across mobile QR scans, exhibit views, and kiosk sessions</div>
                 </div>
-              `}
+              </div>
+              <button type="button" class="dash-panel-action" data-tab="analytics" style="padding:6px 14px; font-size:12px; border:none; background:rgba(0,240,255,0.12); border:1px solid rgba(0,240,255,0.3); border-radius:8px;">Full Analytics →</button>
+            </div>
+
+            <div class="dash-analytics-metrics-row">
+              <div class="dash-metric-item">
+                <div class="dash-metric-num">${totals.allTime.toLocaleString()}</div>
+                <div class="dash-metric-lbl">All-Time Views</div>
+              </div>
+              <div class="dash-metric-item">
+                <div class="dash-metric-num" style="color:#5eead4;">${totals.last7Days.toLocaleString()}</div>
+                <div class="dash-metric-lbl">Last 7 Days</div>
+              </div>
+              <div class="dash-metric-item">
+                <div class="dash-metric-num" style="color:#f59e0b;">${totals.last24Hours.toLocaleString()}</div>
+                <div class="dash-metric-lbl">Last 24 Hours</div>
+              </div>
+            </div>
+
+            <!-- Normal-Sized Traffic Graph -->
+            <div class="dash-traffic-chart-section">
+              <div class="dash-traffic-chart-header">
+                <span class="dash-traffic-chart-label">📊 14-Day Traffic & Engagement Trend</span>
+                <div class="dash-traffic-toggles">
+                  <button type="button" class="dash-traffic-toggle-btn active" id="trafficToggleTotal" title="Combined Scans & Views">Total</button>
+                  <button type="button" class="dash-traffic-toggle-btn" id="trafficToggleScans" title="Mobile QR Scans">Scans</button>
+                  <button type="button" class="dash-traffic-toggle-btn" id="trafficToggleViews" title="Page & Exhibit Views">Views</button>
+                </div>
+              </div>
+              <div class="dash-traffic-canvas-wrap">
+                <canvas id="dashTrafficChart"></canvas>
+              </div>
             </div>
           </div>
 
-          <!-- Gallery Highlights -->
-          <div class="dash-panel-card">
-            <div class="dash-panel-head">
-              <div>
-                <h3 class="dash-panel-title">🖼️ Gallery Snapshot</h3>
-                <div class="dash-panel-sub">Public media highlights and tour moments</div>
+          <!-- 4 Smaller Boxes (2x2 Grid) Next to Analytics -->
+          <div class="dash-quad-boxes-col">
+            <!-- Box 1: Exhibits by Category / Room -->
+            <div class="dash-panel-card compact">
+              <div class="dash-panel-head">
+                <div>
+                  <h3 class="dash-panel-title">🏷️ Exhibits by Category</h3>
+                  <div class="dash-panel-sub">Collection distribution</div>
+                </div>
+                <button type="button" class="dash-panel-action" data-tab="categories" style="border:none;">Rooms →</button>
               </div>
-              <button type="button" class="dash-panel-action" data-tab="gallery" style="border:none;">Manage Media →</button>
-            </div>
-            ${recentGallery.length ? `
-              <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;">
-                ${recentGallery.map(g => {
-                  const paths = Array.isArray(g.imagePaths) && g.imagePaths.length ? g.imagePaths : (g.imagePath ? [g.imagePath] : []);
-                  const img = paths[0] || '';
+              <div class="dash-cat-list compact">
+                ${Object.entries(categoryCounts).length ? Object.entries(categoryCounts).sort((a,b)=>b[1]-a[1]).slice(0, 4).map(([cat, count]) => {
+                  const total = exhibits.length || 1;
+                  const pct = Math.min(100, Math.round((count / total) * 100));
                   return `
-                    <div class="home-gallery-mini-item" data-tab="gallery" style="border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,0.18); aspect-ratio:4/3; cursor:pointer;" title="${escapeHtml(g.title || 'Gallery Item')}">
-                      ${img ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(g.title || 'Gallery')}" loading="lazy" style="width:100%; height:100%; object-fit:cover; display:block;">` : `<div style="width:100%; height:100%; background:rgba(0,42,54,0.85); display:flex; align-items:center; justify-content:center; font-size:24px;">🖼️</div>`}
-                      <div class="home-gallery-mini-overlay">
-                        <div class="home-gallery-mini-caption">${escapeHtml(g.title || g.caption || 'Museum')}</div>
+                    <div class="dash-cat-row compact" data-tab="catalog" data-cat="${escapeHtml(cat)}" title="View ${count} exhibits in ${escapeHtml(cat)}">
+                      <div class="dash-cat-header" style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="display:flex; align-items:center; gap:6px; font-size:11px; color:#f1f5f9; font-weight:700;">
+                          <span style="width:6px; height:6px; border-radius:50%; background:#00f0ff; box-shadow:0 0 5px #00f0ff; display:inline-block;"></span>
+                          ${escapeHtml(cat)}
+                        </span>
+                        <span style="display:flex; align-items:center; gap:5px;">
+                          <span style="font-size:10px; color:#94a3b8;">${pct}%</span>
+                          <span style="background:rgba(0,240,255,0.18); border:1px solid rgba(0,240,255,0.35); color:#ffffff; font-size:10px; font-weight:800; padding:1px 6px; border-radius:999px;">${count}</span>
+                        </span>
+                      </div>
+                      <div class="dash-cat-bar-bg compact">
+                        <div class="dash-cat-bar-fill" style="width:${pct}%;"></div>
                       </div>
                     </div>
                   `;
-                }).join('')}
+                }).join('') : `<p style="color:#94a3b8; font-size:11px;">No categories configured.</p>`}
               </div>
-            ` : `<p style="color:#94a3b8; font-size:12px;">No gallery media uploaded yet.</p>`}
+            </div>
+
+            <!-- Box 2: Recent Visitor Check-ins -->
+            <div class="dash-panel-card compact">
+              <div class="dash-panel-head">
+                <div>
+                  <h3 class="dash-panel-title">👥 Visitor Check-ins</h3>
+                  <div class="dash-panel-sub">Latest registered guests</div>
+                </div>
+                <button type="button" class="dash-panel-action" data-tab="visitors" style="border:none;">Live Log →</button>
+              </div>
+              <div class="dash-visitor-list compact">
+                ${recentVisitors.length ? recentVisitors.slice(0, 4).map(v => {
+                  const initials = (v.visitorName || 'V').split(' ').filter(Boolean).map(n=>n[0]).join('').substring(0,2).toUpperCase();
+                  return `
+                    <div class="dash-visitor-row compact">
+                      <div class="dash-visitor-avatar compact">${escapeHtml(initials)}</div>
+                      <div style="flex:1; min-width:0;">
+                        <div class="dash-visitor-name compact">${escapeHtml(v.visitorName)}</div>
+                        <div class="dash-visitor-time compact">
+                          ${escapeHtml(v.visitDate || 'Today')}${v.visitTime ? ` · ${escapeHtml(v.visitTime)}` : ''} · <strong>${v.pax || 1} pax</strong>
+                        </div>
+                      </div>
+                      <span class="status-badge compact ${(v.status || '').toLowerCase().replace(/[^a-z0-9]/g, '-') || 'active'}">
+                        ${escapeHtml(v.status || 'Checked-in')}
+                      </span>
+                    </div>
+                  `;
+                }).join('') : `<p style="color:#94a3b8; font-size:11px;">No visitors logged.</p>`}
+              </div>
+            </div>
+
+            <!-- Box 3: Upcoming Events -->
+            <div class="dash-panel-card compact">
+              <div class="dash-panel-head">
+                <div>
+                  <h3 class="dash-panel-title">📅 Museum Events</h3>
+                  <div class="dash-panel-sub">Workshops & exhibits</div>
+                </div>
+                <button type="button" class="dash-panel-action" data-tab="events" style="border:none;">All →</button>
+              </div>
+              <div class="dash-event-list compact">
+                ${upcomingEvents.length ? upcomingEvents.slice(0, 2).map(e => {
+                  const d = e.date ? new Date(e.date) : null;
+                  const day = d && !isNaN(d.getTime()) ? d.getDate() : '—';
+                  const month = d && !isNaN(d.getTime()) ? d.toLocaleString('en-US', { month: 'short' }) : 'EVT';
+                  return `
+                    <div class="dash-event-row compact">
+                      <div class="dash-event-date-badge compact">
+                        <span class="dash-event-day compact">${day}</span>
+                        <span class="dash-event-month compact">${month}</span>
+                      </div>
+                      <div style="flex:1; min-width:0;">
+                        <div class="dash-event-title compact">${escapeHtml(e.title)}</div>
+                        <div class="dash-event-sub compact">📍 ${escapeHtml(e.location || 'Museo')} · ${escapeHtml(e.date || '')}</div>
+                      </div>
+                    </div>
+                  `;
+                }).join('') : `
+                  <div style="padding:8px; text-align:center; color:#94a3b8; font-size:11px; background:rgba(0,42,54,0.4); border-radius:8px;">
+                    No upcoming events.
+                  </div>
+                `}
+              </div>
+            </div>
+
+            <!-- Box 4: Gallery Snapshot -->
+            <div class="dash-panel-card compact">
+              <div class="dash-panel-head">
+                <div>
+                  <h3 class="dash-panel-title">🖼️ Gallery Snapshot</h3>
+                  <div class="dash-panel-sub">Visual highlights</div>
+                </div>
+                <button type="button" class="dash-panel-action" data-tab="gallery" style="border:none;">Media →</button>
+              </div>
+              ${recentGallery.length ? `
+                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">
+                  ${recentGallery.slice(0, 3).map(g => {
+                    const paths = Array.isArray(g.imagePaths) && g.imagePaths.length ? g.imagePaths : (g.imagePath ? [g.imagePath] : []);
+                    const img = paths[0] || '';
+                    return `
+                      <div class="home-gallery-mini-item compact" data-tab="gallery" style="border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.18); aspect-ratio:4/3; cursor:pointer;" title="${escapeHtml(g.title || 'Gallery Item')}">
+                        ${img ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(g.title || 'Gallery')}" loading="lazy" style="width:100%; height:100%; object-fit:cover; display:block;">` : `<div style="width:100%; height:100%; background:rgba(0,42,54,0.85); display:flex; align-items:center; justify-content:center; font-size:18px;">🖼️</div>`}
+                        <div class="home-gallery-mini-overlay">
+                          <div class="home-gallery-mini-caption" style="font-size:9.5px;">${escapeHtml(g.title || g.caption || 'Museum')}</div>
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              ` : `<p style="color:#94a3b8; font-size:11px;">No gallery photos yet.</p>`}
+            </div>
           </div>
         </div>
       </div>
@@ -708,6 +724,9 @@ async function renderDashboardHomeTab(contentEl){
 
     // Initialize Dashboard Pie Chart next to the 2 groups of 3 KPI boxes
     initDashboardPieChart(exhibits, categoryCounts, { exhibits, visitors, programs, events, gallery, artifacts });
+
+    // Initialize Dashboard Traffic Chart inside the featured Analytics card
+    initDashboardTrafficChart(dailyData);
 
   }catch(e){
     contentEl.innerHTML = `<div class="empty-state"><h2>Could not load dashboard</h2><p>${escapeHtml(e.message)}</p></div>`;
@@ -881,6 +900,173 @@ function initDashboardPieChart(exhibits, categoryCounts, resources) {
     toggleRes.classList.add('active');
     toggleCats?.classList.remove('active');
     buildChart('resources');
+  });
+}
+
+function initDashboardTrafficChart(dailyData) {
+  const canvas = document.getElementById('dashTrafficChart');
+  if (!canvas) return;
+  if (typeof Chart === 'undefined') {
+    console.warn('Chart.js not loaded yet for traffic chart');
+    return;
+  }
+
+  const ctx = canvas.getContext('2d');
+  let currentMetric = 'total'; // 'total', 'scans', 'views'
+
+  // If dailyData is empty, build a fallback 14-day zeroed array
+  let dataset = Array.isArray(dailyData) && dailyData.length ? dailyData : [];
+  if (!dataset.length) {
+    const now = Date.now();
+    const dayMs = 24 * 60 * 60 * 1000;
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(now - i * dayMs);
+      dataset.push({
+        date: d.toISOString().slice(0, 10),
+        label: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        scans: 0,
+        views: 0,
+        total: 0
+      });
+    }
+  }
+
+  function renderChart(metric) {
+    if (window.dashTrafficChartInstance) {
+      window.dashTrafficChartInstance.destroy();
+      window.dashTrafficChartInstance = null;
+    }
+
+    const labels = dataset.map(d => d.label || d.date);
+    let values = [];
+    let strokeColor = '#00f0ff';
+    let gradientStart = 'rgba(0, 240, 255, 0.35)';
+    let gradientEnd = 'rgba(0, 240, 255, 0.0)';
+    let datasetLabel = 'Total Traffic';
+
+    if (metric === 'scans') {
+      values = dataset.map(d => d.scans || 0);
+      strokeColor = '#10b981';
+      gradientStart = 'rgba(16, 185, 129, 0.35)';
+      gradientEnd = 'rgba(16, 185, 129, 0.0)';
+      datasetLabel = 'QR Scans';
+    } else if (metric === 'views') {
+      values = dataset.map(d => d.views || 0);
+      strokeColor = '#f59e0b';
+      gradientStart = 'rgba(245, 158, 11, 0.35)';
+      gradientEnd = 'rgba(245, 158, 11, 0.0)';
+      datasetLabel = 'Exhibit Views';
+    } else {
+      values = dataset.map(d => d.total !== undefined ? d.total : ((d.scans || 0) + (d.views || 0)));
+      strokeColor = '#00f0ff';
+      gradientStart = 'rgba(0, 240, 255, 0.35)';
+      gradientEnd = 'rgba(0, 240, 255, 0.0)';
+      datasetLabel = 'Total Traffic';
+    }
+
+    const gradient = ctx.createLinearGradient(0, 0, 0, 170);
+    gradient.addColorStop(0, gradientStart);
+    gradient.addColorStop(1, gradientEnd);
+
+    window.dashTrafficChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: datasetLabel,
+          data: values,
+          borderColor: strokeColor,
+          borderWidth: 2.2,
+          backgroundColor: gradient,
+          fill: true,
+          tension: 0.35,
+          pointBackgroundColor: strokeColor,
+          pointBorderColor: '#00202a',
+          pointBorderWidth: 1.5,
+          pointRadius: 3,
+          pointHoverRadius: 5.5,
+          pointHoverBackgroundColor: '#ffffff',
+          pointHoverBorderColor: strokeColor,
+          pointHoverBorderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: 'rgba(6, 28, 38, 0.92)',
+            titleColor: '#ffffff',
+            bodyColor: '#e2e8f0',
+            borderColor: strokeColor,
+            borderWidth: 1,
+            padding: 9,
+            cornerRadius: 8,
+            boxPadding: 4,
+            usePointStyle: true,
+            callbacks: {
+              label: function(context) {
+                return ` ${context.dataset.label}: ${context.parsed.y} sessions`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+              color: 'rgba(255, 255, 255, 0.06)',
+              drawBorder: false
+            },
+            ticks: {
+              color: '#94a3b8',
+              font: { size: 9.5, family: 'Nunito, sans-serif' },
+              maxRotation: 0,
+              autoSkip: true,
+              maxTicksLimit: 7
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(255, 255, 255, 0.06)',
+              drawBorder: false
+            },
+            ticks: {
+              color: '#94a3b8',
+              font: { size: 9.5, family: 'IBM Plex Mono, monospace' },
+              precision: 0,
+              maxTicksLimit: 5
+            }
+          }
+        }
+      }
+    });
+  }
+
+  renderChart(currentMetric);
+
+  // Hook toggle buttons
+  const btnTotal = document.getElementById('trafficToggleTotal');
+  const btnScans = document.getElementById('trafficToggleScans');
+  const btnViews = document.getElementById('trafficToggleViews');
+
+  [btnTotal, btnScans, btnViews].forEach(btn => {
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      [btnTotal, btnScans, btnViews].forEach(b => b?.classList.remove('active'));
+      btn.classList.add('active');
+      if (btn === btnTotal) currentMetric = 'total';
+      else if (btn === btnScans) currentMetric = 'scans';
+      else if (btn === btnViews) currentMetric = 'views';
+      renderChart(currentMetric);
+    });
   });
 }
 
