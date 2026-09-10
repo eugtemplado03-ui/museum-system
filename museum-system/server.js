@@ -91,9 +91,21 @@ app.use(cors({
 
 app.use(express.json({ limit: '10mb' }));
 app.use('/uploads', express.static(UPLOAD_DIR));
-app.get(['/login', '/login.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
-app.get(['/checkin', '/checkin.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
-app.use(express.static(path.join(__dirname, 'public')));
+app.get(['/login', '/login.html', '/checkin', '/checkin.html'], (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    }
+  }
+}));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/exhibits', exhibitRoutes);

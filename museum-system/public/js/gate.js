@@ -43,17 +43,33 @@ const Gate = (() => {
   }
 
   function logoutVisitor() {
-    sessionStorage.removeItem(CHECKIN_KEY);
-    sessionStorage.removeItem(VISITOR_NAME_KEY);
-    localStorage.removeItem(CHECKIN_KEY);
-    localStorage.removeItem(VISITOR_NAME_KEY);
-    localStorage.removeItem(CHECKIN_DATE_KEY);
+    clearVisitorCheckin();
     window.location.href = '/';
   }
 
-  function logoutAdmin() {
+  function clearVisitorCheckin() {
+    sessionStorage.removeItem(CHECKIN_KEY);
+    sessionStorage.removeItem(VISITOR_NAME_KEY);
+    sessionStorage.removeItem('museum_visitor_session');
+    localStorage.removeItem(CHECKIN_KEY);
+    localStorage.removeItem(VISITOR_NAME_KEY);
+    localStorage.removeItem(CHECKIN_DATE_KEY);
+    localStorage.removeItem('museum_visitor_session');
+  }
+
+  function clearAdminSession() {
     localStorage.removeItem(ADMIN_TOKEN_KEY);
     sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+    sessionStorage.removeItem('museum_in_admin');
+  }
+
+  function clearAllSessions() {
+    clearVisitorCheckin();
+    clearAdminSession();
+  }
+
+  function logoutAdmin() {
+    clearAdminSession();
     window.location.href = '/?tab=admin';
   }
 
@@ -64,14 +80,32 @@ const Gate = (() => {
 
   function enforce() {
     const isGate = isGatePage();
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // 1. If arriving at gate with action=signup or signup=1:
+    // Security: user explicitly requested sign-up or backed out from admin
+    if (isGate && (urlParams.get('action') === 'signup' || urlParams.get('signup') === '1' || urlParams.get('reset') === '1')) {
+      clearAllSessions();
+      return;
+    }
+
+    // 2. Browser Back-Button security check from Admin portal:
+    // If user was inside Admin portal (museum_in_admin was set) and navigated to a public/gate page:
+    if (sessionStorage.getItem('museum_in_admin') === 'true' && !window.location.pathname.toLowerCase().includes('admin.html')) {
+      sessionStorage.removeItem('museum_in_admin');
+      clearAllSessions();
+      if (!isGate) {
+        window.location.replace('/?action=signup');
+        return;
+      }
+      return;
+    }
 
     if (!isGate && !isAuthenticated()) {
       const destination = window.location.pathname + window.location.search + window.location.hash;
       const redirectParam = encodeURIComponent(destination || '/dashboard.html');
       window.location.replace(`/?redirect=${redirectParam}`);
     } else if (isGate && isAuthenticated()) {
-      const urlParams = new URLSearchParams(window.location.search);
-      
       // If admin is logged in and navigates to the gate with tab=admin or checkin.html:
       if (isAdminLoggedIn()) {
         const redirectUrl = urlParams.get('redirect') ? decodeURIComponent(urlParams.get('redirect')) : '';
@@ -262,6 +296,13 @@ const Gate = (() => {
   // Automatically enforce on script load
   enforce();
 
+  // Re-verify gate on browser bfcache back/forward restore
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+      enforce();
+    }
+  });
+
   // Inject public admin return controls when DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', injectAdminPublicControls);
@@ -275,6 +316,9 @@ const Gate = (() => {
     isAuthenticated,
     getVisitorName,
     setVisitorCheckedIn,
+    clearVisitorCheckin,
+    clearAdminSession,
+    clearAllSessions,
     logoutVisitor,
     logoutAdmin,
     isGatePage,

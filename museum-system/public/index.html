@@ -384,7 +384,18 @@ body {
     tabVisitorBtn.addEventListener('click', () => switchTab('visitor'));
     tabAdminBtn.addEventListener('click', () => switchTab('admin'));
 
-    if (initialTab === 'admin') {
+    if (urlParams.get('action') === 'signup' || urlParams.get('signup') === '1') {
+      if (typeof Gate !== 'undefined') Gate.clearAllSessions();
+      switchTab('visitor');
+      const notice = document.getElementById('portalTagNotice');
+      const title = document.getElementById('tagNoticeTitle');
+      const sub = document.getElementById('tagNoticeSubtitle');
+      if (notice) {
+        notice.style.display = 'flex';
+        title.textContent = '🔒 Sign-up Required';
+        sub.textContent = 'Admin session ended via browser navigation. Please check in as a visitor to continue.';
+      }
+    } else if (initialTab === 'admin') {
       switchTab('admin');
     }
 
@@ -508,7 +519,8 @@ body {
       try {
         const { token } = await Api.login(username, password);
         Api.setToken(token);
-        Gate.setVisitorCheckedIn(username);
+        // Security: Clear visitor check-in so admin login does not bleed into visitor session
+        if (typeof Gate !== 'undefined') Gate.clearVisitorCheckin();
 
         const target = (redirectUrl && (typeof Gate === 'undefined' || !Gate.isGatePage(redirectUrl)))
           ? redirectUrl

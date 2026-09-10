@@ -110,14 +110,45 @@ async function loadCategories(){
   }
 }
 
-async function boot(){
+function setupAdminBackButtonSecurity() {
+  if (window._adminBackSecurityInit) return;
+  window._adminBackSecurityInit = true;
 
+  try {
+    history.pushState({ page: 'admin_portal_secure' }, '', window.location.href);
+  } catch (e) {}
+
+  window.addEventListener('popstate', () => {
+    sessionStorage.removeItem('museum_in_admin');
+    if (typeof Gate !== 'undefined') {
+      Gate.clearAllSessions();
+    } else {
+      localStorage.removeItem('museum_admin_token');
+      sessionStorage.removeItem('museum_admin_token');
+      localStorage.removeItem('museum_visitor_checked_in');
+      sessionStorage.removeItem('museum_visitor_checked_in');
+      localStorage.removeItem('museum_visitor_date');
+      localStorage.removeItem('museum_visitor_name');
+      sessionStorage.removeItem('museum_visitor_name');
+      localStorage.removeItem('museum_visitor_session');
+      sessionStorage.removeItem('museum_visitor_session');
+    }
+    if (typeof Api !== 'undefined') {
+      Api.clearToken();
+    }
+    window.location.replace('/?action=signup');
+  });
+}
+
+async function boot(){
   if(!Api.getToken()){
     renderLogin();
     return;
   }
   try{
     await Api.me();
+    sessionStorage.setItem('museum_in_admin', 'true');
+    setupAdminBackButtonSecurity();
     renderDashboard();
   }catch(e){
     Api.clearToken();
@@ -127,6 +158,10 @@ async function boot(){
 
 function renderLogin(){
   closeModal();
+  sessionStorage.removeItem('museum_in_admin');
+  if (typeof Gate !== 'undefined') {
+    Gate.clearAllSessions();
+  }
   if (window.MuseoSidebar) window.MuseoSidebar.close();
   document.body.classList.remove('sidebar-open');
   window.location.replace('/?tab=admin');
@@ -150,7 +185,12 @@ const SIDEBAR_ITEMS = [
 ];
 
 function handleSignOut() {
-  Api.clearToken();
+  sessionStorage.removeItem('museum_in_admin');
+  if (typeof Gate !== 'undefined') {
+    Gate.clearAllSessions();
+  } else {
+    Api.clearToken();
+  }
   if (window.MuseoSidebar) window.MuseoSidebar.close();
   document.body.classList.remove('sidebar-open');
   toast('Signed out successfully');
