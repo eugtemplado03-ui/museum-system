@@ -363,8 +363,9 @@
             <div class="featured-video-box" id="featuredVideoBox">
               <iframe
                 id="featuredYT"
-                src="https://www.youtube.com/embed/fAkjwVlPhvA?autoplay=1&mute=1&loop=1&playlist=fAkjwVlPhvA&rel=0&modestbranding=1&playsinline=1"
-                allow="autoplay; encrypted-media; picture-in-picture"
+                src="https://www.youtube.com/embed/fAkjwVlPhvA?autoplay=1&mute=1&loop=1&playlist=fAkjwVlPhvA&rel=0&modestbranding=1&playsinline=1&enablejsapi=1"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
                 allowfullscreen
                 title="Museo Sang Bata sa Negros — Featured Video"
               ></iframe>
@@ -483,8 +484,15 @@
       const label  = document.getElementById('unmuteBtnLabel');
       const btn    = document.getElementById('unmuteBtn');
       _ytMuted = !_ytMuted;
-      const base = 'https://www.youtube.com/embed/fAkjwVlPhvA?autoplay=1&loop=1&playlist=fAkjwVlPhvA&rel=0&modestbranding=1&playsinline=1';
-      iframe.src = base + (_ytMuted ? '&mute=1' : '&mute=0');
+
+      try {
+        const cmd = _ytMuted ? 'mute' : 'unMute';
+        iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: cmd, args: [] }), '*');
+      } catch (e) {
+        const base = 'https://www.youtube.com/embed/fAkjwVlPhvA?autoplay=1&loop=1&playlist=fAkjwVlPhvA&rel=0&modestbranding=1&playsinline=1&enablejsapi=1';
+        iframe.src = base + (_ytMuted ? '&mute=1' : '&mute=0');
+      }
+
       btn.querySelector('.icon').textContent = _ytMuted ? '🔇' : '🔊';
       label.textContent = _ytMuted ? 'Tap to unmute' : 'Mute';
     }

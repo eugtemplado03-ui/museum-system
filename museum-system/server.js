@@ -27,10 +27,12 @@ app.set('trust proxy', 1);
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
   crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: false,
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" },
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://unpkg.com", "https://cdn.jsdelivr.net"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://unpkg.com", "https://cdn.jsdelivr.net", "https://www.youtube.com", "https://s.ytimg.com"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://unpkg.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
       imgSrc: [
@@ -41,7 +43,9 @@ app.use(helmet({
         "http:",
         "https://res.cloudinary.com",
         "https://museosangbata.org",
-        "https://*.tile.openstreetmap.org"
+        "https://*.tile.openstreetmap.org",
+        "https://i.ytimg.com",
+        "https://*.ytimg.com"
       ],
       mediaSrc: [
         "'self'",
@@ -61,7 +65,9 @@ app.use(helmet({
         "https://openrouter.ai",
         "https://api.fish.audio",
         "https://*.tile.openstreetmap.org",
-        "https://nominatim.openstreetmap.org"
+        "https://nominatim.openstreetmap.org",
+        "https://www.youtube.com",
+        "https://*.google.com"
       ]
     }
   }
