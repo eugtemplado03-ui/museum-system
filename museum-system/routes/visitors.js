@@ -1,29 +1,64 @@
 const express = require('express');
 const QRCode = require('qrcode');
+const rateLimit = require('express-rate-limit');
 const visitors = require('../db/visitors');
 const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Public check-in endpoint (no auth required)
+const checkinLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 20, // 20 check-ins per 5 minutes per IP
+  message: { error: 'Too many check-in requests. Please wait a moment before trying again.' },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// Public check-in endpoint with strict input validation
 function validateCheckin(body) {
   const errors = [];
   if (!body.visitorName || !body.visitorName.trim()) {
     errors.push('Visitor name is required.');
+  } else if (body.visitorName.trim().length > 150) {
+    errors.push('Visitor name cannot exceed 150 characters.');
   }
+
   if (!body.address || !body.address.trim()) {
     errors.push('Address is required.');
+  } else if (body.address.trim().length > 250) {
+    errors.push('Address cannot exceed 250 characters.');
   }
-  if (!body.sex) {
+
+  if (!body.sex || typeof body.sex !== 'string') {
     errors.push('Sex is required.');
   }
+
   if (body.age !== undefined && body.age !== '' && (isNaN(parseInt(body.age, 10)) || parseInt(body.age, 10) < 0 || parseInt(body.age, 10) > 120)) {
     errors.push('Age must be a valid number between 0 and 120.');
   }
+
+  if (body.email && body.email.trim()) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(body.email.trim()) || body.email.trim().length > 150) {
+      errors.push('Please enter a valid email address.');
+    }
+  }
+
+  if (body.contactNumber && body.contactNumber.trim()) {
+    const phoneRegex = /^[\d\s+\-()]{7,25}$/;
+    if (!phoneRegex.test(body.contactNumber.trim())) {
+      errors.push('Please enter a valid contact number (7 to 25 digits and valid symbols).');
+    }
+  }
+
+  if (body.notes && body.notes.trim().length > 500) {
+    errors.push('Notes cannot exceed 500 characters.');
+  }
+
   return errors;
 }
 
-router.post('/checkin', async (req, res) => {
+router.post('/checkin', checkinLimiter, async (req, res) => {
   const errors = validateCheckin(req.body);
   if (errors.length) return res.status(400).json({ error: errors.join(' ') });
   

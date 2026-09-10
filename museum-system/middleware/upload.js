@@ -53,10 +53,32 @@ if (process.env.CLOUDINARY_CLOUD_NAME) {
   });
 }
 
+const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.mp4', '.webm', '.ogg', '.mov', '.m4v'];
+const DANGEROUS_EXTENSIONS = ['.html', '.htm', '.svg', '.xml', '.php', '.phtml', '.js', '.sh', '.exe', '.bat', '.cmd', '.py', '.msi', '.vbs', '.jsp'];
+
 function fileFilter(req, file, cb) {
-  if (!ALLOWED_TYPES.includes(file.mimetype)) {
-    return cb(new Error('Only JPEG, PNG, WEBP, GIF images or MP4, WebM, QuickTime videos are allowed.'));
+  const ext = path.extname(file.originalname || '').toLowerCase();
+  
+  // Reject missing or dangerous extensions immediately
+  if (!ext || DANGEROUS_EXTENSIONS.includes(ext) || !ALLOWED_EXTENSIONS.includes(ext)) {
+    return cb(new Error('Invalid file extension. Only standard photos (JPG, PNG, WEBP, GIF) and videos (MP4, WebM, MOV) are allowed.'));
   }
+
+  // Reject disallowed MIME types
+  if (!ALLOWED_TYPES.includes(file.mimetype)) {
+    return cb(new Error('Invalid file MIME type. Only JPEG, PNG, WEBP, GIF images or MP4, WebM, QuickTime videos are allowed.'));
+  }
+
+  // Cross-verify extension matches MIME family
+  const isImageMime = file.mimetype.startsWith('image/');
+  const isVideoMime = file.mimetype.startsWith('video/');
+  const isImageExt = ['.jpg', '.jpeg', '.png', '.webp', '.gif'].includes(ext);
+  const isVideoExt = ['.mp4', '.webm', '.ogg', '.mov', '.m4v'].includes(ext);
+
+  if ((isImageMime && !isImageExt) || (isVideoMime && !isVideoExt)) {
+    return cb(new Error('File extension does not match the content type.'));
+  }
+
   cb(null, true);
 }
 

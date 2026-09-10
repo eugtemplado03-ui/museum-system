@@ -12,8 +12,14 @@ const userSchema = new mongoose.Schema({
 // Avoid OverwriteModelError if required multiple times
 const User = mongoose.models.User || mongoose.model('User', userSchema);
 
+function escapeRegex(str) {
+  return String(str || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 async function findByUsername(username) {
-  return await User.findOne({ username: { $regex: new RegExp(`^${username}$`, 'i') } }).lean();
+  if (!username || typeof username !== 'string') return null;
+  const safeUsername = escapeRegex(username.trim());
+  return await User.findOne({ username: { $regex: new RegExp(`^${safeUsername}$`, 'i') } }).lean();
 }
 
 async function findById(id) {

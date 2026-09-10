@@ -12,18 +12,15 @@ const SITE_NAME = process.env.SITE_NAME || 'Museo Sang Bata sa Negros';
 const MAX_MESSAGE_LENGTH = 1000;
 const MAX_HISTORY_MESSAGES = 14;
 
-// Rate limiter per IP (generous so visitors can have full conversations)
-const rateLimitMap = new Map();
-function isRateLimited(ip) {
-  const entry = rateLimitMap.get(ip) || { count: 0, resetAt: Date.now() + 10 * 60 * 1000 };
-  if (Date.now() > entry.resetAt) {
-    entry.count = 0;
-    entry.resetAt = Date.now() + 10 * 60 * 1000;
-  }
-  entry.count += 1;
-  rateLimitMap.set(ip, entry);
-  return entry.count > 60; // 60 messages / 10 min / IP
-}
+const rateLimit = require('express-rate-limit');
+
+const chatLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 30, // 30 messages per minute per IP
+  message: { error: "That's a lot of questions! Please wait a moment and try again." },
+  standardHeaders: true,
+  legacyHeaders: false
+});
 
 let cachedContext = null;
 let cacheTimestamp = 0;
@@ -401,14 +398,9 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
   }, activeLang);
 }
 
-router.post('/', async (req, res) => {
+router.post('/', chatLimiter, async (req, res) => {
   const apiKey = process.env.OPENROUTER_API_KEY;
   const model = process.env.OPENROUTER_MODEL || 'openai/gpt-4o-mini';
-
-  const ip = req.ip;
-  if (isRateLimited(ip)) {
-    return res.status(429).json({ error: "That's a lot of questions! Please wait a moment and try again." });
-  }
 
   const { message, history, language } = req.body || {};
   if (!message || typeof message !== 'string' || !message.trim()) {

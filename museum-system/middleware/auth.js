@@ -1,6 +1,17 @@
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'change-this-secret-in-production';
+let JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET || JWT_SECRET === 'change-this-secret-in-production') {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('FATAL SECURITY ERROR: JWT_SECRET environment variable must be set to a secure secret in production.');
+  }
+  // In development/test, generate a secure random secret if not set
+  if (!JWT_SECRET) {
+    console.warn('⚠️ WARNING: JWT_SECRET is not defined. Generating a secure random secret for this session.');
+    JWT_SECRET = crypto.randomBytes(32).toString('hex');
+  }
+}
 
 function requireAuth(req, res, next) {
   const header = req.headers.authorization || '';
@@ -17,4 +28,14 @@ function requireAuth(req, res, next) {
   }
 }
 
-module.exports = { requireAuth, JWT_SECRET };
+function requireAdmin(req, res, next) {
+  requireAuth(req, res, () => {
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Access denied: Admin privileges required.' });
+    }
+    next();
+  });
+}
+
+module.exports = { requireAuth, requireAdmin, JWT_SECRET };
+

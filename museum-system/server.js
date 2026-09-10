@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const path = require('path');
 
 const authRoutes = require('./routes/auth');
@@ -21,8 +22,68 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.set('trust proxy', 1);
-app.use(cors());
-app.use(express.json());
+
+// Security Headers with Helmet
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginEmbedderPolicy: false,
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://unpkg.com", "https://cdn.jsdelivr.net"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://unpkg.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+      imgSrc: [
+        "'self'",
+        "data:",
+        "blob:",
+        "https:",
+        "http:",
+        "https://res.cloudinary.com",
+        "https://museosangbata.org",
+        "https://*.tile.openstreetmap.org"
+      ],
+      mediaSrc: [
+        "'self'",
+        "data:",
+        "blob:",
+        "https://res.cloudinary.com",
+        "https://*.cloudinary.com"
+      ],
+      frameSrc: [
+        "'self'",
+        "https://www.youtube.com",
+        "https://www.youtube-nocookie.com",
+        "https://player.vimeo.com"
+      ],
+      connectSrc: [
+        "'self'",
+        "https://openrouter.ai",
+        "https://api.fish.audio",
+        "https://*.tile.openstreetmap.org",
+        "https://nominatim.openstreetmap.org"
+      ]
+    }
+  }
+}));
+
+// Configurable CORS
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim()) 
+  : null;
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (!allowedOrigins || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Cross-Origin Request Blocked by CORS policy'));
+  },
+  credentials: true
+}));
+
+app.use(express.json({ limit: '10mb' }));
 app.use('/uploads', express.static(UPLOAD_DIR));
 app.get(['/login', '/login.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 app.get(['/checkin', '/checkin.html'], (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
@@ -48,12 +109,10 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true, database: dbStatus });
 });
 
-const DEFAULT_MONGODB_URI = "mongodb+srv://museumadmin:museum2026@cluster0.8h7x0p7.mongodb.net/museum?retryWrites=true&w=majority&appName=Cluster0";
-
 // Auto-seed initial catalog if database is empty on fresh deployment
 async function startServer() {
   try {
-    const mongoUri = process.env.MONGODB_URI || DEFAULT_MONGODB_URI;
+    const mongoUri = process.env.MONGODB_URI;
     if (mongoUri) {
       console.log('Connecting to MongoDB...');
       await mongoose.connect(mongoUri);
