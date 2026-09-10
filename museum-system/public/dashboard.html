@@ -224,24 +224,6 @@
   border: 2px dashed #00f0ff !important;
   background: rgba(0, 240, 255, 0.15) !important;
 }
-.quick-tag-pill {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  color: #5eead4;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-.quick-tag-pill:hover {
-  background: rgba(0, 240, 255, 0.25);
-  border-color: #00f0ff;
-  color: #ffffff;
-  transform: translateY(-1px);
-}
 .scan-status.error {
   color: #f87171 !important;
   line-height: 1.35;
@@ -249,27 +231,27 @@
 .scan-status.success {
   color: #34d399 !important;
 }
-.btn-snap-photo {
-  background: rgba(0, 54, 68, 0.85);
-  color: #ffffff;
-  border: 1.5px solid rgba(0, 240, 255, 0.4);
-  cursor: pointer;
-  margin: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: 'Nunito', sans-serif;
-  font-weight: 800;
-  font-size: 14px;
-  padding: 10px 18px;
-  border-radius: 10px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+.manual-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  width: 100% !important;
+  max-width: 320px !important;
+  box-sizing: border-box !important;
+  margin: 0 auto !important;
 }
-.btn-snap-photo:hover {
-  background: rgba(0, 74, 92, 0.95);
-  border-color: #00f0ff;
-  box-shadow: 0 0 12px rgba(0, 240, 255, 0.35);
-  transform: translateY(-1px);
+.manual-row input {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  width: 0 !important;
+  box-sizing: border-box !important;
+}
+.manual-row #manualGoBtn {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 72px !important;
+  box-sizing: border-box !important;
 }
 </style>
 </head>
@@ -389,10 +371,6 @@
               <p>Every exhibit at Museo Sang Bata sa Negros carries its own tag. Scan it here to learn what you're looking at and where to find it in the museum — no app to install.</p>
               <div class="scan-cta" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
                 <button class="btn btn-primary" id="openScannerBtn">&#128247; Open scanner</button>
-                <label class="btn-snap-photo" id="fileScanBtn" title="Take a photo with your camera or select from album">
-                  <span>📸</span> Scan Tag Photo
-                  <input type="file" id="qrFileInput" accept="image/*" capture="environment" style="display: none;">
-                </label>
                 <a class="btn btn-ghost" href="/exhibits.html">Browse all exhibits</a>
               </div>
             </div>
@@ -400,7 +378,7 @@
               <div class="viewport" id="viewport" title="Live camera viewfinder or drag-and-drop QR image here">
                 <div class="viewport-placeholder" id="viewportPlaceholder">
                   <div style="font-size: 28px; margin-bottom: 8px;">📷</div>
-                  Tap <strong>"Open scanner"</strong> to activate your camera, or <strong>"Scan Tag Photo"</strong> to snap an exhibit tag.
+                  Tap <strong>"Open scanner"</strong> to activate your camera to scan an exhibit tag.
                 </div>
                 <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
               </div>
@@ -412,13 +390,6 @@
               <div class="manual-row">
                 <input type="text" id="manualCode" placeholder="e.g. EX-001 or paste tag link" class="mono">
                 <button class="btn btn-ghost dark btn-small" id="manualGoBtn">Go</button>
-              </div>
-              <div class="quick-tags-row" style="display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; font-size: 11.5px; color: #94a3b8; margin-top: 2px;">
-                <span>Quick tags:</span>
-                <button type="button" class="quick-tag-pill" data-code="EX-001" title="Under the Sea">EX-001</button>
-                <button type="button" class="quick-tag-pill" data-code="EX-002" title="River Basin Ecosystem">EX-002</button>
-                <button type="button" class="quick-tag-pill" data-code="EX-003" title="Live Touch Pool">EX-003</button>
-                <button type="button" class="quick-tag-pill" data-code="EX-006" title="Hampanganan Toy Room">EX-006</button>
               </div>
             </div>
           </div>
@@ -854,14 +825,6 @@
       if (e.key === 'Enter') document.getElementById('manualGoBtn').click();
     });
 
-    // Quick tag shortcut buttons
-    document.querySelectorAll('.quick-tag-pill').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const code = btn.dataset.code;
-        if (code) processScannedCode(code);
-      });
-    });
-
     function stopScanner() {
       if (scanRAF) { cancelAnimationFrame(scanRAF); scanRAF = null; }
       if (scanStream) {
@@ -1043,9 +1006,9 @@
 
       if (!hasMediaDevices) {
         if (!isSecure) {
-          status.innerHTML = '⚠️ Live camera requires HTTPS or localhost on mobile browsers.<br>Use <strong>"📸 Scan Tag Photo"</strong> to snap and scan!';
+          status.innerHTML = '⚠️ Live camera requires HTTPS or localhost on mobile browsers.<br>Enter catalog code below to view exhibit.';
         } else {
-          status.innerHTML = '⚠️ Live camera is not available. Tap <strong>"📸 Scan Tag Photo"</strong> or enter code below.';
+          status.innerHTML = '⚠️ Live camera is not available. Enter catalog code below.';
         }
         status.className = 'scan-status error';
         return;
@@ -1192,13 +1155,13 @@
         if (placeholder) placeholder.style.display = 'block';
 
         if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-          status.innerHTML = '⚠️ Camera permission was blocked.<br>Please allow camera in your browser settings, or use <strong>"📸 Scan Tag Photo"</strong>.';
+          status.innerHTML = '⚠️ Camera permission was blocked.<br>Please allow camera in your browser settings, or enter catalog code below.';
         } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-          status.innerHTML = '⚠️ No camera found on this device.<br>Use <strong>"📸 Scan Tag Photo"</strong> or enter the catalog code below.';
+          status.innerHTML = '⚠️ No camera found on this device.<br>Enter catalog code below.';
         } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
           status.innerHTML = '⚠️ Camera is currently in use by another application.<br>Please close other apps using camera and retry.';
         } else {
-          status.innerHTML = '⚠️ Could not open camera (' + (err.message || 'Error') + ').<br>Use <strong>"📸 Scan Tag Photo"</strong> or enter code below.';
+          status.innerHTML = '⚠️ Could not open camera (' + (err.message || 'Error') + ').<br>Enter catalog code below.';
         }
         status.className = 'scan-status error';
       }
