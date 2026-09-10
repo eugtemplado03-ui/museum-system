@@ -196,6 +196,15 @@ body {
     <div style="width:100%; max-width:480px; margin:0 auto;">
       
       <div class="portal-card">
+        <!-- Scanned Tag / Protected Page Redirection Notice -->
+        <div class="portal-tag-notice" id="portalTagNotice" style="display:none; background: linear-gradient(135deg, rgba(0, 174, 189, 0.15), rgba(217, 79, 61, 0.12)); border-bottom: 2px solid var(--teal); padding: 12px 16px; align-items: center; gap: 10px;">
+          <div style="font-size: 24px; flex-shrink: 0;">🏷️</div>
+          <div>
+            <div style="font-size: 13.5px; font-weight: 800; color: #002b36;" id="tagNoticeTitle">Exhibit Tag Scanned</div>
+            <div style="font-size: 11.5px; color: var(--ink-soft);" id="tagNoticeSubtitle">Please complete visitor check-in or sign in as staff admin to view this exhibit.</div>
+          </div>
+        </div>
+
         <!-- Portal Tabs -->
         <div class="portal-tabs" role="tablist">
           <button type="button" class="portal-tab-btn active" id="tabVisitorBtn" role="tab" aria-selected="true">
@@ -324,6 +333,28 @@ body {
     const redirectUrl = urlParams.get('redirect') ? decodeURIComponent(urlParams.get('redirect')) : '';
     const initialTab = urlParams.get('tab') || 'visitor';
 
+    // Show Tag Scanned / Protected Access Banner if redirected from an exhibit or page
+    if (redirectUrl && (typeof Gate === 'undefined' || !Gate.isGatePage(redirectUrl))) {
+      const notice = document.getElementById('portalTagNotice');
+      const title = document.getElementById('tagNoticeTitle');
+      const sub = document.getElementById('tagNoticeSubtitle');
+      if (notice) {
+        notice.style.display = 'flex';
+        if (redirectUrl.includes('code=')) {
+          const m = redirectUrl.match(/code=([^&]+)/i);
+          const c = m ? decodeURIComponent(m[1]) : '';
+          title.textContent = `🏷️ Exhibit Tag ${c} Scanned`;
+          sub.textContent = `Welcome! Please check in as a visitor (or sign in as admin) to view this exhibit.`;
+        } else if (redirectUrl.includes('map.html')) {
+          title.textContent = '🗺️ Museum Floor Map Access';
+          sub.textContent = 'Please log your visit to explore the interactive 3D and 2D floor map.';
+        } else {
+          title.textContent = '🏛️ Museum Check-in Required';
+          sub.textContent = 'Please check in as a visitor or sign in as staff admin to enter.';
+        }
+      }
+    }
+
     // Tabs
     const tabVisitorBtn = document.getElementById('tabVisitorBtn');
     const tabAdminBtn = document.getElementById('tabAdminBtn');
@@ -427,11 +458,11 @@ body {
         } catch(e) {}
 
         // If a redirect URL was preserved (e.g. scanned an exhibit tag)
-        if (redirectUrl && redirectUrl !== '/checkin.html') {
-          submitBtn.innerHTML = '<span>Check-in Verified! Redirecting...</span>';
+        if (redirectUrl && (typeof Gate === 'undefined' || !Gate.isGatePage(redirectUrl))) {
+          submitBtn.innerHTML = '<span>Check-in Verified! Opening exhibit...</span>';
           setTimeout(() => {
             window.location.replace(redirectUrl);
-          }, 400);
+          }, 350);
           return;
         }
 
@@ -479,7 +510,9 @@ body {
         Api.setToken(token);
         Gate.setVisitorCheckedIn(username);
 
-        const target = (redirectUrl && redirectUrl.startsWith('/admin')) ? redirectUrl : '/admin.html';
+        const target = (redirectUrl && (typeof Gate === 'undefined' || !Gate.isGatePage(redirectUrl)))
+          ? redirectUrl
+          : '/admin.html';
         window.location.replace(target);
       } catch (err) {
         adminErrorMessage.textContent = err.message || 'Invalid username or password';
