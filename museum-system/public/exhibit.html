@@ -246,7 +246,7 @@
 
     async function load(){
       const params = new URLSearchParams(location.search);
-      const code = params.get('code');
+      const code = params.get('code') || params.get('id');
       const src = params.get('src') === 'scan' ? 'scan' : 'view';
       const content = document.getElementById('content');
       if(!code){

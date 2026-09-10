@@ -194,7 +194,7 @@
 </style>
 <script src="/js/jsQR.js"></script>
 <style>
-/* ── Scanner Video Display ── */
+/* ── Scanner Video Display & Visual Enhancements ── */
 #viewport video {
   position: absolute;
   inset: 0;
@@ -206,19 +206,70 @@
 }
 .scan-line {
   position: absolute;
-  left: 8%;
-  right: 8%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(0,174,189,0.95), transparent);
-  box-shadow: 0 0 8px rgba(0,174,189,0.8);
-  animation: scanMove 2s linear infinite;
-  z-index: 4;
+  left: 6%;
+  right: 6%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #00f0ff, #ffffff, #00f0ff, transparent);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.95), 0 0 20px rgba(0, 240, 255, 0.6);
+  animation: scanMove 1.8s ease-in-out infinite alternate;
+  z-index: 10;
   border-radius: 2px;
+  pointer-events: none;
 }
 @keyframes scanMove {
-  0%   { top: 15%; }
-  50%  { top: 82%; }
-  100% { top: 15%; }
+  0%   { top: 10%; opacity: 0.85; }
+  100% { top: 90%; opacity: 1; }
+}
+.viewport.dragover {
+  border: 2px dashed #00f0ff !important;
+  background: rgba(0, 240, 255, 0.15) !important;
+}
+.quick-tag-pill {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #5eead4;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.quick-tag-pill:hover {
+  background: rgba(0, 240, 255, 0.25);
+  border-color: #00f0ff;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+.scan-status.error {
+  color: #f87171 !important;
+  line-height: 1.35;
+}
+.scan-status.success {
+  color: #34d399 !important;
+}
+.btn-snap-photo {
+  background: rgba(0, 54, 68, 0.85);
+  color: #ffffff;
+  border: 1.5px solid rgba(0, 240, 255, 0.4);
+  cursor: pointer;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-snap-photo:hover {
+  background: rgba(0, 74, 92, 0.95);
+  border-color: #00f0ff;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.35);
+  transform: translateY(-1px);
 }
 </style>
 </head>
@@ -336,20 +387,38 @@
               <div class="eyebrow">Self-guided tour</div>
               <h1>Point your camera at any exhibit tag.</h1>
               <p>Every exhibit at Museo Sang Bata sa Negros carries its own tag. Scan it here to learn what you're looking at and where to find it in the museum — no app to install.</p>
-              <div class="scan-cta">
+              <div class="scan-cta" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
                 <button class="btn btn-primary" id="openScannerBtn">&#128247; Open scanner</button>
+                <label class="btn-snap-photo" id="fileScanBtn" title="Take a photo with your camera or select from album">
+                  <span>📸</span> Scan Tag Photo
+                  <input type="file" id="qrFileInput" accept="image/*" capture="environment" style="display: none;">
+                </label>
                 <a class="btn btn-ghost" href="/exhibits.html">Browse all exhibits</a>
               </div>
             </div>
             <div class="scanner-frame">
-              <div class="viewport" id="viewport">
-                <div class="viewport-placeholder" id="viewportPlaceholder">Tap "Open scanner" to activate your camera, or enter a catalog code below.</div>
+              <div class="viewport" id="viewport" title="Live camera viewfinder or drag-and-drop QR image here">
+                <div class="viewport-placeholder" id="viewportPlaceholder">
+                  <div style="font-size: 28px; margin-bottom: 8px;">📷</div>
+                  Tap <strong>"Open scanner"</strong> to activate your camera, or <strong>"Scan Tag Photo"</strong> to snap an exhibit tag.
+                </div>
                 <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
               </div>
               <div class="scan-status" id="scanStatus"></div>
+              <div class="scanner-controls-row" id="scannerControlsRow" style="display: none; gap: 8px; justify-content: center; width: 100%; flex-wrap: wrap;">
+                <button type="button" class="btn btn-ghost dark btn-small" id="switchCameraBtn" style="display:none;">🔄 Switch Camera</button>
+                <button type="button" class="btn btn-ghost dark btn-small" id="torchBtn" style="display:none;">💡 Flashlight</button>
+              </div>
               <div class="manual-row">
-                <input type="text" id="manualCode" placeholder="e.g. EX-001" class="mono">
+                <input type="text" id="manualCode" placeholder="e.g. EX-001 or paste tag link" class="mono">
                 <button class="btn btn-ghost dark btn-small" id="manualGoBtn">Go</button>
+              </div>
+              <div class="quick-tags-row" style="display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; font-size: 11.5px; color: #94a3b8; margin-top: 2px;">
+                <span>Quick tags:</span>
+                <button type="button" class="quick-tag-pill" data-code="EX-001" title="Under the Sea">EX-001</button>
+                <button type="button" class="quick-tag-pill" data-code="EX-002" title="River Basin Ecosystem">EX-002</button>
+                <button type="button" class="quick-tag-pill" data-code="EX-003" title="Live Touch Pool">EX-003</button>
+                <button type="button" class="quick-tag-pill" data-code="EX-006" title="Hampanganan Toy Room">EX-006</button>
               </div>
             </div>
           </div>
@@ -732,49 +801,267 @@
     }
     loadHomePreviews();
 
-    document.getElementById('manualGoBtn').addEventListener('click', ()=>{
-      const v = document.getElementById('manualCode').value.trim().toUpperCase();
-      if(v) location.href = '/exhibit.html?code=' + encodeURIComponent(v);
+    // ── Robust Exhibit Tag & QR Scanner Engine ─────────────────────────
+    let scanStream = null;
+    let scanRAF = null;
+    let scanLine = null;
+    let currentFacingMode = 'environment';
+    let availableVideoDevices = [];
+    let currentDeviceIndex = 0;
+    let isTorchOn = false;
+
+    // Helper: Normalize QR code or manually typed input into target exhibit navigation
+    function processScannedCode(rawText) {
+      if (!rawText) return;
+      const trimmed = String(rawText).trim();
+      let targetCode = trimmed;
+
+      try {
+        // If scanned text is a URL, extract code or id query param
+        const parsed = new URL(trimmed);
+        const codeParam = parsed.searchParams.get('code') || parsed.searchParams.get('id');
+        if (codeParam) {
+          location.href = '/exhibit.html?code=' + encodeURIComponent(codeParam.trim().toUpperCase()) + '&src=scan';
+          return;
+        }
+        // If it points to an internal page, preserve path and add src=scan
+        parsed.searchParams.set('src', 'scan');
+        location.href = parsed.pathname + parsed.search;
+        return;
+      } catch (e) {
+        // Not a URL, continue as code text
+      }
+
+      // Match common patterns like EX-001, EX001, EX 001, or numeric 1
+      const match = trimmed.match(/EX-?\s*(\d+)/i);
+      if (match) {
+        targetCode = 'EX-' + match[1].padStart(3, '0');
+      } else if (/^\d+$/.test(trimmed)) {
+        targetCode = 'EX-' + trimmed.padStart(3, '0');
+      } else {
+        targetCode = trimmed.toUpperCase();
+      }
+
+      location.href = '/exhibit.html?code=' + encodeURIComponent(targetCode) + '&src=scan';
+    }
+
+    // Manual code entry handlers
+    document.getElementById('manualGoBtn').addEventListener('click', () => {
+      const v = document.getElementById('manualCode').value;
+      if (v && v.trim()) processScannedCode(v);
     });
-    document.getElementById('manualCode').addEventListener('keydown', e=>{
-      if(e.key==='Enter') document.getElementById('manualGoBtn').click();
+    document.getElementById('manualCode').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('manualGoBtn').click();
     });
 
-    let scanStream = null, scanRAF = null, scanLine = null;
+    // Quick tag shortcut buttons
+    document.querySelectorAll('.quick-tag-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const code = btn.dataset.code;
+        if (code) processScannedCode(code);
+      });
+    });
 
-    function stopScanner(){
-      if(scanRAF){ cancelAnimationFrame(scanRAF); scanRAF = null; }
-      if(scanStream){ scanStream.getTracks().forEach(t => t.stop()); scanStream = null; }
-      if(scanLine && scanLine.parentNode){ scanLine.parentNode.removeChild(scanLine); scanLine = null; }
+    function stopScanner() {
+      if (scanRAF) { cancelAnimationFrame(scanRAF); scanRAF = null; }
+      if (scanStream) {
+        scanStream.getTracks().forEach(t => {
+          try { t.stop(); } catch(e) {}
+        });
+        scanStream = null;
+      }
+      const viewport = document.getElementById('viewport');
+      if (viewport) {
+        viewport.querySelectorAll('video').forEach(v => {
+          try { v.pause(); v.srcObject = null; v.remove(); } catch(e) {}
+        });
+      }
+      if (scanLine && scanLine.parentNode) {
+        scanLine.parentNode.removeChild(scanLine);
+        scanLine = null;
+      }
+      const placeholder = document.getElementById('viewportPlaceholder');
+      if (placeholder) placeholder.style.display = 'block';
+
+      const controlsRow = document.getElementById('scannerControlsRow');
+      if (controlsRow) controlsRow.style.display = 'none';
+
+      const btn = document.getElementById('openScannerBtn');
+      if (btn) {
+        btn.innerHTML = '&#128247; Open scanner';
+        btn.disabled = false;
+        btn.onclick = startScanner;
+      }
+      isTorchOn = false;
     }
     window.addEventListener('beforeunload', stopScanner);
 
-    async function startScanner(){
-      // If already scanning, stop
-      if(scanStream){ stopScanner(); return; }
+    // Cascading camera constraint acquisition for maximum hardware & browser compatibility
+    async function getCameraStream(facing) {
+      const attempts = [
+        { video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 } } },
+        { video: { facingMode: { ideal: facing } } },
+        { video: { facingMode: facing } },
+        { video: true }
+      ];
 
-      const viewport   = document.getElementById('viewport');
-      const placeholder = document.getElementById('viewportPlaceholder');
-      const status     = document.getElementById('scanStatus');
-      const btn        = document.getElementById('openScannerBtn');
+      let lastErr = null;
+      for (const constraints of attempts) {
+        try {
+          return await navigator.mediaDevices.getUserMedia(constraints);
+        } catch (e) {
+          lastErr = e;
+          // If the user actively denied permission, don't keep polling
+          if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+            throw e;
+          }
+        }
+      }
+      throw lastErr || new Error('No camera stream could be started.');
+    }
 
-      // Check camera API exists
-      if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-        status.textContent = '⚠️ Camera not available — use the code field below.';
+    // Decode QR from Image or Canvas
+    async function decodeCanvasQR(canvas) {
+      // 1. Try native BarcodeDetector if available
+      if (typeof BarcodeDetector !== 'undefined') {
+        try {
+          const detector = new BarcodeDetector({ formats: ['qr_code'] });
+          const codes = await detector.detect(canvas);
+          if (codes && codes.length > 0 && codes[0].rawValue) {
+            return codes[0].rawValue;
+          }
+        } catch(e) {}
+      }
+
+      // 2. jsQR fallback
+      if (typeof jsQR === 'function') {
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts: 'attemptBoth' });
+        if (code && code.data) return code.data;
+      }
+      return null;
+    }
+
+    // File snapshot & photo upload QR reader
+    async function handleQrImageFile(file) {
+      if (!file) return;
+      const status = document.getElementById('scanStatus');
+      status.textContent = '⏳ Analyzing tag photo…';
+      status.className = 'scan-status';
+
+      try {
+        const img = new Image();
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          img.onload = async () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+            // Test 1: Scaled to max 1600px
+            let scale = 1;
+            if (img.width > 1600 || img.height > 1600) {
+              scale = Math.min(1600 / img.width, 1600 / img.height);
+            }
+            canvas.width = Math.round(img.width * scale);
+            canvas.height = Math.round(img.height * scale);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            let result = await decodeCanvasQR(canvas);
+
+            // Test 2: If not found, try smaller scale (800px) in case of noise or high contrast
+            if (!result && (canvas.width > 800 || canvas.height > 800)) {
+              const s2 = Math.min(800 / img.width, 800 / img.height);
+              canvas.width = Math.round(img.width * s2);
+              canvas.height = Math.round(img.height * s2);
+              ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+              result = await decodeCanvasQR(canvas);
+            }
+
+            if (result) {
+              status.textContent = '✅ Exhibit tag detected! Loading exhibit…';
+              status.className = 'scan-status success';
+              setTimeout(() => processScannedCode(result), 300);
+            } else {
+              status.textContent = '⚠️ Could not read QR code from this image. Try holding closer with good lighting, or enter code below.';
+              status.className = 'scan-status error';
+            }
+          };
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      } catch (err) {
+        status.textContent = '⚠️ Could not process image. Please try again or use catalog code below.';
+        status.className = 'scan-status error';
+      }
+    }
+
+    // Photo file input listener
+    const qrFileInput = document.getElementById('qrFileInput');
+    if (qrFileInput) {
+      qrFileInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) handleQrImageFile(file);
+        qrFileInput.value = '';
+      });
+    }
+
+    // Drag and drop QR tag photo into viewport
+    const vp = document.getElementById('viewport');
+    if (vp) {
+      vp.addEventListener('dragover', (e) => { e.preventDefault(); vp.classList.add('dragover'); });
+      vp.addEventListener('dragleave', () => vp.classList.remove('dragover'));
+      vp.addEventListener('drop', (e) => {
+        e.preventDefault();
+        vp.classList.remove('dragover');
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+          handleQrImageFile(e.dataTransfer.files[0]);
+        }
+      });
+    }
+
+    // Start live camera QR scanner
+    async function startScanner() {
+      if (scanStream) {
+        stopScanner();
+        const status = document.getElementById('scanStatus');
+        if (status) status.textContent = 'Scanner stopped.';
         return;
       }
 
-      try{
-        btn.textContent  = '⏳ Opening camera…';
-        btn.disabled     = true;
-        status.textContent = 'Requesting camera access…';
+      const viewport = document.getElementById('viewport');
+      const placeholder = document.getElementById('viewportPlaceholder');
+      const status = document.getElementById('scanStatus');
+      const btn = document.getElementById('openScannerBtn');
 
-        scanStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }
-        });
+      status.className = 'scan-status';
 
-        // Hide placeholder and insert video
-        if(placeholder) placeholder.style.display = 'none';
+      const hasMediaDevices = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+      const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+      const isSecure = window.isSecureContext || isLocalhost;
+
+      if (!hasMediaDevices) {
+        if (!isSecure) {
+          status.innerHTML = '⚠️ Live camera requires HTTPS or localhost on mobile browsers.<br>Use <strong>"📸 Scan Tag Photo"</strong> to snap and scan!';
+        } else {
+          status.innerHTML = '⚠️ Live camera is not available. Tap <strong>"📸 Scan Tag Photo"</strong> or enter code below.';
+        }
+        status.className = 'scan-status error';
+        return;
+      }
+
+      try {
+        btn.innerHTML = '⏳ Opening camera…';
+        btn.disabled = true;
+        status.textContent = 'Requesting camera access… please tap Allow.';
+
+        scanStream = await getCameraStream(currentFacingMode);
+
+        if (placeholder) placeholder.style.display = 'none';
+
+        // Clear any old video elements
+        viewport.querySelectorAll('video').forEach(v => { v.srcObject = null; v.remove(); });
 
         const video = document.createElement('video');
         video.setAttribute('playsinline', '');
@@ -785,82 +1072,135 @@
         viewport.appendChild(video);
 
         // Add animated scan line
-        scanLine = document.createElement('div');
-        scanLine.className = 'scan-line';
+        if (!scanLine) {
+          scanLine = document.createElement('div');
+          scanLine.className = 'scan-line';
+        }
         viewport.appendChild(scanLine);
 
         await video.play();
 
-        btn.textContent = '⏹ Stop scanner';
-        btn.disabled    = false;
-        btn.onclick     = () => { stopScanner(); btn.textContent = '📷 Open scanner'; btn.onclick = startScanner; status.textContent = 'Scanner stopped.'; };
+        btn.innerHTML = '⏹ Stop scanner';
+        btn.disabled = false;
+        btn.onclick = () => {
+          stopScanner();
+          status.textContent = 'Scanner stopped.';
+        };
 
         status.textContent = '🔍 Scanning… hold the QR tag steady in the frame.';
 
-        // Prefer native BarcodeDetector (Chrome/Edge/Android WebView) for speed
-        const useNative = typeof BarcodeDetector !== 'undefined';
-        let detector;
-        if(useNative){
-          try { detector = new BarcodeDetector({ formats: ['qr_code'] }); } catch(e){ /* fall through */ }
+        // Setup Torch & Camera Switch if available
+        const controlsRow = document.getElementById('scannerControlsRow');
+        const switchBtn = document.getElementById('switchCameraBtn');
+        const torchBtn = document.getElementById('torchBtn');
+
+        const track = scanStream.getVideoTracks()[0];
+        const capabilities = (track && track.getCapabilities) ? track.getCapabilities() : {};
+
+        if (controlsRow) {
+          let hasControls = false;
+          if (capabilities.torch && torchBtn) {
+            torchBtn.style.display = 'inline-flex';
+            torchBtn.onclick = async () => {
+              try {
+                isTorchOn = !isTorchOn;
+                await track.applyConstraints({ advanced: [{ torch: isTorchOn }] });
+                torchBtn.textContent = isTorchOn ? '💡 Turn Off Light' : '💡 Flashlight';
+              } catch(e) {}
+            };
+            hasControls = true;
+          } else if (torchBtn) {
+            torchBtn.style.display = 'none';
+          }
+
+          if (switchBtn) {
+            switchBtn.style.display = 'inline-flex';
+            switchBtn.onclick = () => {
+              currentFacingMode = (currentFacingMode === 'environment') ? 'user' : 'environment';
+              stopScanner();
+              setTimeout(startScanner, 200);
+            };
+            hasControls = true;
+          }
+          if (hasControls) controlsRow.style.display = 'flex';
+        }
+
+        // Native BarcodeDetector if available
+        let detector = null;
+        if (typeof BarcodeDetector !== 'undefined') {
+          try { detector = new BarcodeDetector({ formats: ['qr_code'] }); } catch (e) {}
         }
 
         const canvas = document.createElement('canvas');
-        const ctx    = canvas.getContext('2d', { willReadFrequently: true });
-        let scanning  = true;
-        let debounce  = false;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        let scanning = true;
+        let debounce = false;
 
         const tick = async () => {
-          if(!scanning) return;
+          if (!scanning || !scanStream) return;
 
-          if(video.readyState >= video.HAVE_ENOUGH_DATA && video.videoWidth > 0){
-            // Decode at half resolution for speed
-            const scale = Math.min(1, 640 / video.videoWidth);
-            canvas.width  = Math.round(video.videoWidth  * scale);
-            canvas.height = Math.round(video.videoHeight * scale);
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            if(!debounce){
+          if (video.readyState >= video.HAVE_ENOUGH_DATA && video.videoWidth > 0) {
+            if (!debounce) {
               debounce = true;
-              try{
+              try {
                 let result = null;
 
-                if(detector){
-                  // Native path
-                  const codes = await detector.detect(canvas);
-                  if(codes && codes.length > 0) result = codes[0].rawValue;
-                } else if(typeof jsQR === 'function'){
-                  // jsQR fallback
-                  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                  const code    = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts: 'attemptBoth' });
-                  if(code && code.data) result = code.data;
+                // 1. Native BarcodeDetector directly on video element (Hardware accelerated)
+                if (detector) {
+                  try {
+                    const codes = await detector.detect(video);
+                    if (codes && codes.length > 0 && codes[0].rawValue) {
+                      result = codes[0].rawValue;
+                    }
+                  } catch(e) {}
                 }
 
-                if(result){
-                  scanning = false;
-                  status.textContent = '✅ QR code detected! Loading exhibit…';
-                  stopScanner();
-                  btn.textContent = '📷 Open scanner';
-                  btn.onclick     = startScanner;
+                // 2. jsQR on canvas
+                if (!result && typeof jsQR === 'function') {
+                  const scale = Math.min(1, 720 / video.videoWidth);
+                  canvas.width = Math.round(video.videoWidth * scale);
+                  canvas.height = Math.round(video.videoHeight * scale);
+                  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                  const qr = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts: 'attemptBoth' });
+                  if (qr && qr.data) result = qr.data;
+                }
 
-                  // Navigate: if full URL redirect, else treat as exhibit code
-                  try{
-                    const url = new URL(result);
-                    url.searchParams.set('src', 'scan');
-                    location.href = url.pathname + url.search;
-                  } catch(e){
-                    location.href = '/exhibit.html?code=' + encodeURIComponent(result.trim()) + '&src=scan';
-                  }
+                if (result) {
+                  scanning = false;
+                  status.textContent = '✅ QR tag detected! Loading exhibit…';
+                  status.className = 'scan-status success';
+                  stopScanner();
+                  setTimeout(() => processScannedCode(result), 300);
                   return;
                 }
-              } catch(e){ /* decode error, skip frame */ }
-              setTimeout(() => { debounce = false; }, 100); // throttle to ~10fps decode
+              } catch (e) {
+                // skip frame
+              }
+              setTimeout(() => { debounce = false; }, 80);
             }
           }
           scanRAF = requestAnimationFrame(tick);
         };
         scanRAF = requestAnimationFrame(tick);
-      }catch(err){
-        status.textContent = 'Camera access denied — use the code field below instead.';
+      } catch (err) {
+        console.warn('Camera open failed:', err);
+        btn.innerHTML = '&#128247; Open scanner';
+        btn.disabled = false;
+        btn.onclick = startScanner;
+
+        if (placeholder) placeholder.style.display = 'block';
+
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+          status.innerHTML = '⚠️ Camera permission was blocked.<br>Please allow camera in your browser settings, or use <strong>"📸 Scan Tag Photo"</strong>.';
+        } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+          status.innerHTML = '⚠️ No camera found on this device.<br>Use <strong>"📸 Scan Tag Photo"</strong> or enter the catalog code below.';
+        } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+          status.innerHTML = '⚠️ Camera is currently in use by another application.<br>Please close other apps using camera and retry.';
+        } else {
+          status.innerHTML = '⚠️ Could not open camera (' + (err.message || 'Error') + ').<br>Use <strong>"📸 Scan Tag Photo"</strong> or enter code below.';
+        }
+        status.className = 'scan-status error';
       }
     }
     document.getElementById('openScannerBtn').addEventListener('click', startScanner);
