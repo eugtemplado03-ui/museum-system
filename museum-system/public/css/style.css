@@ -4327,31 +4327,77 @@ body.admin-portal-body {
 }
 
 /* ── KPI Stat Cards ────────────────────────────────────────────────── */
+/* ── KPI Stat Cards & Pie Graph Layout (3 Box, 2 Group & 1 Graph) ─── */
+.dash-stats-graph-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(310px, 1.15fr);
+  gap: 14px;
+  align-items: stretch;
+  margin-bottom: 20px;
+}
+.dash-kpi-groups-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.dash-kpi-subgroup {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.dash-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
+}
+.dash-group-title {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  color: #5eead4;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dash-group-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: #5eead4;
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.22);
+  padding: 2px 7px;
+  border-radius: 6px;
+}
 .dash-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
 }
 .dash-kpi-card {
   background: rgba(0, 42, 54, 0.80) !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
   border: 1.5px solid rgba(255, 255, 255, 0.16);
-  border-radius: 14px;
-  padding: 15px 16px;
+  border-radius: 12px;
+  padding: 11px 12px;
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 5px;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   position: relative;
   overflow: hidden;
+  min-height: 106px;
 }
 .dash-kpi-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   border-color: #00f0ff;
-  box-shadow: 0 12px 32px rgba(0, 240, 255, 0.22);
+  box-shadow: 0 10px 28px rgba(0, 240, 255, 0.22);
 }
 .dash-kpi-top {
   display: flex;
@@ -4359,15 +4405,15 @@ body.admin-portal-body {
   align-items: center;
 }
 .dash-kpi-icon-wrap {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 14px;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
 }
 .dash-kpi-icon-wrap.teal { background: linear-gradient(135deg, rgba(0,240,255,0.25) 0%, rgba(20,184,166,0.35) 100%); border: 1px solid rgba(0,240,255,0.4); }
 .dash-kpi-icon-wrap.emerald { background: linear-gradient(135deg, rgba(16,185,129,0.25) 0%, rgba(5,150,105,0.35) 100%); border: 1px solid rgba(16,185,129,0.4); }
@@ -4377,9 +4423,9 @@ body.admin-portal-body {
 .dash-kpi-icon-wrap.rose { background: linear-gradient(135deg, rgba(244,63,94,0.25) 0%, rgba(190,18,60,0.35) 100%); border: 1px solid rgba(244,63,94,0.4); }
 
 .dash-kpi-badge {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
-  padding: 2px 7px;
+  padding: 2px 6px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.10);
   color: #cbd5e1;
@@ -4387,29 +4433,182 @@ body.admin-portal-body {
 
 .dash-kpi-val {
   font-family: 'Nunito', sans-serif;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 900;
   color: #ffffff;
   line-height: 1;
 }
 .dash-kpi-lbl {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   color: #e2e8f0;
 }
 .dash-kpi-sub {
-  font-size: 10.5px;
+  font-size: 9.5px;
   color: #94a3b8;
-  margin-top: -3px;
+  margin-top: -2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .dash-kpi-link {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   color: #00f0ff;
   display: flex;
   align-items: center;
   gap: 3px;
+  margin-top: auto;
+  transition: color 0.15s ease;
+}
+.dash-kpi-card:hover .dash-kpi-link {
+  color: #5eead4;
+}
+
+/* ── 1 Graph Design: Pie Card Panel ─────────────────────────────────── */
+.dash-pie-card {
+  background: rgba(0, 42, 54, 0.80) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  padding: 13px 15px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.dash-pie-card:hover {
+  border-color: rgba(0, 240, 255, 0.4);
+  box-shadow: 0 12px 32px rgba(0, 240, 255, 0.15);
+}
+.dash-pie-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.dash-pie-title {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 13.5px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dash-pie-sub {
+  font-size: 10.5px;
+  color: #94a3b8;
+  margin-top: 1px;
+}
+.dash-pie-mode-toggles {
+  display: inline-flex;
+  background: rgba(0, 20, 28, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 2px;
+  gap: 2px;
+}
+.dash-pie-toggle-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.dash-pie-toggle-btn:hover {
+  color: #ffffff;
+}
+.dash-pie-toggle-btn.active {
+  background: rgba(0, 240, 255, 0.22);
+  color: #00f0ff;
+  box-shadow: 0 1px 4px rgba(0, 240, 255, 0.2);
+}
+.dash-pie-chart-wrap {
+  position: relative;
+  height: 165px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2px 0 6px;
+}
+.dash-pie-center-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  text-align: center;
+}
+.dash-pie-center-num {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  font-size: 20px;
+  color: #ffffff;
+  line-height: 1;
+}
+.dash-pie-center-lbl {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #94a3b8;
   margin-top: 2px;
+}
+.dash-pie-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 6px;
+  align-items: center;
+  justify-content: center;
+  padding-top: 4px;
+}
+.dash-pie-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 2px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.dash-pie-legend-item:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(0, 240, 255, 0.3);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+.dash-pie-legend-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dash-pie-legend-pct {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: #94a3b8;
+  font-weight: 600;
 }
 
 /* ── Analytics Bar Card ─────────────────────────────────────────────── */
@@ -4782,26 +4981,32 @@ body.admin-portal-body {
   #dashHeroNewEvent {
     grid-column: span 2 !important;
   }
-  .dash-action-btn {
-    padding: 8px 10px !important;
-    font-size: 12px !important;
-    justify-content: center !important;
+  .dash-stats-graph-layout {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
   }
   .dash-kpi-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 10px !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6px !important;
   }
   .dash-kpi-card {
-    padding: 12px 10px !important;
+    padding: 9px 8px !important;
+    min-height: 98px !important;
   }
   .dash-kpi-val {
-    font-size: 20px !important;
+    font-size: 17px !important;
   }
   .dash-kpi-lbl {
-    font-size: 11.5px !important;
+    font-size: 10.5px !important;
   }
   .dash-kpi-sub {
-    font-size: 9.5px !important;
+    font-size: 8.5px !important;
+  }
+  .dash-pie-card {
+    padding: 12px !important;
+  }
+  .dash-pie-chart-wrap {
+    height: 155px !important;
   }
   .dash-analytics-card {
     padding: 14px !important;

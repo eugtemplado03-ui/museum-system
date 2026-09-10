@@ -392,72 +392,117 @@ async function renderDashboardHomeTab(contentEl){
           </div>
         </div>
 
-        <!-- 2. Rich KPI Stat Cards Grid -->
-        <div class="dash-kpi-grid">
-          <div class="dash-kpi-card" data-tab="catalog" title="Manage Exhibits & Collections">
-            <div class="dash-kpi-top">
-              <div class="dash-kpi-icon-wrap teal">🏛️</div>
-              <span class="dash-kpi-badge">Collections</span>
+        <!-- 2. KPI Stat Cards & Pie Graph Layout (3 Box, 2 Group & 1 Graph) -->
+        <div class="dash-stats-graph-layout">
+          <!-- Left: 2 Groups of 3 KPI Boxes -->
+          <div class="dash-kpi-groups-col">
+            <!-- Group 1: 3 Boxes (Collections & Operations) -->
+            <div class="dash-kpi-subgroup">
+              <div class="dash-group-header">
+                <span class="dash-group-title"><span>🏛️</span> Collections & Operations</span>
+                <span class="dash-group-badge">Group 1 · 3 Cards</span>
+              </div>
+              <div class="dash-kpi-grid">
+                <div class="dash-kpi-card" data-tab="catalog" title="Manage Exhibits & Collections">
+                  <div class="dash-kpi-top">
+                    <div class="dash-kpi-icon-wrap teal">🏛️</div>
+                    <span class="dash-kpi-badge">Collections</span>
+                  </div>
+                  <div class="dash-kpi-val">${exhibits.length}</div>
+                  <div class="dash-kpi-lbl">Total Exhibits</div>
+                  <div class="dash-kpi-sub">Interactive rooms & tags</div>
+                  <div class="dash-kpi-link">Open Catalog →</div>
+                </div>
+
+                <div class="dash-kpi-card" data-tab="visitors" title="View Today's Live Visitors">
+                  <div class="dash-kpi-top">
+                    <div class="dash-kpi-icon-wrap emerald">👥</div>
+                    <span class="dash-kpi-badge" style="background:rgba(16,185,129,0.2); color:#6ee7b7;">Live Feed</span>
+                  </div>
+                  <div class="dash-kpi-val">${visitors.length}</div>
+                  <div class="dash-kpi-lbl">Visitor Records</div>
+                  <div class="dash-kpi-sub">Walk-ins & tour groups</div>
+                  <div class="dash-kpi-link">Open Visitor Log →</div>
+                </div>
+
+                <div class="dash-kpi-card" data-tab="programs" title="Manage Educational Programs">
+                  <div class="dash-kpi-top">
+                    <div class="dash-kpi-icon-wrap amber">🌱</div>
+                    <span class="dash-kpi-badge">Learning</span>
+                  </div>
+                  <div class="dash-kpi-val">${programs.length}</div>
+                  <div class="dash-kpi-lbl">Active Programs</div>
+                  <div class="dash-kpi-sub">Workshops & cohorts</div>
+                  <div class="dash-kpi-link">View Programs →</div>
+                </div>
+              </div>
             </div>
-            <div class="dash-kpi-val">${exhibits.length}</div>
-            <div class="dash-kpi-lbl">Total Exhibits</div>
-            <div class="dash-kpi-sub">Interactive rooms & tags</div>
-            <div class="dash-kpi-link">Open Catalog →</div>
+
+            <!-- Group 2: 3 Boxes (Engagements & Records) -->
+            <div class="dash-kpi-subgroup">
+              <div class="dash-group-header">
+                <span class="dash-group-title"><span>📅</span> Engagements & Records</span>
+                <span class="dash-group-badge">Group 2 · 3 Cards</span>
+              </div>
+              <div class="dash-kpi-grid">
+                <div class="dash-kpi-card" data-tab="events" title="Manage Museum Events">
+                  <div class="dash-kpi-top">
+                    <div class="dash-kpi-icon-wrap purple">📅</div>
+                    <span class="dash-kpi-badge">Calendar</span>
+                  </div>
+                  <div class="dash-kpi-val">${events.length}</div>
+                  <div class="dash-kpi-lbl">Scheduled Events</div>
+                  <div class="dash-kpi-sub">Community gatherings</div>
+                  <div class="dash-kpi-link">View Calendar →</div>
+                </div>
+
+                <div class="dash-kpi-card" data-tab="gallery" title="Curate Gallery Media">
+                  <div class="dash-kpi-top">
+                    <div class="dash-kpi-icon-wrap blue">🖼️</div>
+                    <span class="dash-kpi-badge">Media</span>
+                  </div>
+                  <div class="dash-kpi-val">${gallery.length}</div>
+                  <div class="dash-kpi-lbl">Gallery Photos</div>
+                  <div class="dash-kpi-sub">Visual archive & tours</div>
+                  <div class="dash-kpi-link">Open Gallery →</div>
+                </div>
+
+                <div class="dash-kpi-card" data-tab="artifacts" title="Audit Artifact Logs">
+                  <div class="dash-kpi-top">
+                    <div class="dash-kpi-icon-wrap rose">🏺</div>
+                    <span class="dash-kpi-badge">Audit</span>
+                  </div>
+                  <div class="dash-kpi-val">${artifacts.length}</div>
+                  <div class="dash-kpi-lbl">Artifact Logs</div>
+                  <div class="dash-kpi-sub">Preserved specimens</div>
+                  <div class="dash-kpi-link">View Artifacts →</div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div class="dash-kpi-card" data-tab="visitors" title="View Today's Live Visitors">
-            <div class="dash-kpi-top">
-              <div class="dash-kpi-icon-wrap emerald">👥</div>
-              <span class="dash-kpi-badge" style="background:rgba(16,185,129,0.2); color:#6ee7b7;">Live Feed</span>
+          <!-- Right: 1 Graph Design (Pie Graph Panel) -->
+          <div class="dash-pie-card">
+            <div class="dash-pie-header">
+              <div>
+                <div class="dash-pie-title">
+                  <span>📊</span> Museum Distribution
+                </div>
+                <div class="dash-pie-sub" id="dashPieSub">Exhibits by Category & Room</div>
+              </div>
+              <div class="dash-pie-mode-toggles">
+                <button type="button" class="dash-pie-toggle-btn active" id="pieToggleCategories" title="Show Exhibits by Category">Exhibits</button>
+                <button type="button" class="dash-pie-toggle-btn" id="pieToggleResources" title="Show All Museum Metrics">Resources</button>
+              </div>
             </div>
-            <div class="dash-kpi-val">${visitors.length}</div>
-            <div class="dash-kpi-lbl">Visitor Records</div>
-            <div class="dash-kpi-sub">Walk-ins & tour groups</div>
-            <div class="dash-kpi-link">Open Visitor Log →</div>
-          </div>
-
-          <div class="dash-kpi-card" data-tab="programs" title="Manage Educational Programs">
-            <div class="dash-kpi-top">
-              <div class="dash-kpi-icon-wrap amber">🌱</div>
-              <span class="dash-kpi-badge">Learning</span>
+            <div class="dash-pie-chart-wrap">
+              <canvas id="dashPieCanvas"></canvas>
+              <div class="dash-pie-center-badge">
+                <span class="dash-pie-center-num" id="dashPieCenterNum">${exhibits.length}</span>
+                <span class="dash-pie-center-lbl" id="dashPieCenterLbl">Total</span>
+              </div>
             </div>
-            <div class="dash-kpi-val">${programs.length}</div>
-            <div class="dash-kpi-lbl">Active Programs</div>
-            <div class="dash-kpi-sub">Workshops & cohorts</div>
-            <div class="dash-kpi-link">View Programs →</div>
-          </div>
-
-          <div class="dash-kpi-card" data-tab="events" title="Manage Museum Events">
-            <div class="dash-kpi-top">
-              <div class="dash-kpi-icon-wrap purple">📅</div>
-              <span class="dash-kpi-badge">Calendar</span>
-            </div>
-            <div class="dash-kpi-val">${events.length}</div>
-            <div class="dash-kpi-lbl">Scheduled Events</div>
-            <div class="dash-kpi-sub">Community gatherings</div>
-            <div class="dash-kpi-link">View Calendar →</div>
-          </div>
-
-          <div class="dash-kpi-card" data-tab="gallery" title="Curate Gallery Media">
-            <div class="dash-kpi-top">
-              <div class="dash-kpi-icon-wrap blue">🖼️</div>
-              <span class="dash-kpi-badge">Media</span>
-            </div>
-            <div class="dash-kpi-val">${gallery.length}</div>
-            <div class="dash-kpi-lbl">Gallery Photos</div>
-            <div class="dash-kpi-sub">Visual archive & tours</div>
-            <div class="dash-kpi-link">Open Gallery →</div>
-          </div>
-
-          <div class="dash-kpi-card" data-tab="artifacts" title="Audit Artifact Logs">
-            <div class="dash-kpi-top">
-              <div class="dash-kpi-icon-wrap rose">🏺</div>
-              <span class="dash-kpi-badge">Audit</span>
-            </div>
-            <div class="dash-kpi-val">${artifacts.length}</div>
-            <div class="dash-kpi-lbl">Artifact Logs</div>
-            <div class="dash-kpi-sub">Preserved specimens</div>
-            <div class="dash-kpi-link">View Artifacts →</div>
+            <div class="dash-pie-legend" id="dashPieLegend"></div>
           </div>
         </div>
 
@@ -661,9 +706,182 @@ async function renderDashboardHomeTab(contentEl){
       });
     });
 
+    // Initialize Dashboard Pie Chart next to the 2 groups of 3 KPI boxes
+    initDashboardPieChart(exhibits, categoryCounts, { exhibits, visitors, programs, events, gallery, artifacts });
+
   }catch(e){
     contentEl.innerHTML = `<div class="empty-state"><h2>Could not load dashboard</h2><p>${escapeHtml(e.message)}</p></div>`;
   }
+}
+
+function initDashboardPieChart(exhibits, categoryCounts, resources) {
+  const canvas = document.getElementById('dashPieCanvas');
+  if (!canvas) return;
+  if (typeof Chart === 'undefined') {
+    console.warn('Chart.js not loaded yet for pie chart');
+    return;
+  }
+
+  const ctx = canvas.getContext('2d');
+  let currentMode = 'categories'; // 'categories' or 'resources'
+
+  const PALETTE = [
+    '#00f0ff', '#10b981', '#f59e0b', '#a855f7', '#3b82f6', '#f43f5e',
+    '#14b8a6', '#ec4899', '#8b5cf6', '#eab308', '#06b6d4', '#64748b'
+  ];
+
+  function buildChart(mode) {
+    if (window.dashPieChartInstance) {
+      window.dashPieChartInstance.destroy();
+      window.dashPieChartInstance = null;
+    }
+
+    let labels = [];
+    let data = [];
+    let bgColors = [];
+    let total = 0;
+
+    if (mode === 'categories') {
+      const entries = Object.entries(categoryCounts || {});
+      if (entries.length === 0) {
+        labels = ['No Exhibits'];
+        data = [1];
+        bgColors = ['rgba(255,255,255,0.15)'];
+        total = 0;
+      } else {
+        entries.sort((a, b) => b[1] - a[1]);
+        labels = entries.map(e => e[0]);
+        data = entries.map(e => e[1]);
+        bgColors = labels.map((_, i) => PALETTE[i % PALETTE.length]);
+        total = data.reduce((a, b) => a + b, 0);
+      }
+      const sub = document.getElementById('dashPieSub');
+      if (sub) sub.textContent = 'Exhibits by Category & Room';
+      const centerLbl = document.getElementById('dashPieCenterLbl');
+      if (centerLbl) centerLbl.textContent = 'Exhibits';
+      const centerNum = document.getElementById('dashPieCenterNum');
+      if (centerNum) centerNum.textContent = total;
+    } else {
+      const items = [
+        { label: 'Exhibits', count: (resources.exhibits || []).length, color: '#00f0ff' },
+        { label: 'Visitors', count: (resources.visitors || []).length, color: '#10b981' },
+        { label: 'Programs', count: (resources.programs || []).length, color: '#f59e0b' },
+        { label: 'Events', count: (resources.events || []).length, color: '#a855f7' },
+        { label: 'Photos', count: (resources.gallery || []).length, color: '#3b82f6' },
+        { label: 'Artifacts', count: (resources.artifacts || []).length, color: '#f43f5e' }
+      ];
+      labels = items.map(i => i.label);
+      data = items.map(i => i.count);
+      bgColors = items.map(i => i.color);
+      total = data.reduce((a, b) => a + b, 0);
+
+      const sub = document.getElementById('dashPieSub');
+      if (sub) sub.textContent = 'All Museum Resources Share';
+      const centerLbl = document.getElementById('dashPieCenterLbl');
+      if (centerLbl) centerLbl.textContent = 'Records';
+      const centerNum = document.getElementById('dashPieCenterNum');
+      if (centerNum) centerNum.textContent = total;
+    }
+
+    // Render Legend
+    const legendEl = document.getElementById('dashPieLegend');
+    if (legendEl) {
+      legendEl.innerHTML = labels.map((lbl, i) => {
+        const val = data[i];
+        const pct = total > 0 ? Math.round((val / total) * 100) : 0;
+        const color = bgColors[i];
+        return `
+          <div class="dash-pie-legend-item" data-index="${i}" title="${escapeHtml(lbl)}: ${val} (${pct}%)">
+            <span class="dash-pie-legend-dot" style="background:${color}; box-shadow:0 0 6px ${color}80;"></span>
+            <span style="font-weight:600;">${escapeHtml(lbl)}</span>
+            <span class="dash-pie-legend-pct">${pct}%</span>
+          </div>
+        `;
+      }).join('');
+
+      legendEl.querySelectorAll('.dash-pie-legend-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const idx = parseInt(item.dataset.index, 10);
+          if (window.dashPieChartInstance) {
+            window.dashPieChartInstance.toggleDataVisibility(idx);
+            window.dashPieChartInstance.update();
+            item.style.opacity = window.dashPieChartInstance.getDataVisibility(idx) ? '1' : '0.4';
+          }
+        });
+      });
+    }
+
+    window.dashPieChartInstance = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: data,
+          backgroundColor: bgColors,
+          borderColor: 'rgba(0, 32, 42, 0.9)',
+          borderWidth: 2,
+          hoverBorderColor: '#ffffff',
+          hoverBorderWidth: 2.5,
+          hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '64%',
+        animation: {
+          animateRotate: true,
+          animateScale: true,
+          duration: 650
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: 'rgba(6, 28, 38, 0.92)',
+            titleColor: '#ffffff',
+            bodyColor: '#e2e8f0',
+            borderColor: 'rgba(0, 240, 255, 0.4)',
+            borderWidth: 1,
+            padding: 10,
+            cornerRadius: 8,
+            boxPadding: 4,
+            usePointStyle: true,
+            callbacks: {
+              label: function(context) {
+                const val = context.parsed || 0;
+                const pct = total > 0 ? Math.round((val / total) * 100) : 0;
+                return ` ${context.label}: ${val} (${pct}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  buildChart(currentMode);
+
+  // Wire Toggle Buttons
+  const toggleCats = document.getElementById('pieToggleCategories');
+  const toggleRes = document.getElementById('pieToggleResources');
+
+  toggleCats?.addEventListener('click', () => {
+    if (currentMode === 'categories') return;
+    currentMode = 'categories';
+    toggleCats.classList.add('active');
+    toggleRes?.classList.remove('active');
+    buildChart('categories');
+  });
+
+  toggleRes?.addEventListener('click', () => {
+    if (currentMode === 'resources') return;
+    currentMode = 'resources';
+    toggleRes.classList.add('active');
+    toggleCats?.classList.remove('active');
+    buildChart('resources');
+  });
 }
 
 async function renderCatalogTab(contentEl){
