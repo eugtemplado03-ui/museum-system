@@ -89,18 +89,6 @@ const Gate = (() => {
       return;
     }
 
-    // 2. Browser Back-Button security check from Admin portal:
-    // If user was inside Admin portal (museum_in_admin was set) and navigated to a public/gate page:
-    if (sessionStorage.getItem('museum_in_admin') === 'true' && !window.location.pathname.toLowerCase().includes('admin.html')) {
-      sessionStorage.removeItem('museum_in_admin');
-      clearAllSessions();
-      if (!isGate) {
-        window.location.replace('/?action=signup');
-        return;
-      }
-      return;
-    }
-
     if (!isGate && !isAuthenticated()) {
       const destination = window.location.pathname + window.location.search + window.location.hash;
       const redirectParam = encodeURIComponent(destination || '/dashboard.html');
