@@ -150,8 +150,8 @@
       return `
         <div class="media-combo-box${extraClass}" id="${uid}">
           <div class="media-combo-nav">
-            <button type="button" class="media-combo-tab active" data-target="video" onclick="switchMediaTab(this, '${uid}', 'video')">▶ Video</button>
-            <button type="button" class="media-combo-tab" data-target="photos" onclick="switchMediaTab(this, '${uid}', 'photos')">📷 Photos (${paths.length})</button>
+            <button type="button" class="media-combo-tab active" data-target="video" data-box-id="${uid}">▶ Video</button>
+            <button type="button" class="media-combo-tab" data-target="photos" data-box-id="${uid}">📷 Photos (${paths.length})</button>
           </div>
           <div class="media-combo-panel active" data-panel="video">
             ${videoHtml}
@@ -169,10 +169,16 @@
   };
 
   window.switchMediaTab = function(btn, uid, target) {
-    const box = document.getElementById(uid) || btn.closest('.media-combo-box');
+    const box = (uid ? document.getElementById(uid) : null) || (btn ? btn.closest('.media-combo-box') : null);
     if (!box) return;
-    box.querySelectorAll('.media-combo-tab').forEach(t => t.classList.remove('active'));
-    btn.classList.add('active');
+
+    // Toggle tab active states
+    box.querySelectorAll('.media-combo-tab').forEach(t => {
+      const isTarget = t.dataset.target === target || t === btn;
+      t.classList.toggle('active', isTarget);
+    });
+
+    // Toggle panel visibility
     box.querySelectorAll('.media-combo-panel').forEach(p => {
       if (p.dataset.panel === target) {
         p.style.display = '';
@@ -182,8 +188,47 @@
         p.classList.remove('active');
       }
     });
-    window.initPhotoCarousels(box);
+
+    // Pause video when switching away from video
+    if (target !== 'video') {
+      const videoEl = box.querySelector('video');
+      if (videoEl && typeof videoEl.pause === 'function') {
+        try { videoEl.pause(); } catch (e) {}
+      }
+      const iframe = box.querySelector('iframe');
+      if (iframe) {
+        try {
+          iframe.contentWindow?.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+        } catch (e) {}
+      }
+    }
+
+    // Refresh carousel slide and layout when switching to photos
+    if (target === 'photos') {
+      const carousels = box.querySelectorAll('.photo-carousel.multiple');
+      carousels.forEach(c => {
+        if (typeof c._updateSlide === 'function') {
+          c._updateSlide(parseInt(c.dataset.slide, 10) || 0, false);
+        } else {
+          c._carouselInitialized = false;
+        }
+      });
+      window.initPhotoCarousels(box);
+    }
   };
+
+  // Delegated click listener for all media-combo-tab buttons (works regardless of inline CSP)
+  document.addEventListener('click', function(e) {
+    const tabBtn = e.target.closest('.media-combo-tab');
+    if (!tabBtn) return;
+    const target = tabBtn.dataset.target;
+    if (!target) return;
+    const box = tabBtn.closest('.media-combo-box');
+    const boxId = tabBtn.dataset.boxId || (box ? box.id : '');
+    e.preventDefault();
+    e.stopPropagation();
+    window.switchMediaTab(tabBtn, boxId, target);
+  });
 
   /**
    * Initializes all `.photo-carousel.multiple` elements in the DOM.
@@ -194,7 +239,12 @@
     const carousels = container.querySelectorAll('.photo-carousel.multiple');
 
     carousels.forEach(carousel => {
-      if (carousel._carouselInitialized) return;
+      if (carousel._carouselInitialized) {
+        if (typeof carousel._updateSlide === 'function') {
+          carousel._updateSlide(parseInt(carousel.dataset.slide, 10) || 0, false);
+        }
+        return;
+      }
       carousel._carouselInitialized = true;
 
       const track = carousel.querySelector('.carousel-track');
@@ -222,6 +272,8 @@
           dot.classList.toggle('active', idx === currentIndex);
         });
       }
+
+      carousel._updateSlide = updateSlide;
 
       if (prevBtn) {
         prevBtn.addEventListener('click', (e) => {
