@@ -87,7 +87,7 @@
     <div class="chat-panel" id="chatPanel" role="dialog" aria-label="Museum Assistant Chat">
       <div class="chat-head">
         <div>
-          <div class="title">Bata Guide AI</div>
+          <div class="title"><span class="chat-status-dot"></span> Bata Guide AI</div>
           <div class="subtitle">English • Tagalog • Bisaya</div>
         </div>
         <div style="display:flex; align-items:center; gap:6px;">
@@ -96,7 +96,6 @@
         </div>
       </div>
       <div class="chat-lang-bar" id="chatLangBar">
-        <span class="chat-lang-label">Wika:</span>
         <button class="chat-lang-btn active" data-lang="auto" title="Automatic detection">🌐 Auto</button>
         <button class="chat-lang-btn" data-lang="tl" title="Mag-usap sa Tagalog">🇵🇭 Tagalog</button>
         <button class="chat-lang-btn" data-lang="bis" title="Mag-istorya sa Bisaya/Hiligaynon">🏝️ Bisaya</button>
@@ -170,6 +169,7 @@
     const config = LANG_DATA[lang];
     input.placeholder = config.placeholder;
     suggestionsEl.innerHTML = renderChips(config.suggestions);
+    suggestionsEl.scrollLeft = 0;
     bindChipEvents();
 
     if (state.history.length === 0) {
@@ -183,6 +183,7 @@
     messagesEl.innerHTML = `<div class="chat-msg bot">${renderMarkdown(config.welcome)}</div>`;
     suggestionsEl.style.display = 'flex';
     suggestionsEl.innerHTML = renderChips(config.suggestions);
+    suggestionsEl.scrollLeft = 0;
     bindChipEvents();
     input.value = '';
     scrollToBottom();
