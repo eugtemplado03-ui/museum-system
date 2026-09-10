@@ -402,7 +402,6 @@ async function renderDashboardHomeTab(contentEl){
             <div class="dash-kpi-subgroup">
               <div class="dash-group-header">
                 <span class="dash-group-title"><span>🏛️</span> Collections & Operations</span>
-                <span class="dash-group-badge">Group 1 · 3 Cards</span>
               </div>
               <div class="dash-kpi-grid">
                 <div class="dash-kpi-card" data-tab="catalog" title="Manage Exhibits & Collections">
@@ -444,7 +443,6 @@ async function renderDashboardHomeTab(contentEl){
             <div class="dash-kpi-subgroup">
               <div class="dash-group-header">
                 <span class="dash-group-title"><span>📅</span> Engagements & Records</span>
-                <span class="dash-group-badge">Group 2 · 3 Cards</span>
               </div>
               <div class="dash-kpi-grid">
                 <div class="dash-kpi-card" data-tab="events" title="Manage Museum Events">
