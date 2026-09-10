@@ -2,7 +2,7 @@
   const LANG_DATA = {
     auto: {
       placeholder: 'Ask in English, Tagalog, or Bisaya…',
-      welcome: 'Hi! I am **Bata Guide**, your AI assistant for **Museo Sang Bata sa Negros**! Ask me anything in **English**, **Tagalog**, or **Bisaya** about our exhibits, Staff Office under stairs, Touch Pool, ticket prices, or ask me to **translate**!',
+      welcome: 'Hi! I am **Bata Guide**, your AI assistant for **Museo Sang Bata sa Negros**! Ask me anything in **English**, **Tagalog**, or **Bisaya** about our exhibits, Staff Office under stairs, Touch Pool, or ticket prices — I answer in **English**, **Tagalog**, and **Bisaya**!',
       suggestions: [
         'How much are tickets & hours?',
         'Where is the Staff Office?',
@@ -16,8 +16,8 @@
       ]
     },
     tl: {
-      placeholder: 'Magtanong o magpa-translate (Tagalog)…',
-      welcome: 'Maligayang pagdating! Ako si **Bata Guide**, ang iyong AI assistant at tagapagsalin sa **Museo Sang Bata sa Negros**. Magtanong ukol sa mga exhibit, Staff Office sa ilalim ng hagdan, Touch Pool, entrance fee, o magpa-translate!',
+      placeholder: 'Magtanong sa Tagalog / Bisaya / English…',
+      welcome: 'Maligayang pagdating! Ako si **Bata Guide**, ang iyong AI assistant sa **Museo Sang Bata sa Negros**. Sasagutin ko ang inyong mga katanungan sa **Tagalog**, **Bisaya**, at **English** ukol sa mga exhibit, Staff Office sa ilalim ng hagdan, Touch Pool, o entrance fee!',
       suggestions: [
         'Magkano ang ticket at anong oras bukas?',
         'Saan ang Staff Office?',
@@ -30,8 +30,8 @@
       ]
     },
     bis: {
-      placeholder: 'Pangutana o magpa-translate (Bisaya)…',
-      welcome: 'Maayong pag-abot! Ako si **Bata Guide**, ang imong AI assistant ug tighubad sa **Museo Sang Bata sa Negros**. Pangutana bahin sa mga exhibit, Staff Office sa ilalom sa hagdanan, Touch Pool, bayad sa ticket, o magpa-translate sa Bisaya!',
+      placeholder: 'Pangutana sa Bisaya / Tagalog / English…',
+      welcome: 'Maayong pag-abot! Ako si **Bata Guide**, ang imong AI assistant sa **Museo Sang Bata sa Negros**. Motubag ko sa imong mga pangutana sa **Bisaya**, **Tagalog**, ug **English** bahin sa mga exhibit, Staff Office sa ilalom sa hagdanan, Touch Pool, o bayad sa ticket!',
       suggestions: [
         'Tagpila ang bayad sa ticket ug unsa oras abli?',
         'Asa dapit ang Staff Office?',
@@ -56,10 +56,18 @@
     if (!text) return '';
     let safe = escapeHtml(text);
 
+    // Horizontal rule ---
+    safe = safe.replace(/(?:^|\n)\s*---\s*(?:\n|$)/g, '\n<hr class="chat-divider">\n');
+
     // Bold **text**
     safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     // Italic *text*
     safe = safe.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+    // Language badges
+    safe = safe.replace(/🇵🇭\s*<strong>Sa Tagalog:?<\/strong>/g, '<div class="chat-lang-tag tagalog"><span class="chat-flag">🇵🇭</span> Sa Tagalog</div>');
+    safe = safe.replace(/🏝️\s*<strong>Sa Bisaya:?<\/strong>/g, '<div class="chat-lang-tag bisaya"><span class="chat-flag">🏝️</span> Sa Bisaya</div>');
+    safe = safe.replace(/🌐\s*<strong>In English:?<\/strong>/g, '<div class="chat-lang-tag english"><span class="chat-flag">🌐</span> In English</div>');
 
     // Markdown Links [title](url) - only allow safe URLs
     safe = safe.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, title, url) => {
