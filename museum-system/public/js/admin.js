@@ -1797,7 +1797,7 @@ function openEditModal(id, defaultCategory){
         if (parsed.type === 'direct') {
           exVideoPreview.innerHTML = `
             <div style="margin-top:8px; border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,0.2); max-height:180px; background:#000;">
-              <video src="${escapeHtml(parsed.url)}" controls style="width:100%; max-height:180px; border-radius:12px; display:block;"></video>
+              <video src="${escapeHtml(parsed.url)}" controls style="width:100%; max-height:180px; border-radius:12px; display:block; object-fit:contain; background:#000;"></video>
             </div>`;
           return;
         }

@@ -72,7 +72,7 @@
 
     return `
       <div class="video-container direct-video${extraClass}">
-        <video src="${escapeHtml(video.url)}" controls playsinline preload="metadata" title="${safeTitle}">
+        <video src="${escapeHtml(video.url)}" controls playsinline preload="metadata" title="${safeTitle}" onloadedmetadata="window.applyVideoOrientation && window.applyVideoOrientation(this)">
           Your browser does not support the video tag.
         </video>
       </div>`;
@@ -168,6 +168,42 @@
     return window.renderPhotoCarousel(paths, title, fallbackIcon, customClass);
   };
 
+  /**
+   * Automatically detects if a video element is portrait (vertical) or landscape,
+   * and marks its container so CSS can adjust aspect ratios without zooming or cropping.
+   */
+  window.applyVideoOrientation = function(video) {
+    if (!video || video.nodeType !== 1) return;
+    const w = video.videoWidth;
+    const h = video.videoHeight;
+    if (!w || !h) return;
+
+    const isPortrait = h > w;
+    const container = video.closest('.video-container');
+    const mediaCombo = video.closest('.media-combo-box');
+    const plaqueMedia = video.closest('.plaque-media');
+    const modalWrap = video.closest('.gallery-detail-media-wrap');
+    const modal = video.closest('.gallery-modal-wrap');
+
+    if (isPortrait) {
+      video.classList.add('video-is-portrait');
+      video.classList.remove('video-is-landscape');
+      if (container) container.classList.add('video-portrait');
+      if (mediaCombo) mediaCombo.classList.add('has-portrait-video');
+      if (plaqueMedia) plaqueMedia.classList.add('has-portrait-video');
+      if (modalWrap) modalWrap.classList.add('has-portrait-video');
+      if (modal) modal.classList.add('is-portrait-modal');
+    } else {
+      video.classList.add('video-is-landscape');
+      video.classList.remove('video-is-portrait');
+      if (container) container.classList.remove('video-portrait');
+      if (mediaCombo) mediaCombo.classList.remove('has-portrait-video');
+      if (plaqueMedia) plaqueMedia.classList.remove('has-portrait-video');
+      if (modalWrap) modalWrap.classList.remove('has-portrait-video');
+      if (modal) modal.classList.remove('is-portrait-modal');
+    }
+  };
+
   window.switchMediaTab = function(btn, uid, target) {
     const box = (uid ? document.getElementById(uid) : null) || (btn ? btn.closest('.media-combo-box') : null);
     if (!box) return;
@@ -201,6 +237,12 @@
           iframe.contentWindow?.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
         } catch (e) {}
       }
+      // When leaving video tab, remove portrait expansion from container
+      box.classList.remove('has-portrait-video');
+      const plaque = box.closest('.plaque-media');
+      if (plaque) plaque.classList.remove('has-portrait-video');
+      const modalWrap = box.closest('.gallery-detail-media-wrap');
+      if (modalWrap) modalWrap.classList.remove('has-portrait-video');
     }
 
     // Refresh carousel slide and layout when switching to photos
@@ -214,6 +256,15 @@
         }
       });
       window.initPhotoCarousels(box);
+    } else if (target === 'video') {
+      const videoEl = box.querySelector('video');
+      if (videoEl) {
+        if (videoEl.videoWidth && videoEl.videoHeight) {
+          window.applyVideoOrientation(videoEl);
+        } else {
+          videoEl.addEventListener('loadedmetadata', () => window.applyVideoOrientation(videoEl), { once: true });
+        }
+      }
     }
   };
 
@@ -236,6 +287,19 @@
    */
   window.initPhotoCarousels = function(root) {
     const container = root || document;
+
+    // Scan all video players in container to configure portrait/landscape orientation
+    const videos = container.querySelectorAll('video');
+    videos.forEach(v => {
+      if (v.readyState >= 1 || (v.videoWidth && v.videoHeight)) {
+        window.applyVideoOrientation(v);
+      } else {
+        v.addEventListener('loadedmetadata', () => window.applyVideoOrientation(v), { once: true });
+        v.addEventListener('canplay', () => window.applyVideoOrientation(v), { once: true });
+        v.addEventListener('play', () => window.applyVideoOrientation(v), { once: true });
+      }
+    });
+
     const carousels = container.querySelectorAll('.photo-carousel.multiple');
 
     carousels.forEach(carousel => {
@@ -341,6 +405,19 @@
       updateSlide(0, false);
     });
   };
+
+  // Global listeners for video metadata loading and playback
+  document.addEventListener('loadedmetadata', function(e) {
+    if (e.target && e.target.tagName === 'VIDEO') {
+      window.applyVideoOrientation(e.target);
+    }
+  }, true);
+
+  document.addEventListener('play', function(e) {
+    if (e.target && e.target.tagName === 'VIDEO') {
+      window.applyVideoOrientation(e.target);
+    }
+  }, true);
 
   // Auto-init on DOMContentLoaded
   document.addEventListener('DOMContentLoaded', () => {
