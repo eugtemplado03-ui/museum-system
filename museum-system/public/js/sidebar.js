@@ -89,7 +89,7 @@
 
         <nav class="user-sidebar-nav">
           ${(typeof Gate !== 'undefined' && Gate.isAdminLoggedIn()) ? `
-            <div style="margin: 0 0 12px; padding: 10px 12px; background: linear-gradient(135deg, rgba(217, 79, 61, 0.25), rgba(0, 174, 189, 0.2)); border: 1.5px solid #00f0ff; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+            <div class="sidebar-admin-active-card" data-admin-card="true" style="margin: 0 0 12px; padding: 10px 12px; background: linear-gradient(135deg, rgba(217, 79, 61, 0.25), rgba(0, 174, 189, 0.2)); border: 1.5px solid #00f0ff; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
               <div>
                 <div style="font-size: 10.5px; font-weight: 800; color: #00f0ff; text-transform: uppercase; letter-spacing: 0.5px;">Staff Admin</div>
                 <div style="font-size: 12px; font-weight: 700; color: #ffffff;">Public View Mode</div>
@@ -266,37 +266,61 @@
 
     // Check if admin logged in and dynamically ensure admin return card exists in sidebar
     const isAdmin = (typeof Gate !== 'undefined') ? Gate.isAdminLoggedIn() : (!!localStorage.getItem('museum_admin_token') || !!sessionStorage.getItem('museum_admin_token'));
-    if (isAdmin && sidebar.classList.contains('user-sidebar')) {
+    if (sidebar.classList.contains('user-sidebar')) {
       const nav = sidebar.querySelector('.user-sidebar-nav');
-      if (nav && !nav.querySelector('.sidebar-admin-active-card')) {
-        const card = document.createElement('div');
-        card.className = 'sidebar-admin-active-card';
-        card.style.cssText = 'margin: 0 0 12px; padding: 10px 12px; background: linear-gradient(135deg, rgba(217, 79, 61, 0.25), rgba(0, 174, 189, 0.2)); border: 1.5px solid #00f0ff; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;';
-        card.innerHTML = `
-          <div>
-            <div style="font-size: 10.5px; font-weight: 800; color: #00f0ff; text-transform: uppercase; letter-spacing: 0.5px;">Staff Admin</div>
-            <div style="font-size: 12px; font-weight: 700; color: #ffffff;">Public View Mode</div>
-          </div>
-          <a href="/admin.html" class="btn btn-primary btn-small" style="padding: 5px 10px; font-size: 11.5px; font-weight: 800; border-radius: 8px; text-decoration: none; white-space: nowrap;">
-            🛡️ Admin &rarr;
-          </a>
-        `;
-        nav.insertBefore(card, nav.firstChild);
+      if (nav) {
+        const existingCards = nav.querySelectorAll('.sidebar-admin-active-card, [data-admin-card]');
+        if (isAdmin) {
+          if (existingCards.length === 0) {
+            const card = document.createElement('div');
+            card.className = 'sidebar-admin-active-card';
+            card.setAttribute('data-admin-card', 'true');
+            card.style.cssText = 'margin: 0 0 12px; padding: 10px 12px; background: linear-gradient(135deg, rgba(217, 79, 61, 0.25), rgba(0, 174, 189, 0.2)); border: 1.5px solid #00f0ff; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;';
+            card.innerHTML = `
+              <div>
+                <div style="font-size: 10.5px; font-weight: 800; color: #00f0ff; text-transform: uppercase; letter-spacing: 0.5px;">Staff Admin</div>
+                <div style="font-size: 12px; font-weight: 700; color: #ffffff;">Public View Mode</div>
+              </div>
+              <a href="/admin.html" class="btn btn-primary btn-small" style="padding: 5px 10px; font-size: 11.5px; font-weight: 800; border-radius: 8px; text-decoration: none; white-space: nowrap;">
+                🛡️ Admin &rarr;
+              </a>
+            `;
+            nav.insertBefore(card, nav.firstChild);
+          } else if (existingCards.length > 1) {
+            // Deduplicate: keep only the first card and remove any duplicates
+            for (let i = 1; i < existingCards.length; i++) {
+              existingCards[i].remove();
+            }
+          }
+        } else {
+          existingCards.forEach(c => c.remove());
+        }
       }
 
       const footer = sidebar.querySelector('.user-sidebar-footer');
-      if (footer && !footer.querySelector('.admin-return-sublink')) {
-        const adminSub = document.createElement('a');
-        adminSub.className = 'user-sidebar-sublink admin-return-sublink';
-        adminSub.href = '/admin.html';
-        adminSub.style.cssText = 'color:#00f0ff !important; font-weight:800; background:rgba(0,240,255,0.15); border:1.5px solid #00f0ff; border-radius:10px; padding:10px 14px; margin-top:8px; display:flex; align-items:center; justify-content:space-between; text-decoration:none;';
-        adminSub.innerHTML = '<span>🛡️ Admin Dashboard</span><span>&rarr;</span>';
-        
-        const oldStaffAdmin = footer.querySelector('a[href*="tab=admin"]');
-        if (oldStaffAdmin) {
-          oldStaffAdmin.replaceWith(adminSub);
+      if (footer) {
+        const existingFooterLinks = footer.querySelectorAll('.admin-return-sublink');
+        if (isAdmin) {
+          if (existingFooterLinks.length === 0) {
+            const adminSub = document.createElement('a');
+            adminSub.className = 'user-sidebar-sublink admin-return-sublink';
+            adminSub.href = '/admin.html';
+            adminSub.style.cssText = 'color:#00f0ff !important; font-weight:800; background:rgba(0,240,255,0.15); border:1.5px solid #00f0ff; border-radius:10px; padding:10px 14px; margin-top:8px; display:flex; align-items:center; justify-content:space-between; text-decoration:none;';
+            adminSub.innerHTML = '<span>🛡️ Admin Dashboard</span><span>&rarr;</span>';
+            
+            const oldStaffAdmin = footer.querySelector('a[href*="tab=admin"]');
+            if (oldStaffAdmin) {
+              oldStaffAdmin.replaceWith(adminSub);
+            } else {
+              footer.appendChild(adminSub);
+            }
+          } else if (existingFooterLinks.length > 1) {
+            for (let i = 1; i < existingFooterLinks.length; i++) {
+              existingFooterLinks[i].remove();
+            }
+          }
         } else {
-          footer.appendChild(adminSub);
+          existingFooterLinks.forEach(l => l.remove());
         }
       }
     }
