@@ -6,6 +6,7 @@ services:
     region: singapore
     buildCommand: npm install
     startCommand: npm start
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
         value: 20.18.0
@@ -18,4 +19,10 @@ services:
       - key: SEED_ADMIN_PASS
         value: museum-admin-2026
       - key: MONGODB_URI
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
         sync: false
