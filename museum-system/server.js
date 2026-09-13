@@ -130,6 +130,14 @@ app.get('/api/health', (req, res) => {
 
 // Auto-seed initial catalog if database is empty on fresh deployment
 async function startServer() {
+  // ── Restore data.json from Cloudinary (survives Render restarts) ──
+  try {
+    const { restoreFromCloud } = require('./db/store');
+    await restoreFromCloud();
+  } catch (e) {
+    console.warn('[DB] Cloud restore skipped:', e.message);
+  }
+
   try {
     const mongoUri = process.env.MONGODB_URI;
     if (mongoUri) {
