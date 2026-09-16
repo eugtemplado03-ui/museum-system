@@ -3,63 +3,939 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Museum Access Portal — Museo Sang Bata sa Negros</title>
+<title>Welcome to Museo Sang Bata sa Negros — Hands-on Children's Museum</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
 <style>
+:root {
+  --welcome-teal: #00aebd;
+  --welcome-teal-dark: #007f8c;
+  --welcome-navy: #002b36;
+  --welcome-deep: #061c26;
+  --welcome-coral: #f7941d;
+  --welcome-aqua: #5eead4;
+  --welcome-card-bg: rgba(255, 255, 255, 0.96);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background: linear-gradient(145deg, rgba(6, 28, 38, 0.94) 0%, rgba(0, 36, 48, 0.90) 100%), url('/uploads/header-bg.webp') center / cover fixed no-repeat;
+  background: linear-gradient(180deg, #051a24 0%, #082937 40%, #001f28 100%);
+  color: #1e2d33;
   min-height: 100vh;
   margin: 0;
+  padding-top: 68px; /* space for fixed topbar */
+  font-family: 'Open Sans', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Scroll Offset for Fixed Header */
+.welcome-section,
+.checkin-portal-section,
+#aboutSection,
+#exhibitsSection,
+#programsSection,
+#gallerySection,
+#eventsSection,
+#checkinSection,
+#directUnlockNotice {
+  scroll-margin-top: 100px;
+}
+
+/* ── Top Navigation Bar ────────────────────────────────────────── */
+.welcome-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 68px;
+  background: rgba(6, 28, 38, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1.5px solid rgba(0, 174, 189, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(16px, 4vw, 48px);
+  z-index: 1000;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+}
+
+.welcome-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: #ffffff;
+}
+
+.welcome-brand-mark {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--welcome-teal), #007f8c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 4px 14px rgba(0, 174, 189, 0.4);
+}
+
+.welcome-brand-text h1 {
+  margin: 0;
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.welcome-brand-text p {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--welcome-aqua);
+  font-weight: 600;
+}
+
+.welcome-menu {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 2vw, 24px);
+}
+
+.welcome-menu-link {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.welcome-menu-link:hover {
+  color: #ffffff;
+  background: rgba(0, 174, 189, 0.18);
+  transform: translateY(-1px);
+}
+
+.welcome-nav-cta {
+  background: linear-gradient(135deg, var(--welcome-coral), #e07e0b);
+  color: #ffffff !important;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13.5px;
+  font-weight: 800;
+  padding: 9px 18px;
+  border-radius: 999px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  box-shadow: 0 4px 16px rgba(247, 148, 29, 0.45);
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.welcome-nav-cta:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(247, 148, 29, 0.65);
+}
+
+/* Mobile Nav Toggle */
+.welcome-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 6px;
+}
+
+/* ── Hero Section ──────────────────────────────────────────────── */
+.welcome-hero {
+  position: relative;
+  padding: clamp(36px, 5vw, 64px) clamp(16px, 4vw, 48px) 24px;
+  max-width: 1240px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.welcome-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 174, 189, 0.18);
+  border: 1px solid rgba(94, 234, 212, 0.35);
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--welcome-aqua);
+  margin-bottom: 18px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.welcome-hero-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: clamp(28px, 4.5vw, 48px);
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1.15;
+  margin: 0 0 16px;
+  text-shadow: 0 3px 12px rgba(0, 0, 0, 0.6);
+}
+
+.welcome-hero-title span {
+  background: linear-gradient(135deg, #5eead4 0%, #38bdf8 45%, #fbbf24 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.welcome-hero-subtitle {
+  font-size: clamp(15px, 1.8vw, 17.5px);
+  color: #e2e8f0;
+  max-width: 780px;
+  margin: 0 auto 28px;
+  line-height: 1.65;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.welcome-hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 36px;
+}
+
+.btn-hero-primary {
+  background: linear-gradient(135deg, var(--welcome-teal), var(--welcome-teal-dark));
+  color: #ffffff;
+  padding: 13px 26px;
+  border-radius: 12px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 24px rgba(0, 174, 189, 0.45);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-hero-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 174, 189, 0.65);
+}
+
+.btn-hero-secondary {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  padding: 13px 24px;
+  border-radius: 12px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.2s ease;
+}
+
+.btn-hero-secondary:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: translateY(-2px);
+}
+
+/* ── Interactive Image Carousel ────────────────────────────────── */
+.carousel-section {
+  max-width: 1100px;
+  margin: 0 auto 50px;
+  position: relative;
+}
+
+.welcome-carousel {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1.5px rgba(255, 255, 255, 0.15);
+  background: #001a24;
+}
+
+.carousel-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 360px;
+  max-height: 540px;
+  overflow: hidden;
+}
+
+.carousel-slide-item {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: scale(1.04);
+}
+
+.carousel-slide-item.active {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+}
+
+.carousel-slide-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.carousel-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(6, 28, 38, 0.1) 0%, rgba(6, 28, 38, 0.88) 100%);
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
+  padding: clamp(20px, 4vw, 40px);
+  color: #ffffff;
+  text-align: left;
 }
-.portal-card {
-  background: var(--white);
+
+.carousel-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 174, 189, 0.9);
+  color: #ffffff;
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-bottom: 8px;
+  width: fit-content;
+}
+
+.carousel-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: clamp(20px, 3vw, 32px);
+  font-weight: 900;
+  margin: 0 0 8px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+}
+
+.carousel-desc {
+  font-size: clamp(13px, 1.6vw, 15px);
+  color: #f1f5f9;
+  max-width: 680px;
+  margin: 0 0 16px;
+  line-height: 1.5;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+}
+
+.carousel-cta-btn {
+  background: linear-gradient(135deg, var(--welcome-coral), #d97b0a);
+  color: #ffffff;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13.5px;
+  font-weight: 800;
+  padding: 10px 18px;
+  border-radius: 10px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  box-shadow: 0 4px 14px rgba(247, 148, 29, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.carousel-cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(247, 148, 29, 0.6);
+}
+
+/* Carousel Controls */
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(6, 28, 38, 0.75);
+  backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.carousel-arrow:hover {
+  background: var(--welcome-teal);
+  border-color: #ffffff;
+  transform: translateY(-50%) scale(1.08);
+}
+
+.carousel-arrow.prev { left: 16px; }
+.carousel-arrow.next { right: 16px; }
+
+.carousel-indicators {
+  position: absolute;
+  bottom: 20px;
+  right: clamp(20px, 4vw, 40px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 10;
+}
+
+.carousel-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.25s ease;
+}
+
+.carousel-dot.active {
+  width: 28px;
+  border-radius: 999px;
+  background: var(--welcome-teal);
+  box-shadow: 0 0 12px var(--welcome-teal);
+}
+
+.carousel-counter-badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(6, 28, 38, 0.8);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  z-index: 10;
+}
+
+/* ── Section Container & Typography ────────────────────────────── */
+.welcome-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px clamp(16px, 4vw, 40px);
+}
+
+.section-header {
+  text-align: center;
+  max-width: 760px;
+  margin: 0 auto 44px;
+}
+
+.section-tag {
+  display: inline-block;
+  font-family: 'Nunito', sans-serif;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--welcome-aqua);
+  background: rgba(0, 174, 189, 0.15);
+  border: 1px solid rgba(0, 174, 189, 0.3);
+  padding: 4px 14px;
+  border-radius: 999px;
+  margin-bottom: 10px;
+}
+
+.section-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: clamp(24px, 3.5vw, 36px);
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0 0 12px;
+  line-height: 1.2;
+}
+
+.section-desc {
+  font-size: 15px;
+  color: #cbd5e1;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── About Museum Details Grid ─────────────────────────────────── */
+.about-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.about-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 26px 22px;
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.about-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(0, 174, 189, 0.4);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.about-card-icon {
+  font-size: 32px;
+  margin-bottom: 14px;
+}
+
+.about-card h3 {
+  font-family: 'Nunito', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  margin: 0 0 10px;
+  color: #ffffff;
+}
+
+.about-card p {
+  font-size: 14px;
+  color: #e2e8f0;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.about-card strong {
+  color: var(--welcome-aqua);
+}
+
+/* ── Featured Exhibits Grid ────────────────────────────────────── */
+.exhibits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.exhibit-card {
+  background: #ffffff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.exhibit-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+}
+
+.exhibit-card-img {
+  width: 100%;
+  height: 200px;
+  position: relative;
+  background: #061c26;
+  overflow: hidden;
+}
+
+.exhibit-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+
+.exhibit-card:hover .exhibit-card-img img {
+  transform: scale(1.05);
+}
+
+.exhibit-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(6, 28, 38, 0.85);
+  backdrop-filter: blur(6px);
+  color: var(--welcome-aqua);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(94, 234, 212, 0.3);
+}
+
+.exhibit-category {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--welcome-teal);
+  color: #ffffff;
+  font-family: 'Nunito', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.exhibit-card-body {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.exhibit-card-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+
+.exhibit-card-desc {
+  font-size: 13.5px;
+  color: var(--grey-700);
+  line-height: 1.55;
+  margin: 0 0 16px;
+  flex: 1;
+}
+
+.exhibit-locked-features {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  font-size: 12px;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btn-checkin-direct {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--welcome-teal), var(--welcome-teal-dark));
+  color: #ffffff;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 174, 189, 0.3);
+}
+
+.btn-checkin-direct:hover {
+  background: linear-gradient(135deg, #02bacc, #006e7a);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 174, 189, 0.45);
+}
+
+/* ── Signature Programs Grid ───────────────────────────────────── */
+.programs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 22px;
+}
+
+.program-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  padding: 24px;
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.25s ease;
+}
+
+.program-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--welcome-teal);
+  transform: translateY(-4px);
+}
+
+.program-icon {
+  font-size: 34px;
+  margin-bottom: 12px;
+}
+
+.program-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 10px;
+}
+
+.program-desc {
+  font-size: 13.5px;
+  color: #e2e8f0;
+  line-height: 1.55;
+  margin: 0 0 18px;
+  flex: 1;
+}
+
+.btn-program-direct {
+  background: rgba(0, 174, 189, 0.2);
+  border: 1px solid rgba(0, 174, 189, 0.5);
+  color: #ffffff;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-program-direct:hover {
+  background: var(--welcome-teal);
+  color: #ffffff;
+}
+
+/* ── Gallery Preview Grid ──────────────────────────────────────── */
+.gallery-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.gallery-preview-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  height: 220px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.gallery-preview-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.gallery-preview-card:hover img {
+  transform: scale(1.08);
+}
+
+.gallery-preview-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(6, 28, 38, 0.1) 0%, rgba(6, 28, 38, 0.88) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 16px;
+  color: #ffffff;
+}
+
+.gallery-preview-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  margin: 0 0 4px;
+}
+
+.gallery-preview-caption {
+  font-size: 12px;
+  color: #cbd5e1;
+  margin: 0 0 10px;
+}
+
+.gallery-preview-btn {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+/* ── Events Grid ───────────────────────────────────────────────── */
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 22px;
+}
+
+.event-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
   border: 1.5px solid rgba(255, 255, 255, 0.4);
+  transition: transform 0.2s;
+}
+
+.event-card:hover {
+  transform: translateY(-3px);
+}
+
+.event-date-badge {
+  background: rgba(247, 148, 29, 0.15);
+  color: #d97b0a;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  width: fit-content;
+  margin-bottom: 10px;
+  border: 1px solid rgba(247, 148, 29, 0.3);
+}
+
+.event-card h3 {
+  font-family: 'Nunito', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+
+.event-card p {
+  font-size: 13.5px;
+  color: var(--grey-700);
+  line-height: 1.55;
+  margin: 0 0 18px;
+  flex: 1;
+}
+
+/* ── Check-in & Sign-in Portal Section ─────────────────────────── */
+.checkin-portal-section {
+  padding: 70px clamp(16px, 4vw, 40px) 90px;
+  background: linear-gradient(180deg, rgba(6, 28, 38, 0) 0%, rgba(3, 17, 23, 0.95) 100%);
+}
+
+.portal-container {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.portal-direct-notice {
+  background: linear-gradient(135deg, rgba(0, 174, 189, 0.28), rgba(247, 148, 29, 0.25));
+  border: 2px solid var(--welcome-teal);
+  border-radius: 16px;
+  padding: 14px 18px;
+  margin-bottom: 22px;
+  color: #ffffff;
+  display: none;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 0 20px rgba(0, 174, 189, 0.45);
+}
+
+.portal-direct-notice.visible {
+  display: flex;
+}
+
+.portal-card {
+  background: #ffffff;
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
   border-radius: 22px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
   overflow: hidden;
   width: 100%;
 }
+
 .portal-tabs {
   display: flex;
   background: #002b36;
   border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 }
+
 .portal-tab-btn {
   flex: 1;
-  padding: 15px 12px;
+  padding: 16px 12px;
   border: none;
   background: none;
   font-family: 'Nunito', sans-serif;
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 800;
   color: rgba(255, 255, 255, 0.65);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
+  gap: 8px;
   transition: all 0.2s ease;
   border-bottom: 3px solid transparent;
 }
+
 .portal-tab-btn:hover {
   color: #ffffff;
   background: rgba(255, 255, 255, 0.05);
 }
+
 .portal-tab-btn.active {
   color: #ffffff;
-  background: rgba(0, 174, 189, 0.15);
-  border-bottom-color: var(--teal);
+  background: rgba(0, 174, 189, 0.18);
+  border-bottom-color: var(--welcome-teal);
 }
+
 .portal-tab-body {
-  padding: 26px 22px;
+  padding: 28px 24px;
 }
+
 .form-group {
   margin-bottom: 18px;
 }
+
 .form-group label {
   display: block;
   font-size: 13px;
@@ -67,10 +943,12 @@ body {
   color: var(--ink);
   margin-bottom: 6px;
 }
+
 .form-group label .required {
   color: var(--danger);
   margin-left: 2px;
 }
+
 .form-group input,
 .form-group select,
 .form-group textarea {
@@ -85,48 +963,56 @@ body {
   transition: border-color 0.15s, box-shadow 0.15s;
   box-sizing: border-box;
 }
+
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: var(--teal);
-  box-shadow: 0 0 0 3px rgba(0,174,189,0.15);
+  border-color: var(--welcome-teal);
+  box-shadow: 0 0 0 3px rgba(0,174,189,0.18);
 }
+
 .form-group textarea {
   min-height: 70px;
   resize: vertical;
 }
+
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
+
 .btn-submit {
   width: 100%;
-  padding: 13px 18px;
+  padding: 14px 18px;
   border-radius: 10px;
   border: none;
-  background: var(--teal);
+  background: var(--welcome-teal);
   color: var(--white);
-  font-size: 15px;
+  font-size: 15.5px;
   font-weight: 800;
   font-family: 'Nunito', sans-serif;
   cursor: pointer;
   transition: background 0.15s, transform 0.15s;
-  margin-top: 6px;
+  margin-top: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  box-shadow: 0 6px 16px rgba(0, 174, 189, 0.35);
 }
+
 .btn-submit:hover:not(:disabled) {
-  background: var(--teal-dark);
+  background: var(--welcome-teal-dark);
   transform: translateY(-1px);
 }
+
 .btn-submit:disabled {
-  opacity: 0.6;
+  opacity: 0.65;
   cursor: not-allowed;
 }
+
 .error-message {
   background: var(--danger-light);
   border: 1px solid rgba(217,79,61,0.25);
@@ -139,188 +1025,815 @@ body {
   display: none;
 }
 .error-message.visible { display: block; }
+
 .success-message {
-  background: rgba(6, 28, 38, 0.95);
+  background: rgba(6, 28, 38, 0.96);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
   color: #ffffff;
-  padding: 32px 22px;
-  border-radius: 20px;
+  padding: 34px 24px;
+  border-radius: 22px;
   text-align: center;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.50);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
   display: none;
 }
 .success-message.visible { display: block; }
+
 .success-message .icon {
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 14px;
+  width: 68px;
+  height: 68px;
+  margin: 0 auto 16px;
   border-radius: 50%;
   background: rgba(16, 185, 129, 0.20);
   border: 2px solid #10b981;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
+  font-size: 30px;
+  box-shadow: 0 0 24px rgba(16, 185, 129, 0.4);
 }
+
 .success-message h2 {
   font-family: 'Nunito', sans-serif;
   font-weight: 800;
-  font-size: 23px;
+  font-size: 24px;
   color: #ffffff;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
   margin: 0 0 10px;
 }
+
 .success-message p {
-  font-size: 14.5px;
+  font-size: 15px;
   color: #f1f5f9;
   line-height: 1.6;
-  margin: 0 0 20px;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  margin: 0 0 22px;
 }
+
 .success-message p strong {
-  color: #5eead4;
-  font-weight: 700;
+  color: var(--welcome-aqua);
 }
-@media (max-width: 480px) {
+
+/* ── Footer ────────────────────────────────────────────────────── */
+.welcome-footer {
+  background: #001720;
+  border-top: 1.5px solid rgba(255, 255, 255, 0.08);
+  padding: 48px clamp(16px, 4vw, 48px) 32px;
+  color: #94a3b8;
+  font-size: 13.5px;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 32px;
+  margin-bottom: 36px;
+}
+
+.footer-col h4 {
+  font-family: 'Nunito', sans-serif;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 800;
+  margin: 0 0 16px;
+}
+
+.footer-col p {
+  margin: 0 0 10px;
+  line-height: 1.6;
+}
+
+.footer-col ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-col li {
+  margin-bottom: 8px;
+}
+
+.footer-col a {
+  color: #cbd5e1;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.footer-col a:hover {
+  color: var(--welcome-aqua);
+}
+
+.footer-bottom {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 12.5px;
+}
+
+/* ── Responsive ────────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .welcome-menu {
+    display: none;
+    position: absolute;
+    top: 68px;
+    left: 0;
+    right: 0;
+    background: rgba(6, 28, 38, 0.98);
+    flex-direction: column;
+    padding: 18px 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border-bottom: 1px solid rgba(0, 174, 189, 0.3);
+  }
+  .welcome-menu.open {
+    display: flex;
+  }
+  .welcome-menu-toggle {
+    display: block;
+  }
+}
+
+@media (max-width: 540px) {
   .form-row { grid-template-columns: 1fr; }
-  .portal-tab-body { padding: 20px 16px; }
-  .success-message { padding: 26px 16px; }
+  .portal-tab-body { padding: 22px 16px; }
+  .carousel-stage { aspect-ratio: 4 / 3; min-height: 300px; }
+  .carousel-arrow { width: 38px; height: 38px; font-size: 16px; }
+  .carousel-indicators { bottom: 12px; }
 }
 </style>
 </head>
 <body>
-  <main style="flex:1; display:flex; align-items:center; justify-content:center; padding: clamp(20px, 4vw, 48px) 16px; min-height:100vh; min-height:100dvh; box-sizing:border-box;">
-    <div style="width:100%; max-width:480px; margin:0 auto;">
-      
-      <div class="portal-card">
-        <!-- Scanned Tag / Protected Page Redirection Notice -->
-        <div class="portal-tag-notice" id="portalTagNotice" style="display:none; background: linear-gradient(135deg, rgba(0, 174, 189, 0.15), rgba(217, 79, 61, 0.12)); border-bottom: 2px solid var(--teal); padding: 12px 16px; align-items: center; gap: 10px;">
-          <div style="font-size: 24px; flex-shrink: 0;">🏷️</div>
+
+  <!-- ── 1. Top Navigation Bar ───────────────────────────────────── -->
+  <header class="welcome-nav" role="banner">
+    <a class="welcome-brand" href="#top" title="Museo Sang Bata sa Negros">
+      <div class="welcome-brand-mark">🏛️</div>
+      <div class="welcome-brand-text">
+        <h1>Museo Sang Bata sa Negros</h1>
+        <p>Sagay City, Negros Occidental</p>
+      </div>
+    </a>
+
+    <button type="button" class="welcome-menu-toggle" id="welcomeMenuToggle" aria-label="Toggle navigation menu">
+      ☰
+    </button>
+
+    <nav class="welcome-menu" id="welcomeMenu" role="navigation">
+      <a class="welcome-menu-link" href="#aboutSection">About Museum</a>
+      <a class="welcome-menu-link" href="#exhibitsSection">Exhibits</a>
+      <a class="welcome-menu-link" href="#programsSection">Programs</a>
+      <a class="welcome-menu-link" href="#gallerySection">Gallery</a>
+      <a class="welcome-menu-link" href="#eventsSection">Events</a>
+      <a class="welcome-nav-cta" href="#checkinSection" id="navCheckinCta">
+        <span>🎫</span> Check In / Sign In
+      </a>
+    </nav>
+  </header>
+
+  <main id="top">
+
+    <!-- ── 2. Hero Section ───────────────────────────────────────── -->
+    <section class="welcome-hero">
+      <div class="welcome-hero-badge">
+        <span>🌊</span> Hands-on &amp; Interactive Children's Museum
+      </div>
+      <h1 class="welcome-hero-title">
+        Discover, Play &amp; Protect Our Seas at <span>Museo Sang Bata</span>
+      </h1>
+      <p class="welcome-hero-subtitle">
+        The first interactive children's museum outside Metro Manila, set on the scenic shoreline of Barangay Old Sagay beside the protected Sagay Marine Reserve. Touch live marine life, explore heritage exhibits, and ignite young minds.
+      </p>
+
+      <div class="welcome-hero-actions">
+        <a class="btn-hero-primary" href="#checkinSection">
+          <span>🎫</span> Check In to Unlock Full Access
+        </a>
+        <a class="btn-hero-secondary" href="#exhibitsSection">
+          <span>🔍</span> Preview Exhibits &amp; Programs &darr;
+        </a>
+      </div>
+
+      <!-- ── 3. Interactive Image Carousel ───────────────────────── -->
+      <div class="carousel-section" id="welcomeCarouselSection" aria-label="Museum Showcase Carousel">
+        <div class="welcome-carousel" id="museumCarousel">
+          <div class="carousel-counter-badge" id="carouselCounter">1 / 5</div>
+          
+          <button type="button" class="carousel-arrow prev" id="carouselPrevBtn" aria-label="Previous slide">&#10094;</button>
+          <button type="button" class="carousel-arrow next" id="carouselNextBtn" aria-label="Next slide">&#10095;</button>
+
+          <div class="carousel-stage" id="carouselStage">
+            <!-- Slide 1: Museum Building & Grounds -->
+            <div class="carousel-slide-item active" data-index="0" data-code="EX-001" data-title="Museum Grounds">
+              <img src="/uploads/ex3.jpg" alt="Museo Sang Bata sa Negros Facade and Grounds">
+              <div class="carousel-overlay">
+                <span class="carousel-tag">Coastal Sanctuary</span>
+                <h2 class="carousel-title">Museo Sang Bata sa Negros</h2>
+                <p class="carousel-desc">A premier hands-on children's museum located on the sunlit coast of Barangay Old Sagay beside the 32,000-hectare Sagay Marine Reserve.</p>
+                <button type="button" class="carousel-cta-btn" onclick="directToCheckin('EX-001', 'Under the Sea')">
+                  <span>🎫</span> Check In to Enter Museum &rarr;
+                </button>
+              </div>
+            </div>
+
+            <!-- Slide 2: Under the Sea -->
+            <div class="carousel-slide-item" data-index="1" data-code="EX-001" data-title="Under the Sea">
+              <img src="https://museosangbata.org/wp-content/uploads/2014/11/under-the-sea-banner-260x170.jpg" alt="Under the Sea Marine Exhibit">
+              <div class="carousel-overlay">
+                <span class="carousel-tag">Featured Flagship Exhibit</span>
+                <h2 class="carousel-title">Under the Sea (Main Marine Gallery)</h2>
+                <p class="carousel-desc">Discover how sand forms, how vibrant coral reefs grow, and encounter clownfish, sea stars, and the marine mammals of Sagay Marine Reserve.</p>
+                <button type="button" class="carousel-cta-btn" onclick="directToCheckin('EX-001', 'Under the Sea')">
+                  <span>🎫</span> Check In to View Exhibit Details &amp; Audio Tour &rarr;
+                </button>
+              </div>
+            </div>
+
+            <!-- Slide 3: Splash Zone (Touch Pool) -->
+            <div class="carousel-slide-item" data-index="2" data-code="EX-003" data-title="Splash Zone (Touch Pool)">
+              <img src="https://museosangbata.org/wp-content/uploads/2014/11/splash-banner-260x170.jpg" alt="Splash Zone Touch Pool">
+              <div class="carousel-overlay">
+                <span class="carousel-tag">Hands-on Touch Pool</span>
+                <h2 class="carousel-title">Splash Zone — Live Seashore Creatures</h2>
+                <p class="carousel-desc">Gently touch and observe live sea stars, sea cucumbers, snails, and tidal organisms in an engaging, educator-led touch pool.</p>
+                <button type="button" class="carousel-cta-btn" onclick="directToCheckin('EX-003', 'Splash Zone')">
+                  <span>🎫</span> Check In to View Touch Pool Details &rarr;
+                </button>
+              </div>
+            </div>
+
+            <!-- Slide 4: Mobile Library on Wheels -->
+            <div class="carousel-slide-item" data-index="3" data-code="EX-010" data-title="Books and Exhibit on Wheels">
+              <img src="/uploads/ex4.jpg" alt="Mobile Library and Outreach">
+              <div class="carousel-overlay">
+                <span class="carousel-tag">Community Outreach</span>
+                <h2 class="carousel-title">Books &amp; Exhibits on Wheels</h2>
+                <p class="carousel-desc">Bringing marine conservation literature, storytelling, and interactive science modules to children and schools across coastal communities.</p>
+                <button type="button" class="carousel-cta-btn" onclick="directToPage('/programs.html', 'Books and Exhibit on Wheels')">
+                  <span>🎫</span> Check In to Learn About Outreach &rarr;
+                </button>
+              </div>
+            </div>
+
+            <!-- Slide 5: Junior Guides & Cultural Heritage -->
+            <div class="carousel-slide-item" data-index="4" data-code="EX-006" data-title="Junior Museum Guides">
+              <img src="/uploads/ex2.jpg" alt="Junior Museum Guides and Mascots">
+              <div class="carousel-overlay">
+                <span class="carousel-tag">Youth Leadership</span>
+                <h2 class="carousel-title">Junior Museum Guides &amp; Mascots</h2>
+                <p class="carousel-desc">Meet our passionate young docents trained in marine biodiversity, ready to guide visitors through thrilling interactive museum experiences.</p>
+                <button type="button" class="carousel-cta-btn" onclick="directToPage('/programs.html', 'Junior Museum Guides')">
+                  <span>🎫</span> Check In to Meet the Junior Guides &rarr;
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="carousel-indicators" id="carouselIndicators">
+            <button type="button" class="carousel-dot active" data-slide="0" aria-label="Slide 1"></button>
+            <button type="button" class="carousel-dot" data-slide="1" aria-label="Slide 2"></button>
+            <button type="button" class="carousel-dot" data-slide="2" aria-label="Slide 3"></button>
+            <button type="button" class="carousel-dot" data-slide="3" aria-label="Slide 4"></button>
+            <button type="button" class="carousel-dot" data-slide="4" aria-label="Slide 5"></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 4. About Museum Details Section ───────────────────────── -->
+    <section class="welcome-section" id="aboutSection">
+      <div class="section-header">
+        <span class="section-tag">About the Museum</span>
+        <h2 class="section-title">Where Learning Meets the Sea</h2>
+        <p class="section-desc">
+          Founded in 2003, Museo Sang Bata sa Negros is an alternative learning sanctuary dedicated to awakening children's creative and intellectual potential through hands-on marine conservation education and cultural discovery.
+        </p>
+      </div>
+
+      <div class="about-grid">
+        <div class="about-card">
+          <div class="about-card-icon">📍</div>
+          <h3>Coastal Location</h3>
+          <p>
+            Situated on the shoreline of <strong>Barangay Old Sagay, Sagay City, Negros Occidental</strong>, right beside the 32,000-hectare protected Sagay Marine Reserve.
+          </p>
+        </div>
+
+        <div class="about-card">
+          <div class="about-card-icon">🕒</div>
+          <h3>Operating Hours</h3>
+          <p>
+            Open <strong>Monday to Friday, 8:00 AM – 5:00 PM</strong>.<br>
+            Saturday and Sunday visits are available for <strong>booked educational group tours</strong>.
+          </p>
+        </div>
+
+        <div class="about-card">
+          <div class="about-card-icon">🎟️</div>
+          <h3>Admission &amp; Rates</h3>
+          <p>
+            Regular Tour: <strong>₱20.00</strong> (Students w/ ID), <strong>₱50.00</strong> (Adults), <strong>₱40.00</strong> (Seniors).<br>
+            Guided Tours led by Junior Guides available from <strong>₱130 to ₱800</strong>.
+          </p>
+        </div>
+
+        <div class="about-card">
+          <div class="about-card-icon">🌏</div>
+          <h3>Global Network</h3>
+          <p>
+            Proud member of the <strong>SAMP Intercontinental Museum Network</strong> and the <strong>West Visayan Association of Museums</strong>, bridging local communities with international best practices.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 5. Featured Exhibits Preview ──────────────────────────── -->
+    <section class="welcome-section" id="exhibitsSection">
+      <div class="section-header">
+        <span class="section-tag">Explore Exhibits</span>
+        <h2 class="section-title">Featured Museum Exhibits Preview</h2>
+        <p class="section-desc">
+          Below is a preview of our popular permanent exhibits. <strong>To see full exhibit plaques, multi-lingual audio tours, walking directions, and high-resolution galleries, please check in.</strong>
+        </p>
+      </div>
+
+      <div class="exhibits-grid">
+        <!-- Exhibit 1 -->
+        <article class="exhibit-card">
+          <div class="exhibit-card-img">
+            <img src="https://museosangbata.org/wp-content/uploads/2014/11/under-the-sea-banner-260x170.jpg" alt="Under the Sea" loading="lazy">
+            <span class="exhibit-badge">EX-001</span>
+            <span class="exhibit-category">Marine &amp; Nature</span>
+          </div>
+          <div class="exhibit-card-body">
+            <h3 class="exhibit-card-title">Under the Sea</h3>
+            <p class="exhibit-card-desc">The flagship marine exhibit detailing sand formation, coral reef ecosystems, marine mammals, and extensive shell taxonomy.</p>
+            <div class="exhibit-locked-features">
+              <span>🔒 Full Plaque &amp; Details</span>
+              <span>🎧 Audio Tour</span>
+              <span>🗺️ Map Pin</span>
+            </div>
+            <button type="button" class="btn-checkin-direct" onclick="directToCheckin('EX-001', 'Under the Sea')">
+              <span>🎫</span> Check In to View All Details &rarr;
+            </button>
+          </div>
+        </article>
+
+        <!-- Exhibit 2 -->
+        <article class="exhibit-card">
+          <div class="exhibit-card-img">
+            <img src="https://museosangbata.org/wp-content/uploads/2014/11/training-room-banner-260x170.jpg" alt="The River" loading="lazy">
+            <span class="exhibit-badge">EX-002</span>
+            <span class="exhibit-category">Marine &amp; Nature</span>
+          </div>
+          <div class="exhibit-card-body">
+            <h3 class="exhibit-card-title">The River Basin</h3>
+            <p class="exhibit-card-desc">Follows freshwater river systems on their journey toward the open ocean, emphasizing riverbank conservation and riparian ecology.</p>
+            <div class="exhibit-locked-features">
+              <span>🔒 Full Plaque &amp; Details</span>
+              <span>🎧 Audio Tour</span>
+              <span>🗺️ Map Pin</span>
+            </div>
+            <button type="button" class="btn-checkin-direct" onclick="directToCheckin('EX-002', 'The River')">
+              <span>🎫</span> Check In to View All Details &rarr;
+            </button>
+          </div>
+        </article>
+
+        <!-- Exhibit 3 -->
+        <article class="exhibit-card">
+          <div class="exhibit-card-img">
+            <img src="https://museosangbata.org/wp-content/uploads/2014/11/splash-banner-260x170.jpg" alt="Splash Zone" loading="lazy">
+            <span class="exhibit-badge">EX-003</span>
+            <span class="exhibit-category">Touch &amp; Play</span>
+          </div>
+          <div class="exhibit-card-body">
+            <h3 class="exhibit-card-title">Splash Zone (Touch Pool)</h3>
+            <p class="exhibit-card-desc">Interactive live seawater basin where children safely observe sea cucumbers, sea stars, hermit crabs, and tidal marine organisms.</p>
+            <div class="exhibit-locked-features">
+              <span>🔒 Full Plaque &amp; Details</span>
+              <span>🎧 Audio Tour</span>
+              <span>🗺️ Map Pin</span>
+            </div>
+            <button type="button" class="btn-checkin-direct" onclick="directToCheckin('EX-003', 'Splash Zone')">
+              <span>🎫</span> Check In to View All Details &rarr;
+            </button>
+          </div>
+        </article>
+
+        <!-- Exhibit 4 -->
+        <article class="exhibit-card">
+          <div class="exhibit-card-img">
+            <img src="https://museosangbata.org/wp-content/uploads/2014/11/everyday-heroes-banner-260x170.jpg" alt="Everyday Heroes" loading="lazy">
+            <span class="exhibit-badge">EX-004</span>
+            <span class="exhibit-category">Character &amp; Heritage</span>
+          </div>
+          <div class="exhibit-card-body">
+            <h3 class="exhibit-card-title">Everyday Heroes</h3>
+            <p class="exhibit-card-desc">Inspiring stories of ordinary fishermen, teachers, and neighbors embodying integrity, generosity, and community stewardship.</p>
+            <div class="exhibit-locked-features">
+              <span>🔒 Full Plaque &amp; Details</span>
+              <span>🎧 Audio Tour</span>
+              <span>🗺️ Map Pin</span>
+            </div>
+            <button type="button" class="btn-checkin-direct" onclick="directToCheckin('EX-004', 'Everyday Heroes')">
+              <span>🎫</span> Check In to View All Details &rarr;
+            </button>
+          </div>
+        </article>
+
+        <!-- Exhibit 5 -->
+        <article class="exhibit-card">
+          <div class="exhibit-card-img">
+            <img src="https://museosangbata.org/wp-content/uploads/2014/09/hampanganan-banner-260x170.jpg" alt="Hampanganan" loading="lazy">
+            <span class="exhibit-badge">EX-006</span>
+            <span class="exhibit-category">Toys &amp; Collections</span>
+          </div>
+          <div class="exhibit-card-body">
+            <h3 class="exhibit-card-title">Hampanganan (Toy Room)</h3>
+            <p class="exhibit-card-desc">An enchanting collection of traditional Filipino wooden toys, sungka boards, and folk games that celebrate creative heritage.</p>
+            <div class="exhibit-locked-features">
+              <span>🔒 Full Plaque &amp; Details</span>
+              <span>🎧 Audio Tour</span>
+              <span>🗺️ Map Pin</span>
+            </div>
+            <button type="button" class="btn-checkin-direct" onclick="directToCheckin('EX-006', 'Hampanganan')">
+              <span>🎫</span> Check In to View All Details &rarr;
+            </button>
+          </div>
+        </article>
+
+        <!-- Exhibit 6 -->
+        <article class="exhibit-card">
+          <div class="exhibit-card-img">
+            <img src="https://museosangbata.org/wp-content/uploads/2014/11/mangrove-walk-banner-260x170.jpg" alt="Mangrove Walk" loading="lazy">
+            <span class="exhibit-badge">EX-011</span>
+            <span class="exhibit-category">Marine &amp; Nature</span>
+          </div>
+          <div class="exhibit-card-body">
+            <h3 class="exhibit-card-title">Mangrove Walk (Eco-Trail)</h3>
+            <p class="exhibit-card-desc">Step outside onto the elevated mangrove wooden walkway over tidal waters to witness nature's greatest coastal defense nursery.</p>
+            <div class="exhibit-locked-features">
+              <span>🔒 Full Plaque &amp; Details</span>
+              <span>🎧 Audio Tour</span>
+              <span>🗺️ Map Pin</span>
+            </div>
+            <button type="button" class="btn-checkin-direct" onclick="directToCheckin('EX-011', 'Mangrove Walk')">
+              <span>🎫</span> Check In to View All Details &rarr;
+            </button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ── 6. Signature Programs Section ─────────────────────────── -->
+    <section class="welcome-section" id="programsSection">
+      <div class="section-header">
+        <span class="section-tag">Learning &amp; Outreach</span>
+        <h2 class="section-title">Signature Educational Programs</h2>
+        <p class="section-desc">
+          Beyond physical exhibits, MSBN pioneers community-driven programs that empower youth leadership, environmental literacy, and cultural preservation.
+        </p>
+      </div>
+
+      <div class="programs-grid">
+        <div class="program-card">
+          <div class="program-icon">🧒</div>
+          <h3 class="program-title">Junior Museum Guide Program</h3>
+          <p class="program-desc">Local youth aged 8–12 are trained in public speaking and marine science to serve as docents for museum visitors. Over 300 children have graduated.</p>
+          <button type="button" class="btn-program-direct" onclick="directToPage('/programs.html', 'Junior Museum Guide Program')">
+            <span>🎫</span> Check In to View Program &rarr;
+          </button>
+        </div>
+
+        <div class="program-card">
+          <div class="program-icon">📖</div>
+          <h3 class="program-title">Junior Interactive Storytelling</h3>
+          <p class="program-desc">Children interpret marine stories and folk tales through song, dance, and creative drama, fostering literacy in the Museo Reading Club.</p>
+          <button type="button" class="btn-program-direct" onclick="directToPage('/programs.html', 'Junior Interactive Storytelling')">
+            <span>🎫</span> Check In to View Program &rarr;
+          </button>
+        </div>
+
+        <div class="program-card">
+          <div class="program-icon">🌱</div>
+          <h3 class="program-title">4 Vegetable Gardening Program</h3>
+          <p class="program-desc">A hands-on organic gardening project where young learners cultivate nutritious vegetables, promoting community food security and soil health.</p>
+          <button type="button" class="btn-program-direct" onclick="directToPage('/programs.html', '4 Vegetable Program')">
+            <span>🎫</span> Check In to View Program &rarr;
+          </button>
+        </div>
+
+        <div class="program-card">
+          <div class="program-icon">🐠</div>
+          <h3 class="program-title">Marine Conservation Education (MCEP)</h3>
+          <p class="program-desc">Our flagship initiative training public elementary science teachers, fisherfolk, and coastal mothers in marine biodiversity protection and climate resilience.</p>
+          <button type="button" class="btn-program-direct" onclick="directToPage('/programs.html', 'Marine Conservation Education')">
+            <span>🎫</span> Check In to View Program &rarr;
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 7. Photo Gallery Preview ──────────────────────────────── -->
+    <section class="welcome-section" id="gallerySection">
+      <div class="section-header">
+        <span class="section-tag">Visual Moments</span>
+        <h2 class="section-title">Museum Photo Gallery</h2>
+        <p class="section-desc">
+          Glimpses of joyful learning, interactive science discovery, and coastal adventures captured at Museo Sang Bata sa Negros.
+        </p>
+      </div>
+
+      <div class="gallery-preview-grid">
+        <div class="gallery-preview-card" onclick="directToPage('/gallery.html', 'Carnival Exhibit Photo')">
+          <img src="https://museosangbata.org/wp-content/uploads/2019/01/image2-e1548236620227-260x170.jpeg" alt="Carnival Exhibit" loading="lazy">
+          <div class="gallery-preview-overlay">
+            <div class="gallery-preview-title">Carnival Exhibit</div>
+            <div class="gallery-preview-caption">Play-based learning in the discovery room.</div>
+            <div class="gallery-preview-btn">🔍 Check In to View Gallery &rarr;</div>
+          </div>
+        </div>
+
+        <div class="gallery-preview-card" onclick="directToPage('/gallery.html', 'Under the Sea Photo')">
+          <img src="https://museosangbata.org/wp-content/uploads/2014/11/under-the-sea-banner-260x170.jpg" alt="Under the Sea" loading="lazy">
+          <div class="gallery-preview-overlay">
+            <div class="gallery-preview-title">Under the Sea</div>
+            <div class="gallery-preview-caption">The museum's flagship marine exhibit hall.</div>
+            <div class="gallery-preview-btn">🔍 Check In to View Gallery &rarr;</div>
+          </div>
+        </div>
+
+        <div class="gallery-preview-card" onclick="directToPage('/gallery.html', 'Mangrove Walk Photo')">
+          <img src="https://museosangbata.org/wp-content/uploads/2014/11/mangrove-walk-banner-260x170.jpg" alt="Mangrove Walk" loading="lazy">
+          <div class="gallery-preview-overlay">
+            <div class="gallery-preview-title">Mangrove Walkway</div>
+            <div class="gallery-preview-caption">The outdoor coastal walkway behind the museum.</div>
+            <div class="gallery-preview-btn">🔍 Check In to View Gallery &rarr;</div>
+          </div>
+        </div>
+
+        <div class="gallery-preview-card" onclick="directToPage('/gallery.html', 'Training Room Photo')">
+          <img src="https://museosangbata.org/wp-content/uploads/2014/11/training-room-banner-260x170.jpg" alt="Friendship Room" loading="lazy">
+          <div class="gallery-preview-overlay">
+            <div class="gallery-preview-title">Friendship &amp; Training Room</div>
+            <div class="gallery-preview-caption">Used for workshops and junior guide training.</div>
+            <div class="gallery-preview-btn">🔍 Check In to View Gallery &rarr;</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 8. Events & Celebrations ──────────────────────────────── -->
+    <section class="welcome-section" id="eventsSection">
+      <div class="section-header">
+        <span class="section-tag">Community Happenings</span>
+        <h2 class="section-title">Events &amp; Celebrations</h2>
+        <p class="section-desc">
+          From annual Children's Day competitions to coastal conservation workshops, see what is happening at the museum.
+        </p>
+      </div>
+
+      <div class="events-grid">
+        <div class="event-card">
+          <span class="event-date-badge">📅 June 10, 2026</span>
+          <h3>MSBN Turns 23 Years Old</h3>
+          <p>The museum celebrates 23 years of community service since its establishment in 2003, featuring special guided tours, storytelling, and student exhibitions.</p>
+          <button type="button" class="btn-checkin-direct" onclick="directToPage('/events.html', 'MSBN 23rd Anniversary')">
+            <span>🎫</span> Check In to View Event Details &rarr;
+          </button>
+        </div>
+
+        <div class="event-card">
+          <span class="event-date-badge">📅 March 17, 2026</span>
+          <h3>Adlaw Sang Kabataan 2026</h3>
+          <p>The 18th annual Children's Day celebration bringing together over 34 schools and 320 children for interactive cultural, musical, and environmental contests.</p>
+          <button type="button" class="btn-checkin-direct" onclick="directToPage('/events.html', 'Adlaw Sang Kabataan')">
+            <span>🎫</span> Check In to View Event Details &rarr;
+          </button>
+        </div>
+
+        <div class="event-card">
+          <span class="event-date-badge">📅 February 21, 2026</span>
+          <h3>Recycling Workshop &amp; Storytelling</h3>
+          <p>Kids craft creative pencil holders and planters from upcycled plastic bottles while learning the story of plastic in our marine ecosystems.</p>
+          <button type="button" class="btn-checkin-direct" onclick="directToPage('/events.html', 'Recycling Workshop')">
+            <span>🎫</span> Check In to View Event Details &rarr;
+          </button>
+        </div>
+
+        <div class="event-card">
+          <span class="event-date-badge">📅 May 18–28, 2026</span>
+          <h3>Museum Junior Guide Summer Camp</h3>
+          <p>An intensive 11-day docent program for returning and new young guides to master marine science presentation and leadership skills.</p>
+          <button type="button" class="btn-checkin-direct" onclick="directToPage('/events.html', 'Junior Guide Training')">
+            <span>🎫</span> Check In to View Event Details &rarr;
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 9. Check-in & Sign-in Portal Section ──────────────────── -->
+    <section class="checkin-portal-section" id="checkinSection">
+      <div class="section-header" style="margin-bottom:28px;">
+        <span class="section-tag" style="background:rgba(247, 148, 29, 0.2); border-color:var(--welcome-coral); color:var(--welcome-coral);">Check In to Enter</span>
+        <h2 class="section-title">Museum Access Portal</h2>
+        <p class="section-desc">
+          Check in as a visitor to unlock all exhibit details, multi-lingual audio guides, floor maps, programs, and photo galleries.
+        </p>
+      </div>
+
+      <div class="portal-container">
+        
+        <!-- Direct Unlock Destination Indicator -->
+        <div class="portal-direct-notice" id="directUnlockNotice">
+          <div style="font-size:28px; flex-shrink:0;">🔓</div>
           <div>
-            <div style="font-size: 13.5px; font-weight: 800; color: #002b36;" id="tagNoticeTitle">Exhibit Tag Scanned</div>
-            <div style="font-size: 11.5px; color: var(--ink-soft);" id="tagNoticeSubtitle">Please complete visitor check-in or sign in as staff admin to view this exhibit.</div>
+            <div style="font-weight:800; font-size:15px;" id="directUnlockTitle">Ready to unlock exhibit</div>
+            <div style="font-size:12.5px; color:#e2e8f0;" id="directUnlockSubtitle">Fill in the quick check-in below to enter directly.</div>
           </div>
         </div>
 
-        <!-- Portal Tabs -->
-        <div class="portal-tabs" role="tablist">
-          <button type="button" class="portal-tab-btn active" id="tabVisitorBtn" role="tab" aria-selected="true">
-            <span>🎫</span> Visitor Access
-          </button>
-          <button type="button" class="portal-tab-btn" id="tabAdminBtn" role="tab" aria-selected="false">
-            <span>🔐</span> Staff Sign-In
-          </button>
-        </div>
-
-        <!-- 1. Visitor Check-in Form Tab -->
-        <div class="portal-tab-body" id="visitorTabContent">
-          <div style="text-align:center; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid var(--grey-100);">
-            <div style="font-size:32px; margin-bottom:4px;">🏛️</div>
-            <h1 style="font-family:'Nunito',sans-serif; font-weight:800; font-size:21px; color:var(--ink); margin:0 0 4px;">Visitor Check-in</h1>
-            <p style="margin:0; font-size:13px; color:var(--grey-400);">Please log your visit to unlock full museum access and scanned exhibits</p>
+        <div class="portal-card">
+          <!-- Scanned Tag / Protected Page Redirection Notice (Preserved for gate scanning tests) -->
+          <div class="portal-tag-notice" id="portalTagNotice" style="display:none; background: linear-gradient(135deg, rgba(0, 174, 189, 0.15), rgba(217, 79, 61, 0.12)); border-bottom: 2px solid var(--welcome-teal); padding: 12px 16px; align-items: center; gap: 10px;">
+            <div style="font-size: 24px; flex-shrink: 0;">🏷️</div>
+            <div>
+              <div style="font-size: 13.5px; font-weight: 800; color: #002b36;" id="tagNoticeTitle">Exhibit Tag Scanned</div>
+              <div style="font-size: 11.5px; color: var(--ink-soft);" id="tagNoticeSubtitle">Please complete visitor check-in or sign in as staff admin to view this exhibit.</div>
+            </div>
           </div>
 
-          <form id="checkinForm" novalidate>
-            <div class="error-message" id="errorMessage"></div>
-
-            <div class="form-group">
-              <label>Full Name <span class="required">*</span></label>
-              <input type="text" id="visitorName" name="visitorName" placeholder="Enter your full name" required autocomplete="name">
-            </div>
-
-            <div class="form-group">
-              <label>Address <span class="required">*</span></label>
-              <textarea id="address" name="address" placeholder="Enter your complete address" required></textarea>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label>Sex <span class="required">*</span></label>
-                <select id="sex" name="sex" required>
-                  <option value="">Select sex</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                  <option value="Prefer not to say">Prefer not to say</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Age <span class="required">*</span></label>
-                <input type="number" id="age" name="age" placeholder="Age" min="1" max="120" required>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>Contact Number</label>
-              <input type="tel" id="contactNumber" name="contactNumber" placeholder="+63 9XX XXX XXXX" autocomplete="tel">
-            </div>
-
-            <div class="form-group">
-              <label>Email Address</label>
-              <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email">
-            </div>
-
-            <div class="form-group">
-              <label>Group / Organization (optional)</label>
-              <input type="text" id="groupName" name="groupName" placeholder="e.g. School name, Company, etc.">
-            </div>
-
-            <div class="form-group">
-              <label>Notes (optional)</label>
-              <textarea id="notes" name="notes" placeholder="Any special notes or comments..."></textarea>
-            </div>
-
-            <button type="submit" class="btn-submit" id="submitBtn">
-              <span>Check In &amp; Enter</span> <span>&rarr;</span>
+          <!-- Portal Tabs -->
+          <div class="portal-tabs" role="tablist">
+            <button type="button" class="portal-tab-btn active" id="tabVisitorBtn" role="tab" aria-selected="true">
+              <span>🎫</span> Visitor Access
             </button>
-          </form>
-        </div>
-
-        <!-- 2. Staff Admin Login Tab -->
-        <div class="portal-tab-body" id="adminTabContent" style="display:none;">
-          <div style="text-align:center; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid var(--grey-100);">
-            <div style="font-size:32px; margin-bottom:4px;">🔐</div>
-            <h1 style="font-family:'Nunito',sans-serif; font-weight:800; font-size:21px; color:var(--ink); margin:0 0 4px;">Staff Admin Sign-in</h1>
-            <p style="margin:0; font-size:13px; color:var(--grey-400);">Enter your curator/administrator credentials</p>
+            <button type="button" class="portal-tab-btn" id="tabAdminBtn" role="tab" aria-selected="false">
+              <span>🔐</span> Staff Sign-In
+            </button>
           </div>
 
-          <form id="adminLoginForm" novalidate>
-            <div class="error-message" id="adminErrorMessage"></div>
-
-            <div class="form-group">
-              <label>Username <span class="required">*</span></label>
-              <input type="text" id="adminUsername" placeholder="e.g. admin" required autocomplete="username">
+          <!-- 1. Visitor Check-in Form Tab -->
+          <div class="portal-tab-body" id="visitorTabContent">
+            <div style="text-align:center; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid var(--grey-100);">
+              <div style="font-size:32px; margin-bottom:4px;">🏛️</div>
+              <h2 style="font-family:'Nunito',sans-serif; font-weight:800; font-size:21px; color:var(--ink); margin:0 0 4px;">Visitor Check-in</h2>
+              <p style="margin:0; font-size:13px; color:var(--grey-400);">Please log your visit to unlock full museum access and interactive exhibits</p>
             </div>
 
-            <div class="form-group">
-              <label>Password <span class="required">*</span></label>
-              <input type="password" id="adminPassword" placeholder="Enter your password" required autocomplete="current-password">
+            <form id="checkinForm" novalidate>
+              <div class="error-message" id="errorMessage"></div>
+
+              <div class="form-group">
+                <label for="visitorName">Full Name <span class="required">*</span></label>
+                <input type="text" id="visitorName" name="visitorName" placeholder="Enter your full name" required autocomplete="name">
+              </div>
+
+              <div class="form-group">
+                <label for="address">Address <span class="required">*</span></label>
+                <textarea id="address" name="address" placeholder="Enter your complete address" required></textarea>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="sex">Sex <span class="required">*</span></label>
+                  <select id="sex" name="sex" required>
+                    <option value="">Select sex</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="age">Age <span class="required">*</span></label>
+                  <input type="number" id="age" name="age" placeholder="Age" min="1" max="120" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="contactNumber">Contact Number</label>
+                <input type="tel" id="contactNumber" name="contactNumber" placeholder="+63 9XX XXX XXXX" autocomplete="tel">
+              </div>
+
+              <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email">
+              </div>
+
+              <div class="form-group">
+                <label for="groupName">Group / Organization (optional)</label>
+                <input type="text" id="groupName" name="groupName" placeholder="e.g. School name, Family group, etc.">
+              </div>
+
+              <div class="form-group">
+                <label for="notes">Notes (optional)</label>
+                <textarea id="notes" name="notes" placeholder="Any special requests or comments..."></textarea>
+              </div>
+
+              <button type="submit" class="btn-submit" id="submitBtn">
+                <span>Check In &amp; Enter Museum</span> <span>&rarr;</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- 2. Staff Admin Sign-In Tab -->
+          <div class="portal-tab-body" id="adminTabContent" style="display:none;">
+            <div style="text-align:center; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid var(--grey-100);">
+              <div style="font-size:32px; margin-bottom:4px;">🔐</div>
+              <h2 style="font-family:'Nunito',sans-serif; font-weight:800; font-size:21px; color:var(--ink); margin:0 0 4px;">Staff Admin Sign-in</h2>
+              <p style="margin:0; font-size:13px; color:var(--grey-400);">Enter your curator/administrator credentials</p>
             </div>
 
-            <button type="submit" class="btn-submit" id="adminSubmitBtn">
-              <span>Sign In to Dashboard</span> <span>&rarr;</span>
+            <form id="adminLoginForm" novalidate>
+              <div class="error-message" id="adminErrorMessage"></div>
+
+              <div class="form-group">
+                <label for="adminUsername">Username <span class="required">*</span></label>
+                <input type="text" id="adminUsername" placeholder="e.g. admin" required autocomplete="username">
+              </div>
+
+              <div class="form-group">
+                <label for="adminPassword">Password <span class="required">*</span></label>
+                <input type="password" id="adminPassword" placeholder="Enter your password" required autocomplete="current-password">
+              </div>
+
+              <button type="submit" class="btn-submit" id="adminSubmitBtn">
+                <span>Sign In to Dashboard</span> <span>&rarr;</span>
+              </button>
+            </form>
+          </div>
+
+        </div>
+
+        <!-- Success Card (Hidden by default, displayed after successful check-in) -->
+        <div class="success-message" id="successMessage" style="margin-top:20px;">
+          <div class="icon">✅</div>
+          <h2>Check-in Verified!</h2>
+          <p id="successDetails">Thank you for visiting Museo Sang Bata sa Negros. Your visit has been logged.</p>
+          <div style="display:flex; flex-direction:column; gap:12px; width:100%; margin-top:24px;">
+            <a class="btn-submit" id="continueToDestBtn" href="/dashboard.html" style="text-decoration:none;">
+              <span>Explore Museum Exhibits &amp; Floor Map</span> <span>&rarr;</span>
+            </a>
+            <button type="button" class="btn-submit" id="checkinAnotherBtn" style="background:#ffffff; color:#061c26; border:1.5px solid #cbd5e1; box-shadow:none;">
+              <span>➕ Check in another visitor</span>
             </button>
-          </form>
+          </div>
         </div>
 
       </div>
+    </section>
 
-      <!-- Success Card (Hidden by default) -->
-      <div class="success-message" id="successMessage" style="margin-top:16px;">
-        <div class="icon">✅</div>
-        <h2>Check-in Verified!</h2>
-        <p id="successDetails">Thank you for visiting Museo Sang Bata sa Negros. Your visit has been logged.</p>
-        <div style="display:flex; flex-direction:column; gap:10px; width:100%; margin-top:20px;">
-          <a class="btn btn-primary" id="continueToDestBtn" href="/dashboard.html" style="width:100%; justify-content:center; padding:13px 18px; font-size:14px; font-weight:700; border-radius:10px;">Enter Museum Dashboard &rarr;</a>
-          <button type="button" class="btn btn-secondary" id="checkinAnotherBtn" style="width:100%; justify-content:center; padding:13px 18px; font-size:14px; font-weight:700; background:#ffffff; color:#061c26; border:none; border-radius:10px;">➕ Check in another visitor</button>
-        </div>
-      </div>
-
-    </div>
   </main>
+
+  <!-- ── 10. Footer ──────────────────────────────────────────────── -->
+  <footer class="welcome-footer" id="siteFooter">
+    <div class="footer-content">
+      <div class="footer-col">
+        <h4>🏛️ Museo Sang Bata sa Negros</h4>
+        <p>A hands-on, interactive children's museum and alternative center for marine conservation education and cultural heritage.</p>
+        <p>Member of SAMP Intercontinental Museum Network and West Visayan Association of Museums.</p>
+      </div>
+
+      <div class="footer-col">
+        <h4>📍 Location &amp; Hours</h4>
+        <p><strong>Address:</strong><br>Barangay Old Sagay, Sagay City, Negros Occidental, Philippines 6122</p>
+        <p><strong>Operating Hours:</strong><br>Monday to Friday, 8:00 AM – 5:00 PM<br>(Weekends open for pre-booked tours)</p>
+      </div>
+
+      <div class="footer-col">
+        <h4>🔗 Quick Navigation</h4>
+        <ul>
+          <li><a href="#aboutSection">About Museum</a></li>
+          <li><a href="#exhibitsSection">Featured Exhibits</a></li>
+          <li><a href="#programsSection">Signature Programs</a></li>
+          <li><a href="#gallerySection">Photo Gallery</a></li>
+          <li><a href="#eventsSection">Upcoming Events</a></li>
+          <li><a href="#checkinSection">Visitor Check-in</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>📞 Contact &amp; Support</h4>
+        <p><strong>Mobile:</strong> +63 917 798 7420</p>
+        <p><strong>Email:</strong> info@museosangbata.org</p>
+        <p style="margin-top:12px;">
+          <a href="/?tab=admin" style="color:var(--welcome-aqua); font-weight:700;">🔐 Staff Admin Sign-In &rarr;</a>
+        </p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>&copy; 2003–2026 Museo Sang Bata sa Negros Foundation, Inc. All rights reserved.</div>
+      <div>Sagay Marine Reserve, Negros Occidental, Philippines</div>
+    </div>
+  </footer>
 
   <script src="/js/api.js"></script>
   <script src="/js/gate.js"></script>
@@ -329,12 +1842,160 @@ body {
       return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
     }
 
+    // ── Mobile Menu Toggle ─────────────────────────────────────────
+    const welcomeMenuToggle = document.getElementById('welcomeMenuToggle');
+    const welcomeMenu = document.getElementById('welcomeMenu');
+    if (welcomeMenuToggle && welcomeMenu) {
+      welcomeMenuToggle.addEventListener('click', () => {
+        welcomeMenu.classList.toggle('open');
+      });
+      welcomeMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => welcomeMenu.classList.remove('open'));
+      });
+    }
+
+    // ── Direct Check-in Redirection Flow ───────────────────────────
+    let directTargetUrl = '';
+
+    function directToCheckin(exhibitCode, exhibitTitle) {
+      directTargetUrl = `/exhibit.html?code=${encodeURIComponent(exhibitCode)}`;
+      const notice = document.getElementById('directUnlockNotice');
+      const title = document.getElementById('directUnlockTitle');
+      const sub = document.getElementById('directUnlockSubtitle');
+      
+      if (notice && title && sub) {
+        title.textContent = `🔓 Unlocking: ${exhibitTitle} (${exhibitCode})`;
+        sub.textContent = 'Please complete this quick visitor check-in to view full exhibit plaque, audio tour, and walking guide.';
+        notice.classList.add('visible');
+      }
+
+      const targetEl = notice || document.getElementById('checkinSection');
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      setTimeout(() => {
+        const input = document.getElementById('visitorName');
+        if (input) input.focus();
+      }, 500);
+    }
+
+    function directToPage(targetPath, itemTitle) {
+      directTargetUrl = targetPath;
+      const notice = document.getElementById('directUnlockNotice');
+      const title = document.getElementById('directUnlockTitle');
+      const sub = document.getElementById('directUnlockSubtitle');
+      
+      if (notice && title && sub) {
+        title.textContent = `🔓 Unlocking: ${itemTitle}`;
+        sub.textContent = 'Please complete visitor check-in to gain full access to all museum details.';
+        notice.classList.add('visible');
+      }
+
+      const targetEl = notice || document.getElementById('checkinSection');
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      setTimeout(() => {
+        const input = document.getElementById('visitorName');
+        if (input) input.focus();
+      }, 500);
+    }
+
+    // ── Interactive Image Carousel Controller ──────────────────────
+    const carouselSlides = document.querySelectorAll('.carousel-slide-item');
+    const carouselDots = document.querySelectorAll('.carousel-dot');
+    const carouselPrevBtn = document.getElementById('carouselPrevBtn');
+    const carouselNextBtn = document.getElementById('carouselNextBtn');
+    const carouselCounter = document.getElementById('carouselCounter');
+    const museumCarousel = document.getElementById('museumCarousel');
+    let currentSlide = 0;
+    const totalSlides = carouselSlides.length;
+    let carouselInterval = null;
+
+    function goToSlide(index) {
+      currentSlide = (index + totalSlides) % totalSlides;
+      carouselSlides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === currentSlide);
+      });
+      carouselDots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentSlide);
+      });
+      if (carouselCounter) {
+        carouselCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+      }
+    }
+
+    if (carouselPrevBtn) {
+      carouselPrevBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        goToSlide(currentSlide - 1);
+        resetCarouselTimer();
+      });
+    }
+
+    if (carouselNextBtn) {
+      carouselNextBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        goToSlide(currentSlide + 1);
+        resetCarouselTimer();
+      });
+    }
+
+    carouselDots.forEach(dot => {
+      dot.addEventListener('click', (e) => {
+        e.preventDefault();
+        const slideIdx = parseInt(dot.getAttribute('data-slide'), 10) || 0;
+        goToSlide(slideIdx);
+        resetCarouselTimer();
+      });
+    });
+
+    function startCarouselTimer() {
+      carouselInterval = setInterval(() => {
+        goToSlide(currentSlide + 1);
+      }, 5000);
+    }
+
+    function resetCarouselTimer() {
+      if (carouselInterval) clearInterval(carouselInterval);
+      startCarouselTimer();
+    }
+
+    if (museumCarousel) {
+      museumCarousel.addEventListener('mouseenter', () => {
+        if (carouselInterval) clearInterval(carouselInterval);
+      });
+      museumCarousel.addEventListener('mouseleave', () => {
+        startCarouselTimer();
+      });
+
+      // Touch swipe support for mobile
+      let touchStartX = 0;
+      let touchEndX = 0;
+      museumCarousel.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+      museumCarousel.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        if (touchStartX - touchEndX > 50) {
+          goToSlide(currentSlide + 1);
+          resetCarouselTimer();
+        } else if (touchEndX - touchStartX > 50) {
+          goToSlide(currentSlide - 1);
+          resetCarouselTimer();
+        }
+      }, { passive: true });
+    }
+
+    startCarouselTimer();
+
+    // ── Existing Gate & Form Handlers (Preserved for compatibility) ─
     const urlParams = new URLSearchParams(window.location.search);
     const redirectUrl = urlParams.get('redirect') ? decodeURIComponent(urlParams.get('redirect')) : '';
     const initialTab = urlParams.get('tab') || 'visitor';
 
-    // Show Tag Scanned / Protected Access Banner if redirected from an exhibit or page
     if (redirectUrl && (typeof Gate === 'undefined' || !Gate.isGatePage(redirectUrl))) {
+      directTargetUrl = redirectUrl;
       const notice = document.getElementById('portalTagNotice');
       const title = document.getElementById('tagNoticeTitle');
       const sub = document.getElementById('tagNoticeSubtitle');
@@ -355,7 +2016,7 @@ body {
       }
     }
 
-    // Tabs
+    // Portal Tabs
     const tabVisitorBtn = document.getElementById('tabVisitorBtn');
     const tabAdminBtn = document.getElementById('tabAdminBtn');
     const visitorTabContent = document.getElementById('visitorTabContent');
@@ -369,7 +2030,8 @@ body {
         tabVisitorBtn.setAttribute('aria-selected', 'false');
         visitorTabContent.style.display = 'none';
         adminTabContent.style.display = 'block';
-        document.getElementById('adminUsername').focus();
+        const uInput = document.getElementById('adminUsername');
+        if (uInput) uInput.focus();
       } else {
         tabVisitorBtn.classList.add('active');
         tabVisitorBtn.setAttribute('aria-selected', 'true');
@@ -377,7 +2039,8 @@ body {
         tabAdminBtn.setAttribute('aria-selected', 'false');
         adminTabContent.style.display = 'none';
         visitorTabContent.style.display = 'block';
-        document.getElementById('visitorName').focus();
+        const vInput = document.getElementById('visitorName');
+        if (vInput) vInput.focus();
       }
     }
 
@@ -468,20 +2131,25 @@ body {
           }));
         } catch(e) {}
 
-        // If a redirect URL was preserved (e.g. scanned an exhibit tag)
-        if (redirectUrl && (typeof Gate === 'undefined' || !Gate.isGatePage(redirectUrl))) {
+        const finalDestination = directTargetUrl || redirectUrl;
+
+        // If user clicked an exhibit / program / or scanned an exhibit tag
+        if (finalDestination && (typeof Gate === 'undefined' || !Gate.isGatePage(finalDestination))) {
           submitBtn.innerHTML = '<span>Check-in Verified! Opening exhibit...</span>';
           setTimeout(() => {
-            window.location.replace(redirectUrl);
+            window.location.replace(finalDestination);
           }, 350);
           return;
         }
 
         document.querySelector('.portal-card').style.display = 'none';
-        successDetails.innerHTML = `Welcome, <strong>${escapeHtml(visitorName)}</strong>! Your visit on <strong>${escapeHtml(v.visitDate || '')} at ${escapeHtml(v.visitTime || '')}</strong> has been verified. You now have full access to all museum features.`;
+        const directNoticeEl = document.getElementById('directUnlockNotice');
+        if (directNoticeEl) directNoticeEl.style.display = 'none';
+
+        successDetails.innerHTML = `Welcome, <strong>${escapeHtml(visitorName)}</strong>! Your visit on <strong>${escapeHtml(v.visitDate || '')} at ${escapeHtml(v.visitTime || '')}</strong> has been verified. You now have full access to all museum exhibits, programs, audio tours, and floor maps.`;
         if (continueToDestBtn) {
           continueToDestBtn.href = '/dashboard.html';
-          continueToDestBtn.textContent = 'Explore Museum Exhibits →';
+          continueToDestBtn.innerHTML = '<span>Explore Museum Exhibits &rarr;</span>';
         }
         successMessage.classList.add('visible');
         
@@ -489,17 +2157,18 @@ body {
         errorMessage.textContent = err.message;
         errorMessage.classList.add('visible');
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span>Check In &amp; Enter</span> <span>&rarr;</span>';
+        submitBtn.innerHTML = '<span>Check In &amp; Enter Museum</span> <span>&rarr;</span>';
       }
     });
 
     checkinAnotherBtn?.addEventListener('click', () => {
       form.reset();
       submitBtn.disabled = false;
-      submitBtn.innerHTML = '<span>Check In &amp; Enter</span> <span>&rarr;</span>';
+      submitBtn.innerHTML = '<span>Check In &amp; Enter Museum</span> <span>&rarr;</span>';
       successMessage.classList.remove('visible');
       document.querySelector('.portal-card').style.display = 'block';
-      document.getElementById('visitorName').focus();
+      const vInput = document.getElementById('visitorName');
+      if (vInput) vInput.focus();
     });
 
     // 2. Staff Admin Sign-In Submission
@@ -519,7 +2188,6 @@ body {
       try {
         const { token } = await Api.login(username, password);
         Api.setToken(token);
-        // Security: Clear visitor check-in so admin login does not bleed into visitor session
         if (typeof Gate !== 'undefined') Gate.clearVisitorCheckin();
 
         const target = (redirectUrl && (typeof Gate === 'undefined' || !Gate.isGatePage(redirectUrl)))

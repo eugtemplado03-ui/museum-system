@@ -110,6 +110,11 @@ const Gate = (() => {
         return;
       }
 
+      // Allow authenticated users to view the welcome landing page if requested
+      if (urlParams.get('view') === 'welcome' || urlParams.get('welcome') === '1') {
+        return;
+      }
+
       const redirectUrl = urlParams.get('redirect') ? decodeURIComponent(urlParams.get('redirect')) : '';
       if (redirectUrl && !isGatePage(redirectUrl)) {
         window.location.replace(redirectUrl);
