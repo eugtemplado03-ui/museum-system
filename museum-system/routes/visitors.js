@@ -66,7 +66,7 @@ router.post('/checkin', checkinLimiter, async (req, res) => {
     visitorName: req.body.visitorName.trim(),
     address: req.body.address.trim(),
     sex: req.body.sex,
-    age: req.body.age !== undefined && req.body.age !== '' ? parseInt(req.body.age, 10) : null,
+    age: req.body.age !== undefined && req.body.age !== null && req.body.age !== '' && !isNaN(parseInt(req.body.age, 10)) ? parseInt(req.body.age, 10) : null,
     contactNumber: (req.body.contactNumber || '').trim(),
     email: (req.body.email || '').trim(),
     groupName: (req.body.groupName || '').trim(),

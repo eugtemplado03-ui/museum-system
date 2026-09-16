@@ -10,7 +10,16 @@
     "start": "node server.js",
     "dev": "node server.js",
     "seed": "node scripts/seed.js",
-    "test": "jest"
+    "test": "jest",
+    "test:unit": "jest",
+    "test:db": "node --test test/categories.test.js test/visitors-artifacts.test.js test/image-paths.test.js",
+    "test:system": "node --test test/system-health.test.js test/security.test.js test/chatbot-trilingual.test.js test/pinpoint.test.js"
+  },
+  "jest": {
+    "testMatch": [
+      "<rootDir>/test/admin.test.js",
+      "<rootDir>/test/api.test.js"
+    ]
   },
   "keywords": [],
   "author": "",

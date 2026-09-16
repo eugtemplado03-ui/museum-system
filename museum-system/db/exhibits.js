@@ -39,6 +39,10 @@ const DEFAULT_CATEGORIES = [
   'Character & Heritage', 'Environmental', 'Reading & Learning', 'Other'
 ];
 
+function escapeRegex(str) {
+  return String(str || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function normalizeImagePaths(value) {
   if (!value) return [];
   if (Array.isArray(value)) return value.filter(Boolean).map(String);
@@ -146,7 +150,8 @@ async function all() {
 }
 
 async function findByCode(code) {
-  const doc = await Exhibit.findOne({ code: { $regex: new RegExp(`^${code}$`, 'i') } }).lean();
+  const safeCode = escapeRegex(code);
+  const doc = await Exhibit.findOne({ code: { $regex: new RegExp(`^${safeCode}$`, 'i') } }).lean();
   return enrichExhibit(doc);
 }
 
@@ -242,7 +247,8 @@ async function addCategory(category) {
   const value = String(category || '').trim();
   if (!value) return null;
   await ensureCategories();
-  const exists = await Category.findOne({ name: { $regex: new RegExp(`^${value}$`, 'i') } });
+  const safeVal = escapeRegex(value);
+  const exists = await Category.findOne({ name: { $regex: new RegExp(`^${safeVal}$`, 'i') } });
   if (exists) return null;
   const newCat = new Category({ name: value });
   await newCat.save();
@@ -256,10 +262,12 @@ async function updateCategory(oldCategory, newCategory) {
   if (oldValue === newValue) return oldValue;
 
   await ensureCategories();
-  const oldCat = await Category.findOne({ name: { $regex: new RegExp(`^${oldValue}$`, 'i') } });
+  const safeOld = escapeRegex(oldValue);
+  const safeNew = escapeRegex(newValue);
+  const oldCat = await Category.findOne({ name: { $regex: new RegExp(`^${safeOld}$`, 'i') } });
   if (!oldCat) return null;
 
-  const duplicate = await Category.findOne({ name: { $regex: new RegExp(`^${newValue}$`, 'i') } });
+  const duplicate = await Category.findOne({ name: { $regex: new RegExp(`^${safeNew}$`, 'i') } });
   if (duplicate && duplicate._id.toString() !== oldCat._id.toString()) {
     await Category.deleteOne({ _id: oldCat._id });
   } else {
@@ -268,7 +276,7 @@ async function updateCategory(oldCategory, newCategory) {
   }
 
   await Exhibit.updateMany(
-    { category: { $regex: new RegExp(`^${oldValue}$`, 'i') } },
+    { category: { $regex: new RegExp(`^${safeOld}$`, 'i') } },
     { $set: { category: newValue } }
   );
 
@@ -279,7 +287,8 @@ async function deleteCategory(category) {
   const value = String(category || '').trim();
   if (!value) return false;
   await ensureCategories();
-  const oldCat = await Category.findOne({ name: { $regex: new RegExp(`^${value}$`, 'i') } });
+  const safeVal = escapeRegex(value);
+  const oldCat = await Category.findOne({ name: { $regex: new RegExp(`^${safeVal}$`, 'i') } });
   if (!oldCat) return false;
 
   await Category.deleteOne({ _id: oldCat._id });
@@ -295,7 +304,7 @@ async function deleteCategory(category) {
   }
 
   await Exhibit.updateMany(
-    { category: { $regex: new RegExp(`^${value}$`, 'i') } },
+    { category: { $regex: new RegExp(`^${safeVal}$`, 'i') } },
     { $set: { category: fallback } }
   );
 
@@ -306,7 +315,8 @@ async function assignExhibitsToCategory(category, exhibitIds) {
   const catName = String(category || '').trim();
   if (!catName) return false;
   await ensureCategories();
-  const exists = await Category.findOne({ name: { $regex: new RegExp(`^${catName}$`, 'i') } });
+  const safeName = escapeRegex(catName);
+  const exists = await Category.findOne({ name: { $regex: new RegExp(`^${safeName}$`, 'i') } });
   if (!exists) {
     const newCat = new Category({ name: catName });
     await newCat.save();

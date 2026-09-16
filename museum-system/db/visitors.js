@@ -93,7 +93,7 @@ async function create(payload) {
     email: (payload.email || '').trim(),
     address: (payload.address || '').trim(),
     sex: payload.sex || '',
-    age: payload.age !== undefined && payload.age !== '' ? parseInt(payload.age, 10) : null,
+    age: payload.age !== undefined && payload.age !== null && payload.age !== '' && !isNaN(parseInt(payload.age, 10)) ? parseInt(payload.age, 10) : null,
     visitDate: payload.visitDate || defaultDate,
     visitTime: payload.visitTime || defaultTime,
     purpose: payload.purpose || 'General Visit',

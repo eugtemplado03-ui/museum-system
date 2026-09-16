@@ -61,14 +61,14 @@ describe('Visitors API', () => {
   it('should check in a new visitor', async () => {
     const response = await request(app)
       .post('/api/visitors/checkin')
-      .send({ name: 'John Doe' });
+      .send({ visitorName: 'John Doe', address: 'Bacolod City', sex: 'Male' });
 
     expect(response.status).toBe(201);
-    expect(response.body.visitor.name).toBe('John Doe');
+    expect(response.body.visitor.visitorName).toBe('John Doe');
     expect(response.body.visitor.id).toBeDefined();
 
     // Verify in database
     const v = await Visitor.findOne({ id: response.body.visitor.id });
-    expect(v.name).toBe('John Doe');
+    expect(v.visitorName).toBe('John Doe');
   });
 });

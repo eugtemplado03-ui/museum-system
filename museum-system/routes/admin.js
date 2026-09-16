@@ -12,6 +12,10 @@ async function withExhibitInfo(exhibitId) {
   return { code: ex ? ex.code : null, title: ex ? ex.title : '(deleted exhibit)' };
 }
 
+router.get('/me', (req, res) => {
+  res.json({ user: req.user });
+});
+
 router.get('/analytics', async (req, res) => {
   try {
     const totals = await analytics.totals();

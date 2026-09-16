@@ -143,9 +143,13 @@ router.post('/speak', async (req, res) => {
         text: cleanText,
         format: 'mp3'
       };
-      if (process.env.FISH_AUDIO_MODEL && process.env.FISH_AUDIO_MODEL !== 's2.1-pro-free') {
-        fishPayload.reference_id = process.env.FISH_AUDIO_MODEL;
+      const voiceRef = req.body.reference_id || req.body.voice || (process.env.FISH_AUDIO_MODEL && process.env.FISH_AUDIO_MODEL !== 's2.1-pro-free' ? process.env.FISH_AUDIO_MODEL : null);
+      if (voiceRef) {
+        fishPayload.reference_id = voiceRef;
       }
+
+      const controller = new AbortController();
+      const fishTimeout = setTimeout(() => controller.abort(), 7000);
 
       const response = await fetch('https://api.fish.audio/v1/tts', {
         method: 'POST',
@@ -153,8 +157,10 @@ router.post('/speak', async (req, res) => {
           'Content-Type': 'application/json',
           Authorization: 'Bearer ' + fishKey.trim()
         },
-        body: JSON.stringify(fishPayload)
+        body: JSON.stringify(fishPayload),
+        signal: controller.signal
       });
+      clearTimeout(fishTimeout);
 
       if (response.ok) {
         const audioBuffer = await response.arrayBuffer();
