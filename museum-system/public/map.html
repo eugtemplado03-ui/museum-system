@@ -19,17 +19,17 @@
    THEMES & DESIGN SYSTEM (MAXIMUM VISIBILITY & WIDESCREEN EXPERIENCE)
    ========================================================================== */
     :root {
-      --map-bg: #03131c;
-      --map-board-bg: #051d2a;
-      --map-grid-line: rgba(0, 229, 255, 0.12);
-      --map-wall-ext: #00f0ff;
-      --map-wall-int: #00b4d8;
-      --map-text-color: #f8fafc;
-      --map-panel-bg: rgba(3, 20, 29, 0.96);
-      --map-border: rgba(0, 240, 255, 0.3);
-      --sidebar-bg: rgba(2, 16, 24, 0.95);
-      --sidebar-border: rgba(0, 240, 255, 0.2);
-      --teal-glow: 0 0 20px rgba(0, 240, 255, 0.5);
+      --map-bg: #f8fafc;
+      --map-board-bg: #ffffff;
+      --map-grid-line: rgba(29, 78, 216, 0.08);
+      --map-wall-ext: #1d4ed8;
+      --map-wall-int: #2563eb;
+      --map-text-color: #000000;
+      --map-panel-bg: #ffffff;
+      --map-border: #dbeafe;
+      --sidebar-bg: #ffffff;
+      --sidebar-border: #dbeafe;
+      --teal-glow: 0 4px 16px rgba(29, 78, 216, 0.12);
     }
 
     /* Classic Architectural CAD Blueprint Theme */
@@ -68,26 +68,22 @@
       overflow: hidden;
       font-family: 'Open Sans', 'Nunito', sans-serif;
       user-select: none;
-      background:
-        linear-gradient(180deg, rgba(8, 28, 36, 0.45) 0%, rgba(5, 20, 26, 0.65) 100%),
-        url('/uploads/header-bg.webp') center / cover no-repeat fixed;
-      background-attachment: fixed;
-      color: #e2e8f0;
+      background: #ffffff;
+      color: #000000;
     }
 
     /* ==========================================================================
    COMPACT HEADER & TOOLBAR (SAVING VERTICAL SPACE FOR MAP VIEWPORT)
    ========================================================================== */
     .map-header {
-      background: linear-gradient(180deg, rgba(0, 36, 46, 0.82) 0%, rgba(0, 24, 32, 0.88) 100%);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1.5px solid rgba(0, 174, 189, 0.3);
+      background: #ffffff !important;
+      border-bottom: 1.5px solid #dbeafe !important;
       padding: 8px 18px;
       position: relative;
       z-index: 50;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
       flex-shrink: 0;
+      color: #000000 !important;
     }
 
     .map-header-inner {
@@ -114,7 +110,7 @@
       font-family: 'Nunito', sans-serif;
       font-size: 18px;
       font-weight: 900;
-      color: #ffffff;
+      color: #000000;
       margin: 0;
       display: flex;
       align-items: center;
@@ -123,7 +119,7 @@
 
     .map-header-title p {
       margin: 0;
-      color: #94a3b8;
+      color: #374151;
       font-size: 12px;
     }
 
@@ -137,11 +133,11 @@
     /* Segmented Toggle Buttons */
     .segmented-control {
       display: inline-flex;
-      background: rgba(0, 0, 0, 0.6);
-      border: 1.5px solid var(--map-border);
+      background: #eff6ff;
+      border: 1.5px solid #bfdbfe;
       border-radius: 999px;
       padding: 2px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+      box-shadow: none;
     }
 
     .seg-btn {
@@ -152,7 +148,7 @@
       border-radius: 999px;
       border: none;
       background: transparent;
-      color: #94a3b8;
+      color: #000000;
       font-family: 'Nunito', sans-serif;
       font-size: 12px;
       font-weight: 800;
@@ -162,14 +158,14 @@
     }
 
     .seg-btn:hover {
-      color: #fff;
-      background: rgba(255, 255, 255, 0.08);
+      color: #1d4ed8;
+      background: #dbeafe;
     }
 
     .seg-btn.active {
-      background: #00d2e0;
-      color: #03131c;
-      box-shadow: 0 2px 10px rgba(0, 210, 224, 0.6);
+      background: #1d4ed8;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(29, 78, 216, 0.3);
       font-weight: 900;
     }
 
@@ -178,12 +174,13 @@
       font-weight: 800;
       padding: 1px 6px;
       border-radius: 999px;
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(0, 0, 0, 0.08);
+      color: inherit;
     }
 
     .seg-btn.active .seg-badge {
-      background: rgba(0, 0, 0, 0.25);
-      color: #03131c;
+      background: rgba(255, 255, 255, 0.25);
+      color: #ffffff;
     }
 
     /* Second Row: Search + Category Chips + Sidebar Toggle */
@@ -206,17 +203,17 @@
       width: 100%;
       padding: 6px 12px 6px 32px;
       border-radius: 8px;
-      border: 1px solid var(--map-border);
-      background: rgba(0, 18, 28, 0.8);
-      color: #fff;
+      border: 1.5px solid #bfdbfe;
+      background: #ffffff;
+      color: #000000;
       font-size: 12px;
       box-sizing: border-box;
     }
 
     .map-search-wrap input:focus {
       outline: none;
-      border-color: #00f0ff;
-      box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.25);
+      border-color: #1d4ed8;
+      box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.2);
     }
 
     .map-search-icon {
@@ -245,9 +242,9 @@
       border-radius: 16px;
       font-size: 11.5px;
       font-weight: 700;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(255, 255, 255, 0.05);
-      color: #cbd5e1;
+      border: 1.5px solid #bfdbfe;
+      background: #eff6ff;
+      color: #000000;
       cursor: pointer;
       white-space: nowrap;
       transition: all 0.2s;
@@ -257,8 +254,14 @@
     }
 
     .chip:hover {
-      background: rgba(255, 255, 255, 0.12);
-      color: #fff;
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .chip.active {
+      background: #1d4ed8;
+      color: #ffffff;
+      border-color: #1d4ed8;
     }
 
     .chip.active {
@@ -282,15 +285,16 @@
     /* Collapsible Room & Exhibit Directory Sidebar */
     .map-directory-sidebar {
       width: 320px;
-      background: var(--sidebar-bg);
-      border-right: 1.5px solid var(--sidebar-border);
+      background: #ffffff;
+      border-right: 1.5px solid #dbeafe;
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
       transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s ease;
       z-index: 35;
-      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.05);
       overflow: hidden;
+      color: #000000;
     }
 
     .map-directory-sidebar.collapsed {
@@ -301,11 +305,11 @@
 
     .sidebar-header {
       padding: 12px 16px;
-      border-bottom: 1px solid var(--sidebar-border);
+      border-bottom: 1.5px solid #dbeafe;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(0, 0, 0, 0.2);
+      background: #eff6ff;
       flex-shrink: 0;
     }
 
@@ -313,7 +317,7 @@
       font-family: 'Nunito', sans-serif;
       font-size: 14px;
       font-weight: 900;
-      color: #00f0ff;
+      color: #000000;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -327,6 +331,7 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
+      background: #ffffff;
     }
 
     .sidebar-section-title {
@@ -334,7 +339,7 @@
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.8px;
-      color: #94a3b8;
+      color: #1d4ed8;
       margin-bottom: 6px;
       display: flex;
       align-items: center;
@@ -353,8 +358,9 @@
       justify-content: space-between;
       padding: 8px 10px;
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      color: #000000;
       cursor: pointer;
       transition: all 0.2s;
       color: #e2e8f0;
@@ -392,10 +398,7 @@
       position: relative;
       flex: 1;
       height: 100%;
-      background:
-        linear-gradient(180deg, rgba(3, 19, 28, 0.76) 0%, rgba(1, 14, 20, 0.88) 100%),
-        url('/uploads/header-bg.webp') center / cover no-repeat fixed;
-      background-attachment: fixed;
+      background: #f8fafc;
       overflow: hidden;
       cursor: grab;
       touch-action: none;
@@ -1366,15 +1369,15 @@
     /* Sidebar Directory Category Room Groups */
     .cat-room-group {
       margin-bottom: 10px;
-      background: rgba(0, 22, 33, 0.65);
-      border: 1px solid rgba(0, 240, 255, 0.18);
+      background: #f8fafc;
+      border: 1.5px solid #dbeafe;
       border-radius: 10px;
       overflow: hidden;
       transition: all 0.2s;
     }
 
     .cat-room-group:hover {
-      border-color: rgba(0, 240, 255, 0.45);
+      border-color: #93c5fd;
     }
 
     .cat-room-header {
@@ -1382,14 +1385,14 @@
       align-items: center;
       justify-content: space-between;
       padding: 9px 12px;
-      background: rgba(0, 32, 46, 0.75);
+      background: #eff6ff;
       cursor: pointer;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      border-bottom: 1px solid #dbeafe;
       transition: background 0.15s;
     }
 
     .cat-room-header:hover {
-      background: rgba(0, 48, 70, 0.9);
+      background: #dbeafe;
     }
 
     .cat-room-title-wrap {
@@ -1408,7 +1411,7 @@
     .cat-room-name {
       font-size: 13px;
       font-weight: 800;
-      color: #ffffff;
+      color: #000000;
     }
 
     .cat-room-count-badge {
@@ -1416,8 +1419,9 @@
       font-weight: 800;
       padding: 2px 7px;
       border-radius: 999px;
-      border: 1px solid;
-      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid #bfdbfe;
+      background: #ffffff;
+      color: #1d4ed8 !important;
     }
 
     .cat-room-exhibits-list {
@@ -1435,10 +1439,11 @@
       border-radius: 6px;
       cursor: pointer;
       transition: all 0.15s;
+      color: #000000;
     }
 
     .cat-exhibit-item:hover {
-      background: rgba(0, 240, 255, 0.15);
+      background: #eff6ff;
     }
 
     .cat-exhibit-info {
@@ -1446,12 +1451,15 @@
       align-items: center;
       gap: 6px;
       font-size: 11.5px;
-      color: #cbd5e1;
-      min-width: 0;
+      font-weight: 600;
+      color: #000000;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .cat-exhibit-item:hover .cat-exhibit-info {
-      color: #ffffff;
+      color: #1d4ed8;
     }
 
     .cat-exhibit-bullet {
