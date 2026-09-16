@@ -835,9 +835,9 @@ function initDashboardPieChart(exhibits, categoryCounts, resources) {
         datasets: [{
           data: data,
           backgroundColor: bgColors,
-          borderColor: 'rgba(0, 32, 42, 0.9)',
+          borderColor: '#ffffff',
           borderWidth: 2,
-          hoverBorderColor: '#ffffff',
+          hoverBorderColor: '#3b82f6',
           hoverBorderWidth: 2.5,
           hoverOffset: 6
         }]
@@ -956,9 +956,9 @@ function initDashboardTrafficChart(dailyData) {
       datasetLabel = 'Exhibit Views';
     } else {
       values = dataset.map(d => d.total !== undefined ? d.total : ((d.scans || 0) + (d.views || 0)));
-      strokeColor = '#00f0ff';
-      gradientStart = 'rgba(0, 240, 255, 0.35)';
-      gradientEnd = 'rgba(0, 240, 255, 0.0)';
+      strokeColor = '#3b82f6';
+      gradientStart = 'rgba(59, 130, 246, 0.25)';
+      gradientEnd = 'rgba(59, 130, 246, 0.0)';
       datasetLabel = 'Total Traffic';
     }
 
@@ -979,7 +979,7 @@ function initDashboardTrafficChart(dailyData) {
           fill: true,
           tension: 0.35,
           pointBackgroundColor: strokeColor,
-          pointBorderColor: '#00202a',
+          pointBorderColor: '#ffffff',
           pointBorderWidth: 1.5,
           pointRadius: 3,
           pointHoverRadius: 5.5,
@@ -1000,10 +1000,10 @@ function initDashboardTrafficChart(dailyData) {
             display: false
           },
           tooltip: {
-            backgroundColor: 'rgba(6, 28, 38, 0.92)',
+            backgroundColor: '#0f172a',
             titleColor: '#ffffff',
             bodyColor: '#e2e8f0',
-            borderColor: strokeColor,
+            borderColor: '#3b82f6',
             borderWidth: 1,
             padding: 9,
             cornerRadius: 8,
@@ -1019,11 +1019,11 @@ function initDashboardTrafficChart(dailyData) {
         scales: {
           x: {
             grid: {
-              color: 'rgba(255, 255, 255, 0.06)',
+              color: 'rgba(15, 23, 42, 0.06)',
               drawBorder: false
             },
             ticks: {
-              color: '#94a3b8',
+              color: '#64748b',
               font: { size: 9.5, family: 'Nunito, sans-serif' },
               maxRotation: 0,
               autoSkip: true,
@@ -1033,11 +1033,11 @@ function initDashboardTrafficChart(dailyData) {
           y: {
             beginAtZero: true,
             grid: {
-              color: 'rgba(255, 255, 255, 0.06)',
+              color: 'rgba(15, 23, 42, 0.06)',
               drawBorder: false
             },
             ticks: {
-              color: '#94a3b8',
+              color: '#64748b',
               font: { size: 9.5, family: 'IBM Plex Mono, monospace' },
               precision: 0,
               maxTicksLimit: 5

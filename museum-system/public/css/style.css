@@ -5784,14 +5784,36 @@ body.admin-portal-body {
 }
 
 /* ================================================================
-   FLAT DESIGN WHITE AND BLUE SYSTEM-WIDE THEME SUITE
-   - Clean, flat white and blue color palette across all user & admin displays
-   - All background photos removed from all headers, bodies, heroes, sidebars
-   - Crisp black text across all displays, headings, stats, labels, cards
-   - Soft shadow in all boxes, cards, containers, panels, modals
+   NAVY + WHITE + ELECTRIC BLUE UI SUITE
+   - Design Reference: #0F172A (Navy) + #FFFFFF (White) + #3B82F6 (Electric Blue)
+   - Sidebar: Deep Navy (#0F172A) with Electric Blue (#3B82F6) Active Navigation Pills
+   - Body Canvas: Clean off-white background (#F8FAFC)
+   - Cards & Boxes: Pure White (#FFFFFF) with Soft Shadows and subtle blue borders
+   - Headings & KPI Values: Crisp Black / Navy (#0F172A) for maximum contrast
+   - Subtitles & Labels: Modern Slate (#64748B)
+   - Primary Buttons: Solid Electric Blue (#3B82F6) with white text & smooth hover
    ================================================================ */
 
-/* 1. Global Page Backgrounds & Canvas (No Wallpaper Photos) */
+:root {
+  --theme-navy: #0F172A;
+  --theme-navy-dark: #090E1A;
+  --theme-navy-surface: #1E293B;
+  --theme-navy-border: #334155;
+  --theme-white: #FFFFFF;
+  --theme-canvas: #F8FAFC;
+  --theme-canvas-subtle: #F1F5F9;
+  --theme-electric-blue: #3B82F6;
+  --theme-electric-blue-hover: #2563EB;
+  --theme-electric-blue-soft: #EFF6FF;
+  --theme-electric-blue-border: #DBEAFE;
+  --theme-electric-blue-glow: rgba(59, 130, 246, 0.35);
+  --theme-text-black: #0F172A;
+  --theme-text-muted: #64748B;
+  --theme-soft-shadow: 0 4px 20px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
+  --theme-soft-shadow-hover: 0 10px 28px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+/* 1. Canvas & Body Background */
 html,
 body,
 body.admin-portal-body,
@@ -5799,33 +5821,35 @@ body.admin-portal-body,
 .user-main,
 .admin-layout,
 .admin-main,
-main {
-  background: #ffffff !important;
+main,
+.page-wrap,
+.container {
+  background-color: #F8FAFC !important;
   background-image: none !important;
-  color: #000000 !important;
+  color: #0F172A !important;
 }
 
 /* 2. Top Navigation Bar (User & Admin Displays) */
 .topbar,
 .admin-topbar-header,
 .welcome-nav {
-  background: #ffffff !important;
+  background: #FFFFFF !important;
   background-image: none !important;
-  border-bottom: 2px solid #2563eb !important;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
-  color: #000000 !important;
+  border-bottom: 1.5px solid #E2E8F0 !important;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04) !important;
+  color: #0F172A !important;
 }
 
 .topbar .brand,
 .admin-brand,
 .welcome-brand {
-  color: #000000 !important;
+  color: #0F172A !important;
 }
 
 .brand .name,
 .admin-brand .name,
 .welcome-brand-text h1 {
-  color: #000000 !important;
+  color: #0F172A !important;
   font-weight: 800 !important;
   text-shadow: none !important;
 }
@@ -5833,186 +5857,183 @@ main {
 .brand .tagline,
 .admin-badge-sub,
 .welcome-brand-text p {
-  color: #1d4ed8 !important;
+  color: #64748B !important;
 }
 
 .brand-mark,
 .admin-brand .brand-mark,
 .welcome-brand-mark {
-  background: #1d4ed8 !important;
-  color: #ffffff !important;
+  background: #3B82F6 !important;
+  color: #FFFFFF !important;
   border: none !important;
-  box-shadow: 0 2px 8px rgba(29, 78, 216, 0.25) !important;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3) !important;
 }
 
 .topbar .nav-btn,
 .welcome-menu-link {
-  color: #000000 !important;
-  font-weight: 700 !important;
+  color: #0F172A !important;
 }
 
 .topbar .nav-btn:hover,
-.topbar .nav-btn.active,
 .welcome-menu-link:hover {
-  color: #1d4ed8 !important;
-  background: #eff6ff !important;
-  border: 1px solid #bfdbfe !important;
-  border-radius: 8px !important;
+  background: #EFF6FF !important;
+  color: #3B82F6 !important;
 }
 
-.sidebar-toggle-btn {
-  background: #eff6ff !important;
-  border: 1.5px solid #bfdbfe !important;
-  color: #1d4ed8 !important;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05) !important;
+.topbar .nav-btn.active {
+  background: #3B82F6 !important;
+  color: #FFFFFF !important;
 }
 
-.sidebar-toggle-btn .toggle-bar {
-  background: #1d4ed8 !important;
-}
-
-/* 3. Hero & Banner Sections Across All User & Admin Displays */
-.hero,
-.scan-hero,
-.exhibits-hero,
-.page-hero,
-.programs-hero,
-.gallery-hero,
-.events-hero,
-.dash-hero-banner,
-.admin-hero-banner {
-  background: #ffffff !important;
-  background-image: none !important;
-  border: 1.5px solid #dbeafe !important;
-  border-radius: 20px !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03) !important;
-  color: #000000 !important;
-}
-
-.scan-hero::before,
-.scan-hero::after,
-.exhibits-hero::before,
-.exhibits-hero::after,
-.page-hero::before,
-.page-hero::after {
-  display: none !important;
-}
-
-.eyebrow,
-.exhibits-hero-eyebrow,
-.dash-hero-eyebrow {
-  color: #1d4ed8 !important;
+/* Topbar Context Pills */
+.admin-badge-pill {
+  background: #EFF6FF !important;
+  color: #3B82F6 !important;
+  border: 1px solid #BFDBFE !important;
   font-weight: 800 !important;
-  letter-spacing: 0.14em !important;
-  text-shadow: none !important;
 }
 
-.scan-hero h1,
-.scan-hero p,
-.exhibits-hero h1,
-.exhibits-hero p,
-.page-hero h1,
-.page-hero h2,
-.page-hero p,
-.dash-hero-title,
-.dash-hero-sub {
-  color: #000000 !important;
-  text-shadow: none !important;
-}
-
-/* 4. Scanner Frame & Viewport (Dashboard) */
-.scanner-frame {
-  background: #ffffff !important;
-  border: 1.5px solid #dbeafe !important;
-  border-radius: 18px !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03) !important;
-  color: #000000 !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.viewport {
-  background: #eff6ff !important;
-  border: 1.5px solid #bfdbfe !important;
-}
-
-.viewport-placeholder {
-  color: #000000 !important;
-}
-
-.corner {
-  border-color: #2563eb !important;
-}
-
-.scan-status {
-  color: #000000 !important;
-}
-
-.manual-row input {
-  background: #ffffff !important;
-  border: 1.5px solid #bfdbfe !important;
-  color: #000000 !important;
-}
-
-.manual-row input:focus {
-  border-color: #1d4ed8 !important;
-}
-
-.manual-row #manualGoBtn {
-  background: #1d4ed8 !important;
-  color: #ffffff !important;
-  border: none !important;
-}
-
-/* 5. User Previews & Blocks on Dashboard */
-.home-preview-block,
-#homeRecommendedBlock,
-#homeExhibitsBlock,
-#homeProgramsBlock,
-#homeEventsBlock,
-#homeGalleryBlock,
-.featured-video-wrap {
-  background: #ffffff !important;
-  background-image: none !important;
-  border: 1.5px solid #dbeafe !important;
-  border-radius: 16px !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03) !important;
-  color: #000000 !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-.home-preview-title,
-.home-preview-sub,
-.featured-video-label h2 {
-  color: #000000 !important;
-  text-shadow: none !important;
-}
-
-.home-preview-icon {
-  background: #eff6ff !important;
-  border: 1.5px solid #bfdbfe !important;
-  color: #1d4ed8 !important;
-}
-
-.home-preview-viewall {
-  color: #1d4ed8 !important;
+.admin-context-pill {
+  background: #F1F5F9 !important;
+  border: 1px solid #E2E8F0 !important;
+  color: #0F172A !important;
   font-weight: 700 !important;
 }
 
-.home-minimal-card {
-  background: #ffffff !important;
-  border: 1.5px solid #dbeafe !important;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04) !important;
-  color: #000000 !important;
+.context-pulse-dot {
+  background: #3B82F6 !important;
+  box-shadow: 0 0 6px rgba(59, 130, 246, 0.6) !important;
 }
 
-.home-minimal-card h4,
-.home-minimal-card p {
-  color: #000000 !important;
+.admin-view-site-link {
+  background: #EFF6FF !important;
+  border: 1px solid #BFDBFE !important;
+  color: #3B82F6 !important;
+  font-weight: 700 !important;
 }
 
-/* 6. Soft Shadow in All Boxes / Cards across User & Admin Displays */
+.admin-view-site-link:hover {
+  background: #3B82F6 !important;
+  color: #FFFFFF !important;
+}
+
+.admin-curator-chip {
+  background: #F8FAFC !important;
+  border: 1px solid #E2E8F0 !important;
+  color: #0F172A !important;
+}
+
+.admin-header-signout-btn {
+  background: #FEE2E2 !important;
+  border: 1px solid #FECACA !important;
+  color: #DC2626 !important;
+}
+
+.admin-header-signout-btn:hover {
+  background: #DC2626 !important;
+  color: #FFFFFF !important;
+}
+
+/* 3. Deep Navy Sidebar (#0F172A) with Electric Blue (#3B82F6) Active Nav Pill */
+.admin-sidebar,
+.sidebar,
+.user-sidebar,
+.browse-sidebar {
+  background: #0F172A !important;
+  background-image: none !important;
+  border-right: 1px solid #1E293B !important;
+  box-shadow: 4px 0 24px rgba(15, 23, 42, 0.12) !important;
+}
+
+.admin-sidebar-brand,
+.user-sidebar-brand {
+  background: #0B1120 !important;
+  border-bottom: 1px solid #1E293B !important;
+  color: #FFFFFF !important;
+}
+
+.admin-sidebar-logo {
+  background: #3B82F6 !important;
+  color: #FFFFFF !important;
+}
+
+.admin-sidebar-title,
+.user-sidebar-title {
+  color: #FFFFFF !important;
+  font-weight: 800 !important;
+}
+
+.admin-sidebar-title span {
+  color: #94A3B8 !important;
+}
+
+.admin-sidebar-section-title,
+.user-sidebar-section-title,
+.browse-sidebar-title {
+  color: #64748B !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+.admin-sidebar-btn,
+.user-sidebar-btn,
+.cat-sidebar-btn {
+  color: #94A3B8 !important;
+  border-radius: 10px !important;
+  transition: all 0.2s ease !important;
+  border: none !important;
+  background: transparent !important;
+  margin: 2px 0 !important;
+  padding: 10px 14px !important;
+  font-weight: 600 !important;
+}
+
+.admin-sidebar-btn:hover,
+.user-sidebar-btn:hover,
+.cat-sidebar-btn:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #FFFFFF !important;
+}
+
+/* Electric Blue Active Navigation Pill (Matching Mockup) */
+.admin-sidebar-btn.active,
+.user-sidebar-btn.active,
+.cat-sidebar-btn.active {
+  background: #3B82F6 !important;
+  color: #FFFFFF !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35) !important;
+}
+
+.admin-sidebar-btn.active .admin-sidebar-icon,
+.user-sidebar-btn.active .admin-sidebar-icon {
+  color: #FFFFFF !important;
+}
+
+.admin-sidebar-indicator {
+  display: none !important;
+}
+
+.admin-sidebar-footer,
+.user-sidebar-footer {
+  background: #0B1120 !important;
+  border-top: 1px solid #1E293B !important;
+}
+
+.admin-sidebar-signout,
+.user-sidebar-sublink {
+  color: #94A3B8 !important;
+}
+
+.admin-sidebar-signout:hover,
+.user-sidebar-sublink:hover {
+  color: #FFFFFF !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 4. White Cards & KPI Boxes with Soft Shadows (#FFFFFF on #F8FAFC) */
 .card,
 .content-card,
 .tag-card,
@@ -6035,9 +6056,6 @@ main {
 .modal,
 .modal-box,
 .admin-modal-card,
-.browse-sidebar,
-.user-sidebar,
-.admin-sidebar,
 .portal-card,
 .about-card,
 .feedback-card,
@@ -6048,18 +6066,25 @@ main {
 .filter-chip-bar,
 .panel,
 .admin-auth-card,
-.login-card {
-  background: #ffffff !important;
+.login-card,
+.home-preview-block,
+#homeRecommendedBlock,
+#homeExhibitsBlock,
+#homeProgramsBlock,
+#homeEventsBlock,
+#homeGalleryBlock,
+.featured-video-wrap,
+.home-minimal-card {
+  background: #FFFFFF !important;
   background-image: none !important;
-  border: 1.5px solid #dbeafe !important;
+  border: 1.5px solid #DBEAFE !important;
   border-radius: 16px !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03) !important;
-  color: #000000 !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+  color: #0F172A !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
-/* Hover on interactive boxes */
 .card:hover,
 .content-card:hover,
 .tag-card:hover,
@@ -6074,161 +6099,119 @@ main {
 .dash-panel-card:hover,
 .about-card:hover {
   transform: translateY(-2px) !important;
-  box-shadow: 0 8px 24px rgba(29, 78, 216, 0.10), 0 2px 6px rgba(0, 0, 0, 0.04) !important;
-  border-color: #93c5fd !important;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+  border-color: #93C5FD !important;
 }
 
-/* 7. Exhibits & Catalog Specifics */
-.tag-card h3,
-.tag-card .meta,
-.content-card h2,
-.content-card h3,
-.content-card p {
-  color: #000000 !important;
+/* 5. KPI Metrics Card Elements */
+.dash-kpi-val,
+.stat-card .num,
+.dash-pie-center-num,
+.dash-metric-num {
+  color: #0F172A !important;
+  font-weight: 900 !important;
   text-shadow: none !important;
 }
 
-.tag-hole {
-  background: #ffffff !important;
-  border: 3px solid #2563eb !important;
+.dash-kpi-lbl,
+.stat-card .label,
+.dash-metric-lbl {
+  color: #64748B !important;
+  font-weight: 700 !important;
 }
 
-.tag-cat {
-  background: #eff6ff !important;
-  color: #1d4ed8 !important;
-  border: 1px solid #bfdbfe !important;
+.dash-kpi-icon-wrap,
+.dash-analytics-icon,
+.home-preview-icon {
+  background: #EFF6FF !important;
+  border: 1px solid #DBEAFE !important;
+  color: #3B82F6 !important;
+  border-radius: 12px !important;
 }
 
+.dash-kpi-badge {
+  background: #EFF6FF !important;
+  border: 1px solid #DBEAFE !important;
+  color: #3B82F6 !important;
+  font-weight: 700 !important;
+  border-radius: 999px !important;
+}
+
+/* 6. Hero Banner / Control Center Callout */
+.dash-hero-banner {
+  background: #FFFFFF !important;
+  border: 1.5px solid #DBEAFE !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+}
+
+.dash-hero-title {
+  color: #0F172A !important;
+  font-weight: 900 !important;
+}
+
+.dash-hero-sub {
+  color: #64748B !important;
+}
+
+.dash-hero-eyebrow {
+  background: #EFF6FF !important;
+  border: 1px solid #DBEAFE !important;
+  color: #3B82F6 !important;
+}
+
+/* 7. Visitor Scanner Hero & Viewport */
+.scan-hero {
+  background: #FFFFFF !important;
+  border: 1.5px solid #DBEAFE !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+  color: #0F172A !important;
+}
+
+.scanner-frame,
+.viewport {
+  background: #F1F5F9 !important;
+  border: 2px solid #3B82F6 !important;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.12) !important;
+}
+
+.scan-title,
+.scan-h2,
+.scan-instructions {
+  color: #0F172A !important;
+}
+
+/* 8. Search & Filters Toolbar */
 .search-box-wrap,
 .filter-controls-group {
-  background: #ffffff !important;
-  border: 1.5px solid #bfdbfe !important;
-  color: #000000 !important;
+  background: #FFFFFF !important;
+  border: 1.5px solid #DBEAFE !important;
+  color: #0F172A !important;
 }
 
 .search-input,
 .filter-select {
-  background: #ffffff !important;
-  color: #000000 !important;
-  border: 1.5px solid #bfdbfe !important;
+  background: #FFFFFF !important;
+  color: #0F172A !important;
+  border: 1.5px solid #DBEAFE !important;
 }
 
-.filter-stats-text {
-  color: #000000 !important;
+.filter-chip {
+  background: #FFFFFF !important;
+  border: 1.5px solid #DBEAFE !important;
+  color: #0F172A !important;
+  border-radius: 999px !important;
 }
 
-.browse-sidebar-title,
-.user-sidebar-section-title {
-  color: #1d4ed8 !important;
-  font-weight: 800 !important;
+.filter-chip.active {
+  background: #3B82F6 !important;
+  color: #FFFFFF !important;
+  border-color: #3B82F6 !important;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3) !important;
 }
 
-.cat-sidebar-btn,
-.user-sidebar-btn {
-  color: #000000 !important;
-}
-
-.cat-sidebar-btn:hover,
-.user-sidebar-btn:hover {
-  background: #eff6ff !important;
-  color: #1d4ed8 !important;
-}
-
-.cat-sidebar-btn.active,
-.user-sidebar-btn.active {
-  background: #eff6ff !important;
-  color: #1d4ed8 !important;
-  border: 1px solid #93c5fd !important;
-  font-weight: 800 !important;
-}
-
-.user-sidebar-brand {
-  border-bottom: 1.5px solid #e2e8f0 !important;
-  color: #000000 !important;
-}
-
-.user-sidebar-title {
-  color: #000000 !important;
-}
-
-.user-sidebar-footer {
-  border-top: 1.5px solid #e2e8f0 !important;
-  background: #ffffff !important;
-}
-
-.user-sidebar-sublink {
-  color: #000000 !important;
-}
-
-.user-sidebar-sublink:hover {
-  color: #1d4ed8 !important;
-  background: #eff6ff !important;
-}
-
-/* 8. Admin Dashboard Panels, Featured Analytics & Quad Boxes */
-.dash-analytics-head,
-.dash-panel-head {
-  border-bottom: 1px solid #e2e8f0 !important;
-}
-
-.dash-analytics-title,
-.dash-panel-title,
-.dash-group-title,
-.dash-pie-title {
-  color: #000000 !important;
-  font-weight: 800 !important;
-}
-
-.dash-analytics-sub,
-.dash-panel-sub,
-.dash-pie-sub {
-  color: #374151 !important;
-}
-
-.dash-analytics-icon {
-  background: #eff6ff !important;
-  border: 1px solid #bfdbfe !important;
-  color: #1d4ed8 !important;
-}
-
-.dash-analytics-metrics-row {
-  background: #eff6ff !important;
-  border: 1.5px solid #dbeafe !important;
-  border-radius: 12px !important;
-}
-
-.dash-metric-num {
-  color: #000000 !important;
-  font-weight: 900 !important;
-}
-
-.dash-metric-lbl {
-  color: #4b5563 !important;
-  font-weight: 700 !important;
-}
-
-.dash-traffic-chart-label {
-  color: #000000 !important;
-  font-weight: 800 !important;
-}
-
-.dash-traffic-toggles {
-  background: #eff6ff !important;
-  border: 1px solid #bfdbfe !important;
-  border-radius: 8px !important;
-}
-
-.dash-traffic-toggle-btn {
-  color: #374151 !important;
-}
-
-.dash-traffic-toggle-btn.active {
-  background: #1d4ed8 !important;
-  color: #ffffff !important;
-  box-shadow: 0 2px 6px rgba(29, 78, 216, 0.25) !important;
-}
-
-/* Flat White & Blue for Quad Boxes Content Rows */
+/* 9. Quad Boxes Rows (Analytics, Categories, Visitors, Events) */
 .dash-cat-row,
 .dash-cat-row.compact,
 .dash-visitor-row,
@@ -6237,12 +6220,12 @@ main {
 .dash-event-row.compact,
 .dash-curator-row,
 .dash-curator-row.compact {
-  background: #f8fafc !important;
-  border: 1.5px solid #e2e8f0 !important;
+  background: #F8FAFC !important;
+  border: 1.5px solid #E2E8F0 !important;
   border-radius: 10px !important;
-  color: #000000 !important;
+  color: #0F172A !important;
   margin-bottom: 6px !important;
-  padding: 6px 10px !important;
+  padding: 8px 12px !important;
   transition: all 0.15s ease !important;
 }
 
@@ -6252,258 +6235,155 @@ main {
 .dash-visitor-row.compact:hover,
 .dash-event-row:hover,
 .dash-event-row.compact:hover {
-  background: #eff6ff !important;
-  border-color: #93c5fd !important;
+  background: #EFF6FF !important;
+  border-color: #93C5FD !important;
 }
 
-.dash-cat-header,
-.dash-cat-header span {
-  color: #000000 !important;
-  font-weight: 700 !important;
-}
-
-.dash-cat-bar-bg,
-.dash-cat-bar-bg.compact {
-  background: #e2e8f0 !important;
-}
-
-.dash-cat-bar-fill {
-  background: #1d4ed8 !important;
-}
-
-.dash-visitor-avatar,
-.dash-visitor-avatar.compact {
-  background: #eff6ff !important;
-  border: 1px solid #bfdbfe !important;
-  color: #1d4ed8 !important;
-}
-
+.dash-cat-name,
 .dash-visitor-name,
-.dash-visitor-name.compact,
-.dash-event-title,
-.dash-event-title.compact,
-.dash-curator-name,
-.dash-curator-name.compact {
-  color: #000000 !important;
+.dash-event-name {
+  color: #0F172A !important;
   font-weight: 700 !important;
 }
 
-.dash-visitor-time,
-.dash-visitor-time.compact,
-.dash-event-sub,
-.dash-event-sub.compact,
-.dash-curator-role,
-.dash-curator-role.compact {
-  color: #4b5563 !important;
+.dash-cat-count {
+  background: #EFF6FF !important;
+  border: 1px solid #DBEAFE !important;
+  color: #3B82F6 !important;
+  font-weight: 800 !important;
 }
 
-.dash-event-date-badge,
-.dash-event-date-badge.compact {
-  background: #eff6ff !important;
-  border: 1px solid #bfdbfe !important;
-  color: #1d4ed8 !important;
-}
-
-.dash-event-day,
-.dash-event-day.compact,
-.dash-event-month,
-.dash-event-month.compact {
-  color: #1d4ed8 !important;
-}
-
-.dash-panel-action {
-  color: #1d4ed8 !important;
-  font-weight: 700 !important;
-}
-
-/* Status Badges */
-.status-badge {
-  background: #eff6ff !important;
-  border: 1px solid #bfdbfe !important;
-  color: #1d4ed8 !important;
-  font-weight: 700 !important;
-}
-
-.status-badge.checked-in,
-.status-badge.active {
-  background: #ecfdf5 !important;
-  border: 1px solid #a7f3d0 !important;
+.dash-visitor-badge {
+  background: #ECFDF5 !important;
+  border: 1px solid #A7F3D0 !important;
   color: #059669 !important;
 }
 
-/* 9. Admin Sidebar */
-.admin-sidebar {
-  background: #ffffff !important;
-  border-right: 1.5px solid #e2e8f0 !important;
-  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.04) !important;
-  color: #000000 !important;
-}
-
-.admin-sidebar-btn {
-  color: #000000 !important;
-  border-radius: 8px !important;
-}
-
-.admin-sidebar-btn:hover {
-  background: #eff6ff !important;
-  color: #1d4ed8 !important;
-}
-
-.admin-sidebar-btn.active {
-  background: #eff6ff !important;
-  color: #1d4ed8 !important;
-  border: 1.5px solid #93c5fd !important;
-  font-weight: 800 !important;
-  box-shadow: inset 0 0 8px rgba(29, 78, 216, 0.08) !important;
-}
-
-.admin-sidebar-heading {
-  color: #1d4ed8 !important;
-  font-weight: 800 !important;
-}
-
-.admin-context-pill,
-.admin-view-site-link,
-.admin-curator-chip {
-  background: #eff6ff !important;
-  border: 1px solid #bfdbfe !important;
-  color: #000000 !important;
-  box-shadow: none !important;
-}
-
-.admin-sidebar-footer {
-  border-top: 1px solid #e2e8f0 !important;
-  background: #ffffff !important;
-  padding: 16px 12px 22px !important;
-}
-
-.admin-sidebar-signout,
-.admin-header-signout-btn {
-  background: #fef2f2 !important;
-  border: 1px solid #fecaca !important;
-  color: #dc2626 !important;
-  font-weight: 700 !important;
-  border-radius: 8px !important;
-}
-
-.admin-sidebar-signout:hover,
-.admin-header-signout-btn:hover {
-  background: #fee2e2 !important;
-  color: #b91c1c !important;
-}
-
-/* 10. Tables in Admin & Ledger */
+/* 10. Tables & Ledgers */
 table.ledger {
-  background: #ffffff !important;
-  color: #000000 !important;
+  background: #FFFFFF !important;
+  border: 1.5px solid #DBEAFE !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
 }
 
 table.ledger th {
-  background: #eff6ff !important;
-  color: #000000 !important;
-  border-bottom: 2px solid #bfdbfe !important;
+  background: #F8FAFC !important;
+  color: #64748B !important;
+  border-bottom: 1.5px solid #E2E8F0 !important;
   font-weight: 800 !important;
-  text-shadow: none !important;
+  font-size: 11.5px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
 }
 
 table.ledger td {
-  background: #ffffff !important;
-  color: #000000 !important;
-  border-bottom: 1px solid #e2e8f0 !important;
+  background: #FFFFFF !important;
+  color: #0F172A !important;
+  border-bottom: 1px solid #F1F5F9 !important;
 }
 
 table.ledger tr:hover td {
-  background: #f0f7ff !important;
+  background: #F8FAFC !important;
 }
 
 .admin-head {
-  background: #eff6ff !important;
-  border-bottom: 1.5px solid #bfdbfe !important;
-  color: #000000 !important;
+  background: #EFF6FF !important;
+  border-bottom: 1.5px solid #DBEAFE !important;
+  color: #0F172A !important;
 }
 
 .admin-head h2 {
-  color: #000000 !important;
+  color: #0F172A !important;
   text-shadow: none !important;
 }
 
-/* 11. Typography — Crisp Black Text Across All Displays */
+/* 11. Typography */
 h1, h2, h3, h4, h5, h6,
 .section-head h2,
 .content-card h2,
 .content-card h3,
-.stat-card .num,
-.stat-card .label,
-.dash-kpi-val,
-.dash-kpi-lbl,
+.page-hero h1,
+.dash-analytics-title,
+.dash-panel-title,
 .dash-group-title,
 .dash-pie-title,
-.dash-pie-center-num,
-.title-cell,
-.page-hero h1,
-.page-hero p,
-.body-text,
-p, label, span:not(.btn):not(.tag):not(.badge):not(.dash-action-btn):not(.btn-submit):not(.admin-badge-pill):not(.yt-badge) {
-  color: #000000 !important;
+.title-cell {
+  color: #0F172A !important;
+  font-weight: 800 !important;
+  text-shadow: none !important;
+}
+
+p, label, span:not(.btn):not(.tag):not(.badge):not(.dash-action-btn):not(.btn-submit):not(.admin-badge-pill):not(.yt-badge):not(.dash-kpi-badge):not(.filter-chip):not(.admin-sidebar-icon):not(.directions-floating-panel *):not(.dir-steps-list *):not(.dir-actions *) {
+  color: #0F172A !important;
   text-shadow: none !important;
 }
 
 .content-card p.desc,
 .content-card .meta,
+.dash-hero-sub,
 .dash-kpi-sub,
 .dash-pie-sub,
+.body-text,
 .stat-card .label {
-  color: #1f2937 !important;
+  color: #64748B !important;
 }
 
-/* 12. Buttons & Controls */
+/* 12. Buttons: Electric Blue Primary (#3B82F6), Soft White Secondary */
 .btn-primary,
 .dash-action-btn.primary,
 .btn-submit {
-  background: #1d4ed8 !important;
-  color: #ffffff !important;
+  background: #3B82F6 !important;
+  color: #FFFFFF !important;
   border: none !important;
   border-radius: 10px !important;
-  box-shadow: 0 2px 8px rgba(29, 78, 216, 0.25) !important;
+  font-weight: 800 !important;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.28) !important;
+  transition: all 0.2s ease !important;
 }
 
 .btn-primary:hover,
 .dash-action-btn.primary:hover,
 .btn-submit:hover {
-  background: #1e40af !important;
+  background: #2563EB !important;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.40) !important;
+  transform: translateY(-1px) !important;
 }
 
 .btn-secondary,
 .dash-action-btn.secondary,
 .btn-ghost {
-  background: #eff6ff !important;
-  border: 1.5px solid #bfdbfe !important;
-  color: #1d4ed8 !important;
+  background: #FFFFFF !important;
+  border: 1.5px solid #DBEAFE !important;
+  color: #0F172A !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
 }
 
 .btn-secondary:hover,
 .dash-action-btn.secondary:hover,
 .btn-ghost:hover {
-  background: #dbeafe !important;
-  color: #1e40af !important;
+  background: #EFF6FF !important;
+  border-color: #3B82F6 !important;
+  color: #2563EB !important;
 }
 
 /* 13. Forms & Inputs */
 input:not([type="checkbox"]):not([type="radio"]),
 select,
 textarea {
-  background: #ffffff !important;
-  color: #000000 !important;
-  border: 1.5px solid #bfdbfe !important;
+  background: #FFFFFF !important;
+  color: #0F172A !important;
+  border: 1.5px solid #DBEAFE !important;
   border-radius: 8px !important;
 }
 
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: #1d4ed8 !important;
+  border-color: #3B82F6 !important;
   outline: none !important;
-  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18) !important;
 }
 
 /* 14. Footer */
@@ -6511,40 +6391,36 @@ textarea:focus {
 .site-footer,
 .welcome-footer,
 footer {
-  background: #eff6ff !important;
-  border-top: 2px solid #bfdbfe !important;
-  color: #000000 !important;
+  background: #0F172A !important;
+  border-top: 1px solid #1E293B !important;
+  color: #94A3B8 !important;
 }
 
 #siteFooter a,
 .welcome-footer a,
 footer a {
-  color: #1d4ed8 !important;
+  color: #3B82F6 !important;
 }
 
 /* 15. Admin Public Dock & Banner */
 .admin-public-dock {
-  background: #ffffff !important;
-  border: 1.5px solid #bfdbfe !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12) !important;
-  color: #000000 !important;
+  background: #FFFFFF !important;
+  border: 1.5px solid #DBEAFE !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.12) !important;
+  color: #0F172A !important;
 }
 
 .admin-dock-badge {
-  color: #1d4ed8 !important;
+  color: #3B82F6 !important;
 }
 
 .admin-dock-badge::before {
-  background: #1d4ed8 !important;
-  box-shadow: 0 0 6px rgba(29, 78, 216, 0.6) !important;
+  background: #3B82F6 !important;
+  box-shadow: 0 0 6px rgba(59, 130, 246, 0.6) !important;
 }
 
 .admin-dock-btn {
-  background: #1d4ed8 !important;
-  color: #ffffff !important;
-  box-shadow: 0 2px 6px rgba(29, 78, 216, 0.25) !important;
-}
-
-.admin-dock-close {
-  color: #64748b !important;
+  background: #3B82F6 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.28) !important;
 }

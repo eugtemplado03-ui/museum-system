@@ -723,13 +723,13 @@
       position: absolute;
       top: 18px;
       left: 18px;
-      width: 330px;
+      width: 350px;
       max-width: calc(100vw - 36px);
-      background: var(--map-panel-bg);
-      border: 1.5px solid #ffea00;
+      background: rgba(15, 23, 42, 0.96);
+      border: 2px solid #ffd700;
       border-radius: 16px;
       padding: 14px 16px;
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), 0 0 20px rgba(255, 234, 0, 0.25);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), 0 0 20px rgba(255, 215, 0, 0.25);
       z-index: 45;
       display: none;
       animation: slideInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -789,7 +789,7 @@
     .dir-destination-name {
       font-size: 14px;
       font-weight: 800;
-      color: #ffffff;
+      color: #ffffff !important;
       margin-bottom: 10px;
     }
 
@@ -806,9 +806,13 @@
       display: flex;
       align-items: flex-start;
       gap: 8px;
-      font-size: 12px;
-      color: #cbd5e1;
-      line-height: 1.4;
+      font-size: 12.5px;
+      color: #f1f5f9 !important;
+      line-height: 1.45;
+    }
+
+    .dir-step-item span {
+      color: #f1f5f9 !important;
     }
 
     .dir-step-num {
@@ -816,10 +820,10 @@
       width: 20px;
       height: 20px;
       border-radius: 50%;
-      background: rgba(255, 234, 0, 0.2);
-      border: 1px solid #ffea00;
-      color: #ffea00;
-      font-weight: 900;
+      background: rgba(255, 215, 0, 0.22) !important;
+      border: 1px solid #ffd700 !important;
+      color: #ffd700 !important;
+      font-weight: 900 !important;
       font-size: 10.5px;
       display: flex;
       align-items: center;
@@ -828,37 +832,36 @@
 
     .dir-actions {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       width: 100%;
-      margin-top: 10px;
+      margin-top: 12px;
     }
 
     .btn-dir-voice {
       flex: 1;
-      width: 100%;
-      min-height: 40px;
-      padding: 9px 14px;
-      border-radius: 10px;
-      border: 1.5px solid #ffea00;
-      background: linear-gradient(135deg, rgba(255, 234, 0, 0.22) 0%, rgba(255, 214, 0, 0.1) 100%);
-      color: #ffea00;
+      min-height: 42px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 2px solid #ffd700;
+      background: rgba(15, 23, 42, 0.85);
+      color: #ffd700;
       font-family: 'Nunito', sans-serif;
       font-weight: 800;
-      font-size: 13px;
+      font-size: 13.5px;
       letter-spacing: 0.2px;
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 4px 14px rgba(255, 234, 0, 0.18);
+      box-shadow: 0 4px 14px rgba(255, 215, 0, 0.18);
     }
 
     .btn-dir-voice:hover {
-      background: #ffea00;
-      color: #000;
-      box-shadow: 0 4px 18px rgba(255, 234, 0, 0.45);
+      background: #ffd700;
+      color: #0f172a;
+      box-shadow: 0 4px 18px rgba(255, 215, 0, 0.45);
       transform: translateY(-1px);
     }
 
@@ -870,7 +873,7 @@
       background: #ef4444 !important;
       border-color: #ef4444 !important;
       color: #fff !important;
-      box-shadow: 0 0 14px rgba(239, 68, 68, 0.5) !important;
+      box-shadow: 0 0 16px rgba(239, 68, 68, 0.6) !important;
       animation: pulseStop 1.5s infinite;
     }
 
@@ -878,6 +881,39 @@
       background: #dc2626 !important;
       border-color: #dc2626 !important;
       color: #fff !important;
+    }
+
+    .btn-dir-info {
+      flex: 1;
+      min-height: 42px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 2px solid #00f0ff;
+      background: rgba(15, 23, 42, 0.85);
+      color: #00f0ff;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 13.5px;
+      letter-spacing: 0.2px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 14px rgba(0, 240, 255, 0.18);
+      white-space: nowrap;
+    }
+
+    .btn-dir-info:hover {
+      background: #00f0ff;
+      color: #0f172a;
+      box-shadow: 0 4px 18px rgba(0, 240, 255, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .btn-dir-info:active {
+      transform: translateY(0);
     }
 
     @keyframes pulseStop {
@@ -1459,7 +1495,7 @@
     }
 
     .cat-exhibit-item:hover .cat-exhibit-info {
-      color: #1d4ed8;
+      color: #ffffff;
     }
 
     .cat-exhibit-bullet {
@@ -1805,26 +1841,28 @@
 
       .dir-actions {
         display: flex;
+        gap: 8px;
         width: 100%;
         flex-shrink: 0;
         margin-top: auto;
-        padding-top: 6px;
-        border-top: 1px solid rgba(255, 234, 0, 0.2);
+        padding-top: 8px;
+        border-top: 1px solid rgba(255, 215, 0, 0.2);
       }
 
       .btn-dir-voice {
-        width: 100%;
+        flex: 1;
+        width: auto;
         min-height: 42px;
-        font-size: 13.5px;
-        font-weight: 900;
-        border-radius: 10px;
-        padding: 8px 14px;
-        gap: 8px;
-        background: linear-gradient(135deg, rgba(255, 234, 0, 0.25) 0%, rgba(255, 214, 0, 0.15) 100%);
-        border: 1.5px solid #ffea00;
-        color: #ffea00;
-        box-shadow: 0 4px 14px rgba(255, 234, 0, 0.2);
-        display: flex;
+        font-size: 12.5px;
+        font-weight: 800;
+        border-radius: 12px;
+        padding: 8px 10px;
+        gap: 6px;
+        border: 2px solid #ffd700;
+        background: rgba(15, 23, 42, 0.85);
+        color: #ffd700;
+        box-shadow: 0 4px 14px rgba(255, 215, 0, 0.2);
+        display: inline-flex;
         align-items: center;
         justify-content: center;
       }
@@ -1833,7 +1871,26 @@
         background: #ef4444 !important;
         border-color: #ef4444 !important;
         color: #ffffff !important;
-        box-shadow: 0 0 14px rgba(239, 68, 68, 0.5) !important;
+        box-shadow: 0 0 16px rgba(239, 68, 68, 0.6) !important;
+      }
+
+      .btn-dir-info {
+        flex: 1;
+        width: auto;
+        min-height: 42px;
+        font-size: 12.5px;
+        font-weight: 800;
+        border-radius: 12px;
+        padding: 8px 10px;
+        gap: 6px;
+        border: 2px solid #00f0ff;
+        background: rgba(15, 23, 42, 0.85);
+        color: #00f0ff;
+        box-shadow: 0 4px 14px rgba(0, 240, 255, 0.2);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
       }
 
       /* Compact Collapsed / Minimized State for Walking Directions */
@@ -2118,6 +2175,7 @@
           <ol class="dir-steps-list" id="dirStepsList"></ol>
           <div class="dir-actions">
             <button class="btn-dir-voice" id="dirVoiceBtn">🔊 Read Aloud</button>
+            <button class="btn-dir-info" id="dirExhibitInfoBtn" style="display:none;">📖 Exhibit Details</button>
           </div>
         </div>
       </div>
@@ -4154,6 +4212,26 @@
           dirBtn.disabled = false;
         }
 
+        const infoBtn = document.getElementById('dirExhibitInfoBtn');
+        if (infoBtn) {
+          infoBtn.style.display = 'inline-flex';
+          infoBtn.onclick = (e) => {
+            if (e) e.stopPropagation();
+            if (targetExhibit) {
+              const pRoom = findRoomForExhibit(targetExhibit.code);
+              if (pRoom) {
+                openCategoryRoomDrawer(pRoom, targetExhibit.code);
+              } else {
+                window.location.href = `/exhibit.html?code=${encodeURIComponent(targetExhibit.code)}`;
+              }
+            } else if (parentRoom) {
+              openCategoryRoomDrawer(parentRoom);
+            } else if (activeRouteKey && CATEGORY_ROOMS[activeRouteKey]) {
+              openCategoryRoomDrawer(CATEGORY_ROOMS[activeRouteKey]);
+            }
+          };
+        }
+
         directionsPanel.classList.add('active');
         directionsPanel.classList.remove('minimized');
         const collapseIcon = document.getElementById('dirCollapseIcon');
@@ -4172,6 +4250,8 @@
         activeRouteKey = null;
         activeDirectionsSpeech = null;
         directionsPanel.classList.remove('active');
+        const infoBtn = document.getElementById('dirExhibitInfoBtn');
+        if (infoBtn) infoBtn.style.display = 'none';
         const routeLayer = document.getElementById('routeLayer');
         if (routeLayer) routeLayer.innerHTML = '';
         document.querySelectorAll('.individual-exhibit-pin.active-pin').forEach(el => {
