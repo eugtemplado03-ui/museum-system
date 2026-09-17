@@ -6,7 +6,7 @@
 <title>Gallery — Museo Sang Bata sa Negros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=49">
+<link rel="stylesheet" href="/css/style.css?v=50">
 <script src="/js/gate.js"></script>
 </head>
 <body>
@@ -85,7 +85,7 @@
 
       <!-- ── Main Content Area: Gallery Grid ── -->
       <main style="padding: clamp(20px, 3vw, 36px); flex: 1;">
-        <div class="wrap" style="width: calc(100% - 24px); max-width: 1440px; margin: 0 auto; padding: 0 4px;">
+        <div class="wrap" style="width: 92%; max-width: 1100px; margin: 0 auto; padding: 0 4px;">
           <div class="gallery-grid" id="galleryGrid"></div>
           <div id="emptyState" style="display:none;" class="empty-state">
             <h2>No photos or videos yet</h2>
@@ -175,8 +175,8 @@
       overlay.id = 'galleryDetailOverlay';
       overlay.style.zIndex = '1000';
       overlay.innerHTML = `
-        <div class="modal gallery-modal-wrap" style="width: min(1440px, calc(100% - 24px)); max-width: 1440px; margin: 20px auto; padding: 0; overflow: hidden; border-radius: 20px;">
-          <div class="gallery-detail-media-wrap" style="position: relative; width: 100%; aspect-ratio: 16/9; max-height: 560px; min-height: 280px; background: rgba(0, 16, 24, 0.9);">
+        <div class="modal gallery-modal-wrap" style="width: min(1000px, 92vw); max-width: 1000px; margin: 20px auto; padding: 0; overflow: hidden; border-radius: 20px;">
+          <div class="gallery-detail-media-wrap" style="position: relative; width: 100%; aspect-ratio: 16/9; max-height: 480px; min-height: 260px; background: rgba(0, 16, 24, 0.9);">
             ${renderMediaBox(images, g.videoUrl, g.title || g.caption || 'Gallery photo', '📷')}
             <button type="button" class="modal-close-btn" onclick="closeGalleryDetail()" style="position: absolute; top: 12px; right: 12px; z-index: 10; width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.4); background: rgba(0,0,0,0.6); color: #fff; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(6px);">✕</button>
           </div>

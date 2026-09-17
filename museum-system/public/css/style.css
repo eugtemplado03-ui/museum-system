@@ -1903,8 +1903,8 @@ body.sidebar-open {
 .detail-back:hover { opacity: 0.75; }
 
 .plaque {
-  max-width: 1440px;
-  width: 100%;
+  max-width: 1000px;
+  width: 92%;
   margin: 0 auto;
   background: rgba(6, 28, 38, 0.85);
   backdrop-filter: blur(14px);
@@ -1920,8 +1920,8 @@ body.sidebar-open {
   background: rgba(0, 20, 28, 0.6);
   width: 100%;
   aspect-ratio: 16/9;
-  max-height: 520px;
-  min-height: 280px;
+  max-height: 460px;
+  min-height: 260px;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -7936,7 +7936,7 @@ footer a:hover {
 /* ── Exhibit & Item Plaque Details: Baby Blue Background with Crisp White Text ── */
 .plaque {
   width: 100% !important;
-  max-width: 1440px !important;
+  max-width: 1000px !important;
   margin: 0 auto !important;
   box-sizing: border-box !important;
   background: #5ba4e6 !important;
@@ -8364,10 +8364,10 @@ footer a:hover {
   text-shadow: none !important;
 }
 
-/* ── Wide View Details & Plaques Suite (Exhibits, Programs, Events, Gallery) ── */
+/* ── Balanced View Details & Plaques Suite (Exhibits, Programs, Events, Gallery) ── */
 .detail-wrap {
-  width: calc(100% - 24px) !important;
-  max-width: 1440px !important;
+  width: 92% !important;
+  max-width: 1000px !important;
   margin: 0 auto !important;
   padding: 0 4px !important;
   box-sizing: border-box !important;
@@ -8375,7 +8375,7 @@ footer a:hover {
 
 .plaque {
   width: 100% !important;
-  max-width: 1440px !important;
+  max-width: 1000px !important;
   margin: 0 auto !important;
   box-sizing: border-box !important;
 }
@@ -8383,20 +8383,20 @@ footer a:hover {
 .plaque-media {
   width: 100% !important;
   aspect-ratio: 16/9 !important;
-  max-height: 520px !important;
-  min-height: 280px !important;
+  max-height: 460px !important;
+  min-height: 260px !important;
 }
 
 .modal.gallery-modal-wrap:not(.is-portrait-modal) {
-  width: min(1440px, calc(100% - 24px)) !important;
-  max-width: 1440px !important;
+  width: min(1000px, 92vw) !important;
+  max-width: 1000px !important;
 }
 
 .gallery-detail-media-wrap:not(.has-portrait-video) {
   width: 100% !important;
   aspect-ratio: 16/9 !important;
-  max-height: 560px !important;
-  min-height: 280px !important;
+  max-height: 480px !important;
+  min-height: 260px !important;
 }
 
 
