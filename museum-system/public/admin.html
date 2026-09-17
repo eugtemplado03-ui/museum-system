@@ -6,7 +6,7 @@
 <title>Admin — Museo Sang Bata sa Negros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=25">
+<link rel="stylesheet" href="/css/style.css?v=26">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   /* ── Dedicated Admin Navy Topbar ────────────────────────────── */
@@ -222,6 +222,8 @@
   #tabContent *:not(.btn-primary):not(.btn-primary *):not(.dash-action-btn):not(.dash-action-btn *):not(.dash-panel-action):not(.dash-panel-action *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *):not(.filter-chip.active):not(.filter-chip.active *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.dash-cat-bar-fill),
   .dash-wrapper,
   .dash-wrapper *:not(.btn-primary):not(.btn-primary *):not(.dash-action-btn):not(.dash-action-btn *):not(.dash-panel-action):not(.dash-panel-action *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *):not(.dash-pie-toggle-btn.active):not(.dash-pie-toggle-btn.active *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.dash-cat-bar-fill),
+  .modal-overlay .modal,
+  .modal-overlay .modal *:not(.btn-primary):not(.btn-primary *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *),
   .modal-overlay .modal-box,
   .modal-overlay .modal-box *:not(.btn-primary):not(.btn-primary *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *),
   .admin-modal-card,
@@ -307,6 +309,9 @@
   .admin-main input:not([type="submit"]):not([type="button"]):not([type="reset"]),
   .admin-main select,
   .admin-main textarea,
+  .modal input:not([type="submit"]):not([type="button"]):not([type="reset"]),
+  .modal select,
+  .modal textarea,
   .modal-box input:not([type="submit"]):not([type="button"]):not([type="reset"]),
   .modal-box select,
   .modal-box textarea,
@@ -325,6 +330,9 @@
   .admin-main input:focus,
   .admin-main select:focus,
   .admin-main textarea:focus,
+  .modal input:focus,
+  .modal select:focus,
+  .modal textarea:focus,
   .modal-box input:focus,
   .modal-box select:focus,
   .modal-box textarea:focus,
@@ -338,6 +346,8 @@
   }
   .admin-main input::placeholder,
   .admin-main textarea::placeholder,
+  .modal input::placeholder,
+  .modal textarea::placeholder,
   .modal-box input::placeholder,
   .modal-box textarea::placeholder,
   .form-field input::placeholder,
@@ -347,6 +357,7 @@
     opacity: 0.85 !important;
   }
   .admin-main option,
+  .modal option,
   .modal-box option,
   select option {
     background: #ffffff !important;
@@ -490,17 +501,184 @@
     color: #FFFFFF !important;
   }
 
-  /* Modals */
+  /* Modals & Dialogs (White Background, Black Text, Perfectly Sized Grid) */
+  .modal-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(15, 23, 42, 0.65) !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 24px 16px !important;
+    z-index: 99999 !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+  }
+  .modal,
+  .modal-box,
+  .modal-overlay .modal,
   .modal-overlay .modal-box {
     background: #FFFFFF !important;
     border: 1.5px solid #CBD5E1 !important;
+    border-radius: 18px !important;
+    width: min(720px, 94vw) !important;
+    max-width: 720px !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 28px 32px !important;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.20) !important;
+    box-sizing: border-box !important;
+    position: relative !important;
     color: #000000 !important;
   }
-  .modal-title,
+  .modal h2,
+  .modal-box h2,
+  .modal-title {
+    color: #000000 !important;
+    font-family: 'Nunito', sans-serif !important;
+    font-size: 22px !important;
+    font-weight: 900 !important;
+    margin: 0 0 20px 0 !important;
+    text-shadow: none !important;
+    padding-bottom: 12px !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+  }
   .modal-sub,
   .modal-close {
     color: #000000 !important;
     text-shadow: none !important;
+  }
+  .form-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px 20px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    align-items: start !important;
+  }
+  .form-field {
+    display: flex !important;
+    flex-direction: column !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    gap: 6px !important;
+    box-sizing: border-box !important;
+  }
+  .form-field.full {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .form-field label {
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    line-height: 1.3 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .modal input:not([type="submit"]):not([type="button"]):not([type="reset"]),
+  .modal select,
+  .modal textarea,
+  .modal-box input:not([type="submit"]):not([type="button"]):not([type="reset"]),
+  .modal-box select,
+  .modal-box textarea,
+  .form-field input:not([type="submit"]):not([type="button"]):not([type="reset"]),
+  .form-field select,
+  .form-field textarea {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    background: #f0f9ff !important;
+    color: #000000 !important;
+    border: 1.5px solid #93c5fd !important;
+    border-radius: 10px !important;
+    padding: 10px 14px !important;
+    font-family: inherit !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease !important;
+  }
+  .modal input:not([type="file"]):not([type="checkbox"]):not([type="radio"]),
+  .modal select,
+  .modal-box input:not([type="file"]):not([type="checkbox"]):not([type="radio"]),
+  .modal-box select,
+  .form-field input:not([type="file"]):not([type="checkbox"]):not([type="radio"]),
+  .form-field select {
+    height: 44px !important;
+    min-height: 44px !important;
+  }
+  .modal select,
+  .modal-box select,
+  .form-field select {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background-color: #f0f9ff !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23000000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 14px center !important;
+    background-size: 14px !important;
+    padding-right: 38px !important;
+    cursor: pointer !important;
+  }
+  .modal input:focus,
+  .modal select:focus,
+  .modal textarea:focus,
+  .modal-box input:focus,
+  .modal-box select:focus,
+  .modal-box textarea:focus,
+  .form-field input:focus,
+  .form-field select:focus,
+  .form-field textarea:focus {
+    outline: none !important;
+    border-color: #3b82f6 !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22) !important;
+    color: #000000 !important;
+  }
+  .modal textarea,
+  .modal-box textarea,
+  .form-field textarea {
+    min-height: 80px !important;
+    resize: vertical !important;
+  }
+  .modal-actions {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+    margin-top: 24px !important;
+    padding-top: 16px !important;
+    border-top: 1.5px solid #e2e8f0 !important;
+  }
+  .modal .btn-ghost.dark,
+  .modal-box .btn-ghost.dark {
+    background: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    color: #000000 !important;
+    font-weight: 700 !important;
+  }
+  .modal .btn-ghost.dark:hover,
+  .modal-box .btn-ghost.dark:hover {
+    background: #f1f5f9 !important;
+    border-color: #94a3b8 !important;
+    color: #000000 !important;
+  }
+  @media (max-width: 640px) {
+    .form-grid {
+      grid-template-columns: 1fr !important;
+    }
   }
 
   /* Cards, Panels, Hub, Analytics */
@@ -651,7 +829,7 @@
   <script src="/js/lightbox.js"></script>
   <script src="/js/sidebar.js"></script>
   <script src="/js/carousel.js"></script>
-  <script src="/js/admin.js?v=28"></script>
+  <script src="/js/admin.js?v=29"></script>
   <script src="/js/footer.js"></script>
 </body>
 </html>

@@ -2091,51 +2091,153 @@ table.ledger .thumb img { width: 100%; height: 100%; object-fit: cover; border-r
 
 /* ── Modal ──────────────────────────────────────────────────────── */
 .modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0, 30, 40, 0.75);
-  backdrop-filter: blur(6px);
-  display: flex; align-items: flex-start; justify-content: center;
-  padding: 40px 16px; z-index: 99999 !important; overflow-y: auto;
+  position: fixed !important; inset: 0 !important;
+  background: rgba(15, 23, 42, 0.65) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+  display: flex !important; align-items: center !important; justify-content: center !important;
+  padding: 24px 16px !important; z-index: 99999 !important; overflow-y: auto !important;
+  box-sizing: border-box !important;
 }
 .modal {
-  background: rgba(6, 28, 38, 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-radius: 20px;
-  width: 100%; max-width: 640px;
-  padding: 34px 34px 30px;
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6);
-  border: 1.5px solid rgba(255, 255, 255, 0.22);
-  position: relative;
+  background: #ffffff !important;
+  border-radius: 18px !important;
+  width: min(720px, 94vw) !important;
+  max-width: 720px !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 28px 32px !important;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.20) !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  color: #000000 !important;
 }
 #closeTagModalCornerBtn:hover {
   background: rgba(255, 255, 255, 0.25) !important;
   transform: scale(1.08);
 }
-.modal h2 { font-family: 'Nunito', sans-serif; font-weight: 800; margin: 0 0 22px; font-size: 24px; color: #ffffff; text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5); }
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.form-field { display: flex; flex-direction: column; gap: 7px; }
-.form-field.full { grid-column: 1/-1; }
-.form-field label { font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.07em; color: #cbd5e1; font-weight: 700; }
-.form-field input, .form-field select, .form-field textarea {
-  padding: 12px 14px; border-radius: 10px;
-  border: 1.5px solid #93c5fd;
-  font-family: 'Open Sans', sans-serif; font-size: 15px;
-  background: #f0f9ff !important; color: #000000 !important;
-  font-weight: 600;
-  transition: border-color 0.15s, background 0.15s;
-}
-.form-field input:focus, .form-field select:focus, .form-field textarea:focus {
-  outline: none; border-color: #3b82f6; background: #ffffff !important;
+.modal h2 {
+  font-family: 'Nunito', sans-serif !important;
+  font-weight: 900 !important;
+  margin: 0 0 20px !important;
+  font-size: 22px !important;
   color: #000000 !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22);
+  text-shadow: none !important;
+  border-bottom: 2px solid #e2e8f0 !important;
+  padding-bottom: 12px !important;
 }
-.form-field input::placeholder, .form-field textarea::placeholder {
-  color: #334155 !important; font-weight: 500 !important; opacity: 0.85 !important;
+.form-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 16px 20px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  align-items: start !important;
 }
-.form-field textarea { resize: vertical; min-height: 90px; }
+.form-field {
+  display: flex !important;
+  flex-direction: column !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  gap: 6px !important;
+  box-sizing: border-box !important;
+}
+.form-field.full {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+.form-field label {
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  color: #000000 !important;
+  font-weight: 800 !important;
+  margin: 0 !important;
+  line-height: 1.3 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+.form-field input,
+.form-field select,
+.form-field textarea,
+.modal input:not([type="submit"]):not([type="button"]):not([type="reset"]),
+.modal select,
+.modal textarea {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  padding: 10px 14px !important;
+  border-radius: 10px !important;
+  border: 1.5px solid #93c5fd !important;
+  font-family: inherit !important;
+  font-size: 14px !important;
+  background: #f0f9ff !important;
+  color: #000000 !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease !important;
+}
+.form-field input:not([type="file"]):not([type="checkbox"]):not([type="radio"]),
+.form-field select,
+.modal input:not([type="file"]):not([type="checkbox"]):not([type="radio"]),
+.modal select {
+  height: 44px !important;
+  min-height: 44px !important;
+}
+.form-field select,
+.modal select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-color: #f0f9ff !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23000000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 14px center !important;
+  background-size: 14px !important;
+  padding-right: 38px !important;
+  cursor: pointer !important;
+}
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus,
+.modal input:focus,
+.modal select:focus,
+.modal textarea:focus {
+  outline: none !important;
+  border-color: #3b82f6 !important;
+  background: #ffffff !important;
+  color: #000000 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22) !important;
+}
+.form-field input::placeholder,
+.form-field textarea::placeholder,
+.modal input::placeholder,
+.modal textarea::placeholder {
+  color: #334155 !important;
+  font-weight: 500 !important;
+  opacity: 0.85 !important;
+}
+.form-field textarea,
+.modal textarea {
+  resize: vertical !important;
+  min-height: 80px !important;
+}
 .form-error { color: var(--danger); font-size: 13px; grid-column: 1/-1; }
-.modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 26px; }
+.modal-actions {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 12px !important;
+  margin-top: 24px !important;
+  padding-top: 16px !important;
+  border-top: 1.5px solid #e2e8f0 !important;
+}
 .image-preview { width: 100%; height: 140px; border-radius: 12px; object-fit: cover; background: #e0f2fe; border: 1.5px solid #bae6fd; margin-top: 8px; }
 .image-preview-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; margin-top: 12px; }
 .image-thumb { position: relative; border-radius: 10px; overflow: hidden; min-height: 110px; background: #e0f2fe; border: 1.5px solid #bae6fd; }
@@ -5460,26 +5562,19 @@ body.admin-portal-body {
   font-size: 13px;
 }
 
-/* ── Dark Theme for Editing Modals & Inputs ── */
+/* ── Admin & Portal Modals & Form Inputs ── */
 .modal {
-  background: rgba(6, 28, 38, 0.96) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.22) !important;
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.7) !important;
-  color: #ffffff !important;
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.20) !important;
+  color: #000000 !important;
 }
 .modal-overlay {
-  background: rgba(0, 20, 28, 0.82) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
+  background: rgba(15, 23, 42, 0.65) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
 }
-.modal input[type="text"],
-.modal input[type="number"],
-.modal input[type="email"],
-.modal input[type="password"],
-.modal input[type="url"],
-.modal input[type="tel"],
+.modal input:not([type="submit"]):not([type="button"]):not([type="reset"]),
 .modal select,
 .modal textarea {
   background: #f0f9ff !important;
@@ -5487,6 +5582,27 @@ body.admin-portal-body {
   border: 1.5px solid #93c5fd !important;
   border-radius: 10px !important;
   font-weight: 600 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+.modal input:not([type="file"]):not([type="checkbox"]):not([type="radio"]),
+.modal select {
+  height: 44px !important;
+  min-height: 44px !important;
+}
+.modal select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-color: #f0f9ff !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23000000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 14px center !important;
+  background-size: 14px !important;
+  padding-right: 38px !important;
+  cursor: pointer !important;
 }
 .modal input:focus,
 .modal select:focus,
@@ -6522,13 +6638,15 @@ p, label, span:not(.btn):not(.tag):not(.badge):not(.dash-action-btn):not(.btn-su
 }
 
 /* 13. Forms & Inputs */
-input:not([type="checkbox"]):not([type="radio"]),
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
 select,
 textarea {
-  background: #FFFFFF !important;
-  color: #0F172A !important;
-  border: 1.5px solid #DBEAFE !important;
-  border-radius: 8px !important;
+  background: #f0f9ff !important;
+  color: #000000 !important;
+  border: 1.5px solid #93c5fd !important;
+  border-radius: 10px !important;
+  box-sizing: border-box !important;
+  font-family: inherit !important;
 }
 
 input:focus,
@@ -6536,7 +6654,9 @@ select:focus,
 textarea:focus {
   border-color: #3B82F6 !important;
   outline: none !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18) !important;
+  background: #ffffff !important;
+  color: #000000 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22) !important;
 }
 
 /* 14. Footer */
