@@ -119,8 +119,9 @@
 
     .map-header-title p {
       margin: 0;
-      color: #94a3b8 !important;
+      color: #ffffff !important;
       font-size: 12px;
+      opacity: 0.95;
     }
 
     .switchers-group {
@@ -148,13 +149,17 @@
       border-radius: 999px;
       border: none;
       background: transparent;
-      color: #e2e8f0;
+      color: #ffffff !important;
       font-family: 'Nunito', sans-serif;
       font-size: 12px;
       font-weight: 800;
       cursor: pointer;
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       white-space: nowrap;
+    }
+
+    .seg-btn span {
+      color: #ffffff !important;
     }
 
     .seg-btn:hover {
@@ -164,7 +169,7 @@
 
     .seg-btn.active {
       background: #2563eb;
-      color: #ffffff;
+      color: #ffffff !important;
       box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
       font-weight: 900;
     }
@@ -179,20 +184,24 @@
       font-weight: 800;
       padding: 1px 6px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.15);
-      color: #ffffff;
+      background: rgba(255, 255, 255, 0.2) !important;
+      color: #ffffff !important;
     }
 
     .seg-btn.active .seg-badge {
-      background: rgba(255, 255, 255, 0.28);
-      color: #ffffff;
+      background: rgba(255, 255, 255, 0.3) !important;
+      color: #ffffff !important;
     }
 
     #btnToggleSidebar {
       background: #1e293b !important;
       border: 1.5px solid #334155 !important;
-      color: #38bdf8 !important;
+      color: #ffffff !important;
       transition: all 0.2s ease;
+    }
+
+    #btnToggleSidebar span {
+      color: #ffffff !important;
     }
 
     #btnToggleSidebar:hover {
@@ -223,14 +232,14 @@
       border-radius: 8px;
       border: 1.5px solid #334155;
       background: #1e293b;
-      color: #ffffff;
+      color: #ffffff !important;
       font-size: 12px;
       box-sizing: border-box;
       transition: all 0.2s;
     }
 
     .map-search-wrap input::placeholder {
-      color: #94a3b8;
+      color: rgba(255, 255, 255, 0.75) !important;
     }
 
     .map-search-wrap input:focus {
@@ -244,7 +253,7 @@
       left: 9px;
       top: 50%;
       transform: translateY(-50%);
-      color: #38bdf8;
+      color: #ffffff !important;
       font-size: 12px;
     }
 
@@ -267,13 +276,17 @@
       font-weight: 700;
       border: 1.5px solid #334155;
       background: #1e293b;
-      color: #e2e8f0;
+      color: #ffffff !important;
       cursor: pointer;
       white-space: nowrap;
       transition: all 0.2s;
       display: flex;
       align-items: center;
       gap: 4px;
+    }
+
+    .chip span {
+      color: #ffffff !important;
     }
 
     .chip:hover {
@@ -348,6 +361,11 @@
       margin: 0;
     }
 
+    #sidebarCountLabel {
+      color: #ffffff !important;
+      opacity: 0.95;
+    }
+
     .sidebar-content {
       flex: 1;
       overflow-y: auto;
@@ -356,6 +374,7 @@
       flex-direction: column;
       gap: 12px;
       background: #0f172a !important; /* Navy! */
+      color: #ffffff !important;
     }
 
     .sidebar-content::-webkit-scrollbar {
@@ -377,11 +396,15 @@
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.8px;
-      color: #38bdf8 !important; /* Baby blue title! */
+      color: #ffffff !important;
       margin-bottom: 6px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+    }
+
+    .sidebar-section-title span {
+      color: #ffffff !important;
     }
 
     .room-dir-list {
@@ -398,7 +421,7 @@
       border-radius: 8px;
       background: #1e293b; /* Navy surface! */
       border: 1.5px solid #334155;
-      color: #f1f5f9;
+      color: #ffffff !important;
       cursor: pointer;
       transition: all 0.18s ease;
     }
@@ -421,7 +444,15 @@
       gap: 8px;
       font-size: 12.5px;
       font-weight: 700;
-      color: #f1f5f9;
+      color: #ffffff !important;
+    }
+
+    .room-dir-info span {
+      color: #ffffff !important;
+    }
+
+    .room-dir-item span {
+      color: #ffffff !important;
     }
 
     .room-dir-code {
@@ -430,9 +461,9 @@
       font-weight: 800;
       padding: 1px 5px;
       border-radius: 4px;
-      background: rgba(0, 240, 255, 0.15);
-      color: #00f0ff;
-      border: 1px solid rgba(0, 240, 255, 0.3);
+      background: rgba(255, 255, 255, 0.15) !important;
+      color: #ffffff !important;
+      border: 1px solid rgba(255, 255, 255, 0.3) !important;
     }
 
     /* ==========================================================================
@@ -1510,9 +1541,9 @@
       font-weight: 800;
       padding: 2px 7px;
       border-radius: 999px;
-      border: 1px solid #38bdf8;
-      background: rgba(15, 23, 42, 0.6);
-      color: #38bdf8 !important;
+      border: 1px solid rgba(255, 255, 255, 0.45) !important;
+      background: rgba(255, 255, 255, 0.15) !important;
+      color: #ffffff !important;
       transition: all 0.15s;
     }
 
@@ -1532,7 +1563,7 @@
       border-radius: 6px;
       cursor: pointer;
       transition: all 0.18s ease;
-      color: #e2e8f0 !important; /* Crisp light text on navy! */
+      color: #ffffff !important; /* Crisp pure white on navy! */
       background: transparent;
     }
 
@@ -1548,7 +1579,7 @@
       gap: 6px;
       font-size: 11.5px;
       font-weight: 600;
-      color: #e2e8f0 !important;
+      color: #ffffff !important;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -1561,7 +1592,7 @@
     }
 
     .cat-exhibit-bullet {
-      color: #38bdf8;
+      color: #ffffff !important;
       font-size: 11px;
       transition: color 0.15s;
     }
@@ -1574,12 +1605,14 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      color: #ffffff !important;
     }
 
     .cat-exhibit-code {
       font-family: 'IBM Plex Mono', monospace;
       font-size: 9.5px;
-      color: #94a3b8;
+      color: #ffffff !important;
+      opacity: 0.9;
       font-weight: 700;
       flex-shrink: 0;
       transition: color 0.15s;
@@ -2212,7 +2245,7 @@
     <aside class="map-directory-sidebar" id="mapSidebar" aria-label="Exhibit Directory">
       <div class="sidebar-header">
         <h3 class="sidebar-title">🏛️ Rooms Directory</h3>
-        <span style="font-size: 11px; color: #94a3b8;" id="sidebarCountLabel">6 Rooms • 11 Exhibits</span>
+        <span style="font-size: 11px; color: #ffffff !important; opacity: 0.95;" id="sidebarCountLabel">6 Rooms • 11 Exhibits</span>
       </div>
       <div class="sidebar-content" id="sidebarList">
         <!-- Rendered dynamically -->
@@ -3312,7 +3345,7 @@
                 <span class="cat-room-dot" style="background:${room.color}; box-shadow:0 0 8px ${room.color};"></span>
                 <span class="cat-room-name">${room.icon} ${escapeHtml(room.category)}</span>
               </div>
-              <span class="cat-room-count-badge" style="border-color:${room.color}; color:${room.color};">
+              <span class="cat-room-count-badge" style="border-color: rgba(255, 255, 255, 0.45); color: #ffffff !important;">
                 ${room.exhibitCodes.length} ${room.exhibitCodes.length === 1 ? 'Exhibit' : 'Exhibits'}
               </span>
             </div>
@@ -3350,23 +3383,23 @@
           <div class="room-dir-list">
             <div class="room-dir-item" data-zone="zone_entrance">
               <div class="room-dir-info"><span>🚪</span><span>Main Entrance &amp; Foyer</span></div>
-              <span style="font-size:10px; color:#94a3b8;">Entry</span>
+              <span style="font-size:10px; color:#ffffff !important; opacity:0.9;">Entry</span>
             </div>
             <div class="room-dir-item" data-zone="zone_staff_office">
               <div class="room-dir-info"><span>💼</span><span>Staff Office (Under Stairs)</span></div>
-              <span style="font-size:10px; color:#38bdf8;">Admin</span>
+              <span style="font-size:10px; color:#ffffff !important; opacity:0.9;">Admin</span>
             </div>
             <div class="room-dir-item" data-zone="zone_function_hall">
               <div class="room-dir-info"><span>🏛️</span><span>Central Function Hall</span></div>
-              <span style="font-size:10px; color:#94a3b8;">Great Hall</span>
+              <span style="font-size:10px; color:#ffffff !important; opacity:0.9;">Great Hall</span>
             </div>
             <div class="room-dir-item" data-zone="zone_stairs">
               <div class="room-dir-info"><span>🪜</span><span>Staircase to Level 2</span></div>
-              <span style="font-size:10px; color:#f59e0b;">Stairs Up</span>
+              <span style="font-size:10px; color:#ffffff !important; opacity:0.9;">Stairs Up</span>
             </div>
             <div class="room-dir-item" data-zone="zone_aquarium">
               <div class="room-dir-info"><span>🐠</span><span>Aquarium &amp; Live Reef</span></div>
-              <span style="font-size:10px; color:#38bdf8;">Tanks</span>
+              <span style="font-size:10px; color:#ffffff !important; opacity:0.9;">Tanks</span>
             </div>
           </div>
         `;
@@ -3378,11 +3411,11 @@
           <div class="room-dir-list">
             <div class="room-dir-item" data-zone="zone_stairs_landing">
               <div class="room-dir-info"><span>🪜</span><span>Stairs Down to Ground</span></div>
-              <span style="font-size:10px; color:#f59e0b;">Landing</span>
+              <span style="font-size:10px; color:#ffffff !important; opacity:0.9;">Landing</span>
             </div>
             <div class="room-dir-item" data-zone="zone_mezzanine_void">
               <div class="room-dir-info"><span>👀</span><span>Mezzanine Void Balcony</span></div>
-              <span style="font-size:10px; color:#ec4899;">Overlook</span>
+              <span style="font-size:10px; color:#ffffff !important; opacity:0.9;">Overlook</span>
             </div>
           </div>
         `;
