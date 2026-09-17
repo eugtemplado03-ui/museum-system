@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="/css/style.css?v=41">
 <script src="/js/gate.js"></script>
 </head>
-<body class="page-gallery bg-ex3-page">
+<body>
   <!-- ── Top Navigation Bar ─────────────────────────────────────── -->
   <div class="topbar">
     <div class="topbar-left">
@@ -39,51 +39,60 @@
 
   <div class="user-layout">
     <div class="user-main">
-      <main><div class="wrap">
-    <div class="page-hero gallery-hero">
-      <div style="position:relative; z-index:1;">
-        <h1>Photo gallery</h1>
-        <p>A look around the museum — exhibits, workshops, and community activities.</p>
-      </div>
-      <div class="page-hero-icon" style="font-size:72px; flex-shrink:0; opacity:0.9;" aria-hidden="true">🖼️</div>
-    </div>
+      <!-- ── Top Two-Section Banner with ex3.jpg Background ── -->
+      <section class="page-top-banner" id="galleryTopBanner">
+        <div class="page-top-inner">
+          <!-- Section 1: Hero Banner -->
+          <div class="page-hero gallery-hero">
+            <div style="position:relative; z-index:1;">
+              <h1>Photo gallery</h1>
+              <p>A look around the museum — exhibits, workshops, and community activities.</p>
+            </div>
+            <div class="page-hero-icon" style="font-size:72px; flex-shrink:0; opacity:0.9;" aria-hidden="true">🖼️</div>
+          </div>
 
-    <!-- Search & Filter Toolbar -->
-    <div class="filter-toolbar" id="galleryFilterToolbar">
-      <div class="filter-toolbar-top">
-        <div class="search-box-wrap">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="gallerySearchInput" class="search-input" placeholder="Search gallery by title, caption, keyword…" autocomplete="off">
-          <button type="button" id="gallerySearchClear" class="search-clear-btn" style="display:none;" title="Clear search">✕</button>
+          <!-- Section 2: Search & Filter Toolbar -->
+          <div class="filter-toolbar" id="galleryFilterToolbar">
+            <div class="filter-toolbar-top">
+              <div class="search-box-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="gallerySearchInput" class="search-input" placeholder="Search gallery by title, caption, keyword…" autocomplete="off">
+                <button type="button" id="gallerySearchClear" class="search-clear-btn" style="display:none;" title="Clear search">✕</button>
+              </div>
+              <div class="filter-controls-group">
+                <select id="gallerySortSelect" class="filter-select" title="Sort gallery">
+                  <option value="default">Sort: Default Order</option>
+                  <option value="title-asc">Sort: Title (A–Z)</option>
+                  <option value="photos-desc">Sort: Most Photos</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="filter-chips-row" id="galleryTypeChips">
+              <button type="button" class="filter-chip-btn active" data-type="all">All Posts</button>
+              <button type="button" class="filter-chip-btn" data-type="photo">Single Photos 📷</button>
+              <button type="button" class="filter-chip-btn" data-type="album">Photo Albums 📚</button>
+              <button type="button" class="filter-chip-btn" data-type="video">Videos ▶</button>
+            </div>
+
+            <div class="filter-stats-bar" id="galleryStatsBar">
+              <div class="filter-stats-text" id="galleryFilterStats">Showing gallery posts</div>
+              <button type="button" class="filter-reset-link" id="galleryResetFilters" style="display:none;">Reset search &amp; filters</button>
+            </div>
+          </div>
         </div>
-        <div class="filter-controls-group">
-          <select id="gallerySortSelect" class="filter-select" title="Sort gallery">
-            <option value="default">Sort: Default Order</option>
-            <option value="title-asc">Sort: Title (A–Z)</option>
-            <option value="photos-desc">Sort: Most Photos</option>
-          </select>
+      </section>
+
+      <!-- ── Main Content Area: Gallery Grid ── -->
+      <main style="padding: clamp(20px, 3vw, 36px); flex: 1;">
+        <div class="wrap" style="max-width: 1100px; margin: 0 auto;">
+          <div class="gallery-grid" id="galleryGrid"></div>
+          <div id="emptyState" style="display:none;" class="empty-state">
+            <h2>No photos or videos yet</h2>
+            <p>Media added from the admin dashboard will appear here.</p>
+          </div>
         </div>
-      </div>
-
-      <div class="filter-chips-row" id="galleryTypeChips">
-        <button type="button" class="filter-chip-btn active" data-type="all">All Posts</button>
-        <button type="button" class="filter-chip-btn" data-type="photo">Single Photos 📷</button>
-        <button type="button" class="filter-chip-btn" data-type="album">Photo Albums 📚</button>
-        <button type="button" class="filter-chip-btn" data-type="video">Videos ▶</button>
-      </div>
-
-      <div class="filter-stats-bar" id="galleryStatsBar">
-        <div class="filter-stats-text" id="galleryFilterStats">Showing gallery posts</div>
-        <button type="button" class="filter-reset-link" id="galleryResetFilters" style="display:none;">Reset search &amp; filters</button>
-      </div>
-    </div>
-
-    <div class="gallery-grid" id="galleryGrid"></div>
-    <div id="emptyState" style="display:none;" class="empty-state">
-      <h2>No photos or videos yet</h2>
-      <p>Media added from the admin dashboard will appear here.</p>
-    </div>
-  </div></main>
+      </main>
   <footer id="siteFooter"></footer>
 
   <script src="/js/api.js"></script>

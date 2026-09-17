@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="/css/style.css?v=41">
 <script src="/js/gate.js"></script>
 </head>
-<body class="page-events bg-ex3-page">
+<body>
   <!-- ── Top Navigation Bar ─────────────────────────────────────── -->
   <div class="topbar">
     <div class="topbar-left">
@@ -39,55 +39,64 @@
 
   <div class="user-layout">
     <div class="user-main">
-      <main><div class="wrap">
-    <div class="page-hero events-hero">
-      <div style="position:relative; z-index:1;">
-        <h1>News &amp; events</h1>
-        <p>Recent happenings at the museum — anniversaries, workshops, training programs, and community outreach.</p>
-      </div>
-      <div class="page-hero-icon" style="font-size:72px; flex-shrink:0; opacity:0.9;" aria-hidden="true">📅</div>
-    </div>
+      <!-- ── Top Two-Section Banner with ex3.jpg Background ── -->
+      <section class="page-top-banner" id="eventsTopBanner">
+        <div class="page-top-inner">
+          <!-- Section 1: Hero Banner -->
+          <div class="page-hero events-hero">
+            <div style="position:relative; z-index:1;">
+              <h1>News &amp; events</h1>
+              <p>Recent happenings at the museum — anniversaries, workshops, training programs, and community outreach.</p>
+            </div>
+            <div class="page-hero-icon" style="font-size:72px; flex-shrink:0; opacity:0.9;" aria-hidden="true">📅</div>
+          </div>
 
-    <!-- Search & Filter Toolbar -->
-    <div class="filter-toolbar" id="eventFilterToolbar">
-      <div class="filter-toolbar-top">
-        <div class="search-box-wrap">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="eventSearchInput" class="search-input" placeholder="Search events by title, date, location, description…" autocomplete="off">
-          <button type="button" id="eventSearchClear" class="search-clear-btn" style="display:none;" title="Clear search">✕</button>
+          <!-- Section 2: Search & Filter Toolbar -->
+          <div class="filter-toolbar" id="eventFilterToolbar">
+            <div class="filter-toolbar-top">
+              <div class="search-box-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="eventSearchInput" class="search-input" placeholder="Search events by title, date, location, description…" autocomplete="off">
+                <button type="button" id="eventSearchClear" class="search-clear-btn" style="display:none;" title="Clear search">✕</button>
+              </div>
+              <div class="filter-controls-group">
+                <select id="eventMediaFilter" class="filter-select" title="Filter by media">
+                  <option value="all">All Media</option>
+                  <option value="video">Has Video ▶</option>
+                  <option value="photo">Has Photos 📷</option>
+                </select>
+                <select id="eventSortSelect" class="filter-select" title="Sort events">
+                  <option value="date-desc">Sort: Date (Newest first)</option>
+                  <option value="date-asc">Sort: Date (Oldest first)</option>
+                  <option value="title-asc">Sort: Title (A–Z)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="filter-chips-row" id="eventTimeChips">
+              <button type="button" class="filter-chip-btn active" data-time="all">All Events</button>
+              <button type="button" class="filter-chip-btn" data-time="upcoming">Upcoming 📅</button>
+              <button type="button" class="filter-chip-btn" data-time="past">Past Events 🏛️</button>
+            </div>
+
+            <div class="filter-stats-bar" id="eventStatsBar">
+              <div class="filter-stats-text" id="eventFilterStats">Showing events</div>
+              <button type="button" class="filter-reset-link" id="eventResetFilters" style="display:none;">Reset search &amp; filters</button>
+            </div>
+          </div>
         </div>
-        <div class="filter-controls-group">
-          <select id="eventMediaFilter" class="filter-select" title="Filter by media">
-            <option value="all">All Media</option>
-            <option value="video">Has Video ▶</option>
-            <option value="photo">Has Photos 📷</option>
-          </select>
-          <select id="eventSortSelect" class="filter-select" title="Sort events">
-            <option value="date-desc">Sort: Date (Newest first)</option>
-            <option value="date-asc">Sort: Date (Oldest first)</option>
-            <option value="title-asc">Sort: Title (A–Z)</option>
-          </select>
+      </section>
+
+      <!-- ── Main Content Area: Events Grid ── -->
+      <main style="padding: clamp(20px, 3vw, 36px); flex: 1;">
+        <div class="wrap" style="max-width: 1100px; margin: 0 auto;">
+          <div class="content-grid" id="eventGrid"></div>
+          <div id="emptyState" style="display:none;" class="empty-state">
+            <h2>No events listed yet</h2>
+            <p>Events added from the admin dashboard will appear here.</p>
+          </div>
         </div>
-      </div>
-
-      <div class="filter-chips-row" id="eventTimeChips">
-        <button type="button" class="filter-chip-btn active" data-time="all">All Events</button>
-        <button type="button" class="filter-chip-btn" data-time="upcoming">Upcoming 📅</button>
-        <button type="button" class="filter-chip-btn" data-time="past">Past Events 🏛️</button>
-      </div>
-
-      <div class="filter-stats-bar" id="eventStatsBar">
-        <div class="filter-stats-text" id="eventFilterStats">Showing events</div>
-        <button type="button" class="filter-reset-link" id="eventResetFilters" style="display:none;">Reset search &amp; filters</button>
-      </div>
-    </div>
-
-    <div class="content-grid" id="eventGrid"></div>
-    <div id="emptyState" style="display:none;" class="empty-state">
-      <h2>No events listed yet</h2>
-      <p>Events added from the admin dashboard will appear here.</p>
-    </div>
-  </div></main>
+      </main>
 
   <script src="/js/api.js"></script>
   <script src="/js/chatbot.js"></script>

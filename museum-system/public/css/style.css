@@ -1485,30 +1485,19 @@ body.sidebar-open {
 .page-hero h2 { margin-top: 0; color: #ffffff; text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6); }
 .page-hero p { color: rgba(255,255,255,0.90); font-size: 15px; line-height: 1.6; max-width: 60ch; margin: 0; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5); }
 
-/* Dedicated Hero Background Photos with Photo Images */
+/* Dedicated Hero Background - translucent glass within top banner */
 .exhibits-hero,
-.page-hero.programs-hero,
-.programs-hero,
-.page-hero.gallery-hero,
-.gallery-hero,
-.page-hero.events-hero,
-.events-hero {
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.55) 0%, rgba(15, 23, 42, 0.75) 100%), url('/uploads/ex3.jpg') center/cover no-repeat !important;
-  background-size: cover !important;
-  background-position: center !important;
-  border-radius: 20px;
-  padding: 40px 44px;
-  margin-bottom: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
-  border: 1.5px solid rgba(255, 255, 255, 0.30);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  overflow: hidden;
-  position: relative;
+.page-hero.programs-hero, .programs-hero,
+.page-hero.gallery-hero, .gallery-hero,
+.page-hero.events-hero, .events-hero {
+  background: rgba(15, 23, 42, 0.40) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255, 255, 255, 0.30) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+  color: #FFFFFF;
+  margin-bottom: 22px;
 }
 
 .content-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
@@ -7705,49 +7694,90 @@ footer a {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
 }
 
-/* 17. Dedicated Hero Backgrounds (Exhibits, Programs, Gallery, Events) with Crisp White Text */
+/* 17. Top Two-Section Banner with ex3.jpg Background across Exhibits, Programs, Gallery & Events */
+.page-top-banner {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: clamp(24px, 3.5vw, 40px) 0 clamp(20px, 3vw, 32px) 0 !important;
+  background: url('/uploads/ex3.jpg') center top / cover no-repeat !important;
+  border: none !important;
+  border-radius: 0 !important;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.20) !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+.page-top-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+      rgba(15, 23, 42, 0.52) 0%,
+      rgba(15, 23, 42, 0.36) 45%,
+      rgba(15, 23, 42, 0.62) 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.page-top-banner > * {
+  position: relative;
+  z-index: 2;
+}
+
+.page-top-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 clamp(16px, 3vw, 24px);
+}
+
+.page-top-banner .exhibits-hero,
+.page-top-banner .page-hero,
 .exhibits-hero,
-.page-hero.programs-hero,
-.programs-hero,
-.page-hero.gallery-hero,
-.gallery-hero,
-.page-hero.events-hero,
-.events-hero {
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.55) 0%, rgba(15, 23, 42, 0.75) 100%), url('/uploads/ex3.jpg') center/cover no-repeat !important;
-  background-size: cover !important;
-  background-position: center !important;
+.page-hero {
+  background: rgba(15, 23, 42, 0.40) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.30) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25) !important;
   color: #FFFFFF !important;
+  margin-bottom: 22px !important;
 }
 
+.page-top-banner .exhibits-hero *,
+.page-top-banner .page-hero *,
 .exhibits-hero *,
-.page-hero *,
-.programs-hero *,
-.gallery-hero *,
-.events-hero * {
+.page-hero * {
   color: #FFFFFF !important;
 }
 
+.page-top-banner .exhibits-hero h1,
+.page-top-banner .page-hero h1,
 .exhibits-hero h1,
-.page-hero h1,
-.programs-hero h1,
-.gallery-hero h1,
-.events-hero h1 {
+.page-hero h1 {
   color: #FFFFFF !important;
   font-weight: 900 !important;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.75) !important;
 }
 
+.page-top-banner .exhibits-hero p,
+.page-top-banner .page-hero p,
 .exhibits-hero p,
-.page-hero p,
-.programs-hero p,
-.gallery-hero p,
-.events-hero p {
+.page-hero p {
   color: #FFFFFF !important;
   opacity: 0.95 !important;
   font-weight: 600 !important;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.65) !important;
 }
 
+.page-top-banner .exhibits-hero-eyebrow,
 .exhibits-hero .exhibits-hero-eyebrow {
   color: #93c5fd !important;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75) !important;
@@ -7756,79 +7786,36 @@ footer a {
   text-transform: uppercase !important;
 }
 
+.page-top-banner .section-head {
+  margin-bottom: 12px !important;
+}
+
+.page-top-banner .section-head h2 {
+  color: #FFFFFF !important;
+  font-weight: 900 !important;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.65) !important;
+}
+
+.page-top-banner .section-head .count {
+  color: rgba(255, 255, 255, 0.90) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+}
+
+.page-top-banner .filter-toolbar {
+  background: #FFFFFF !important;
+  border: 1.5px solid #DBEAFE !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.20), 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+  margin-bottom: 0 !important;
+}
+
+.page-top-banner .filter-toolbar * {
+  text-shadow: none !important;
+}
+
 .exhibits-hero .btn-primary,
 .exhibits-hero .btn-primary * {
   color: #FFFFFF !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
 }
-
-/* 18. Full Background with ex3.jpg for Exhibits, Programs, Gallery, and Events Sections */
-body.bg-ex3-page,
-.bg-ex3-page .user-layout,
-.bg-ex3-page .user-main,
-.page-exhibits,
-.page-exhibits .user-main,
-.page-programs,
-.page-programs .user-main,
-.page-gallery,
-.page-gallery .user-main,
-.page-events,
-.page-events .user-main {
-  background: linear-gradient(180deg,
-      rgba(15, 23, 42, 0.45) 0%,
-      rgba(15, 23, 42, 0.32) 40%,
-      rgba(15, 23, 42, 0.60) 100%),
-    url('/uploads/ex3.jpg') center top / cover no-repeat fixed !important;
-  background-attachment: fixed !important;
-  background-size: cover !important;
-  background-position: center top !important;
-  min-height: 100vh !important;
-}
-
-/* Section Headings and Count Badges on ex3.jpg Background */
-.bg-ex3-page .section-head h2,
-.page-exhibits .section-head h2,
-.page-programs .section-head h2,
-.page-gallery .section-head h2,
-.page-events .section-head h2,
-.page-exhibits h2,
-.page-programs h2,
-.page-gallery h2,
-.page-events h2 {
-  color: #FFFFFF !important;
-  font-weight: 800 !important;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.75) !important;
-}
-
-.bg-ex3-page .section-head .count,
-.page-exhibits .section-head .count {
-  color: #FFFFFF !important;
-  background: rgba(15, 23, 42, 0.65) !important;
-  border: 1px solid rgba(255, 255, 255, 0.35) !important;
-  padding: 3px 12px !important;
-  border-radius: 999px !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
-}
-
-.bg-ex3-page .filter-toolbar,
-.page-exhibits .filter-toolbar,
-.page-programs .filter-toolbar,
-.page-gallery .filter-toolbar,
-.page-events .filter-toolbar {
-  background: #FFFFFF !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.8) !important;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.22) !important;
-  border-radius: 16px !important;
-}
-
-.bg-ex3-page .filter-stats,
-.bg-ex3-page .filter-stats *,
-.bg-ex3-page .filter-stats-bar,
-.bg-ex3-page .filter-stats-bar * {
-  color: #FFFFFF !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6) !important;
-  font-weight: 600 !important;
-}
-
 
 
