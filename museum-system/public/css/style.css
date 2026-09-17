@@ -1485,9 +1485,11 @@ body.sidebar-open {
 .page-hero h2 { margin-top: 0; color: #ffffff; text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6); }
 .page-hero p { color: rgba(255,255,255,0.90); font-size: 15px; line-height: 1.6; max-width: 60ch; margin: 0; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5); }
 
-/* Dedicated Hero Background Photos */
+/* Dedicated Hero Background Photos with Photo Images */
 .exhibits-hero {
-  background: linear-gradient(135deg, rgba(0, 48, 62, 0.68) 0%, rgba(0, 32, 44, 0.82) 100%), none!important;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.55) 0%, rgba(15, 23, 42, 0.75) 100%), url('/uploads/ex1.jpeg') center/cover no-repeat !important;
+  background-size: cover !important;
+  background-position: center !important;
   border-radius: 20px;
   padding: 40px 44px;
   margin-bottom: 36px;
@@ -1496,20 +1498,26 @@ body.sidebar-open {
   justify-content: space-between;
   gap: 24px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255, 255, 255, 0.30);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   overflow: hidden;
   position: relative;
 }
 .page-hero.programs-hero, .programs-hero {
-  background: linear-gradient(135deg, rgba(0, 48, 62, 0.68) 0%, rgba(0, 32, 44, 0.82) 100%), none!important;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.55) 0%, rgba(15, 23, 42, 0.75) 100%), url('/uploads/ex2.jpg') center/cover no-repeat !important;
+  background-size: cover !important;
+  background-position: center !important;
 }
 .page-hero.gallery-hero, .gallery-hero {
-  background: linear-gradient(135deg, rgba(0, 48, 62, 0.68) 0%, rgba(0, 32, 44, 0.82) 100%), none!important;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.55) 0%, rgba(15, 23, 42, 0.75) 100%), url('/uploads/ex3.jpg') center/cover no-repeat !important;
+  background-size: cover !important;
+  background-position: center !important;
 }
 .page-hero.events-hero, .events-hero {
-  background: linear-gradient(135deg, rgba(0, 48, 62, 0.68) 0%, rgba(0, 32, 44, 0.82) 100%), none!important;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.55) 0%, rgba(15, 23, 42, 0.75) 100%), url('/uploads/ex4.jpg') center/cover no-repeat !important;
+  background-size: cover !important;
+  background-position: center !important;
 }
 
 .content-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
@@ -6822,16 +6830,15 @@ table.ledger tr:hover td {
 }
 
 /* 11. Typography */
-h1:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *),
-h2:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *),
-h3:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *),
-h4:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *),
-h5:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *),
-h6:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *),
+h1:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *),
+h2:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *),
+h3:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *),
+h4:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *),
+h5:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *),
+h6:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *),
 .section-head h2,
 .content-card h2,
 .content-card h3,
-.page-hero h1:not(.welcome-hero *),
 .dash-analytics-title,
 .dash-panel-title,
 .dash-group-title,
@@ -6842,9 +6849,9 @@ h6:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-c
   text-shadow: none !important;
 }
 
-p:not(.gallery-item .caption *):not(.rating-item *):not(.info-card *):not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *),
+p:not(.gallery-item .caption *):not(.rating-item *):not(.info-card *):not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *),
 label:not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *),
-span:not(.btn):not(.tag):not(.badge):not(.dash-action-btn):not(.btn-submit):not(.admin-badge-pill):not(.yt-badge):not(.dash-kpi-badge):not(.filter-chip):not(.admin-sidebar-icon):not(.directions-floating-panel *):not(.dir-steps-list *):not(.dir-actions *):not(.gallery-item .caption *):not(.carousel-badge *):not(.rating-item *):not(.info-card *):not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *) {
+span:not(.btn):not(.tag):not(.badge):not(.dash-action-btn):not(.btn-submit):not(.admin-badge-pill):not(.yt-badge):not(.dash-kpi-badge):not(.filter-chip):not(.admin-sidebar-icon):not(.directions-floating-panel *):not(.dir-steps-list *):not(.dir-actions *):not(.gallery-item .caption *):not(.carousel-badge *):not(.rating-item *):not(.info-card *):not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *) {
   color: #000000 !important;
   text-shadow: none !important;
 }
@@ -7706,4 +7713,80 @@ footer a {
   border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
 }
+
+/* 17. Dedicated Hero Backgrounds (Exhibits, Programs, Gallery, Events) with Crisp White Text */
+.exhibits-hero {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.55) 0%, rgba(15, 23, 42, 0.75) 100%), url('/uploads/ex1.jpeg') center/cover no-repeat !important;
+  background-size: cover !important;
+  background-position: center !important;
+  color: #FFFFFF !important;
+}
+
+.page-hero.programs-hero,
+.programs-hero {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.55) 0%, rgba(15, 23, 42, 0.75) 100%), url('/uploads/ex2.jpg') center/cover no-repeat !important;
+  background-size: cover !important;
+  background-position: center !important;
+  color: #FFFFFF !important;
+}
+
+.page-hero.gallery-hero,
+.gallery-hero {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.55) 0%, rgba(15, 23, 42, 0.75) 100%), url('/uploads/ex3.jpg') center/cover no-repeat !important;
+  background-size: cover !important;
+  background-position: center !important;
+  color: #FFFFFF !important;
+}
+
+.page-hero.events-hero,
+.events-hero {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.55) 0%, rgba(15, 23, 42, 0.75) 100%), url('/uploads/ex4.jpg') center/cover no-repeat !important;
+  background-size: cover !important;
+  background-position: center !important;
+  color: #FFFFFF !important;
+}
+
+.exhibits-hero *,
+.page-hero *,
+.programs-hero *,
+.gallery-hero *,
+.events-hero * {
+  color: #FFFFFF !important;
+}
+
+.exhibits-hero h1,
+.page-hero h1,
+.programs-hero h1,
+.gallery-hero h1,
+.events-hero h1 {
+  color: #FFFFFF !important;
+  font-weight: 900 !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.75) !important;
+}
+
+.exhibits-hero p,
+.page-hero p,
+.programs-hero p,
+.gallery-hero p,
+.events-hero p {
+  color: #FFFFFF !important;
+  opacity: 0.95 !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.65) !important;
+}
+
+.exhibits-hero .exhibits-hero-eyebrow {
+  color: #93c5fd !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75) !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+}
+
+.exhibits-hero .btn-primary,
+.exhibits-hero .btn-primary * {
+  color: #FFFFFF !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+}
+
 
