@@ -2697,8 +2697,8 @@ async function renderFeedbackTab(contentEl){
       <div class="feedback-row">
         <div>
           <span class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
-          <span style="font-size:12.5px; color:var(--ink-soft); margin-left:8px;">${escapeHtml(r.title)} · ${r.code||''}</span>
-          ${r.comment ? `<div class="comment" style="margin-top:6px;">${escapeHtml(r.comment)}</div>` : `<div class="comment" style="margin-top:6px; color:var(--ink-soft); font-style:italic;">No comment left.</div>`}
+          <span class="rating-target" style="font-size:13px; margin-left:8px; font-weight:700;">${escapeHtml(r.title)} · ${r.code||''}</span>
+          ${r.comment ? `<div class="comment" style="margin-top:6px;">${escapeHtml(r.comment)}</div>` : `<div class="comment" style="margin-top:6px; font-style:italic; opacity:0.9;">No comment left.</div>`}
           <div class="when">${new Date(r.createdAt).toLocaleString()}</div>
         </div>
         <button class="btn btn-danger btn-small" data-remove-rating="${r.id}">Remove</button>
