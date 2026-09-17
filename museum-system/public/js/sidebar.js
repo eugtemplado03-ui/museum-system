@@ -100,7 +100,7 @@
               </a>
             </div>
           ` : ''}
-          <div class="user-sidebar-section-title" style="color:#ffffff !important; font-size:11.5px !important; font-weight:900 !important; letter-spacing:0.1em !important; text-transform:uppercase !important;">Navigation</div>
+          <div class="user-sidebar-section-title" style="color:#ffffff !important; font-size:10px !important; font-weight:900 !important; letter-spacing:0.08em !important; text-transform:uppercase !important; padding:4px 8px 2px !important; margin:2px 0 1px !important;">Navigation</div>
           <a class="user-sidebar-btn ${activeKey === 'home' ? 'active' : ''}" href="/dashboard.html" style="color:#ffffff !important; font-weight:700 !important;">
             <span class="user-sidebar-icon">🏠</span>
             <span class="user-sidebar-label" style="color:#ffffff !important; font-weight:700 !important;">Home</span>
@@ -132,7 +132,7 @@
             ${activeKey === 'events' ? '<span class="user-sidebar-indicator"></span>' : ''}
           </a>
 
-          <div class="user-sidebar-section-title" style="margin-top:12px; color:#ffffff !important; font-size:11.5px !important; font-weight:900 !important; letter-spacing:0.1em !important; text-transform:uppercase !important;">Quick Jump</div>
+          <div class="user-sidebar-section-title" style="margin-top:8px; color:#ffffff !important; font-size:10px !important; font-weight:900 !important; letter-spacing:0.08em !important; text-transform:uppercase !important; padding:4px 8px 2px !important;">Quick Jump</div>
           <a class="user-sidebar-btn" href="#" onclick="event.preventDefault(); window.openVisitorHistoryModal();" style="color:#ffffff !important; font-weight:700 !important;">
             <span class="user-sidebar-icon">📋</span>
             <span class="user-sidebar-label" style="color:#ffffff !important; font-weight:700 !important;">My Visit History</span>

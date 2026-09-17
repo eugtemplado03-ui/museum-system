@@ -244,29 +244,29 @@ async function renderDashboard(){
   app.innerHTML = `
     <div class="admin-layout">
       <aside class="admin-sidebar" id="adminSidebar" style="background:#0F172A !important; color:#ffffff !important;">
-        <div class="admin-sidebar-brand" style="background:#0B1120 !important;">
-          <div class="admin-sidebar-logo">M</div>
-          <div class="admin-sidebar-title" style="color:#ffffff !important; font-weight:800;">Admin<br><span style="color:#ffffff !important; font-weight:800; opacity:0.95;">Dashboard</span></div>
+        <div class="admin-sidebar-brand" style="background:#0B1120 !important; padding:10px 12px !important; gap:10px !important;">
+          <div class="admin-sidebar-logo" style="width:32px !important; height:32px !important; font-size:15px !important; border-radius:8px !important;">M</div>
+          <div class="admin-sidebar-title" style="color:#ffffff !important; font-weight:800 !important; font-size:13.5px !important; line-height:1.15 !important;">Admin<br><span style="color:#ffffff !important; font-weight:800 !important; font-size:9.5px !important; opacity:0.95;">Dashboard</span></div>
           <button type="button" class="admin-sidebar-close" id="adminSidebarCloseBtn" aria-label="Close admin menu">✕</button>
         </div>
-        <nav class="admin-sidebar-nav">
+        <nav class="admin-sidebar-nav" style="padding:6px 8px !important; gap:2px !important;">
           ${groups.map(grp => `
-            <div class="admin-sidebar-section">
-              <div class="admin-sidebar-section-title" style="color:#ffffff !important; font-size:11.5px !important; font-weight:900 !important; letter-spacing:0.1em !important; text-transform:uppercase !important;">${grp.name}</div>
+            <div class="admin-sidebar-section" style="margin-bottom:4px !important;">
+              <div class="admin-sidebar-section-title" style="color:#ffffff !important; font-size:10px !important; font-weight:900 !important; letter-spacing:0.08em !important; text-transform:uppercase !important; padding:4px 8px 2px !important; margin:2px 0 1px !important;">${grp.name}</div>
               ${grp.items.map(item => `
-                <button class="admin-sidebar-btn ${activeTab === item.id ? 'active' : ''}" data-tab="${item.id}" style="color:#ffffff !important; font-weight:700 !important;">
-                  <span class="admin-sidebar-icon">${item.icon}</span>
-                  <span class="admin-sidebar-label" style="color:#ffffff !important; font-weight:700 !important;">${item.label}</span>
-                  ${item.id === 'visitors' ? '<span class="sidebar-badge live" style="color:#ffffff !important; background:#059669 !important;">Live</span>' : ''}
+                <button class="admin-sidebar-btn ${activeTab === item.id ? 'active' : ''}" data-tab="${item.id}" style="color:#ffffff !important; font-weight:700 !important; font-size:12.5px !important; padding:6px 10px !important; min-height:32px !important; border-radius:7px !important; margin:1px 0 !important; gap:9px !important;">
+                  <span class="admin-sidebar-icon" style="font-size:15px !important; width:18px !important; text-align:center !important; flex-shrink:0 !important;">${item.icon}</span>
+                  <span class="admin-sidebar-label" style="color:#ffffff !important; font-weight:700 !important; font-size:12.5px !important; line-height:1.2 !important;">${item.label}</span>
+                  ${item.id === 'visitors' ? '<span class="sidebar-badge live" style="color:#ffffff !important; background:#059669 !important; font-size:9.5px !important; padding:1px 5px !important;">Live</span>' : ''}
                   ${activeTab === item.id ? '<span class="admin-sidebar-indicator"></span>' : ''}
                 </button>
               `).join('')}
             </div>
           `).join('')}
         </nav>
-        <div class="admin-sidebar-footer" style="background:#0B1120 !important;">
-          <button class="admin-sidebar-signout" id="signOutBtn" style="color:#ffffff !important; font-weight:700 !important; border:1.5px solid rgba(255,255,255,0.2) !important;">
-            <span style="color:#ffffff !important;">⎋</span> <span style="color:#ffffff !important;">Sign out</span>
+        <div class="admin-sidebar-footer" style="background:#0B1120 !important; padding:8px 10px !important;">
+          <button class="admin-sidebar-signout" id="signOutBtn" style="color:#ffffff !important; font-weight:700 !important; font-size:12px !important; padding:6px 10px !important; border-radius:7px !important; border:1.5px solid rgba(255,255,255,0.2) !important; gap:7px !important;">
+            <span style="color:#ffffff !important; font-size:13px !important;">⎋</span> <span style="color:#ffffff !important; font-size:12px !important;">Sign out</span>
           </button>
         </div>
       </aside>
