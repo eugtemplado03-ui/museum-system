@@ -11,7 +11,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=50">
+  <link rel="stylesheet" href="/css/style.css?v=51">
   <script src="/js/gate.js"></script>
   <script src="/js/sidebar.js" defer></script>
   <style>
@@ -83,6 +83,14 @@
       z-index: 50;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
       flex-shrink: 0;
+      color: #ffffff !important;
+    }
+
+    /* GUARANTEE 100% PURE WHITE TEXT FOR TOP (HEADER) AND SIDE (DIRECTORY) */
+    .map-header,
+    .map-header *,
+    .map-directory-sidebar,
+    .map-directory-sidebar *:not(.cat-room-dot) {
       color: #ffffff !important;
     }
 
@@ -2144,76 +2152,76 @@
   </div>
 
   <!-- Interactive Map Compact Header & Controls -->
-  <header class="map-header">
+  <header class="map-header" style="background: #0f172a !important; color: #ffffff !important;">
     <div class="map-header-inner">
       <div class="map-header-top">
         <div class="map-header-title">
-          <h1>🏛️ Floor Map &amp; Exhibit Wayfinding</h1>
-          <p>Architectural plan from blueprint photo • All rooms &amp; exhibits</p>
+          <h1 style="color: #ffffff !important;">🏛️ Floor Map &amp; Exhibit Wayfinding</h1>
+          <p style="color: #ffffff !important; opacity: 0.95;">Architectural plan from blueprint photo • All rooms &amp; exhibits</p>
         </div>
 
         <div class="switchers-group">
           <!-- Floor Switcher -->
           <div class="segmented-control" role="tablist" aria-label="Floor Selector">
-            <button class="seg-btn active" id="btnFloor1" role="tab" aria-selected="true">
-              <span>📍 Level 1</span>
-              <span class="seg-badge" id="badgeFloor1">9</span>
+            <button class="seg-btn active" id="btnFloor1" role="tab" aria-selected="true" style="color: #ffffff !important;">
+              <span style="color: #ffffff !important;">📍 Level 1</span>
+              <span class="seg-badge" id="badgeFloor1" style="color: #ffffff !important; background: rgba(255, 255, 255, 0.25) !important;">9</span>
             </button>
-            <button class="seg-btn" id="btnFloor2" role="tab" aria-selected="false">
-              <span>🪜 Level 2</span>
-              <span class="seg-badge" id="badgeFloor2">2</span>
+            <button class="seg-btn" id="btnFloor2" role="tab" aria-selected="false" style="color: #ffffff !important;">
+              <span style="color: #ffffff !important;">🪜 Level 2</span>
+              <span class="seg-badge" id="badgeFloor2" style="color: #ffffff !important; background: rgba(255, 255, 255, 0.25) !important;">2</span>
             </button>
           </div>
 
           <!-- 2D / 3D Isometric View Mode -->
           <div class="segmented-control" role="group" aria-label="View Perspective Mode">
-            <button class="seg-btn active" id="btnMode2D" title="Top-down Architectural 2D Plan">
-              <span>📐 2D CAD</span>
+            <button class="seg-btn active" id="btnMode2D" title="Top-down Architectural 2D Plan" style="color: #ffffff !important;">
+              <span style="color: #ffffff !important;">📐 2D CAD</span>
             </button>
-            <button class="seg-btn" id="btnMode3D" title="Isometric 3D Architectural Model">
-              <span>🎲 3D Model</span>
+            <button class="seg-btn" id="btnMode3D" title="Isometric 3D Architectural Model" style="color: #ffffff !important;">
+              <span style="color: #ffffff !important;">🎲 3D Model</span>
             </button>
           </div>
 
           <!-- Screen Fit & Width Toggles -->
           <div class="segmented-control" role="group" aria-label="Zoom Fit Modes">
-            <button class="seg-btn active" id="btnFitAll" title="Fit 100% of the entire building on screen">
-              <span>⛶ Fit</span>
+            <button class="seg-btn active" id="btnFitAll" title="Fit 100% of the entire building on screen" style="color: #ffffff !important;">
+              <span style="color: #ffffff !important;">⛶ Fit</span>
             </button>
-            <button class="seg-btn" id="btnFitWidth" title="Expand map to full width">
-              <span>⬌ Width</span>
+            <button class="seg-btn" id="btnFitWidth" title="Expand map to full width" style="color: #ffffff !important;">
+              <span style="color: #ffffff !important;">⬌ Width</span>
             </button>
           </div>
 
           <!-- Mouse Wheel Mode (Scroll vs Zoom) -->
           <div class="segmented-control wheel-mode-control" role="group" aria-label="Mouse Wheel Mode">
-            <button class="seg-btn active" id="btnWheelScroll" title="Mouse wheel scrolls/pans map up and down">
-              <span>↕️ Scroll</span>
+            <button class="seg-btn active" id="btnWheelScroll" title="Mouse wheel scrolls/pans map up and down" style="color: #ffffff !important;">
+              <span style="color: #ffffff !important;">↕️ Scroll</span>
             </button>
-            <button class="seg-btn" id="btnWheelZoom" title="Mouse wheel zooms map in and out">
-              <span>🔍 Zoom</span>
+            <button class="seg-btn" id="btnWheelZoom" title="Mouse wheel zooms map in and out" style="color: #ffffff !important;">
+              <span style="color: #ffffff !important;">🔍 Zoom</span>
             </button>
           </div>
 
           <!-- Exhibit Pins Toggle -->
           <div class="segmented-control" role="group" aria-label="Exhibit Pinpoints Visibility">
             <button class="seg-btn active" id="btnToggleExhibitPins"
-              title="Toggle individual exhibit pinpoints on the floor map">
-              <span>📍 Exhibits</span>
+              title="Toggle individual exhibit pinpoints on the floor map" style="color: #ffffff !important;">
+              <span style="color: #ffffff !important;">📍 Exhibits</span>
             </button>
           </div>
 
           <!-- High-Contrast Theme Switcher -->
           <div class="segmented-control" role="group" aria-label="Theme Mode">
-            <button class="seg-btn" id="btnThemeToggle" title="Toggle Blueprint / Daylight High-Contrast Mode">
-              <span id="themeToggleLabel">🎨 CAD Theme</span>
+            <button class="seg-btn" id="btnThemeToggle" title="Toggle Blueprint / Daylight High-Contrast Mode" style="color: #ffffff !important;">
+              <span id="themeToggleLabel" style="color: #ffffff !important;">🎨 CAD Theme</span>
             </button>
           </div>
 
           <!-- Sidebar Toggle -->
           <button class="seg-btn active" id="btnToggleSidebar"
-            title="Toggle Rooms Directory Sidebar">
-            <span>📋 Directory</span>
+            title="Toggle Rooms Directory Sidebar" style="color: #ffffff !important;">
+            <span style="color: #ffffff !important;">📋 Directory</span>
           </button>
         </div>
       </div>
@@ -2221,18 +2229,18 @@
       <!-- Secondary Toolbar: Search, Filters & Quick Legend -->
       <div class="map-toolbar-row">
         <div class="map-search-wrap">
-          <span class="map-search-icon">🔍</span>
-          <input type="text" id="mapSearchInput" placeholder="Search rooms or exhibits…" aria-label="Search Exhibits">
+          <span class="map-search-icon" style="color: #ffffff !important;">🔍</span>
+          <input type="text" id="mapSearchInput" placeholder="Search rooms or exhibits…" aria-label="Search Exhibits" style="background: #1e293b !important; color: #ffffff !important; border: 1.5px solid #334155 !important;">
         </div>
 
         <div class="chips-row" role="tablist" aria-label="Filter Rooms by Category">
-          <button class="chip active" data-cat="all">All Category Rooms</button>
-          <button class="chip" data-cat="Marine &amp; Nature">🌊 Marine &amp; Nature (5)</button>
-          <button class="chip" data-cat="Touch &amp; Play">💦 Touch &amp; Play (1)</button>
-          <button class="chip" data-cat="Reading &amp; Learning">📚 Reading &amp; Learning (1)</button>
-          <button class="chip" data-cat="Character &amp; Heritage">🏆 Character &amp; Heritage (2)</button>
-          <button class="chip" data-cat="Toys &amp; Collections">🧸 Toys &amp; Collections (1)</button>
-          <button class="chip" data-cat="Carnival &amp; Discovery">🎡 Carnival &amp; Discovery (1)</button>
+          <button class="chip active" data-cat="all" style="color: #ffffff !important;">All Category Rooms</button>
+          <button class="chip" data-cat="Marine &amp; Nature" style="color: #ffffff !important;">🌊 Marine &amp; Nature (5)</button>
+          <button class="chip" data-cat="Touch &amp; Play" style="color: #ffffff !important;">💦 Touch &amp; Play (1)</button>
+          <button class="chip" data-cat="Reading &amp; Learning" style="color: #ffffff !important;">📚 Reading &amp; Learning (1)</button>
+          <button class="chip" data-cat="Character &amp; Heritage" style="color: #ffffff !important;">🏆 Character &amp; Heritage (2)</button>
+          <button class="chip" data-cat="Toys &amp; Collections" style="color: #ffffff !important;">🧸 Toys &amp; Collections (1)</button>
+          <button class="chip" data-cat="Carnival &amp; Discovery" style="color: #ffffff !important;">🎡 Carnival &amp; Discovery (1)</button>
         </div>
       </div>
     </div>
@@ -2242,12 +2250,12 @@
   <div class="map-layout-container">
 
     <!-- Interactive Room & Exhibit Directory Sidebar -->
-    <aside class="map-directory-sidebar" id="mapSidebar" aria-label="Exhibit Directory">
-      <div class="sidebar-header">
-        <h3 class="sidebar-title">🏛️ Rooms Directory</h3>
+    <aside class="map-directory-sidebar" id="mapSidebar" aria-label="Exhibit Directory" style="background: #0f172a !important; color: #ffffff !important;">
+      <div class="sidebar-header" style="background: #0f172a !important; color: #ffffff !important;">
+        <h3 class="sidebar-title" style="color: #ffffff !important;">🏛️ Rooms Directory</h3>
         <span style="font-size: 11px; color: #ffffff !important; opacity: 0.95;" id="sidebarCountLabel">6 Rooms • 11 Exhibits</span>
       </div>
-      <div class="sidebar-content" id="sidebarList">
+      <div class="sidebar-content" id="sidebarList" style="background: #0f172a !important; color: #ffffff !important;">
         <!-- Rendered dynamically -->
       </div>
     </aside>
@@ -3327,9 +3335,9 @@
         document.getElementById('sidebarCountLabel').textContent = `${roomsOnFloor.length} Rooms • ${totalExhibits} Exhibits`;
 
         let html = `
-        <div class="sidebar-section-title">
-          <span>Category Rooms (Level ${currentFloor})</span>
-          <span>${roomsOnFloor.length}</span>
+        <div class="sidebar-section-title" style="color: #ffffff !important;">
+          <span style="color: #ffffff !important;">Category Rooms (Level ${currentFloor})</span>
+          <span style="color: #ffffff !important;">${roomsOnFloor.length}</span>
         </div>
         <div class="category-rooms-dir-list">
       `;
@@ -3343,9 +3351,9 @@
             <div class="cat-room-header" data-room-id="${room.id}" title="View walking route to ${escapeHtml(room.title)}">
               <div class="cat-room-title-wrap">
                 <span class="cat-room-dot" style="background:${room.color}; box-shadow:0 0 8px ${room.color};"></span>
-                <span class="cat-room-name">${room.icon} ${escapeHtml(room.category)}</span>
+                <span class="cat-room-name" style="color: #ffffff !important;">${room.icon} ${escapeHtml(room.category)}</span>
               </div>
-              <span class="cat-room-count-badge" style="border-color: rgba(255, 255, 255, 0.45); color: #ffffff !important;">
+              <span class="cat-room-count-badge" style="border-color: rgba(255, 255, 255, 0.45); color: #ffffff !important; background: rgba(255, 255, 255, 0.15) !important;">
                 ${room.exhibitCodes.length} ${room.exhibitCodes.length === 1 ? 'Exhibit' : 'Exhibits'}
               </span>
             </div>
@@ -3356,12 +3364,12 @@
             const ex = exhibitsData.find(e => e.code === code);
             if (!ex) return;
             html += `
-            <div class="cat-exhibit-item" data-room-id="${room.id}" data-code="${ex.code}" title="View walking directions to ${escapeHtml(ex.title)}">
-              <div class="cat-exhibit-info">
-                <span class="cat-exhibit-bullet">📍</span>
-                <span class="cat-exhibit-title">${escapeHtml(ex.title)}</span>
+            <div class="cat-exhibit-item" data-room-id="${room.id}" data-code="${ex.code}" title="View walking directions to ${escapeHtml(ex.title)}" style="color: #ffffff !important;">
+              <div class="cat-exhibit-info" style="color: #ffffff !important;">
+                <span class="cat-exhibit-bullet" style="color: #ffffff !important;">📍</span>
+                <span class="cat-exhibit-title" style="color: #ffffff !important;">${escapeHtml(ex.title)}</span>
               </div>
-              <span class="cat-exhibit-code">${ex.code}</span>
+              <span class="cat-exhibit-code" style="color: #ffffff !important; opacity: 0.9;">${ex.code}</span>
             </div>
           `;
           });
@@ -3377,44 +3385,44 @@
         // Public Facilities & Architectural Wings
         if (currentFloor === 1) {
           html += `
-          <div class="sidebar-section-title" style="margin-top:14px;">
-            <span>Facilities &amp; Public Wings</span>
+          <div class="sidebar-section-title" style="margin-top:14px; color: #ffffff !important;">
+            <span style="color: #ffffff !important;">Facilities &amp; Public Wings</span>
           </div>
           <div class="room-dir-list">
-            <div class="room-dir-item" data-zone="zone_entrance">
-              <div class="room-dir-info"><span>🚪</span><span>Main Entrance &amp; Foyer</span></div>
+            <div class="room-dir-item" data-zone="zone_entrance" style="color: #ffffff !important;">
+              <div class="room-dir-info" style="color: #ffffff !important;"><span style="color: #ffffff !important;">🚪</span><span style="color: #ffffff !important;">Main Entrance &amp; Foyer</span></div>
               <span style="font-size:10px; color:#ffffff !important; opacity:0.9;">Entry</span>
             </div>
-            <div class="room-dir-item" data-zone="zone_staff_office">
-              <div class="room-dir-info"><span>💼</span><span>Staff Office (Under Stairs)</span></div>
+            <div class="room-dir-item" data-zone="zone_staff_office" style="color: #ffffff !important;">
+              <div class="room-dir-info" style="color: #ffffff !important;"><span style="color: #ffffff !important;">💼</span><span style="color: #ffffff !important;">Staff Office (Under Stairs)</span></div>
               <span style="font-size:10px; color:#ffffff !important; opacity:0.9;">Admin</span>
             </div>
-            <div class="room-dir-item" data-zone="zone_function_hall">
-              <div class="room-dir-info"><span>🏛️</span><span>Central Function Hall</span></div>
+            <div class="room-dir-item" data-zone="zone_function_hall" style="color: #ffffff !important;">
+              <div class="room-dir-info" style="color: #ffffff !important;"><span style="color: #ffffff !important;">🏛️</span><span style="color: #ffffff !important;">Central Function Hall</span></div>
               <span style="font-size:10px; color:#ffffff !important; opacity:0.9;">Great Hall</span>
             </div>
-            <div class="room-dir-item" data-zone="zone_stairs">
-              <div class="room-dir-info"><span>🪜</span><span>Staircase to Level 2</span></div>
+            <div class="room-dir-item" data-zone="zone_stairs" style="color: #ffffff !important;">
+              <div class="room-dir-info" style="color: #ffffff !important;"><span style="color: #ffffff !important;">🪜</span><span style="color: #ffffff !important;">Staircase to Level 2</span></div>
               <span style="font-size:10px; color:#ffffff !important; opacity:0.9;">Stairs Up</span>
             </div>
-            <div class="room-dir-item" data-zone="zone_aquarium">
-              <div class="room-dir-info"><span>🐠</span><span>Aquarium &amp; Live Reef</span></div>
+            <div class="room-dir-item" data-zone="zone_aquarium" style="color: #ffffff !important;">
+              <div class="room-dir-info" style="color: #ffffff !important;"><span style="color: #ffffff !important;">🐠</span><span style="color: #ffffff !important;">Aquarium &amp; Live Reef</span></div>
               <span style="font-size:10px; color:#ffffff !important; opacity:0.9;">Tanks</span>
             </div>
           </div>
         `;
         } else {
           html += `
-          <div class="sidebar-section-title" style="margin-top:14px;">
-            <span>Mezzanine Features</span>
+          <div class="sidebar-section-title" style="margin-top:14px; color: #ffffff !important;">
+            <span style="color: #ffffff !important;">Mezzanine Features</span>
           </div>
           <div class="room-dir-list">
-            <div class="room-dir-item" data-zone="zone_stairs_landing">
-              <div class="room-dir-info"><span>🪜</span><span>Stairs Down to Ground</span></div>
+            <div class="room-dir-item" data-zone="zone_stairs_landing" style="color: #ffffff !important;">
+              <div class="room-dir-info" style="color: #ffffff !important;"><span style="color: #ffffff !important;">🪜</span><span style="color: #ffffff !important;">Stairs Down to Ground</span></div>
               <span style="font-size:10px; color:#ffffff !important; opacity:0.9;">Landing</span>
             </div>
-            <div class="room-dir-item" data-zone="zone_mezzanine_void">
-              <div class="room-dir-info"><span>👀</span><span>Mezzanine Void Balcony</span></div>
+            <div class="room-dir-item" data-zone="zone_mezzanine_void" style="color: #ffffff !important;">
+              <div class="room-dir-info" style="color: #ffffff !important;"><span style="color: #ffffff !important;">👀</span><span style="color: #ffffff !important;">Mezzanine Void Balcony</span></div>
               <span style="font-size:10px; color:#ffffff !important; opacity:0.9;">Overlook</span>
             </div>
           </div>
