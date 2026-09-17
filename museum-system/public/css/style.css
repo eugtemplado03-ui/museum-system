@@ -7549,11 +7549,11 @@ footer a {
   box-shadow: 0 12px 32px rgba(91, 164, 230, 0.45) !important;
 }
 
-.home-mini-card *,
-.home-exhibit-card *,
-.recommended-card *,
-.home-gallery-mini-item *,
-.tag-card * {
+.home-mini-card *:not(.btn):not(.btn *),
+.home-exhibit-card *:not(.btn):not(.btn *),
+.recommended-card *:not(.btn):not(.btn *),
+.home-gallery-mini-item *:not(.btn):not(.btn *),
+.tag-card *:not(.btn):not(.btn *) {
   color: #FFFFFF !important;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45) !important;
 }
@@ -7590,10 +7590,38 @@ footer a {
 }
 
 .home-mini-card .home-mini-link,
-.tag-card .tag-foot a {
+.tag-card .tag-foot a:not(.btn) {
   color: #FFFFFF !important;
   font-weight: 900 !important;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Card Buttons (e.g. Map & View Label): Solid Black Text with No Shadow */
+.tag-card .tag-foot .btn,
+.tag-card .tag-foot .btn *,
+.tag-card .tag-foot a.btn,
+.tag-card .tag-foot a.btn *,
+.tag-card .btn,
+.tag-card .btn *,
+.content-card .btn,
+.content-card .btn *,
+.btn-ghost.dark,
+.btn-ghost.dark * {
+  color: #000000 !important;
+  text-shadow: none !important;
+  font-weight: 800 !important;
+}
+
+.tag-card .tag-foot .btn:hover,
+.tag-card .tag-foot .btn:hover *,
+.tag-card .tag-foot a.btn:hover,
+.tag-card .tag-foot a.btn:hover *,
+.tag-card .btn:hover,
+.tag-card .btn:hover *,
+.content-card .btn:hover,
+.content-card .btn:hover * {
+  color: #1d4ed8 !important;
+  text-shadow: none !important;
 }
 
 /* Review Snippet Box inside Cards */

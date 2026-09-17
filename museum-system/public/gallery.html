@@ -6,7 +6,7 @@
 <title>Gallery — Museo Sang Bata sa Negros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=41">
+<link rel="stylesheet" href="/css/style.css?v=42">
 <script src="/js/gate.js"></script>
 </head>
 <body>
@@ -140,7 +140,7 @@
           ${g.title ? `<h3 style="cursor:pointer;" onclick="openGalleryDetail('${escapeHtml(g.id)}')">${escapeHtml(g.title)}</h3>` : ''}
           ${g.caption ? `<p class="desc">${escapeHtml(g.caption)}</p>` : ''}
           <div style="margin-top:auto; padding-top:12px;">
-            <button type="button" class="btn btn-ghost dark btn-small" onclick="openGalleryDetail('${escapeHtml(g.id)}')">View details &rarr;</button>
+            <button type="button" class="btn btn-ghost dark btn-small" onclick="openGalleryDetail('${escapeHtml(g.id)}')" style="color:#000000 !important; text-shadow:none !important; font-weight:800; background:#ffffff !important;">View details &rarr;</button>
           </div>
         </div>
       </div>`;

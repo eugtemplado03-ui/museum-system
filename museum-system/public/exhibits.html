@@ -7,7 +7,7 @@
 <meta name="description" content="Browse all exhibit tags at Museo Sang Bata sa Negros. Search, filter by category and rating, and discover every artifact on the floor.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=41">
+<link rel="stylesheet" href="/css/style.css?v=42">
 <script src="/js/gate.js"></script>
 <style>
 /* ── Category Sidebar ── */
@@ -172,6 +172,26 @@
     font-size: 11px;
     padding: 5px 8px;
   }
+}
+
+/* Ensure card footer action buttons (Map & View label) always show solid black text */
+.tag-foot .btn,
+.tag-foot a.btn,
+.tag-card .tag-foot .btn,
+.tag-card .tag-foot a.btn {
+  color: #000000 !important;
+  text-shadow: none !important;
+  font-weight: 800 !important;
+  background: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.2) !important;
+}
+.tag-foot .btn:hover,
+.tag-foot a.btn:hover,
+.tag-card .tag-foot .btn:hover,
+.tag-card .tag-foot a.btn:hover {
+  color: #1d4ed8 !important;
+  text-shadow: none !important;
+  background: #f1f5f9 !important;
 }
 </style>
 </head>
@@ -439,8 +459,8 @@
         <div class="tag-foot">
           <span class="tag-id mono">${ex.code}</span>
           <div style="display:flex; gap:6px; align-items:center;">
-            <a class="btn btn-ghost dark btn-small" href="/map.html?focus=${encodeURIComponent(ex.code)}&route=1" title="Show walking route on floor map" style="padding:4px 8px; font-size:11.5px;">🧭 Map</a>
-            <a class="btn btn-ghost dark btn-small" href="/exhibit.html?code=${encodeURIComponent(ex.code)}">View label &rarr;</a>
+            <a class="btn btn-ghost dark btn-small" href="/map.html?focus=${encodeURIComponent(ex.code)}&route=1" title="Show walking route on floor map" style="padding:4px 8px; font-size:11.5px; color:#000000 !important; text-shadow:none !important; font-weight:800; background:#ffffff !important;">🧭 Map</a>
+            <a class="btn btn-ghost dark btn-small" href="/exhibit.html?code=${encodeURIComponent(ex.code)}" style="color:#000000 !important; text-shadow:none !important; font-weight:800; background:#ffffff !important;">View label &rarr;</a>
           </div>
         </div>
       </div>`;

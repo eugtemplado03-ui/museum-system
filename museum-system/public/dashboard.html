@@ -9,7 +9,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=41">
+  <link rel="stylesheet" href="/css/style.css?v=42">
   <script src="/js/gate.js"></script>
   <style>
     /* ── Featured Video Section ── */
@@ -946,9 +946,9 @@
       box-shadow: 0 12px 32px rgba(91, 164, 230, 0.45) !important;
     }
 
-    .home-mini-card *,
-    .home-exhibit-card *,
-    .recommended-card * {
+    .home-mini-card *:not(.btn):not(.btn *),
+    .home-exhibit-card *:not(.btn):not(.btn *),
+    .recommended-card *:not(.btn):not(.btn *) {
       color: #FFFFFF !important;
       text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45) !important;
     }
@@ -984,6 +984,24 @@
       color: #FFFFFF !important;
       font-weight: 900 !important;
       text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    /* Card Action Buttons (Solid Black text, no shadow) */
+    .home-mini-card .btn,
+    .home-mini-card .btn *,
+    .home-exhibit-card .btn,
+    .home-exhibit-card .btn * {
+      color: #000000 !important;
+      text-shadow: none !important;
+      font-weight: 800 !important;
+    }
+
+    .home-mini-card .btn:hover,
+    .home-mini-card .btn:hover *,
+    .home-exhibit-card .btn:hover,
+    .home-exhibit-card .btn:hover * {
+      color: #1d4ed8 !important;
+      text-shadow: none !important;
     }
 
     /* Review Snippet Box inside Exhibit Card */
