@@ -6,7 +6,7 @@
 <title>Exhibit — Museo Sang Bata sa Negros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=46">
+<link rel="stylesheet" href="/css/style.css?v=47">
 <script src="/js/gate.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <style>
@@ -14,51 +14,52 @@
   .leaflet-popup-content-wrapper { border-radius: 8px; }
   .leaflet-popup-content { margin: 10px 14px; }
 
-  /* ── Walking Directions Responsive Card ── */
+  /* ── Walking Directions Responsive Card (White Background with Crisp Black Text) ── */
   .exhibit-directions-card {
     margin-top: 20px;
-    padding: 18px 20px;
-    background: linear-gradient(135deg, rgba(3, 29, 41, 0.95) 0%, rgba(2, 20, 29, 0.98) 100%);
-    border: 1.5px solid rgba(0, 240, 255, 0.35);
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+    padding: 22px 22px 20px;
+    background: #ffffff !important;
+    border: 1.5px solid #dbeafe !important;
+    border-radius: 18px;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
   }
   .dir-card-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 12px;
+    gap: 12px;
+    margin-bottom: 14px;
   }
   .dir-title-area {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
   }
   .dir-icon-badge {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 10px;
-    background: rgba(0, 240, 255, 0.15);
-    border: 1px solid #00f0ff;
+    background: #e0f2fe !important;
+    border: 1.5px solid #38bdf8 !important;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 20px;
     flex-shrink: 0;
   }
   .dir-title-area h3 {
     font-family: 'Nunito', sans-serif;
-    font-size: 15px;
+    font-size: 16.5px;
     font-weight: 800;
-    color: #ffffff;
+    color: #0f172a !important;
     margin: 0;
     line-height: 1.25;
   }
   .dir-title-area span {
-    font-size: 11.5px;
-    color: #94a3b8;
+    font-size: 12px;
+    color: #475569 !important;
+    font-weight: 600;
   }
   .dir-badges-group {
     display: flex;
@@ -66,20 +67,48 @@
     flex-wrap: wrap;
     align-items: center;
   }
+  .dir-badge-floor {
+    background: #eff6ff !important;
+    border: 1.5px solid #93c5fd !important;
+    color: #0284c7 !important;
+    font-size: 11.5px !important;
+    font-weight: 800 !important;
+    padding: 4px 10px !important;
+    border-radius: 999px !important;
+  }
+  .dir-badge-loc {
+    background: #f8fafc !important;
+    border: 1.5px solid #cbd5e1 !important;
+    color: #0f172a !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    padding: 4px 10px !important;
+    border-radius: 999px !important;
+  }
+  .dir-badge-pin {
+    background: #fdf2f8 !important;
+    border: 1.5px solid #f472b6 !important;
+    color: #db2777 !important;
+    font-size: 11.5px !important;
+    font-weight: 800 !important;
+    padding: 4px 10px !important;
+    border-radius: 999px !important;
+  }
   .dir-steps-box {
-    background: rgba(0,0,0,0.45);
-    border: 1px solid rgba(0, 240, 255, 0.2);
-    border-radius: 12px;
-    padding: 14px;
-    margin-bottom: 14px;
+    background: #f8fafc !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
   }
   .dir-steps-heading {
-    font-size: 11px;
+    font-size: 11.5px;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    color: #5eead4;
-    margin-bottom: 10px;
+    color: #0284c7 !important;
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -90,26 +119,27 @@
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 9px;
+    gap: 10px;
   }
   .dir-step-row {
     display: flex;
     align-items: flex-start;
-    gap: 10px;
-    font-size: 13.5px;
-    color: #e2e8f0;
-    line-height: 1.5;
+    gap: 12px;
+    font-size: 14px;
+    color: #0f172a !important;
+    line-height: 1.55;
+    font-weight: 600;
   }
   .dir-step-pill {
     flex-shrink: 0;
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
-    background: rgba(0,240,255,0.18);
-    border: 1px solid #00f0ff;
-    color: #00f0ff;
+    background: #e0f2fe !important;
+    border: 1.5px solid #38bdf8 !important;
+    color: #0284c7 !important;
     font-weight: 800;
-    font-size: 11px;
+    font-size: 12px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -127,17 +157,45 @@
     align-items: center;
     flex-wrap: wrap;
   }
+  #dirVoicePlayBtn, #dirVoiceStopBtn {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1.5px solid #cbd5e1 !important;
+    font-weight: 800;
+    font-size: 13px;
+    padding: 8px 16px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    transition: transform 0.15s, background 0.15s;
+  }
+  #dirVoicePlayBtn:hover, #dirVoiceStopBtn:hover {
+    background: #f1f5f9 !important;
+    border-color: #94a3b8 !important;
+    transform: translateY(-1px);
+  }
+  #dirVoiceStatus {
+    font-size: 12px;
+    color: #475569 !important;
+    font-weight: 600;
+  }
   .dir-map-button {
     text-decoration: none;
-    padding: 9px 16px;
-    font-size: 13px;
+    padding: 10px 18px;
+    font-size: 13.5px;
     font-weight: 800;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    box-shadow: 0 2px 12px rgba(0,174,189,0.4);
+    background: #0284c7 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 10px rgba(2, 132, 199, 0.3);
     border-radius: 10px;
+    transition: transform 0.15s, background 0.15s;
+  }
+  .dir-map-button:hover {
+    background: #0369a1 !important;
+    transform: translateY(-1px);
   }
 
   @media (max-width: 600px) {
@@ -320,12 +378,12 @@
                     </div>
                   </div>
                   <div class="dir-badges-group">
-                    <span style="background:rgba(0, 240, 255, 0.15); border:1px solid rgba(0, 240, 255, 0.4); color:#00f0ff; font-size:11px; font-weight:800; padding:3px 8px; border-radius:999px;">
+                    <span class="dir-badge-floor">
                       ${exhibit.floor === 2 ? 'Level 2 (Second Floor)' : 'Level 1 (Ground Floor)'}
                     </span>
-                    ${exhibit.location ? `<span style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:#e2e8f0; font-size:11px; font-weight:700; padding:3px 8px; border-radius:999px;">📍 ${escapeHtml(exhibit.location)}</span>` : ''}
+                    ${exhibit.location ? `<span class="dir-badge-loc">📍 ${escapeHtml(exhibit.location)}</span>` : ''}
                     ${exhibit.pinX !== null && exhibit.pinX !== undefined && exhibit.pinY !== null && exhibit.pinY !== undefined ? `
-                      <span style="background:rgba(255, 0, 85, 0.15); border:1px solid rgba(255, 0, 85, 0.4); color:#ff4081; font-size:11px; font-weight:800; padding:3px 8px; border-radius:999px;">
+                      <span class="dir-badge-pin">
                         📍 Map Pin: (${Math.round(exhibit.pinX)}%, ${Math.round(exhibit.pinY)}%)
                       </span>
                     ` : ''}
