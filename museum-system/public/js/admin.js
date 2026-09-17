@@ -2807,10 +2807,10 @@ async function renderVisitorsTab(contentEl){
   contentEl.innerHTML = `
     <!-- Live KPIs -->
     <div class="kpi-cards-grid">
-      <div class="kpi-stat-card" style="border:1.5px solid rgba(94,234,212,0.4); background:linear-gradient(135deg, rgba(0,42,54,0.9) 0%, rgba(0,174,189,0.2) 100%);">
+      <div class="kpi-stat-card">
         <div class="kpi-stat-icon green">🟢</div>
         <div class="kpi-stat-info">
-          <div class="kpi-stat-value" style="color:#5eead4;">${todayTotalPax} <span style="font-size:12px; font-weight:600; color:#cbd5e1;">pax</span></div>
+          <div class="kpi-stat-value">${todayTotalPax} <span style="font-size:12px; font-weight:700; color:#000000;">pax</span></div>
           <div class="kpi-stat-label">Today's Headcount (${todayTotalVisits} logs)</div>
         </div>
       </div>

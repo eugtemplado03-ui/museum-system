@@ -6,7 +6,7 @@
 <title>Admin — Museo Sang Bata sa Negros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=26">
+<link rel="stylesheet" href="/css/style.css?v=27">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   /* ── Dedicated Admin Navy Topbar ────────────────────────────── */
@@ -226,6 +226,8 @@
   .modal-overlay .modal *:not(.btn-primary):not(.btn-primary *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *),
   .modal-overlay .modal-box,
   .modal-overlay .modal-box *:not(.btn-primary):not(.btn-primary *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *),
+  .kpi-stat-card,
+  .kpi-stat-card *:not(.btn-primary):not(.btn-primary *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *),
   .admin-modal-card,
   .admin-modal-card *:not(.btn-primary):not(.btn-primary *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *) {
     color: #000000 !important;
@@ -281,7 +283,11 @@
   .dash-event-title,
   .dash-event-sub,
   .dash-event-day,
-  .dash-event-month {
+  .dash-event-month,
+  .kpi-stat-value,
+  .kpi-stat-value *,
+  .kpi-stat-label,
+  .kpi-stat-label * {
     color: #000000 !important;
     text-shadow: none !important;
   }
@@ -690,6 +696,8 @@
   .content-card *,
   .stat-card,
   .stat-card *,
+  .kpi-stat-card,
+  .kpi-stat-card *,
   .dash-hub-card,
   .dash-hub-card *,
   .dash-analytics-box,
@@ -699,6 +707,41 @@
     color: #000000 !important;
     text-shadow: none !important;
   }
+
+  /* KPI Stat Cards (White Background, Black Text, Soft Blue Accent) */
+  .kpi-stat-card {
+    background: #FFFFFF !important;
+    border: 1.5px solid #DBEAFE !important;
+    border-radius: 16px !important;
+    padding: 18px 22px !important;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+    color: #000000 !important;
+  }
+  .kpi-stat-card:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+    border-color: #93C5FD !important;
+  }
+  .kpi-stat-value,
+  .kpi-stat-value * {
+    color: #000000 !important;
+    font-weight: 900 !important;
+    text-shadow: none !important;
+  }
+  .kpi-stat-label,
+  .kpi-stat-label * {
+    color: #000000 !important;
+    font-weight: 700 !important;
+    text-shadow: none !important;
+  }
+  .kpi-stat-icon {
+    background: #EFF6FF !important;
+    border: 1.5px solid #DBEAFE !important;
+  }
+  .kpi-stat-icon.orange { background: #FFF7ED !important; border-color: #FFEDD5 !important; }
+  .kpi-stat-icon.green { background: #F0FDF4 !important; border-color: #DCFCE7 !important; }
+  .kpi-stat-icon.purple { background: #FAF5FF !important; border-color: #F3E8FF !important; }
+  .kpi-stat-icon.red { background: #FEF2F2 !important; border-color: #FEE2E2 !important; }
 
   /* Baby Blue Action Buttons with Crisp White Text */
   .btn-primary,
@@ -829,7 +872,7 @@
   <script src="/js/lightbox.js"></script>
   <script src="/js/sidebar.js"></script>
   <script src="/js/carousel.js"></script>
-  <script src="/js/admin.js?v=29"></script>
+  <script src="/js/admin.js?v=30"></script>
   <script src="/js/footer.js"></script>
 </body>
 </html>

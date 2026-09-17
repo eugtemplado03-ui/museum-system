@@ -3143,54 +3143,57 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
   margin-bottom: 24px;
 }
 .kpi-stat-card {
-  background: rgba(6, 28, 38, 0.82);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1.5px solid rgba(255, 255, 255, 0.18);
-  border-radius: 14px;
-  padding: 20px 22px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  background: #FFFFFF !important;
+  border: 1.5px solid #DBEAFE !important;
+  border-radius: 16px !important;
+  padding: 18px 22px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease !important;
 }
 .kpi-stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 36px rgba(0, 174, 189, 0.30);
-  border-color: var(--teal);
+  transform: translateY(-2px) !important;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+  border-color: #93C5FD !important;
 }
 .kpi-stat-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
-  background: var(--teal-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  flex-shrink: 0;
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 12px !important;
+  background: #EFF6FF !important;
+  border: 1.5px solid #DBEAFE !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 26px !important;
+  flex-shrink: 0 !important;
 }
-.kpi-stat-icon.orange { background: #fff3e6; color: var(--orange); }
-.kpi-stat-icon.green { background: #e8f5e9; color: #2e7d32; }
-.kpi-stat-icon.purple { background: #f3e5f5; color: #7b1fa2; }
-.kpi-stat-icon.red { background: #ffebee; color: var(--danger); }
-.kpi-stat-info { display: flex; flex-direction: column; min-width: 0; }
+.kpi-stat-icon.orange { background: #FFF7ED !important; border-color: #FFEDD5 !important; }
+.kpi-stat-icon.green { background: #F0FDF4 !important; border-color: #DCFCE7 !important; }
+.kpi-stat-icon.purple { background: #FAF5FF !important; border-color: #F3E8FF !important; }
+.kpi-stat-icon.red { background: #FEF2F2 !important; border-color: #FEE2E2 !important; }
+.kpi-stat-info { display: flex !important; flex-direction: column !important; min-width: 0 !important; }
 .kpi-stat-value {
-  font-size: 26px;
-  font-weight: 800;
-  color: #ffffff;
-  line-height: 1.1;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  font-size: 26px !important;
+  font-weight: 900 !important;
+  color: #000000 !important;
+  line-height: 1.15 !important;
+  text-shadow: none !important;
+}
+.kpi-stat-value * {
+  color: #000000 !important;
 }
 .kpi-stat-label {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #cbd5e1;
-  margin-top: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #000000 !important;
+  margin-top: 4px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  text-shadow: none !important;
 }
 
 /* Status & Condition Badges */
@@ -6274,6 +6277,7 @@ main,
 .gallery-card,
 .gallery-preview-card,
 .stat-card,
+.kpi-stat-card,
 .dash-kpi-card,
 .dash-pie-card,
 .dash-card,
@@ -6324,6 +6328,7 @@ main,
 .event-card:hover,
 .gallery-preview-card:hover,
 .stat-card:hover,
+.kpi-stat-card:hover,
 .dash-kpi-card:hover,
 .dash-pie-card:hover,
 .dash-analytics-featured-card:hover,
@@ -6337,6 +6342,7 @@ main,
 /* 5. KPI Metrics Card Elements */
 .dash-kpi-val,
 .stat-card .num,
+.kpi-stat-value,
 .dash-pie-center-num,
 .dash-metric-num {
   color: #000000 !important;
@@ -6346,6 +6352,7 @@ main,
 
 .dash-kpi-lbl,
 .stat-card .label,
+.kpi-stat-label,
 .dash-metric-lbl {
   color: #000000 !important;
   font-weight: 800 !important;
