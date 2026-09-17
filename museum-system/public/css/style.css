@@ -3850,56 +3850,63 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
     display: none !important;
   }
   table.ledger tr {
-    background: rgba(6, 28, 38, 0.88) !important;
-    backdrop-filter: blur(14px) !important;
-    -webkit-backdrop-filter: blur(14px) !important;
-    border: 1.5px solid rgba(255, 255, 255, 0.18) !important;
+    background: #5ba4e6 !important;
+    background-image: linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important;
+    border: 2px solid #4696df !important;
     border-radius: 16px !important;
-    padding: 16px !important;
-    margin-bottom: 14px !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
-    transition: transform 0.15s ease, border-color 0.15s ease !important;
+    padding: 10px !important;
+    margin-bottom: 16px !important;
+    box-shadow: 0 6px 22px rgba(91, 164, 230, 0.32) !important;
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease !important;
   }
   table.ledger tr:hover {
-    border-color: var(--teal) !important;
+    border-color: #2563eb !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 26px rgba(91, 164, 230, 0.45) !important;
   }
   table.ledger td {
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
     text-align: right !important;
-    padding: 8px 0 !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-    background: transparent !important;
+    padding: 10px 14px !important;
+    border-bottom: 1px solid #E2E8F0 !important;
+    background: #FFFFFF !important;
     font-size: 13.5px !important;
-    color: #e2e8f0 !important;
-    min-height: 34px !important;
+    color: #000000 !important;
+    min-height: 38px !important;
     gap: 12px !important;
   }
-  table.ledger td:last-child {
+  table.ledger tr td:first-child {
+    border-top-left-radius: 10px !important;
+    border-top-right-radius: 10px !important;
+  }
+  table.ledger tr td:last-child {
+    border-bottom-left-radius: 10px !important;
+    border-bottom-right-radius: 10px !important;
     border-bottom: none !important;
     padding-top: 12px !important;
-    padding-bottom: 0 !important;
+    padding-bottom: 10px !important;
   }
   table.ledger td[data-label]::before {
     content: attr(data-label);
-    font-weight: 700;
+    font-weight: 800;
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #94a3b8;
+    color: #000000;
     text-align: left;
     flex-shrink: 0;
   }
   table.ledger td.title-cell {
     font-size: 16px !important;
-    color: #ffffff !important;
+    color: #000000 !important;
     font-weight: 800 !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-bottom: 1px solid #E2E8F0 !important;
     padding-bottom: 10px !important;
   }
   table.ledger td.title-cell::before {
-    color: var(--teal) !important;
+    color: #000000 !important;
   }
   table.ledger .row-actions {
     width: 100% !important;
@@ -6616,17 +6623,26 @@ main,
 }
 
 /* 10. Tables & Ledgers */
+.admin-table-wrap {
+  background: #FFFFFF !important;
+  border: 2.5px solid #5ba4e6 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 20px rgba(91, 164, 230, 0.20) !important;
+  overflow: hidden !important;
+  margin-top: 12px !important;
+}
+
 table.ledger {
   background: #FFFFFF !important;
-  border: 1.5px solid #DBEAFE !important;
-  border-radius: 12px !important;
-  overflow: hidden !important;
+  border: none !important;
+  border-collapse: collapse !important;
+  width: 100% !important;
 }
 
 table.ledger th {
   background: #F8FAFC !important;
   color: #000000 !important;
-  border-bottom: 1.5px solid #E2E8F0 !important;
+  border-bottom: 2px solid #5ba4e6 !important;
   font-weight: 800 !important;
   font-size: 11.5px !important;
   text-transform: uppercase !important;
