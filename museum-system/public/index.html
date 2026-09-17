@@ -12,6 +12,8 @@
   <link rel="stylesheet" href="/css/style.css">
   <style>
     :root {
+      --baby-blue: #5ba4e6;
+      --baby-blue-dark: #3b93dc;
       --blue-primary: #3b82f6;
       --blue-hover: #2563eb;
       --blue-accent: #3b82f6;
@@ -53,97 +55,73 @@
       scroll-margin-top: 90px;
     }
 
-    /* ── Top Navigation Bar ────────────────────────────────────────── */
-    .welcome-nav {
+    /* ── Top Navigation Bar (Baby Blue Background) ─────────────────── */
+    header.welcome-nav,
+    header.welcome-nav.nav-scrolled,
+    .welcome-nav,
+    .welcome-nav.nav-scrolled {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       height: 68px;
-      background: transparent;
-      border-bottom: 1px solid rgba(255,255,255,0.15);
-      backdrop-filter: blur(0px);
-      -webkit-backdrop-filter: blur(0px);
+      background: var(--baby-blue, #5ba4e6) !important;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.35) !important;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 clamp(16px, 4vw, 48px);
       z-index: 1000;
-      box-shadow: none;
-      transition: background 0.4s cubic-bezier(0.22,1,0.36,1),
-                  border-color 0.4s cubic-bezier(0.22,1,0.36,1),
-                  backdrop-filter 0.4s cubic-bezier(0.22,1,0.36,1),
-                  box-shadow 0.4s cubic-bezier(0.22,1,0.36,1);
+      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.12) !important;
+      transition: all 0.3s ease;
     }
 
-    /* After scrolling past hero — solid white nav */
-    .welcome-nav.nav-scrolled {
-      background: #ffffff !important;
-      border-bottom: 2.5px solid var(--blue-accent);
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      box-shadow: 0 2px 10px rgba(29, 78, 216, 0.1);
-    }
-
-    .welcome-brand {
+    .welcome-brand,
+    .nav-scrolled .welcome-brand {
       display: flex;
       align-items: center;
       gap: 12px;
       text-decoration: none;
-      color: #ffffff;
+      color: #ffffff !important;
       transition: color 0.4s ease;
     }
 
-    .nav-scrolled .welcome-brand {
-      color: var(--text-black);
-    }
-
-    .welcome-brand-mark {
+    .welcome-brand-mark,
+    .nav-scrolled .welcome-brand-mark {
       width: 42px;
       height: 42px;
       border-radius: 12px;
-      background: rgba(255,255,255,0.22);
-      border: 1.5px solid rgba(255,255,255,0.4);
-      color: #ffffff;
+      background: rgba(255, 255, 255, 0.25) !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
+      color: #ffffff !important;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 22px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+      transition: all 0.3s ease;
     }
 
-    .nav-scrolled .welcome-brand-mark {
-      background: var(--blue-primary);
-      border-color: transparent;
-      box-shadow: 0 2px 8px rgba(29, 78, 216, 0.25);
-    }
-
-    .welcome-brand-text h1 {
+    .welcome-brand-text h1,
+    .nav-scrolled .welcome-brand-text h1 {
       margin: 0;
       font-family: 'Nunito', sans-serif;
       font-size: 16px;
-      font-weight: 800;
-      color: inherit;
+      font-weight: 800 !important;
+      color: #ffffff !important;
       line-height: 1.2;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.3);
-      transition: text-shadow 0.4s ease;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35) !important;
     }
 
-    .nav-scrolled .welcome-brand-text h1 {
-      text-shadow: none;
-    }
-
-    .welcome-brand-text p {
+    .welcome-brand-text p,
+    .nav-scrolled .welcome-brand-text p {
       margin: 0;
       font-size: 11.5px;
-      color: rgba(255,255,255,0.8);
-      font-weight: 700;
-      transition: color 0.4s ease;
-    }
-
-    .nav-scrolled .welcome-brand-text p {
-      color: var(--blue-primary);
+      color: rgba(255, 255, 255, 0.92) !important;
+      font-weight: 700 !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
     }
 
     .welcome-menu {
@@ -152,36 +130,29 @@
       gap: clamp(10px, 2vw, 24px);
     }
 
-    .welcome-menu-link {
-      color: rgba(255,255,255,0.9);
+    .welcome-menu-link,
+    .nav-scrolled .welcome-menu-link {
+      color: #ffffff !important;
       text-decoration: none;
       font-family: 'Nunito', sans-serif;
       font-size: 14.5px;
-      font-weight: 700;
+      font-weight: 700 !important;
       padding: 8px 12px;
       border-radius: 8px;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.3);
-      transition: all 0.35s cubic-bezier(0.22,1,0.36,1);
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+      transition: all 0.25s ease;
     }
 
-    .welcome-menu-link:hover {
-      color: #ffffff;
-      background: rgba(255,255,255,0.15);
-      text-shadow: 0 1px 8px rgba(0,0,0,0.4);
-    }
-
-    .nav-scrolled .welcome-menu-link {
-      color: var(--text-black);
-      text-shadow: none;
-    }
-
+    .welcome-menu-link:hover,
     .nav-scrolled .welcome-menu-link:hover {
-      color: var(--blue-primary);
-      background: var(--blue-light);
+      color: #ffffff !important;
+      background: rgba(255, 255, 255, 0.25) !important;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4) !important;
     }
 
-    .welcome-nav-cta {
-      background: rgba(255,255,255,0.18);
+    .welcome-nav-cta,
+    .nav-scrolled .welcome-nav-cta {
+      background: rgba(255, 255, 255, 0.22) !important;
       color: #ffffff !important;
       font-family: 'Nunito', sans-serif;
       font-size: 14px;
@@ -192,30 +163,20 @@
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      border: 1.5px solid rgba(255,255,255,0.45);
+      border: 1.5px solid rgba(255, 255, 255, 0.6) !important;
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-      transition: all 0.35s cubic-bezier(0.22,1,0.36,1);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15) !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+      transition: all 0.25s ease;
     }
 
-    .welcome-nav-cta:hover {
-      background: rgba(255,255,255,0.32);
-      transform: translateY(-1px);
-      box-shadow: 0 5px 18px rgba(0,0,0,0.2);
-    }
-
-    .nav-scrolled .welcome-nav-cta {
-      background: var(--blue-primary);
-      border-color: transparent;
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      box-shadow: 0 3px 10px rgba(29, 78, 216, 0.3);
-    }
-
+    .welcome-nav-cta:hover,
     .nav-scrolled .welcome-nav-cta:hover {
-      background: var(--blue-hover);
-      box-shadow: 0 5px 14px rgba(29, 78, 216, 0.4);
+      background: rgba(255, 255, 255, 0.36) !important;
+      border-color: #ffffff !important;
+      transform: translateY(-1px);
+      box-shadow: 0 5px 18px rgba(0, 0, 0, 0.25) !important;
     }
 
     /* Mobile Nav Toggle */
@@ -1291,13 +1252,16 @@
       color: var(--blue-primary);
     }
 
-    /* ── Footer ────────────────────────────────────────────────────── */
-    .welcome-footer {
-      background: var(--blue-box-bg);
-      border-top: 2.5px solid var(--blue-box-border);
-      padding: 48px clamp(16px, 4vw, 48px) 32px;
-      color: var(--text-black);
-      font-size: 13.5px;
+    /* ── Footer (Baby Blue Background, White Text) ─────────────────── */
+    #siteFooter,
+    #siteFooter.welcome-footer,
+    .welcome-footer,
+    footer.welcome-footer {
+      background: var(--baby-blue, #5ba4e6) !important;
+      border-top: 2.5px solid rgba(255, 255, 255, 0.35) !important;
+      padding: 48px clamp(16px, 4vw, 48px) 32px !important;
+      color: #ffffff !important;
+      font-size: 13.5px !important;
     }
 
     .footer-content {
@@ -1309,18 +1273,27 @@
       margin-bottom: 36px;
     }
 
-    .footer-col h4 {
+    .footer-col h4,
+    #siteFooter .footer-col h4,
+    .welcome-footer .footer-col h4 {
       font-family: 'Nunito', sans-serif;
-      color: var(--blue-primary);
-      font-size: 16px;
+      color: #ffffff !important;
+      font-size: 17px;
       font-weight: 900;
       margin: 0 0 14px;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
     }
 
-    .footer-col p {
+    .footer-col p,
+    .footer-col strong,
+    #siteFooter .footer-col p,
+    #siteFooter .footer-col strong,
+    .welcome-footer p,
+    .welcome-footer strong {
       margin: 0 0 10px;
       line-height: 1.6;
-      color: var(--text-black);
+      color: #ffffff !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
     }
 
     .footer-col ul {
@@ -1333,30 +1306,48 @@
       margin-bottom: 8px;
     }
 
+    #siteFooter a,
+    #siteFooter.welcome-footer a,
+    .welcome-footer a,
     .footer-col a {
-      color: var(--text-black);
-      font-weight: 600;
-      text-decoration: none;
-      transition: color 0.15s;
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      text-decoration: none !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+      transition: all 0.2s ease;
+      display: inline-block;
     }
 
+    #siteFooter a:hover,
+    #siteFooter.welcome-footer a:hover,
+    .welcome-footer a:hover,
     .footer-col a:hover {
-      color: var(--blue-primary);
-      text-decoration: underline;
+      color: #ffffff !important;
+      text-decoration: underline !important;
+      transform: translateX(3px);
     }
 
-    .footer-bottom {
+    .footer-bottom,
+    .welcome-footer .footer-bottom,
+    #siteFooter .footer-bottom {
       max-width: 1200px;
       margin: 0 auto;
       padding-top: 24px;
-      border-top: 1.5px solid var(--blue-box-border);
+      border-top: 1.5px solid rgba(255, 255, 255, 0.35) !important;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 14px;
       font-size: 12.5px;
-      color: var(--text-muted);
+      color: rgba(255, 255, 255, 0.95) !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    }
+
+    .footer-bottom div,
+    .welcome-footer .footer-bottom div,
+    #siteFooter .footer-bottom div {
+      color: rgba(255, 255, 255, 0.95) !important;
     }
 
     /* ── Responsive ────────────────────────────────────────────────── */
@@ -1367,11 +1358,11 @@
         top: 68px;
         left: 0;
         right: 0;
-        background: #ffffff;
+        background: var(--baby-blue, #5ba4e6) !important;
         flex-direction: column;
         padding: 18px 24px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-        border-bottom: 2px solid var(--blue-primary);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        border-bottom: 2px solid rgba(255, 255, 255, 0.35);
       }
 
       .welcome-menu.open {
@@ -2141,7 +2132,7 @@
         <p><strong>Mobile:</strong> +63 917 798 7420</p>
         <p><strong>Email:</strong> info@museosangbata.org</p>
         <p style="margin-top:12px;">
-          <a href="/?tab=admin" style="color:var(--blue-primary); font-weight:800;">🔐 Staff Admin Sign-In &rarr;</a>
+          <a href="/?tab=admin" style="color:#ffffff !important; font-weight:800; text-shadow:0 1px 2px rgba(0,0,0,0.3);">🔐 Staff Admin Sign-In &rarr;</a>
         </p>
       </div>
     </div>
