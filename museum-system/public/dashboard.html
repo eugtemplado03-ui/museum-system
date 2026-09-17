@@ -9,7 +9,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=34">
+  <link rel="stylesheet" href="/css/style.css?v=36">
   <script src="/js/gate.js"></script>
   <style>
     /* ── Featured Video Section ── */
@@ -570,15 +570,18 @@
 
     /* ── Dashboard Hero Banner (Two-Section Container with header-bg.webp) ── */
     .dashboard-hero-banner {
-      position: relative;
-      background: url('/uploads/header-bg.webp') center center / cover no-repeat !important;
-      border-radius: 24px;
-      padding: clamp(20px, 3vw, 36px) clamp(16px, 2.5vw, 32px);
-      margin-bottom: 38px;
-      border: 1.5px solid rgba(255, 255, 255, 0.4);
-      box-shadow: 0 10px 36px rgba(0, 0, 0, 0.16);
-      overflow: hidden;
-      box-sizing: border-box;
+      position: relative !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      padding: clamp(24px, 3.5vw, 42px) 0 clamp(28px, 4vw, 44px) 0 !important;
+      background: url('/uploads/header-bg.webp') center top / cover no-repeat !important;
+      border: none !important;
+      border-radius: 0 !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.22) !important;
+      box-shadow: 0 10px 36px rgba(0, 0, 0, 0.16) !important;
+      overflow: hidden !important;
+      box-sizing: border-box !important;
     }
 
     .dashboard-hero-banner::before {
@@ -587,9 +590,8 @@
       inset: 0;
       background: linear-gradient(180deg,
           rgba(15, 23, 42, 0.45) 0%,
-          rgba(15, 23, 42, 0.30) 45%,
+          rgba(15, 23, 42, 0.28) 45%,
           rgba(15, 23, 42, 0.55) 100%);
-      border-radius: inherit;
       z-index: 1;
       pointer-events: none;
     }
@@ -599,8 +601,19 @@
       z-index: 2;
     }
 
+    .dashboard-hero-inner {
+      position: relative;
+      z-index: 2;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0 clamp(12px, 2.5vw, 24px);
+    }
+
     .dashboard-hero-banner .carousel-section {
-      margin-bottom: 22px !important;
+      max-width: 100% !important;
+      margin: 0 auto 24px auto !important;
       padding-bottom: 0 !important;
     }
 
@@ -610,9 +623,13 @@
 
     @media (max-width: 768px) {
       .dashboard-hero-banner {
-        padding: 14px 10px;
-        border-radius: 18px;
-        margin-bottom: 24px;
+        padding: 16px 0 24px 0 !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+      }
+
+      .dashboard-hero-inner {
+        padding: 0 10px;
       }
     }
 
@@ -1015,12 +1032,11 @@
 
     <!-- ── Main Content Area ────────────────────────────────────── -->
     <div class="user-main">
-      <main
-        style="padding: clamp(14px, 2.5vw, 32px) clamp(10px, 2.5vw, 24px); flex: 1; min-width: 0; max-width: 100%; width: 100%; box-sizing: border-box;">
-        <div class="wrap" style="max-width: 1100px; margin: 0 auto; width: 100%; box-sizing: border-box;">
-          <!-- ── Top Hero Banner (Carousel + Tag Scanner with header-bg.webp) ── -->
-          <div class="dashboard-hero-banner" id="dashboardHeroBanner">
-            <!-- ── 0. Showcase Hero Carousel (Same as Welcome Page) ──── -->
+      <!-- ── Top Hero Banner (Carousel + Tag Scanner with header-bg.webp) ── -->
+      <!-- Full side-to-side and flush directly against the topbar -->
+      <section class="dashboard-hero-banner" id="dashboardHeroBanner">
+        <div class="dashboard-hero-inner">
+          <!-- ── 0. Showcase Hero Carousel (Same as Welcome Page) ──── -->
             <div class="carousel-section" id="dashboardCarouselSection" aria-label="Museum Showcase Carousel">
               <div class="welcome-carousel" id="dashboardCarousel">
                 <div class="carousel-counter-badge" id="dashCarouselCounter">1 / 5</div>
@@ -1156,8 +1172,13 @@
                 </div>
               </div>
             </div>
-          </div>
+        </div>
+      </section>
 
+      <!-- ── Main Dashboard Content (Rest of Page with Clean Canvas) ── -->
+      <main
+        style="padding: clamp(24px, 3.5vw, 40px) clamp(10px, 2.5vw, 24px) 48px; flex: 1; min-width: 0; max-width: 100%; width: 100%; box-sizing: border-box;">
+        <div class="wrap" style="max-width: 1100px; margin: 0 auto; width: 100%; box-sizing: border-box;">
           <!-- ── Featured Video ──────────────────────────────────── -->
           <div class="featured-video-wrap">
             <div class="featured-video-label">

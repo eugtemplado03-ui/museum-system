@@ -7032,15 +7032,18 @@ span:not(.btn):not(.tag):not(.badge):not(.dash-action-btn):not(.btn-submit):not(
 
 /* ── Dashboard Hero Banner (Two-Section Header with header-bg.webp) ── */
 .dashboard-hero-banner {
-  position: relative;
-  background: url('/uploads/header-bg.webp') center center / cover no-repeat !important;
-  border-radius: 24px;
-  padding: clamp(20px, 3vw, 36px) clamp(16px, 2.5vw, 32px);
-  margin-bottom: 40px;
-  border: 1.5px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.16);
-  overflow: hidden;
-  box-sizing: border-box;
+  position: relative !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: clamp(24px, 3.5vw, 42px) 0 clamp(28px, 4vw, 44px) 0 !important;
+  background: url('/uploads/header-bg.webp') center top / cover no-repeat !important;
+  border: none !important;
+  border-radius: 0 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.22) !important;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.16) !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
 }
 
 .dashboard-hero-banner::before {
@@ -7050,10 +7053,9 @@ span:not(.btn):not(.tag):not(.badge):not(.dash-action-btn):not(.btn-submit):not(
   background: linear-gradient(
     180deg,
     rgba(15, 23, 42, 0.45) 0%,
-    rgba(15, 23, 42, 0.30) 45%,
+    rgba(15, 23, 42, 0.28) 45%,
     rgba(15, 23, 42, 0.55) 100%
   );
-  border-radius: inherit;
   z-index: 1;
   pointer-events: none;
 }
@@ -7063,20 +7065,35 @@ span:not(.btn):not(.tag):not(.badge):not(.dash-action-btn):not(.btn-submit):not(
   z-index: 2;
 }
 
+.dashboard-hero-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 clamp(12px, 2.5vw, 24px);
+}
+
 .dashboard-hero-banner .carousel-section {
-  margin-bottom: 24px;
-  padding-bottom: 0;
+  max-width: 100% !important;
+  margin: 0 auto 24px auto !important;
+  padding-bottom: 0 !important;
 }
 
 .dashboard-hero-banner .scan-hero {
-  margin-bottom: 0;
+  margin-bottom: 0 !important;
 }
 
 @media (max-width: 768px) {
   .dashboard-hero-banner {
-    padding: 14px 10px;
-    border-radius: 18px;
-    margin-bottom: 24px;
+    padding: 16px 0 24px 0 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  .dashboard-hero-inner {
+    padding: 0 10px;
   }
 }
 
