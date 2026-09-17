@@ -9,7 +9,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=38">
+  <link rel="stylesheet" href="/css/style.css?v=39">
   <script src="/js/gate.js"></script>
   <style>
     /* ── Featured Video Section ── */
@@ -919,6 +919,157 @@
     .carousel-cta-btn,
     .carousel-cta-btn * {
       color: #FFFFFF !important;
+    }
+
+    /* ── Exhibit, Program & Event Preview Boxes: Baby Blue with Crisp White Text & Shadows ── */
+    .home-mini-card,
+    .home-exhibit-card,
+    .recommended-card,
+    .home-gallery-mini-item {
+      background: #5ba4e6 !important;
+      background-image: linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
+      border-radius: 16px !important;
+      box-shadow: 0 8px 24px rgba(91, 164, 230, 0.30), 0 2px 6px rgba(0, 0, 0, 0.06) !important;
+      color: #FFFFFF !important;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
+    }
+
+    .home-mini-card:hover,
+    .home-exhibit-card:hover,
+    .recommended-card:hover,
+    .home-gallery-mini-item:hover {
+      transform: translateY(-4px) !important;
+      background: #4696df !important;
+      background-image: linear-gradient(135deg, #4696df 0%, #3685ce 100%) !important;
+      border-color: #FFFFFF !important;
+      box-shadow: 0 12px 32px rgba(91, 164, 230, 0.45) !important;
+    }
+
+    .home-mini-card *,
+    .home-exhibit-card *,
+    .recommended-card * {
+      color: #FFFFFF !important;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45) !important;
+    }
+
+    .home-mini-card .home-mini-title {
+      color: #FFFFFF !important;
+      font-family: 'Nunito', sans-serif !important;
+      font-size: 16.5px !important;
+      font-weight: 800 !important;
+      line-height: 1.35 !important;
+      text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .home-mini-card .home-mini-snippet {
+      color: #FFFFFF !important;
+      font-weight: 600 !important;
+      opacity: 0.96 !important;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    .home-mini-card .home-mini-foot {
+      border-top: 1px solid rgba(255, 255, 255, 0.35) !important;
+      color: #FFFFFF !important;
+    }
+
+    .home-mini-card .home-mini-foot span {
+      color: #FFFFFF !important;
+      font-weight: 700 !important;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    .home-mini-card .home-mini-link {
+      color: #FFFFFF !important;
+      font-weight: 900 !important;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    /* Review Snippet Box inside Exhibit Card */
+    .home-mini-card .card-review-snippet {
+      background: rgba(0, 0, 0, 0.18) !important;
+      border: 1px solid rgba(255, 255, 255, 0.35) !important;
+      border-left: 3.5px solid #FFFFFF !important;
+      border-radius: 8px !important;
+      color: #FFFFFF !important;
+      padding: 8px 10px !important;
+      margin-top: 10px !important;
+    }
+
+    .home-mini-card .card-review-snippet * {
+      color: #FFFFFF !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45) !important;
+    }
+
+    .home-mini-card .card-review-snippet .quote-mark {
+      color: #FFFFFF !important;
+      font-size: 18px !important;
+      font-weight: 900 !important;
+      margin-right: 4px !important;
+    }
+
+    .home-mini-card .card-review-snippet .snippet-text {
+      color: #FFFFFF !important;
+      font-weight: 600 !important;
+      line-height: 1.45 !important;
+    }
+
+    .home-mini-card .card-review-snippet .snippet-author {
+      color: rgba(255, 255, 255, 0.95) !important;
+      font-weight: 700 !important;
+      display: block !important;
+      margin-top: 4px !important;
+      font-style: italic !important;
+    }
+
+    /* Badges Inside Card: Translucent Glass with Crisp White Text */
+    .home-mini-card .rating-badge-pill {
+      background: rgba(255, 255, 255, 0.22) !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.6) !important;
+      color: #FFFFFF !important;
+      font-weight: 800 !important;
+      border-radius: 999px !important;
+      padding: 3px 9px !important;
+      backdrop-filter: blur(4px) !important;
+      -webkit-backdrop-filter: blur(4px) !important;
+    }
+
+    .home-mini-card .rating-badge-pill * {
+      color: #FFFFFF !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+    }
+
+    .home-mini-card .rating-badge-pill .stars-gold {
+      color: #fde047 !important;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .home-mini-card .home-mini-badge {
+      background: rgba(255, 255, 255, 0.24) !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.6) !important;
+      color: #FFFFFF !important;
+      font-weight: 800 !important;
+      border-radius: 999px !important;
+      padding: 3px 9px !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+      backdrop-filter: blur(4px) !important;
+      -webkit-backdrop-filter: blur(4px) !important;
+    }
+
+    .home-mini-card .home-mini-badge.date {
+      background: rgba(255, 255, 255, 0.28) !important;
+      border-color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    .home-mini-card .home-mini-badge.video {
+      background: rgba(220, 38, 38, 0.85) !important;
+      border-color: rgba(255, 255, 255, 0.6) !important;
+    }
+
+    .home-mini-card .home-exhibit-media {
+      border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
     }
   </style>
 </head>
