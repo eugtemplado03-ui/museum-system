@@ -5809,23 +5809,22 @@ body.admin-portal-body {
 .floor-picker-viewport {
   position: relative;
   width: 100%;
-  max-width: 100%;
+  max-width: 500px;
+  margin: 12px auto;
   aspect-ratio: 1000 / 1300;
-  max-height: 480px;
   background: #03131c;
   border: 1.5px solid rgba(0, 240, 255, 0.35);
   border-radius: 12px;
   overflow: hidden;
-  margin: 10px 0;
   cursor: crosshair;
   user-select: none;
   box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8), 0 6px 20px rgba(0,0,0,0.4);
+  touch-action: none;
 }
 
 .floor-picker-svg-wrap {
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
   pointer-events: auto;
@@ -5835,6 +5834,22 @@ body.admin-portal-body {
   width: 100%;
   height: 100%;
   display: block;
+}
+
+@keyframes miniRadarPulse {
+  0% { r: 12px; opacity: 0.95; stroke-width: 3px; }
+  70% { r: 32px; opacity: 0.15; stroke-width: 1.5px; }
+  100% { r: 36px; opacity: 0; stroke-width: 1px; }
+}
+
+.mini-radar-pulse {
+  animation: miniRadarPulse 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  transform-origin: 0 0;
+}
+
+.mini-pin-halo {
+  animation: miniRadarPulse 2.4s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  transform-origin: 0 -22px;
 }
 
 .floor-picker-other-pins-wrap {

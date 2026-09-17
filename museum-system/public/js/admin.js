@@ -1385,7 +1385,81 @@ function getRoomCenterForCategory(cat) {
   return { floor: 1, pinX: 50, pinY: 34, name: 'Marine & Nature Room' };
 }
 
-function renderMiniBlueprintSvg(floor) {
+function renderBlueprintPinsLayer(otherExhibits, activePin, showOtherPins) {
+  let pinsSvg = '<g id="miniBlueprintPinsLayer">';
+
+  // 1. Other Existing Exhibit Pins (Reference Locations)
+  if (showOtherPins && Array.isArray(otherExhibits)) {
+    otherExhibits.forEach(item => {
+      const posX = (Number(item.pinX) / 100) * 1000;
+      const posY = (Number(item.pinY) / 100) * 1300;
+      const itemTitle = (item.title || 'Exhibit').trim();
+      const itemCode = item.code ? `${item.code}: ` : '';
+      const fullLabel = `${itemCode}${itemTitle}`;
+      const badgeWidth = Math.max(70, Math.min(180, fullLabel.length * 6.5 + 18));
+      const badgeX = -badgeWidth / 2;
+      const badgeY = -34;
+
+      pinsSvg += `
+        <g class="mini-blueprint-pin other-pin" transform="translate(${posX}, ${posY})" pointer-events="none">
+          <!-- Ambient Halo Ring -->
+          <circle cx="0" cy="-14" r="12" fill="none" stroke="#00f0ff" stroke-width="1.8" opacity="0.6" />
+          <!-- Pin Drop Shape: tip touches (0, 0) -->
+          <path d="M 0 0 C -2 -3 -9 -11 -9 -17 C -9 -23 -5 -27 0 -27 C 5 -27 9 -23 9 -17 C 9 -11 2 -3 0 0 Z"
+                fill="#03202e" stroke="#00f0ff" stroke-width="2.2" filter="drop-shadow(0 2px 6px rgba(0,0,0,0.9))" />
+          <circle cx="0" cy="-17" r="4.5" fill="#00f0ff" />
+          <circle cx="0" cy="-17" r="1.8" fill="#ffffff" />
+          <!-- Pill Badge -->
+          <rect x="${badgeX}" y="${badgeY}" width="${badgeWidth}" height="17" rx="8.5"
+                fill="rgba(3, 20, 29, 0.94)" stroke="#00f0ff" stroke-width="1.2" filter="drop-shadow(0 2px 6px rgba(0,0,0,0.85))" />
+          <text x="0" y="${badgeY + 12}" text-anchor="middle"
+                font-family="'Nunito', sans-serif" font-size="8.5" font-weight="800" fill="#e0f2fe">
+            ${escapeHtml(fullLabel.length > 24 ? fullLabel.slice(0, 22) + '…' : fullLabel)}
+          </text>
+        </g>
+      `;
+    });
+  }
+
+  // 2. Currently Selected / Active Pin (Pulsing High-Contrast Marker)
+  if (activePin && activePin.pinX !== null && activePin.pinX !== undefined && activePin.pinY !== null && activePin.pinY !== undefined) {
+    const actX = (Number(activePin.pinX) / 100) * 1000;
+    const actY = (Number(activePin.pinY) / 100) * 1300;
+    const actTitle = (activePin.title || 'Exhibit').trim();
+    const actBadgeText = `${actTitle} (Selected)`;
+    const actBadgeWidth = Math.max(90, Math.min(230, actBadgeText.length * 7.2 + 22));
+    const actBadgeX = -actBadgeWidth / 2;
+    const actBadgeY = -48;
+
+    pinsSvg += `
+      <g class="mini-blueprint-pin active-pin" transform="translate(${actX}, ${actY})" pointer-events="none">
+        <!-- Animated Ground Radar Rings -->
+        <circle cx="0" cy="0" r="18" fill="rgba(255, 0, 85, 0.2)" stroke="#ff0055" stroke-width="2" class="mini-radar-pulse" />
+        <circle cx="0" cy="-22" r="22" fill="none" stroke="#ff0055" stroke-width="2.5" opacity="0.85" class="mini-pin-halo" />
+        <!-- Pin Drop Body: tip touches (0, 0) -->
+        <path d="M 0 0 C -4 -5 -15 -17 -15 -27 C -15 -36 -8 -44 0 -44 C 8 -44 15 -36 15 -27 C 15 -17 4 -5 0 0 Z"
+              fill="#ff0055" stroke="#ffffff" stroke-width="3" filter="drop-shadow(0 4px 14px rgba(255,0,85,0.9)) drop-shadow(0 4px 8px rgba(0,0,0,0.9))" />
+        <!-- Inner Core Dots -->
+        <circle cx="0" cy="-27" r="7.5" fill="#ffffff" />
+        <circle cx="0" cy="-27" r="3.5" fill="#ff0055" />
+        <!-- Active Pill Badge with High Contrast -->
+        <rect x="${actBadgeX}" y="${actBadgeY}" width="${actBadgeWidth}" height="22" rx="11"
+              fill="linear-gradient(135deg, #ff0055 0%, #d946ef 100%)" stroke="#ffffff" stroke-width="2" filter="drop-shadow(0 4px 12px rgba(255,0,85,0.7)) drop-shadow(0 2px 6px rgba(0,0,0,0.8))" />
+        <text x="0" y="${actBadgeY + 15}" text-anchor="middle"
+              font-family="'Nunito', sans-serif" font-size="10.5" font-weight="900" fill="#ffffff">
+          ${escapeHtml(actBadgeText.length > 28 ? actBadgeText.slice(0, 26) + '…' : actBadgeText)}
+        </text>
+      </g>
+    `;
+  }
+
+  pinsSvg += '</g>';
+  return pinsSvg;
+}
+
+function renderMiniBlueprintSvg(floor, otherExhibits = [], activePin = null, showOtherPins = true) {
+  const pinsLayer = renderBlueprintPinsLayer(otherExhibits, activePin, showOtherPins);
+
   if (floor === 2) {
     return `
       <svg viewBox="0 0 1000 1300" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:100%; display:block;">
@@ -1446,6 +1520,7 @@ function renderMiniBlueprintSvg(floor) {
           <text x="500" y="860" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="20" fill="#f472b6">👀 MEZZANINE VOID</text>
           <text x="500" y="890" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="700" font-size="14" fill="#fbcfe8">Open-to-Below Balcony Overlooking Function Hall</text>
         </g>
+        ${pinsLayer}
       </svg>
     `;
   }
@@ -1617,6 +1692,7 @@ function renderMiniBlueprintSvg(floor) {
         <line x1="360" y1="1265" x2="640" y2="1265" stroke="rgba(0,240,255,0.4)" stroke-width="2" />
         <text x="500" y="1255" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="12" fill="#7dd3fc">▲ ACCESS RAMP &amp; STEPS</text>
       </g>
+      ${pinsLayer}
     </svg>
   `;
 }
@@ -1673,14 +1749,8 @@ function openEditModal(id, defaultCategory){
           </div>
         </div>
 
-        <div class="floor-picker-viewport" id="exFloorViewport" title="Click anywhere on the floor map to pinpoint this exhibit">
+        <div class="floor-picker-viewport" id="exFloorViewport" title="Click or drag anywhere on the floor map to pinpoint this exhibit">
           <div class="floor-picker-svg-wrap" id="exFloorSvgWrap"></div>
-          <div class="floor-picker-other-pins-wrap" id="exFloorOtherPinsWrap"></div>
-          <div class="floor-picker-pin current-active-pin" id="exFloorPin" style="${currentPinX !== null && currentPinY !== null ? `left:${currentPinX}%; top:${currentPinY}%; display:flex;` : 'display:none;'}">
-            <div class="current-pin-radar-ring"></div>
-            <div class="picker-pin-icon">📍</div>
-            <div class="picker-pin-badge" id="exFloorPinBadge">${escapeHtml(ex ? ex.title || 'Exhibit' : 'New Exhibit')} (Selected)</div>
-          </div>
         </div>
 
         <!-- Informative Visual Pinpoint Legend -->
@@ -1926,7 +1996,6 @@ function openEditModal(id, defaultCategory){
   let showOtherPins = true;
 
   function updatePinUi() {
-    if (exFloorSvgWrap) exFloorSvgWrap.innerHTML = renderMiniBlueprintSvg(currentFloor);
     if (exFloor1Btn) exFloor1Btn.classList.toggle('active', currentFloor === 1);
     if (exFloor2Btn) exFloor2Btn.classList.toggle('active', currentFloor === 2);
 
@@ -1943,22 +2012,15 @@ function openEditModal(id, defaultCategory){
       otherPinsCountNum.textContent = otherExhibits.length;
     }
 
-    if (exFloorOtherPinsWrap) {
-      if (showOtherPins && otherExhibits.length > 0) {
-        exFloorOtherPinsWrap.innerHTML = otherExhibits.map(item => {
-          const itemTitle = item.title || 'Exhibit';
-          const itemCode = item.code ? `${item.code}: ` : '';
-          const label = `${itemCode}${itemTitle}`;
-          return `
-            <div class="floor-picker-pin other-pin" style="left:${item.pinX}%; top:${item.pinY}%;" title="${escapeHtml(label)} (${Math.round(item.pinX)}%, ${Math.round(item.pinY)}%)">
-              <div class="other-pin-icon">📍</div>
-              <div class="other-pin-badge">${escapeHtml(label)}</div>
-            </div>
-          `;
-        }).join('');
-      } else {
-        exFloorOtherPinsWrap.innerHTML = '';
-      }
+    const titleText = (document.getElementById('ex-title')?.value || (ex ? ex.title : '') || 'New Exhibit').trim();
+    const activePinObj = (currentPinX !== null && currentPinY !== null) ? {
+      pinX: currentPinX,
+      pinY: currentPinY,
+      title: titleText
+    } : null;
+
+    if (exFloorSvgWrap) {
+      exFloorSvgWrap.innerHTML = renderMiniBlueprintSvg(currentFloor, otherExhibits, activePinObj, showOtherPins);
     }
 
     if (btnToggleOtherPins) {
@@ -1966,22 +2028,12 @@ function openEditModal(id, defaultCategory){
     }
 
     if (currentPinX !== null && currentPinY !== null) {
-      if (exFloorPin) {
-        exFloorPin.style.left = `${currentPinX}%`;
-        exFloorPin.style.top = `${currentPinY}%`;
-        exFloorPin.style.display = 'flex';
-      }
-      const titleText = (document.getElementById('ex-title')?.value || (ex ? ex.title : '') || 'New Exhibit').trim();
-      if (exFloorPinBadge) {
-        exFloorPinBadge.textContent = `${titleText} (Selected)`;
-      }
       const roomName = detectRoomFromCoords(currentFloor, currentPinX, currentPinY);
       if (exPinCoordsBadge) {
         exPinCoordsBadge.innerHTML = `Floor: <strong>L${currentFloor}</strong> • Pin: <strong>X: ${Math.round(currentPinX)}%, Y: ${Math.round(currentPinY)}%</strong> • <span class="room-tag">${escapeHtml(roomName)}</span>`;
       }
       if (btnClearPin) btnClearPin.style.display = 'inline-block';
     } else {
-      if (exFloorPin) exFloorPin.style.display = 'none';
       if (exPinCoordsBadge) {
         exPinCoordsBadge.innerHTML = `<span style="color:#94a3b8;">No pin placed yet. Click anywhere on the map above to drop a pinpoint.</span>`;
       }
@@ -2021,23 +2073,53 @@ function openEditModal(id, defaultCategory){
     });
   }
 
-  if (exFloorViewport) {
-    exFloorViewport.addEventListener('click', (e) => {
-      const rect = exFloorViewport.getBoundingClientRect();
-      const clickX = e.clientX - rect.left;
-      const clickY = e.clientY - rect.top;
-      let pctX = Math.round(((clickX / rect.width) * 100) * 10) / 10;
-      let pctY = Math.round(((clickY / rect.height) * 100) * 10) / 10;
-      pctX = Math.max(2, Math.min(98, pctX));
-      pctY = Math.max(2, Math.min(98, pctY));
-      currentPinX = pctX;
-      currentPinY = pctY;
-      updatePinUi();
+  let isPinDragging = false;
 
-      const locInput = document.getElementById('ex-location');
-      if (locInput && !locInput.value.trim()) {
-        locInput.value = `${detectRoomFromCoords(currentFloor, currentPinX, currentPinY)}`;
+  function setPinFromPointer(e) {
+    const svgEl = exFloorViewport ? exFloorViewport.querySelector('svg') : null;
+    if (!svgEl) return;
+    const pt = svgEl.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    const ctm = svgEl.getScreenCTM();
+    if (!ctm) return;
+    const svgP = pt.matrixTransform(ctm.inverse());
+    let pctX = Math.round(((svgP.x / 1000) * 100) * 10) / 10;
+    let pctY = Math.round(((svgP.y / 1300) * 100) * 10) / 10;
+    pctX = Math.max(1, Math.min(99, pctX));
+    pctY = Math.max(1, Math.min(99, pctY));
+    currentPinX = pctX;
+    currentPinY = pctY;
+    updatePinUi();
+
+    const locInput = document.getElementById('ex-location');
+    if (locInput && !locInput.value.trim()) {
+      locInput.value = `${detectRoomFromCoords(currentFloor, currentPinX, currentPinY)}`;
+    }
+  }
+
+  if (exFloorViewport) {
+    exFloorViewport.addEventListener('pointerdown', (e) => {
+      if (e.button !== undefined && e.button !== 0) return;
+      isPinDragging = true;
+      try { exFloorViewport.setPointerCapture(e.pointerId); } catch (_) {}
+      setPinFromPointer(e);
+    });
+
+    exFloorViewport.addEventListener('pointermove', (e) => {
+      if (!isPinDragging) return;
+      setPinFromPointer(e);
+    });
+
+    exFloorViewport.addEventListener('pointerup', (e) => {
+      if (isPinDragging) {
+        isPinDragging = false;
+        try { exFloorViewport.releasePointerCapture(e.pointerId); } catch (_) {}
       }
+    });
+
+    exFloorViewport.addEventListener('pointercancel', () => {
+      isPinDragging = false;
     });
   }
 
@@ -2063,9 +2145,11 @@ function openEditModal(id, defaultCategory){
   }
 
   const titleInput = document.getElementById('ex-title');
-  if (titleInput && exFloorPinBadge) {
+  if (titleInput) {
     titleInput.addEventListener('input', () => {
-      exFloorPinBadge.textContent = `${titleInput.value.trim() || 'New Exhibit'} (Selected)`;
+      if (currentPinX !== null && currentPinY !== null) {
+        updatePinUi();
+      }
     });
   }
 
