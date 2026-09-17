@@ -78,12 +78,13 @@
       sidebar.id = 'userSidebar';
       sidebar.className = 'user-sidebar';
       sidebar.setAttribute('aria-label', 'Navigation Sidebar');
-      sidebar.setAttribute('aria-hidden', 'true');
+      sidebar.style.background = '#0F172A';
+      sidebar.style.color = '#ffffff';
 
       sidebar.innerHTML = `
-        <div class="user-sidebar-brand">
+        <div class="user-sidebar-brand" style="background:#0B1120 !important;">
           <div class="user-sidebar-logo">🏛️</div>
-          <div class="user-sidebar-title">Explore Museo<br><span>Navigation</span></div>
+          <div class="user-sidebar-title" style="color:#ffffff !important; font-weight:800;">Explore Museo<br><span style="color:#ffffff !important; font-weight:800; opacity:0.95;">Navigation</span></div>
           <button type="button" class="user-sidebar-close" id="sidebarCloseBtn" aria-label="Close sidebar">✕</button>
         </div>
 
@@ -94,49 +95,49 @@
                 <div style="font-size: 10.5px; font-weight: 800; color: #00f0ff; text-transform: uppercase; letter-spacing: 0.5px;">Staff Admin</div>
                 <div style="font-size: 12px; font-weight: 700; color: #ffffff;">Public View Mode</div>
               </div>
-              <a href="/admin.html" class="btn btn-primary btn-small" style="padding: 5px 10px; font-size: 11.5px; font-weight: 800; border-radius: 8px; text-decoration: none; white-space: nowrap;">
+              <a href="/admin.html" class="btn btn-primary btn-small" style="padding: 5px 10px; font-size: 11.5px; font-weight: 800; border-radius: 8px; text-decoration: none; white-space: nowrap; color:#ffffff !important;">
                 🛡️ Admin &rarr;
               </a>
             </div>
           ` : ''}
-          <div class="user-sidebar-section-title">Navigation</div>
-          <a class="user-sidebar-btn ${activeKey === 'home' ? 'active' : ''}" href="/dashboard.html">
+          <div class="user-sidebar-section-title" style="color:#ffffff !important; font-size:11.5px !important; font-weight:900 !important; letter-spacing:0.1em !important; text-transform:uppercase !important;">Navigation</div>
+          <a class="user-sidebar-btn ${activeKey === 'home' ? 'active' : ''}" href="/dashboard.html" style="color:#ffffff !important; font-weight:700 !important;">
             <span class="user-sidebar-icon">🏠</span>
-            <span class="user-sidebar-label">Home</span>
+            <span class="user-sidebar-label" style="color:#ffffff !important; font-weight:700 !important;">Home</span>
             ${activeKey === 'home' ? '<span class="user-sidebar-indicator"></span>' : ''}
           </a>
-          <a class="user-sidebar-btn ${activeKey === 'exhibits' ? 'active' : ''}" href="/exhibits.html">
+          <a class="user-sidebar-btn ${activeKey === 'exhibits' ? 'active' : ''}" href="/exhibits.html" style="color:#ffffff !important; font-weight:700 !important;">
             <span class="user-sidebar-icon">🏛️</span>
-            <span class="user-sidebar-label">Exhibits</span>
+            <span class="user-sidebar-label" style="color:#ffffff !important; font-weight:700 !important;">Exhibits</span>
             ${activeKey === 'exhibits' ? '<span class="user-sidebar-indicator"></span>' : ''}
           </a>
-          <a class="user-sidebar-btn ${activeKey === 'map' ? 'active' : ''}" href="/map.html">
+          <a class="user-sidebar-btn ${activeKey === 'map' ? 'active' : ''}" href="/map.html" style="color:#ffffff !important; font-weight:700 !important;">
             <span class="user-sidebar-icon">🗺️</span>
-            <span class="user-sidebar-label">Floor Map</span>
+            <span class="user-sidebar-label" style="color:#ffffff !important; font-weight:700 !important;">Floor Map</span>
             ${activeKey === 'map' ? '<span class="user-sidebar-indicator"></span>' : ''}
           </a>
-          <a class="user-sidebar-btn ${activeKey === 'programs' ? 'active' : ''}" href="/programs.html">
+          <a class="user-sidebar-btn ${activeKey === 'programs' ? 'active' : ''}" href="/programs.html" style="color:#ffffff !important; font-weight:700 !important;">
             <span class="user-sidebar-icon">🌱</span>
-            <span class="user-sidebar-label">Programs</span>
+            <span class="user-sidebar-label" style="color:#ffffff !important; font-weight:700 !important;">Programs</span>
             ${activeKey === 'programs' ? '<span class="user-sidebar-indicator"></span>' : ''}
           </a>
-          <a class="user-sidebar-btn ${activeKey === 'gallery' ? 'active' : ''}" href="/gallery.html">
+          <a class="user-sidebar-btn ${activeKey === 'gallery' ? 'active' : ''}" href="/gallery.html" style="color:#ffffff !important; font-weight:700 !important;">
             <span class="user-sidebar-icon">🖼️</span>
-            <span class="user-sidebar-label">Gallery</span>
+            <span class="user-sidebar-label" style="color:#ffffff !important; font-weight:700 !important;">Gallery</span>
             ${activeKey === 'gallery' ? '<span class="user-sidebar-indicator"></span>' : ''}
           </a>
-          <a class="user-sidebar-btn ${activeKey === 'events' ? 'active' : ''}" href="/events.html">
+          <a class="user-sidebar-btn ${activeKey === 'events' ? 'active' : ''}" href="/events.html" style="color:#ffffff !important; font-weight:700 !important;">
             <span class="user-sidebar-icon">📅</span>
-            <span class="user-sidebar-label">Events</span>
+            <span class="user-sidebar-label" style="color:#ffffff !important; font-weight:700 !important;">Events</span>
             ${activeKey === 'events' ? '<span class="user-sidebar-indicator"></span>' : ''}
           </a>
 
-          <div class="user-sidebar-section-title" style="margin-top:12px;">Quick Jump</div>
-          <a class="user-sidebar-btn" href="#" onclick="event.preventDefault(); window.openVisitorHistoryModal();">
+          <div class="user-sidebar-section-title" style="margin-top:12px; color:#ffffff !important; font-size:11.5px !important; font-weight:900 !important; letter-spacing:0.1em !important; text-transform:uppercase !important;">Quick Jump</div>
+          <a class="user-sidebar-btn" href="#" onclick="event.preventDefault(); window.openVisitorHistoryModal();" style="color:#ffffff !important; font-weight:700 !important;">
             <span class="user-sidebar-icon">📋</span>
-            <span class="user-sidebar-label">My Visit History</span>
+            <span class="user-sidebar-label" style="color:#ffffff !important; font-weight:700 !important;">My Visit History</span>
           </a>
-          <a class="user-sidebar-btn" href="/#scannerSection">
+          <a class="user-sidebar-btn" href="/#scannerSection" style="color:#ffffff !important; font-weight:700 !important;">
             <span class="user-sidebar-icon">📷</span>
             <span class="user-sidebar-label">Tag Scanner</span>
           </a>

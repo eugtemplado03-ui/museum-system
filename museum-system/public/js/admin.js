@@ -243,31 +243,30 @@ async function renderDashboard(){
 
   app.innerHTML = `
     <div class="admin-layout">
-      <!-- Sidebar (Docked on Desktop, Slide Drawer on Mobile) -->
-      <aside class="admin-sidebar" id="adminSidebar">
-        <div class="admin-sidebar-brand">
+      <aside class="admin-sidebar" id="adminSidebar" style="background:#0F172A !important; color:#ffffff !important;">
+        <div class="admin-sidebar-brand" style="background:#0B1120 !important;">
           <div class="admin-sidebar-logo">M</div>
-          <div class="admin-sidebar-title">Admin<br><span>Dashboard</span></div>
+          <div class="admin-sidebar-title" style="color:#ffffff !important; font-weight:800;">Admin<br><span style="color:#ffffff !important; font-weight:800; opacity:0.95;">Dashboard</span></div>
           <button type="button" class="admin-sidebar-close" id="adminSidebarCloseBtn" aria-label="Close admin menu">✕</button>
         </div>
         <nav class="admin-sidebar-nav">
           ${groups.map(grp => `
             <div class="admin-sidebar-section">
-              <div class="admin-sidebar-section-title">${grp.name}</div>
+              <div class="admin-sidebar-section-title" style="color:#ffffff !important; font-size:11.5px !important; font-weight:900 !important; letter-spacing:0.1em !important; text-transform:uppercase !important;">${grp.name}</div>
               ${grp.items.map(item => `
-                <button class="admin-sidebar-btn ${activeTab === item.id ? 'active' : ''}" data-tab="${item.id}">
+                <button class="admin-sidebar-btn ${activeTab === item.id ? 'active' : ''}" data-tab="${item.id}" style="color:#ffffff !important; font-weight:700 !important;">
                   <span class="admin-sidebar-icon">${item.icon}</span>
-                  <span class="admin-sidebar-label">${item.label}</span>
-                  ${item.id === 'visitors' ? '<span class="sidebar-badge live">Live</span>' : ''}
+                  <span class="admin-sidebar-label" style="color:#ffffff !important; font-weight:700 !important;">${item.label}</span>
+                  ${item.id === 'visitors' ? '<span class="sidebar-badge live" style="color:#ffffff !important; background:#059669 !important;">Live</span>' : ''}
                   ${activeTab === item.id ? '<span class="admin-sidebar-indicator"></span>' : ''}
                 </button>
               `).join('')}
             </div>
           `).join('')}
         </nav>
-        <div class="admin-sidebar-footer">
-          <button class="admin-sidebar-signout" id="signOutBtn">
-            <span>⎋</span> Sign out
+        <div class="admin-sidebar-footer" style="background:#0B1120 !important;">
+          <button class="admin-sidebar-signout" id="signOutBtn" style="color:#ffffff !important; font-weight:700 !important; border:1.5px solid rgba(255,255,255,0.2) !important;">
+            <span style="color:#ffffff !important;">⎋</span> <span style="color:#ffffff !important;">Sign out</span>
           </button>
         </div>
       </aside>

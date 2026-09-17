@@ -110,24 +110,36 @@
     background: rgba(255, 255, 255, 0.12) !important;
     color: #FFFFFF !important;
   }
+
+  /* ── Universal Header & Sidepanel White Text Enforcement ── */
+  .admin-topbar-header,
+  .admin-topbar-header *,
+  .topbar,
+  .topbar *,
+  .admin-sidebar,
+  .admin-sidebar *,
+  .user-sidebar,
+  .user-sidebar * {
+    color: #FFFFFF !important;
+  }
 </style>
 </head>
 <body class="admin-portal-body">
   <!-- Dedicated Admin Management Topbar (Replaces public visitor navigation) -->
-  <div class="topbar admin-topbar-header">
+  <div class="topbar admin-topbar-header" style="background:#0F172A !important; color:#ffffff !important;">
     <div class="topbar-left">
-      <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle admin sidebar" title="Open Admin Menu">
-        <span class="toggle-bar"></span>
-        <span class="toggle-bar"></span>
-        <span class="toggle-bar"></span>
+      <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle admin sidebar" title="Open Admin Menu" style="background:rgba(255,255,255,0.15) !important; border:1.5px solid rgba(255,255,255,0.25) !important;">
+        <span class="toggle-bar" style="background:#ffffff !important;"></span>
+        <span class="toggle-bar" style="background:#ffffff !important;"></span>
+        <span class="toggle-bar" style="background:#ffffff !important;"></span>
       </button>
-      <a class="brand admin-brand" href="/admin.html">
-        <div class="brand-mark">M</div>
+      <a class="brand admin-brand" href="/admin.html" style="color:#ffffff !important;">
+        <div class="brand-mark" style="background:#3B82F6 !important; color:#ffffff !important;">M</div>
         <div class="brand-text">
-          <div class="name">Museo Sang Bata sa Negros</div>
+          <div class="name" style="color:#ffffff !important; font-weight:800 !important;">Museo Sang Bata sa Negros</div>
           <div class="admin-badge-row">
-            <span class="admin-badge-pill">🛡️ Admin</span>
-            <span class="admin-badge-sub hide-mobile">Management Console</span>
+            <span class="admin-badge-pill" style="color:#ffffff !important; background:#3B82F6 !important; border:1px solid #60A5FA !important; font-weight:800 !important;">🛡️ Admin</span>
+            <span class="admin-badge-sub hide-mobile" style="color:#ffffff !important; opacity:0.9 !important;">Management Console</span>
           </div>
         </div>
       </a>
@@ -136,28 +148,28 @@
     <!-- Management Context & Header Actions -->
     <div class="admin-header-right">
       <!-- Active Section Context Indicator (Desktop/Tablet) -->
-      <div class="admin-context-pill hide-mobile" id="adminContextPill" title="Current Active Section">
-        <span class="context-pulse-dot"></span>
-        <span id="adminContextTitle" class="context-label">📊 Dashboard Overview</span>
+      <div class="admin-context-pill hide-mobile" id="adminContextPill" title="Current Active Section" style="background:rgba(255,255,255,0.1) !important; color:#ffffff !important; border:1px solid rgba(255,255,255,0.16) !important;">
+        <span class="context-pulse-dot" style="background:#3B82F6 !important;"></span>
+        <span id="adminContextTitle" class="context-label" style="color:#ffffff !important; font-weight:700 !important;">📊 Dashboard Overview</span>
       </div>
 
       <!-- Quick Action: Preview Public Visitor Site -->
-      <a class="admin-view-site-link" id="adminViewSiteBtn" href="/dashboard.html" title="View live public museum website">
+      <a class="admin-view-site-link" id="adminViewSiteBtn" href="/dashboard.html" title="View live public museum website" style="background:rgba(59,130,246,0.25) !important; color:#ffffff !important; border:1px solid rgba(59,130,246,0.5) !important; font-weight:700 !important;">
         <span class="site-icon">🌐</span>
-        <span class="site-label hide-mobile">View Public Site</span>
-        <span class="site-arrow hide-mobile">↗</span>
+        <span class="site-label hide-mobile" style="color:#ffffff !important;">View Public Site</span>
+        <span class="site-arrow hide-mobile" style="color:#ffffff !important;">↗</span>
       </a>
 
       <!-- Curator Profile Chip -->
-      <div class="admin-curator-chip hide-mobile">
+      <div class="admin-curator-chip hide-mobile" style="background:rgba(255,255,255,0.1) !important; color:#ffffff !important; border:1px solid rgba(255,255,255,0.16) !important;">
         <span class="curator-avatar">👤</span>
-        <span class="curator-role">Curator</span>
+        <span class="curator-role" style="color:#ffffff !important;">Curator</span>
       </div>
 
       <!-- Sign Out Button -->
-      <button type="button" class="admin-header-signout-btn" id="topbarSignOutBtn" title="Sign out of Admin Portal">
-        <span>⎋</span>
-        <span class="signout-label hide-mobile">Sign Out</span>
+      <button type="button" class="admin-header-signout-btn" id="topbarSignOutBtn" title="Sign out of Admin Portal" style="background:rgba(220,38,38,0.25) !important; border:1px solid rgba(239,68,68,0.45) !important; color:#ffffff !important;">
+        <span style="color:#ffffff !important;">⎋</span>
+        <span class="signout-label hide-mobile" style="color:#ffffff !important;">Sign Out</span>
       </button>
     </div>
   </div>
@@ -171,7 +183,7 @@
   <script src="/js/lightbox.js"></script>
   <script src="/js/sidebar.js"></script>
   <script src="/js/carousel.js"></script>
-  <script src="/js/admin.js?v=21"></script>
+  <script src="/js/admin.js?v=22"></script>
   <script src="/js/footer.js"></script>
 </body>
 </html>
