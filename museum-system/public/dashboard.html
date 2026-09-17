@@ -6,7 +6,7 @@
 <title>Home — Museo Sang Bata sa Negros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=33">
+<link rel="stylesheet" href="/css/style.css?v=34">
 <script src="/js/gate.js"></script>
 <style>
 /* ── Featured Video Section ── */
@@ -514,6 +514,287 @@
   color: #64748B !important;
   opacity: 1 !important;
 }
+
+/* ── Dashboard Hero Showcase Carousel (Identical to Welcome Page) ── */
+.carousel-section {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-bottom: 24px;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.welcome-carousel {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
+  border: none;
+  background: #000;
+  width: 100%;
+}
+
+.carousel-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 360px;
+  max-height: 520px;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .carousel-stage {
+    aspect-ratio: 16 / 10;
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 600px) {
+  .carousel-stage {
+    aspect-ratio: 4 / 3;
+    min-height: 280px;
+  }
+
+  .carousel-arrow {
+    width: 36px;
+    height: 36px;
+    font-size: 15px;
+  }
+
+  .carousel-indicators {
+    bottom: 14px;
+  }
+}
+
+.carousel-slide-item {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.carousel-slide-item.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.carousel-slide-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.carousel-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.05) 0%,
+    rgba(0, 0, 0, 0.25) 40%,
+    rgba(0, 0, 0, 0.85) 100%
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: clamp(20px, 4vw, 36px);
+  color: #ffffff !important;
+  text-align: left;
+}
+
+.carousel-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #ffffff !important;
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 14px;
+  border-radius: 999px;
+  margin-bottom: 10px;
+  width: fit-content;
+  text-shadow:
+    0 1px 2px rgba(0,0,0,0.7),
+    0 2px 6px rgba(0,0,0,0.4);
+}
+
+.carousel-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: clamp(20px, 3vw, 30px);
+  font-weight: 900;
+  margin: 0 0 10px;
+  color: #ffffff !important;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.95),
+    0 2px 8px rgba(0, 0, 0, 0.7),
+    0 4px 18px rgba(0, 0, 0, 0.45);
+}
+
+.carousel-desc {
+  font-size: clamp(13px, 1.6vw, 15px);
+  color: #ffffff !important;
+  max-width: 680px;
+  margin: 0 0 16px;
+  line-height: 1.55;
+  font-weight: 500;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.85),
+    0 2px 8px rgba(0, 0, 0, 0.6),
+    0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+.carousel-cta-btn {
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+  font-family: 'Nunito', sans-serif;
+  font-size: 13.5px;
+  font-weight: 800;
+  padding: 10px 20px;
+  border-radius: 12px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 2px 6px rgba(0, 0, 0, 0.6);
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  cursor: pointer;
+}
+
+.carousel-cta-btn:hover {
+  background: rgba(255, 255, 255, 0.28) !important;
+  border-color: rgba(255, 255, 255, 0.85) !important;
+  color: #ffffff !important;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.carousel-cta-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Carousel Controls */
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
+  color: #ffffff !important;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.carousel-arrow:hover {
+  background: rgba(255, 255, 255, 0.30) !important;
+  border-color: rgba(255, 255, 255, 0.9) !important;
+  color: #ffffff !important;
+  transform: translateY(-50%) scale(1.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.carousel-arrow:active {
+  transform: translateY(-50%) scale(0.96);
+}
+
+.carousel-arrow.prev {
+  left: 16px;
+}
+
+.carousel-arrow.next {
+  right: 16px;
+}
+
+.carousel-indicators {
+  position: absolute;
+  bottom: 20px;
+  right: clamp(20px, 4vw, 40px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 10;
+}
+
+.carousel-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s ease;
+}
+
+.carousel-dot.active {
+  width: 26px;
+  border-radius: 999px;
+  background: #ffffff;
+  border-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.carousel-counter-badge {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  z-index: 10;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.carousel-section,
+.carousel-section *,
+.welcome-carousel,
+.welcome-carousel *,
+.carousel-stage,
+.carousel-stage *,
+.carousel-slide-item,
+.carousel-slide-item *,
+.carousel-overlay,
+.carousel-overlay *,
+.carousel-title,
+.carousel-desc,
+.carousel-tag,
+.carousel-cta-btn,
+.carousel-cta-btn * {
+  color: #FFFFFF !important;
+}
 </style>
 </head>
 <body>
@@ -586,6 +867,10 @@
           <span class="user-sidebar-icon">📋</span>
           <span class="user-sidebar-label">My Visit History</span>
         </a>
+        <a class="user-sidebar-btn" href="#dashboardCarouselSection">
+          <span class="user-sidebar-icon">🖼️</span>
+          <span class="user-sidebar-label">Showcase Carousel</span>
+        </a>
         <a class="user-sidebar-btn" href="#scannerSection">
           <span class="user-sidebar-icon">📷</span>
           <span class="user-sidebar-label">Tag Scanner</span>
@@ -625,6 +910,100 @@
     <div class="user-main">
       <main style="padding: clamp(14px, 2.5vw, 32px) clamp(10px, 2.5vw, 24px); flex: 1; min-width: 0; max-width: 100%; width: 100%; box-sizing: border-box;">
         <div class="wrap" style="max-width: 1100px; margin: 0 auto; width: 100%; box-sizing: border-box;">
+          <!-- ── 0. Showcase Hero Carousel (Same as Welcome Page) ──── -->
+          <div class="carousel-section" id="dashboardCarouselSection" aria-label="Museum Showcase Carousel" style="margin-bottom: 28px;">
+            <div class="welcome-carousel" id="dashboardCarousel">
+              <div class="carousel-counter-badge" id="dashCarouselCounter">1 / 5</div>
+
+              <button type="button" class="carousel-arrow prev" id="dashCarouselPrevBtn"
+                aria-label="Previous slide">&#10094;</button>
+              <button type="button" class="carousel-arrow next" id="dashCarouselNextBtn"
+                aria-label="Next slide">&#10095;</button>
+
+              <div class="carousel-stage" id="dashCarouselStage">
+                <!-- Slide 1: Museum Building & Grounds -->
+                <div class="carousel-slide-item active" data-index="0" data-code="EX-001" data-title="Museum Grounds">
+                  <img src="/uploads/ex3.jpg" alt="Museo Sang Bata sa Negros Facade and Grounds">
+                  <div class="carousel-overlay">
+                    <span class="carousel-tag">Coastal Sanctuary</span>
+                    <h2 class="carousel-title">Museo Sang Bata sa Negros</h2>
+                    <p class="carousel-desc">A premier hands-on children's museum located on the sunlit coast of Barangay
+                      Old Sagay beside the 32,000-hectare Sagay Marine Reserve.</p>
+                    <a class="carousel-cta-btn" href="/exhibits.html">
+                      <span>🏛️</span> Explore All Exhibits &rarr;
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Slide 2: Under the Sea -->
+                <div class="carousel-slide-item" data-index="1" data-code="EX-001" data-title="Under the Sea">
+                  <img src="https://museosangbata.org/wp-content/uploads/2014/11/under-the-sea-banner-260x170.jpg"
+                    alt="Under the Sea Marine Exhibit">
+                  <div class="carousel-overlay">
+                    <span class="carousel-tag">Featured Flagship Exhibit</span>
+                    <h2 class="carousel-title">Under the Sea (Main Marine Gallery)</h2>
+                    <p class="carousel-desc">Discover how sand forms, how vibrant coral reefs grow, and encounter clownfish,
+                      sea stars, and the marine mammals of Sagay Marine Reserve.</p>
+                    <a class="carousel-cta-btn" href="/exhibit.html?code=EX-001">
+                      <span>🐟</span> View Exhibit Details &amp; Audio Tour &rarr;
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Slide 3: Splash Zone (Touch Pool) -->
+                <div class="carousel-slide-item" data-index="2" data-code="EX-003" data-title="Splash Zone (Touch Pool)">
+                  <img src="https://museosangbata.org/wp-content/uploads/2014/11/splash-banner-260x170.jpg"
+                    alt="Splash Zone Touch Pool">
+                  <div class="carousel-overlay">
+                    <span class="carousel-tag">Hands-on Touch Pool</span>
+                    <h2 class="carousel-title">Splash Zone — Live Seashore Creatures</h2>
+                    <p class="carousel-desc">Gently touch and observe live sea stars, sea cucumbers, snails, and tidal
+                      organisms in an engaging, educator-led touch pool.</p>
+                    <a class="carousel-cta-btn" href="/exhibit.html?code=EX-003">
+                      <span>✋</span> Explore Touch Pool Details &rarr;
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Slide 4: Mobile Library on Wheels -->
+                <div class="carousel-slide-item" data-index="3" data-code="EX-010" data-title="Books and Exhibit on Wheels">
+                  <img src="/uploads/ex4.jpg" alt="Mobile Library and Outreach">
+                  <div class="carousel-overlay">
+                    <span class="carousel-tag">Community Outreach</span>
+                    <h2 class="carousel-title">Books &amp; Exhibits on Wheels</h2>
+                    <p class="carousel-desc">Bringing marine conservation literature, storytelling, and interactive science
+                      modules to children and schools across coastal communities.</p>
+                    <a class="carousel-cta-btn" href="/programs.html">
+                      <span>🌱</span> Explore Signature Programs &rarr;
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Slide 5: Junior Guides & Cultural Heritage -->
+                <div class="carousel-slide-item" data-index="4" data-code="EX-006" data-title="Junior Museum Guides">
+                  <img src="/uploads/ex2.jpg" alt="Junior Museum Guides and Mascots">
+                  <div class="carousel-overlay">
+                    <span class="carousel-tag">Youth Leadership</span>
+                    <h2 class="carousel-title">Junior Museum Guides &amp; Mascots</h2>
+                    <p class="carousel-desc">Meet our passionate young docents trained in marine biodiversity, ready to
+                      guide visitors through thrilling interactive museum experiences.</p>
+                    <a class="carousel-cta-btn" href="/programs.html">
+                      <span>🏆</span> Meet the Junior Guides &rarr;
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="carousel-indicators" id="dashCarouselIndicators">
+                <button type="button" class="carousel-dot active" data-slide="0" aria-label="Slide 1"></button>
+                <button type="button" class="carousel-dot" data-slide="1" aria-label="Slide 2"></button>
+                <button type="button" class="carousel-dot" data-slide="2" aria-label="Slide 3"></button>
+                <button type="button" class="carousel-dot" data-slide="3" aria-label="Slide 4"></button>
+                <button type="button" class="carousel-dot" data-slide="4" aria-label="Slide 5"></button>
+              </div>
+            </div>
+          </div>
+
           <div class="scan-hero" id="scannerSection">
             <div>
               <div class="eyebrow">Self-guided tour</div>
@@ -1428,6 +1807,83 @@
       }
     }
     document.getElementById('openScannerBtn').addEventListener('click', startScanner);
+
+    // ── Interactive Showcase Hero Carousel Controller (Same as Welcome Page) ──
+    (function initDashboardHeroCarousel() {
+      const carousel = document.getElementById('dashboardCarousel');
+      if (!carousel) return;
+      const slides = carousel.querySelectorAll('.carousel-slide-item');
+      const dots = carousel.querySelectorAll('.carousel-dot');
+      const prevBtn = document.getElementById('dashCarouselPrevBtn');
+      const nextBtn = document.getElementById('dashCarouselNextBtn');
+      const counter = document.getElementById('dashCarouselCounter');
+      let currentSlide = 0;
+      const totalSlides = slides.length;
+      let timer = null;
+
+      function goTo(index) {
+        currentSlide = (index + totalSlides) % totalSlides;
+        slides.forEach((s, i) => s.classList.toggle('active', i === currentSlide));
+        dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+        if (counter) counter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+      }
+
+      function startTimer() {
+        if (timer) clearInterval(timer);
+        timer = setInterval(() => goTo(currentSlide + 1), 5000);
+      }
+
+      function resetTimer() {
+        startTimer();
+      }
+
+      if (prevBtn) {
+        prevBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          goTo(currentSlide - 1);
+          resetTimer();
+        });
+      }
+
+      if (nextBtn) {
+        nextBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          goTo(currentSlide + 1);
+          resetTimer();
+        });
+      }
+
+      dots.forEach((dot) => {
+        dot.addEventListener('click', (e) => {
+          e.preventDefault();
+          const idx = parseInt(dot.getAttribute('data-slide'), 10) || 0;
+          goTo(idx);
+          resetTimer();
+        });
+      });
+
+      carousel.addEventListener('mouseenter', () => { if (timer) clearInterval(timer); });
+      carousel.addEventListener('mouseleave', startTimer);
+
+      // Touch swipe support for mobile
+      let touchStartX = 0;
+      let touchEndX = 0;
+      carousel.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+      carousel.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        if (touchStartX - touchEndX > 50) {
+          goTo(currentSlide + 1);
+          resetTimer();
+        } else if (touchEndX - touchStartX > 50) {
+          goTo(currentSlide - 1);
+          resetTimer();
+        }
+      }, { passive: true });
+
+      startTimer();
+    })();
   </script>
   <footer id="siteFooter"></footer>
   <script src="/js/sidebar.js"></script>
