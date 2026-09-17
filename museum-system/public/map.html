@@ -19,17 +19,17 @@
    THEMES & DESIGN SYSTEM (MAXIMUM VISIBILITY & WIDESCREEN EXPERIENCE)
    ========================================================================== */
     :root {
-      --map-bg: #e2e8f0;
+      --map-bg: #f8fafc;
       --map-board-bg: #ffffff;
-      --map-grid-line: rgba(15, 23, 42, 0.08);
-      --map-wall-ext: #0f172a;
-      --map-wall-int: #1e293b;
-      --map-text-color: #0f172a;
-      --map-panel-bg: rgba(255, 255, 255, 0.96);
-      --map-border: rgba(15, 23, 42, 0.2);
+      --map-grid-line: rgba(29, 78, 216, 0.08);
+      --map-wall-ext: #1d4ed8;
+      --map-wall-int: #2563eb;
+      --map-text-color: #000000;
+      --map-panel-bg: #ffffff;
+      --map-border: #dbeafe;
       --sidebar-bg: #ffffff;
-      --sidebar-border: rgba(15, 23, 42, 0.15);
-      --teal-glow: 0 4px 16px rgba(15, 23, 42, 0.12);
+      --sidebar-border: #dbeafe;
+      --teal-glow: 0 4px 16px rgba(29, 78, 216, 0.12);
     }
 
     /* Classic Architectural CAD Blueprint Theme */
@@ -76,13 +76,12 @@
    COMPACT HEADER & TOOLBAR (SAVING VERTICAL SPACE FOR MAP VIEWPORT)
    ========================================================================== */
     .map-header {
-      background: #5ba4e6 !important;
-      background-image: linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important;
-      border-bottom: 2px solid rgba(255, 255, 255, 0.45) !important;
+      background: #0f172a !important;
+      border-bottom: 1.5px solid #1e293b !important;
       padding: 8px 18px;
       position: relative;
       z-index: 50;
-      box-shadow: 0 4px 20px rgba(91, 164, 230, 0.35), 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
       flex-shrink: 0;
       color: #ffffff !important;
     }
@@ -120,7 +119,6 @@
       font-size: 18px;
       font-weight: 900;
       color: #ffffff !important;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25) !important;
       margin: 0;
       display: flex;
       align-items: center;
@@ -132,7 +130,6 @@
       color: #ffffff !important;
       font-size: 12px;
       opacity: 0.95;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
     }
 
     .switchers-group {
@@ -2134,7 +2131,7 @@
   </style>
 </head>
 
-<body class="theme-light">
+<body>
 
   <!-- ── Top Navigation Bar (Identical to Dashboard) ──────────────── -->
   <div class="topbar">
@@ -2165,7 +2162,7 @@
   </div>
 
   <!-- Interactive Map Compact Header & Controls -->
-  <header class="map-header" style="background: #5ba4e6 !important; background-image: linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important; color: #ffffff !important; border-bottom: 2px solid rgba(255, 255, 255, 0.45) !important;">
+  <header class="map-header" style="background: #0f172a !important; color: #ffffff !important;">
     <div class="map-header-inner">
       <div class="map-header-top">
         <div class="map-header-title">
@@ -2194,6 +2191,12 @@
             </button>
           </div>
 
+          <!-- High-Contrast Theme Switcher -->
+          <div class="segmented-control" role="group" aria-label="Theme Mode">
+            <button class="seg-btn" id="btnThemeToggle" title="Toggle Blueprint / Daylight High-Contrast Mode" style="color: #ffffff !important;">
+              <span id="themeToggleLabel" style="color: #ffffff !important;">☀️ Daylight High-Contrast</span>
+            </button>
+          </div>
 
           <!-- Sidebar Toggle -->
           <button class="seg-btn active" id="btnToggleSidebar"
@@ -2420,7 +2423,9 @@
       // ── Application State ──
       let currentFloor = 1;
       let is3DMode = false;
-      document.body.classList.add('theme-light');
+      let currentThemeIndex = 0; // 0: Dark CAD, 1: Classic Blueprint, 2: Daylight Light
+      const THEMES = ['', 'theme-cad', 'theme-light'];
+      const THEME_LABELS = ['🎨 Classic Blueprint', '☀️ Daylight High-Contrast', '🌙 Neon Dark Mode'];
 
       // ── CATEGORY ROOM DEFINITIONS (Every Category is an Architectural Room that Houses Exhibits) ──
       const CATEGORY_ROOMS = {
@@ -4372,6 +4377,14 @@
           setTimeout(() => fitToScreen(true), 320);
         });
 
+        // High-Contrast Theme Switcher
+        document.getElementById('btnThemeToggle').addEventListener('click', () => {
+          THEMES.forEach(t => { if (t) document.body.classList.remove(t); });
+          currentThemeIndex = (currentThemeIndex + 1) % THEMES.length;
+          const newTheme = THEMES[currentThemeIndex];
+          if (newTheme) document.body.classList.add(newTheme);
+          document.getElementById('themeToggleLabel').textContent = THEME_LABELS[currentThemeIndex];
+        });
 
         // Zoom Controls
         document.getElementById('btnZoomIn').addEventListener('click', () => zoom(0.2));
