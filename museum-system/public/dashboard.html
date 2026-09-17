@@ -9,7 +9,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=36">
+  <link rel="stylesheet" href="/css/style.css?v=37">
   <script src="/js/gate.js"></script>
   <style>
     /* ── Featured Video Section ── */
@@ -414,14 +414,16 @@
       font-weight: 800 !important;
     }
 
-    /* ── Self-Guided Tour Scanner Card: Baby Blue Background, Pure White Text, Baby Blue Buttons ── */
+    /* ── Self-Guided Tour Scanner Card: Translucent Baby Blue Glass Background, Pure White Text, Baby Blue Buttons ── */
     #scannerSection.scan-hero,
     .scan-hero {
-      background: #5ba4e6 !important;
-      background-image: linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important;
-      border: 1.5px solid rgba(255, 255, 255, 0.45) !important;
+      background: rgba(91, 164, 230, 0.65) !important;
+      background-image: linear-gradient(135deg, rgba(91, 164, 230, 0.70) 0%, rgba(70, 150, 223, 0.55) 100%) !important;
+      backdrop-filter: blur(14px) saturate(130%) !important;
+      -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.55) !important;
       border-radius: 20px !important;
-      box-shadow: 0 8px 32px rgba(91, 164, 230, 0.35), 0 2px 6px rgba(0, 0, 0, 0.05) !important;
+      box-shadow: 0 10px 36px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
       color: #FFFFFF !important;
     }
 
@@ -517,13 +519,15 @@
     .scan-hero #manualGoBtn,
     .scan-hero #switchCameraBtn,
     .scan-hero #torchBtn {
-      background: #5ba4e6 !important;
-      background-image: linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important;
+      background: rgba(91, 164, 230, 0.88) !important;
+      background-image: linear-gradient(135deg, rgba(91, 164, 230, 0.92) 0%, rgba(70, 150, 223, 0.84) 100%) !important;
+      backdrop-filter: blur(8px) !important;
+      -webkit-backdrop-filter: blur(8px) !important;
       color: #FFFFFF !important;
-      border: 1.5px solid rgba(255, 255, 255, 0.65) !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.70) !important;
       border-radius: 10px !important;
       font-weight: 800 !important;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16) !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
       transition: all 0.2s ease !important;
     }
@@ -544,12 +548,12 @@
     .scan-hero #manualGoBtn:hover,
     .scan-hero #switchCameraBtn:hover,
     .scan-hero #torchBtn:hover {
-      background: #4696df !important;
-      background-image: linear-gradient(135deg, #4696df 0%, #3685ce 100%) !important;
+      background: rgba(70, 150, 223, 0.98) !important;
+      background-image: linear-gradient(135deg, rgba(70, 150, 223, 0.98) 0%, rgba(54, 133, 206, 0.98) 100%) !important;
       color: #FFFFFF !important;
       border-color: #FFFFFF !important;
       transform: translateY(-2px) !important;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.24) !important;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
     }
 
     #scannerSection .manual-row input,
