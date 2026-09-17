@@ -5831,7 +5831,6 @@ main,
 
 /* 2. Top Navigation Bar (User & Admin Displays) */
 .topbar,
-.admin-topbar-header,
 .welcome-nav {
   background: #FFFFFF !important;
   background-image: none !important;
@@ -5840,24 +5839,44 @@ main,
   color: #0F172A !important;
 }
 
+/* Dedicated Admin Topbar — Navy Background */
+.admin-topbar-header {
+  background: #0F172A !important;
+  background-image: none !important;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+  color: #FFFFFF !important;
+}
+
 .topbar .brand,
-.admin-brand,
 .welcome-brand {
   color: #0F172A !important;
 }
 
+.admin-brand {
+  color: #FFFFFF !important;
+}
+
 .brand .name,
-.admin-brand .name,
 .welcome-brand-text h1 {
   color: #0F172A !important;
   font-weight: 800 !important;
   text-shadow: none !important;
 }
 
+.admin-brand .name {
+  color: #FFFFFF !important;
+  font-weight: 800 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
 .brand .tagline,
-.admin-badge-sub,
 .welcome-brand-text p {
   color: #64748B !important;
+}
+
+.admin-badge-sub {
+  color: rgba(255, 255, 255, 0.8) !important;
 }
 
 .brand-mark,
@@ -5887,28 +5906,28 @@ main,
 
 /* Topbar Context Pills */
 .admin-badge-pill {
-  background: #EFF6FF !important;
-  color: #3B82F6 !important;
-  border: 1px solid #BFDBFE !important;
+  background: rgba(59, 130, 246, 0.25) !important;
+  color: #60A5FA !important;
+  border: 1px solid rgba(59, 130, 246, 0.45) !important;
   font-weight: 800 !important;
 }
 
 .admin-context-pill {
-  background: #F1F5F9 !important;
-  border: 1px solid #E2E8F0 !important;
-  color: #0F172A !important;
+  background: rgba(255, 255, 255, 0.10) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  color: #FFFFFF !important;
   font-weight: 700 !important;
 }
 
 .context-pulse-dot {
   background: #3B82F6 !important;
-  box-shadow: 0 0 6px rgba(59, 130, 246, 0.6) !important;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.8) !important;
 }
 
 .admin-view-site-link {
-  background: #EFF6FF !important;
-  border: 1px solid #BFDBFE !important;
-  color: #3B82F6 !important;
+  background: rgba(59, 130, 246, 0.2) !important;
+  border: 1px solid rgba(59, 130, 246, 0.45) !important;
+  color: #FFFFFF !important;
   font-weight: 700 !important;
 }
 
@@ -5918,15 +5937,15 @@ main,
 }
 
 .admin-curator-chip {
-  background: #F8FAFC !important;
-  border: 1px solid #E2E8F0 !important;
-  color: #0F172A !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  color: #FFFFFF !important;
 }
 
 .admin-header-signout-btn {
-  background: #FEE2E2 !important;
-  border: 1px solid #FECACA !important;
-  color: #DC2626 !important;
+  background: rgba(220, 38, 38, 0.2) !important;
+  border: 1px solid rgba(239, 68, 68, 0.4) !important;
+  color: #FCA5A5 !important;
 }
 
 .admin-header-signout-btn:hover {
@@ -5964,36 +5983,46 @@ main,
 }
 
 .admin-sidebar-title span {
-  color: #94A3B8 !important;
+  color: #FFFFFF !important;
+  font-weight: 800 !important;
+  opacity: 0.95;
 }
 
 .admin-sidebar-section-title,
 .user-sidebar-section-title,
 .browse-sidebar-title {
-  color: #64748B !important;
-  font-size: 11px !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.08em !important;
+  color: #FFFFFF !important;
+  font-size: 11.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.1em !important;
   text-transform: uppercase !important;
+  opacity: 0.95;
 }
 
 .admin-sidebar-btn,
 .user-sidebar-btn,
 .cat-sidebar-btn {
-  color: #94A3B8 !important;
+  color: #FFFFFF !important;
   border-radius: 10px !important;
   transition: all 0.2s ease !important;
   border: none !important;
   background: transparent !important;
   margin: 2px 0 !important;
   padding: 10px 14px !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
+}
+
+.admin-sidebar-label {
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  flex: 1;
+  white-space: nowrap;
 }
 
 .admin-sidebar-btn:hover,
 .user-sidebar-btn:hover,
 .cat-sidebar-btn:hover {
-  background: rgba(255, 255, 255, 0.06) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
   color: #FFFFFF !important;
 }
 
@@ -6005,6 +6034,12 @@ main,
   color: #FFFFFF !important;
   font-weight: 800 !important;
   box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35) !important;
+}
+
+.admin-sidebar-btn.active .admin-sidebar-label,
+.user-sidebar-btn.active .admin-sidebar-label {
+  color: #FFFFFF !important;
+  font-weight: 800 !important;
 }
 
 .admin-sidebar-btn.active .admin-sidebar-icon,
@@ -6024,13 +6059,14 @@ main,
 
 .admin-sidebar-signout,
 .user-sidebar-sublink {
-  color: #94A3B8 !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
 }
 
 .admin-sidebar-signout:hover,
 .user-sidebar-sublink:hover {
   color: #FFFFFF !important;
-  background: rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
 }
 
 /* 4. White Cards & KPI Boxes with Soft Shadows (#FFFFFF on #F8FAFC) */
