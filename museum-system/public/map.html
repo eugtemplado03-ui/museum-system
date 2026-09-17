@@ -11,7 +11,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/style.css?v=50">
   <script src="/js/gate.js"></script>
   <script src="/js/sidebar.js" defer></script>
   <style>
@@ -76,14 +76,14 @@
    COMPACT HEADER & TOOLBAR (SAVING VERTICAL SPACE FOR MAP VIEWPORT)
    ========================================================================== */
     .map-header {
-      background: #ffffff !important;
-      border-bottom: 1.5px solid #dbeafe !important;
+      background: #0f172a !important;
+      border-bottom: 1.5px solid #1e293b !important;
       padding: 8px 18px;
       position: relative;
       z-index: 50;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
       flex-shrink: 0;
-      color: #000000 !important;
+      color: #ffffff !important;
     }
 
     .map-header-inner {
@@ -110,7 +110,7 @@
       font-family: 'Nunito', sans-serif;
       font-size: 18px;
       font-weight: 900;
-      color: #000000;
+      color: #ffffff !important;
       margin: 0;
       display: flex;
       align-items: center;
@@ -119,7 +119,7 @@
 
     .map-header-title p {
       margin: 0;
-      color: #374151;
+      color: #94a3b8 !important;
       font-size: 12px;
     }
 
@@ -133,11 +133,11 @@
     /* Segmented Toggle Buttons */
     .segmented-control {
       display: inline-flex;
-      background: #eff6ff;
-      border: 1.5px solid #bfdbfe;
+      background: #1e293b;
+      border: 1.5px solid #334155;
       border-radius: 999px;
       padding: 2px;
-      box-shadow: none;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
     }
 
     .seg-btn {
@@ -148,7 +148,7 @@
       border-radius: 999px;
       border: none;
       background: transparent;
-      color: #000000;
+      color: #e2e8f0;
       font-family: 'Nunito', sans-serif;
       font-size: 12px;
       font-weight: 800;
@@ -158,15 +158,20 @@
     }
 
     .seg-btn:hover {
-      color: #1d4ed8;
-      background: #dbeafe;
+      color: #ffffff !important;
+      background: #5ba4e6 !important; /* Baby blue hover! */
     }
 
     .seg-btn.active {
-      background: #1d4ed8;
+      background: #2563eb;
       color: #ffffff;
-      box-shadow: 0 2px 8px rgba(29, 78, 216, 0.3);
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
       font-weight: 900;
+    }
+
+    .seg-btn.active:hover {
+      background: #5ba4e6 !important; /* Baby blue hover! */
+      color: #ffffff !important;
     }
 
     .seg-badge {
@@ -174,13 +179,26 @@
       font-weight: 800;
       padding: 1px 6px;
       border-radius: 999px;
-      background: rgba(0, 0, 0, 0.08);
-      color: inherit;
+      background: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
     }
 
     .seg-btn.active .seg-badge {
-      background: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.28);
       color: #ffffff;
+    }
+
+    #btnToggleSidebar {
+      background: #1e293b !important;
+      border: 1.5px solid #334155 !important;
+      color: #38bdf8 !important;
+      transition: all 0.2s ease;
+    }
+
+    #btnToggleSidebar:hover {
+      background: #5ba4e6 !important; /* Baby blue hover! */
+      color: #ffffff !important;
+      border-color: #5ba4e6 !important;
     }
 
     /* Second Row: Search + Category Chips + Sidebar Toggle */
@@ -203,17 +221,22 @@
       width: 100%;
       padding: 6px 12px 6px 32px;
       border-radius: 8px;
-      border: 1.5px solid #bfdbfe;
-      background: #ffffff;
-      color: #000000;
+      border: 1.5px solid #334155;
+      background: #1e293b;
+      color: #ffffff;
       font-size: 12px;
       box-sizing: border-box;
+      transition: all 0.2s;
+    }
+
+    .map-search-wrap input::placeholder {
+      color: #94a3b8;
     }
 
     .map-search-wrap input:focus {
       outline: none;
-      border-color: #1d4ed8;
-      box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.2);
+      border-color: #5ba4e6;
+      box-shadow: 0 0 0 2px rgba(91, 164, 230, 0.3);
     }
 
     .map-search-icon {
@@ -221,7 +244,7 @@
       left: 9px;
       top: 50%;
       transform: translateY(-50%);
-      color: #64748b;
+      color: #38bdf8;
       font-size: 12px;
     }
 
@@ -242,9 +265,9 @@
       border-radius: 16px;
       font-size: 11.5px;
       font-weight: 700;
-      border: 1.5px solid #bfdbfe;
-      background: #eff6ff;
-      color: #000000;
+      border: 1.5px solid #334155;
+      background: #1e293b;
+      color: #e2e8f0;
       cursor: pointer;
       white-space: nowrap;
       transition: all 0.2s;
@@ -254,21 +277,22 @@
     }
 
     .chip:hover {
-      background: #dbeafe;
-      color: #1d4ed8;
+      background: #5ba4e6 !important; /* Baby blue hover! */
+      border-color: #5ba4e6 !important;
+      color: #ffffff !important;
     }
 
     .chip.active {
-      background: #1d4ed8;
-      color: #ffffff;
-      border-color: #1d4ed8;
+      background: #0284c7 !important;
+      border-color: #38bdf8 !important;
+      color: #ffffff !important;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
     }
 
-    .chip.active {
-      background: rgba(0, 240, 255, 0.2);
-      border-color: #00f0ff;
-      color: #00f0ff;
-      box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+    .chip.active:hover {
+      background: #5ba4e6 !important; /* Baby blue hover! */
+      border-color: #5ba4e6 !important;
+      color: #ffffff !important;
     }
 
     /* ==========================================================================
@@ -285,16 +309,16 @@
     /* Collapsible Room & Exhibit Directory Sidebar */
     .map-directory-sidebar {
       width: 320px;
-      background: #ffffff;
-      border-right: 1.5px solid #dbeafe;
+      background: #0f172a !important; /* Solid navy background! */
+      border-right: 1.5px solid #1e293b;
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
       transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s ease;
       z-index: 35;
-      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.05);
+      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
       overflow: hidden;
-      color: #000000;
+      color: #ffffff;
     }
 
     .map-directory-sidebar.collapsed {
@@ -305,11 +329,11 @@
 
     .sidebar-header {
       padding: 12px 16px;
-      border-bottom: 1.5px solid #dbeafe;
+      border-bottom: 1.5px solid #1e293b;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #eff6ff;
+      background: #0f172a !important; /* Navy! */
       flex-shrink: 0;
     }
 
@@ -317,7 +341,7 @@
       font-family: 'Nunito', sans-serif;
       font-size: 14px;
       font-weight: 900;
-      color: #000000;
+      color: #ffffff !important;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -331,7 +355,21 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      background: #ffffff;
+      background: #0f172a !important; /* Navy! */
+    }
+
+    .sidebar-content::-webkit-scrollbar {
+      width: 6px;
+    }
+    .sidebar-content::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    .sidebar-content::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 999px;
+    }
+    .sidebar-content::-webkit-scrollbar-thumb:hover {
+      background: #5ba4e6;
     }
 
     .sidebar-section-title {
@@ -339,7 +377,7 @@
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.8px;
-      color: #1d4ed8;
+      color: #38bdf8 !important; /* Baby blue title! */
       margin-bottom: 6px;
       display: flex;
       align-items: center;
@@ -358,18 +396,23 @@
       justify-content: space-between;
       padding: 8px 10px;
       border-radius: 8px;
-      background: #f8fafc;
-      border: 1.5px solid #e2e8f0;
-      color: #000000;
+      background: #1e293b; /* Navy surface! */
+      border: 1.5px solid #334155;
+      color: #f1f5f9;
       cursor: pointer;
-      transition: all 0.2s;
-      color: #e2e8f0;
+      transition: all 0.18s ease;
     }
 
     .room-dir-item:hover {
-      background: rgba(0, 240, 255, 0.12);
-      border-color: #00f0ff;
+      background: #5ba4e6 !important; /* Baby blue hover! */
+      border-color: #5ba4e6 !important;
+      color: #ffffff !important;
       transform: translateX(3px);
+    }
+
+    .room-dir-item:hover .room-dir-info span,
+    .room-dir-item:hover span {
+      color: #ffffff !important;
     }
 
     .room-dir-info {
@@ -378,6 +421,7 @@
       gap: 8px;
       font-size: 12.5px;
       font-weight: 700;
+      color: #f1f5f9;
     }
 
     .room-dir-code {
@@ -1405,15 +1449,15 @@
     /* Sidebar Directory Category Room Groups */
     .cat-room-group {
       margin-bottom: 10px;
-      background: #f8fafc;
-      border: 1.5px solid #dbeafe;
+      background: #1e293b !important; /* Navy card surface! */
+      border: 1.5px solid #334155 !important;
       border-radius: 10px;
       overflow: hidden;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
     }
 
     .cat-room-group:hover {
-      border-color: #93c5fd;
+      border-color: #5ba4e6 !important; /* Baby blue border hover! */
     }
 
     .cat-room-header {
@@ -1421,14 +1465,24 @@
       align-items: center;
       justify-content: space-between;
       padding: 9px 12px;
-      background: #eff6ff;
+      background: #162a45 !important; /* Deep navy header! */
       cursor: pointer;
-      border-bottom: 1px solid #dbeafe;
-      transition: background 0.15s;
+      border-bottom: 1px solid #334155;
+      transition: all 0.18s ease;
     }
 
     .cat-room-header:hover {
-      background: #dbeafe;
+      background: #5ba4e6 !important; /* Baby blue hover! */
+    }
+
+    .cat-room-header:hover .cat-room-name {
+      color: #ffffff !important;
+    }
+
+    .cat-room-header:hover .cat-room-count-badge {
+      background: #ffffff !important;
+      color: #0f172a !important;
+      border-color: #ffffff !important;
     }
 
     .cat-room-title-wrap {
@@ -1447,7 +1501,8 @@
     .cat-room-name {
       font-size: 13px;
       font-weight: 800;
-      color: #000000;
+      color: #ffffff !important; /* Crisp white on navy! */
+      transition: color 0.15s;
     }
 
     .cat-room-count-badge {
@@ -1455,9 +1510,10 @@
       font-weight: 800;
       padding: 2px 7px;
       border-radius: 999px;
-      border: 1px solid #bfdbfe;
-      background: #ffffff;
-      color: #1d4ed8 !important;
+      border: 1px solid #38bdf8;
+      background: rgba(15, 23, 42, 0.6);
+      color: #38bdf8 !important;
+      transition: all 0.15s;
     }
 
     .cat-room-exhibits-list {
@@ -1465,6 +1521,7 @@
       display: flex;
       flex-direction: column;
       gap: 2px;
+      background: #1e293b !important; /* Navy surface! */
     }
 
     .cat-exhibit-item {
@@ -1474,12 +1531,15 @@
       padding: 6px 8px;
       border-radius: 6px;
       cursor: pointer;
-      transition: all 0.15s;
-      color: #000000;
+      transition: all 0.18s ease;
+      color: #e2e8f0 !important; /* Crisp light text on navy! */
+      background: transparent;
     }
 
     .cat-exhibit-item:hover {
-      background: #eff6ff;
+      background: #5ba4e6 !important; /* Baby blue hover! */
+      color: #ffffff !important;
+      transform: translateX(3px);
     }
 
     .cat-exhibit-info {
@@ -1488,19 +1548,26 @@
       gap: 6px;
       font-size: 11.5px;
       font-weight: 600;
-      color: #000000;
+      color: #e2e8f0 !important;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      transition: color 0.15s;
     }
 
     .cat-exhibit-item:hover .cat-exhibit-info {
-      color: #ffffff;
+      color: #ffffff !important;
+      font-weight: 700;
     }
 
     .cat-exhibit-bullet {
-      color: #00f0ff;
+      color: #38bdf8;
       font-size: 11px;
+      transition: color 0.15s;
+    }
+
+    .cat-exhibit-item:hover .cat-exhibit-bullet {
+      color: #ffffff !important;
     }
 
     .cat-exhibit-title {
@@ -1512,9 +1579,14 @@
     .cat-exhibit-code {
       font-family: 'IBM Plex Mono', monospace;
       font-size: 9.5px;
-      color: #64748b;
+      color: #94a3b8;
       font-weight: 700;
       flex-shrink: 0;
+      transition: color 0.15s;
+    }
+
+    .cat-exhibit-item:hover .cat-exhibit-code {
+      color: #ffffff !important;
     }
 
     /* Category Room Pin Beacon Pulse */
@@ -2107,7 +2179,6 @@
 
           <!-- Sidebar Toggle -->
           <button class="seg-btn active" id="btnToggleSidebar"
-            style="background: rgba(0, 240, 255, 0.15); border: 1.5px solid var(--map-border); color: #00f0ff;"
             title="Toggle Rooms Directory Sidebar">
             <span>📋 Directory</span>
           </button>
