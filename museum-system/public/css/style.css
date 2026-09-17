@@ -6199,7 +6199,7 @@ main,
 .stat-card .num,
 .dash-pie-center-num,
 .dash-metric-num {
-  color: #0F172A !important;
+  color: #000000 !important;
   font-weight: 900 !important;
   text-shadow: none !important;
 }
@@ -6207,8 +6207,8 @@ main,
 .dash-kpi-lbl,
 .stat-card .label,
 .dash-metric-lbl {
-  color: #64748B !important;
-  font-weight: 700 !important;
+  color: #000000 !important;
+  font-weight: 800 !important;
 }
 
 .dash-kpi-icon-wrap,
@@ -6237,18 +6237,21 @@ main,
 }
 
 .dash-hero-title {
-  color: #0F172A !important;
+  color: #000000 !important;
   font-weight: 900 !important;
 }
 
 .dash-hero-sub {
-  color: #64748B !important;
+  color: #000000 !important;
+  font-weight: 600 !important;
+  opacity: 1 !important;
 }
 
 .dash-hero-eyebrow {
-  background: #EFF6FF !important;
-  border: 1px solid #DBEAFE !important;
-  color: #3B82F6 !important;
+  background: rgba(91, 164, 230, 0.15) !important;
+  border: 1px solid rgba(91, 164, 230, 0.35) !important;
+  color: #000000 !important;
+  font-weight: 800 !important;
 }
 
 /* 6b. Admin Section Topbar: Baby Blue Background & Crisp White Text */
@@ -6430,8 +6433,8 @@ h1, h2, h3, h4, h5, h6,
 .dash-group-title,
 .dash-pie-title,
 .title-cell {
-  color: #0F172A !important;
-  font-weight: 800 !important;
+  color: #000000 !important;
+  font-weight: 900 !important;
   text-shadow: none !important;
 }
 
@@ -6447,32 +6450,38 @@ p, label, span:not(.btn):not(.tag):not(.badge):not(.dash-action-btn):not(.btn-su
 .dash-pie-sub,
 .body-text,
 .stat-card .label {
-  color: #64748B !important;
+  color: #000000 !important;
+  font-weight: 600 !important;
 }
 
-/* 12. Buttons: Electric Blue Primary (#3B82F6), Soft White Secondary */
+/* 12. Buttons: Baby Blue Primary & Secondary with Crisp White Text */
 .btn-primary,
 .dash-action-btn.primary,
+.dash-action-btn.secondary,
+.dash-action-btn,
 .btn-submit {
-  background: #3B82F6 !important;
+  background: #5ba4e6 !important;
+  background-image: linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important;
   color: #FFFFFF !important;
-  border: none !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.4) !important;
   border-radius: 10px !important;
   font-weight: 800 !important;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.28) !important;
+  box-shadow: 0 4px 14px rgba(91, 164, 230, 0.35) !important;
   transition: all 0.2s ease !important;
 }
 
 .btn-primary:hover,
 .dash-action-btn.primary:hover,
+.dash-action-btn.secondary:hover,
+.dash-action-btn:hover,
 .btn-submit:hover {
-  background: #2563EB !important;
-  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.40) !important;
+  background: #4696df !important;
+  box-shadow: 0 6px 18px rgba(91, 164, 230, 0.45) !important;
   transform: translateY(-1px) !important;
+  color: #FFFFFF !important;
 }
 
 .btn-secondary,
-.dash-action-btn.secondary,
 .btn-ghost {
   background: #FFFFFF !important;
   border: 1.5px solid #DBEAFE !important;
@@ -6482,7 +6491,6 @@ p, label, span:not(.btn):not(.tag):not(.badge):not(.dash-action-btn):not(.btn-su
 }
 
 .btn-secondary:hover,
-.dash-action-btn.secondary:hover,
 .btn-ghost:hover {
   background: #EFF6FF !important;
   border-color: #3B82F6 !important;

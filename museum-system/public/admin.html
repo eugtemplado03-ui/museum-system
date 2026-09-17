@@ -6,7 +6,7 @@
 <title>Admin — Museo Sang Bata sa Negros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=21">
+<link rel="stylesheet" href="/css/style.css?v=22">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   /* ── Dedicated Admin Navy Topbar ────────────────────────────── */
@@ -199,6 +199,121 @@
   .user-sidebar * {
     color: #FFFFFF !important;
   }
+
+  /* ── Dashboard Executive Section: Hard Black Text & Baby Blue Buttons ── */
+  .dash-wrapper {
+    color: #000000 !important;
+  }
+  .dash-wrapper p,
+  .dash-wrapper span:not(.dash-action-btn *):not(.dash-pie-toggle-btn.active *):not(.dash-panel-action *):not(.btn *):not(.badge):not(.tag),
+  .dash-wrapper label,
+  .dash-wrapper h1,
+  .dash-wrapper h2,
+  .dash-wrapper h3,
+  .dash-wrapper h4,
+  .dash-hero-title,
+  .dash-hero-sub,
+  .dash-hero-eyebrow,
+  .dash-hero-eyebrow span,
+  .dash-group-title,
+  .dash-group-title span,
+  .dash-kpi-val,
+  .dash-kpi-lbl,
+  .dash-kpi-sub,
+  .dash-pie-title,
+  .dash-pie-title span,
+  .dash-pie-sub,
+  .dash-pie-center-num,
+  .dash-pie-center-lbl,
+  .dash-pie-legend,
+  .dash-pie-legend *,
+  .dash-analytics-title,
+  .dash-analytics-sub,
+  .dash-metric-num,
+  .dash-metric-lbl,
+  .dash-metric-sub {
+    color: #000000 !important;
+    text-shadow: none !important;
+  }
+  .dash-hero-title {
+    font-weight: 900 !important;
+  }
+  .dash-hero-sub {
+    font-weight: 600 !important;
+    opacity: 1 !important;
+  }
+  .dash-hero-eyebrow {
+    background: rgba(91, 164, 230, 0.15) !important;
+    border: 1px solid rgba(91, 164, 230, 0.35) !important;
+    color: #000000 !important;
+    font-weight: 800 !important;
+  }
+  .dash-group-title {
+    font-weight: 900 !important;
+  }
+  .dash-kpi-val {
+    font-weight: 900 !important;
+  }
+  .dash-kpi-lbl {
+    font-weight: 800 !important;
+  }
+  .dash-kpi-sub {
+    font-weight: 600 !important;
+    opacity: 1 !important;
+  }
+
+  /* Baby Blue Buttons in Dashboard Section */
+  .dash-action-btn,
+  .dash-action-btn.primary,
+  .dash-action-btn.secondary,
+  .dash-quick-actions button,
+  .dash-panel-action {
+    background: #5ba4e6 !important;
+    background-image: linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important;
+    color: #ffffff !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.4) !important;
+    border-radius: 10px !important;
+    font-weight: 800 !important;
+    box-shadow: 0 4px 14px rgba(91, 164, 230, 0.35) !important;
+    transition: all 0.2s ease !important;
+  }
+  .dash-action-btn *,
+  .dash-action-btn.primary *,
+  .dash-action-btn.secondary *,
+  .dash-quick-actions button *,
+  .dash-panel-action * {
+    color: #ffffff !important;
+  }
+  .dash-action-btn:hover,
+  .dash-action-btn.primary:hover,
+  .dash-action-btn.secondary:hover,
+  .dash-quick-actions button:hover,
+  .dash-panel-action:hover {
+    background: #4696df !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 18px rgba(91, 164, 230, 0.45) !important;
+    color: #ffffff !important;
+  }
+
+  /* Baby Blue Active Toggle in Pie Card & Links */
+  .dash-pie-toggle-btn.active {
+    background: #5ba4e6 !important;
+    color: #ffffff !important;
+    border: 1px solid #4696df !important;
+    box-shadow: 0 2px 8px rgba(91, 164, 230, 0.35) !important;
+    font-weight: 800 !important;
+  }
+  .dash-pie-toggle-btn.active * {
+    color: #ffffff !important;
+  }
+  .dash-kpi-link {
+    color: #3b93dc !important;
+    font-weight: 800 !important;
+  }
+  .dash-kpi-link:hover {
+    color: #2563eb !important;
+    text-decoration: underline !important;
+  }
 </style>
 </head>
 <body class="admin-portal-body">
@@ -260,7 +375,7 @@
   <script src="/js/lightbox.js"></script>
   <script src="/js/sidebar.js"></script>
   <script src="/js/carousel.js"></script>
-  <script src="/js/admin.js?v=24"></script>
+  <script src="/js/admin.js?v=25"></script>
   <script src="/js/footer.js"></script>
 </body>
 </html>

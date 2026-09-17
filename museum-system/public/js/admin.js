@@ -371,24 +371,24 @@ async function renderDashboardHomeTab(contentEl){
         <!-- 1. Executive Control Center Hero Banner -->
         <div class="dash-hero-banner">
           <div class="dash-hero-info">
-            <div class="dash-hero-eyebrow">
-              <span>🏛️</span> Museo Sang Bata sa Negros · Admin Console
+            <div class="dash-hero-eyebrow" style="color:#000000 !important; font-weight:800 !important; background:rgba(91,164,230,0.15) !important; border:1px solid rgba(91,164,230,0.35) !important;">
+              <span>🏛️</span> <span style="color:#000000 !important;">Museo Sang Bata sa Negros · Admin Console</span>
             </div>
-            <h1 class="dash-hero-title">Executive Control Center</h1>
-            <p class="dash-hero-sub">
+            <h1 class="dash-hero-title" style="color:#000000 !important; font-weight:900 !important;">Executive Control Center</h1>
+            <p class="dash-hero-sub" style="color:#000000 !important; font-weight:600 !important;">
               Real-time operations hub for interactive room collections, floor navigation, visitor intake, and public engagement.
             </p>
           </div>
           <!-- Quick Action Commands -->
           <div class="dash-quick-actions">
-            <button type="button" class="dash-action-btn primary" id="dashHeroAddExhibit">
-              <span>+</span> Add Exhibit
+            <button type="button" class="dash-action-btn primary" id="dashHeroAddExhibit" style="background:#5ba4e6 !important; background-image:linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important; color:#ffffff !important; border:1.5px solid rgba(255,255,255,0.4) !important; font-weight:800 !important; box-shadow:0 4px 14px rgba(91,164,230,0.35) !important;">
+              <span style="color:#ffffff !important;">+</span> <span style="color:#ffffff !important;">Add Exhibit</span>
             </button>
-            <button type="button" class="dash-action-btn secondary" id="dashHeroCheckinVisitor">
-              <span>🟢</span> Log Walk-in
+            <button type="button" class="dash-action-btn secondary" id="dashHeroCheckinVisitor" style="background:#5ba4e6 !important; background-image:linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important; color:#ffffff !important; border:1.5px solid rgba(255,255,255,0.4) !important; font-weight:800 !important; box-shadow:0 4px 14px rgba(91,164,230,0.35) !important;">
+              <span>🟢</span> <span style="color:#ffffff !important;">Log Walk-in</span>
             </button>
-            <button type="button" class="dash-action-btn secondary" id="dashHeroNewEvent">
-              <span>📅</span> Schedule Event
+            <button type="button" class="dash-action-btn secondary" id="dashHeroNewEvent" style="background:#5ba4e6 !important; background-image:linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important; color:#ffffff !important; border:1.5px solid rgba(255,255,255,0.4) !important; font-weight:800 !important; box-shadow:0 4px 14px rgba(91,164,230,0.35) !important;">
+              <span>📅</span> <span style="color:#ffffff !important;">Schedule Event</span>
             </button>
           </div>
         </div>
@@ -400,7 +400,7 @@ async function renderDashboardHomeTab(contentEl){
             <!-- Group 1: 3 Boxes (Collections & Operations) -->
             <div class="dash-kpi-subgroup">
               <div class="dash-group-header">
-                <span class="dash-group-title"><span>🏛️</span> Collections & Operations</span>
+                <span class="dash-group-title" style="color:#000000 !important; font-weight:900 !important;"><span>🏛️</span> Collections & Operations</span>
               </div>
               <div class="dash-kpi-grid">
                 <div class="dash-kpi-card" data-tab="catalog" title="Manage Exhibits & Collections">
@@ -441,7 +441,7 @@ async function renderDashboardHomeTab(contentEl){
             <!-- Group 2: 3 Boxes (Engagements & Records) -->
             <div class="dash-kpi-subgroup">
               <div class="dash-group-header">
-                <span class="dash-group-title"><span>📅</span> Engagements & Records</span>
+                <span class="dash-group-title" style="color:#000000 !important; font-weight:900 !important;"><span>📅</span> Engagements & Records</span>
               </div>
               <div class="dash-kpi-grid">
                 <div class="dash-kpi-card" data-tab="events" title="Manage Museum Events">
@@ -484,24 +484,24 @@ async function renderDashboardHomeTab(contentEl){
           <div class="dash-pie-card">
             <div class="dash-pie-header">
               <div>
-                <div class="dash-pie-title">
+                <div class="dash-pie-title" style="color:#000000 !important; font-weight:900 !important;">
                   <span>📊</span> Museum Distribution
                 </div>
-                <div class="dash-pie-sub" id="dashPieSub">Exhibits by Category & Room</div>
+                <div class="dash-pie-sub" id="dashPieSub" style="color:#000000 !important; font-weight:600 !important;">Exhibits by Category & Room</div>
               </div>
               <div class="dash-pie-mode-toggles">
-                <button type="button" class="dash-pie-toggle-btn active" id="pieToggleCategories" title="Show Exhibits by Category">Exhibits</button>
+                <button type="button" class="dash-pie-toggle-btn active" id="pieToggleCategories" title="Show Exhibits by Category" style="background:#5ba4e6 !important; color:#ffffff !important; border:1px solid #4696df !important; font-weight:800 !important;">Exhibits</button>
                 <button type="button" class="dash-pie-toggle-btn" id="pieToggleResources" title="Show All Museum Metrics">Resources</button>
               </div>
             </div>
             <div class="dash-pie-chart-wrap">
               <canvas id="dashPieCanvas"></canvas>
               <div class="dash-pie-center-badge">
-                <span class="dash-pie-center-num" id="dashPieCenterNum">${exhibits.length}</span>
-                <span class="dash-pie-center-lbl" id="dashPieCenterLbl">Total</span>
+                <span class="dash-pie-center-num" id="dashPieCenterNum" style="color:#000000 !important; font-weight:900 !important;">${exhibits.length}</span>
+                <span class="dash-pie-center-lbl" id="dashPieCenterLbl" style="color:#000000 !important; font-weight:800 !important;">Total</span>
               </div>
             </div>
-            <div class="dash-pie-legend" id="dashPieLegend"></div>
+            <div class="dash-pie-legend" id="dashPieLegend" style="color:#000000 !important; font-weight:700 !important;"></div>
           </div>
         </div>
 
@@ -513,11 +513,11 @@ async function renderDashboardHomeTab(contentEl){
               <div style="display:flex; align-items:center; gap:12px;">
                 <div class="dash-analytics-icon">📈</div>
                 <div>
-                  <div class="dash-analytics-title">Public Traffic & Digital Engagement</div>
-                  <div class="dash-analytics-sub">Analytics tracked across mobile QR scans, exhibit views, and kiosk sessions</div>
+                  <div class="dash-analytics-title" style="color:#000000 !important; font-weight:900 !important;">Public Traffic & Digital Engagement</div>
+                  <div class="dash-analytics-sub" style="color:#000000 !important; font-weight:600 !important;">Analytics tracked across mobile QR scans, exhibit views, and kiosk sessions</div>
                 </div>
               </div>
-              <button type="button" class="dash-panel-action" data-tab="analytics" style="padding:6px 14px; font-size:12px; border:none; background:rgba(0,240,255,0.12); border:1px solid rgba(0,240,255,0.3); border-radius:8px;">Full Analytics →</button>
+              <button type="button" class="dash-panel-action" data-tab="analytics" style="padding:6px 14px; font-size:12px; border:none; background:#5ba4e6 !important; background-image:linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important; color:#ffffff !important; border-radius:8px; font-weight:800 !important; box-shadow:0 2px 8px rgba(91,164,230,0.35) !important;">Full Analytics →</button>
             </div>
 
             <div class="dash-analytics-metrics-row">
