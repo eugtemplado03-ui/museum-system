@@ -9,7 +9,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=37">
+  <link rel="stylesheet" href="/css/style.css?v=38">
   <script src="/js/gate.js"></script>
   <style>
     /* ── Featured Video Section ── */
@@ -414,17 +414,22 @@
       font-weight: 800 !important;
     }
 
-    /* ── Self-Guided Tour Scanner Card: Translucent Baby Blue Glass Background, Pure White Text, Baby Blue Buttons ── */
+    /* ── Self-Guided Tour Scanner Card: Transparent Background, Pure White Text, Baby Blue Buttons ── */
     #scannerSection.scan-hero,
     .scan-hero {
-      background: rgba(91, 164, 230, 0.65) !important;
-      background-image: linear-gradient(135deg, rgba(91, 164, 230, 0.70) 0%, rgba(70, 150, 223, 0.55) 100%) !important;
-      backdrop-filter: blur(14px) saturate(130%) !important;
-      -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
-      border: 1.5px solid rgba(255, 255, 255, 0.55) !important;
+      background: transparent !important;
+      background-image: none !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.4) !important;
       border-radius: 20px !important;
-      box-shadow: 0 10px 36px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.16) !important;
+      backdrop-filter: blur(6px) !important;
+      -webkit-backdrop-filter: blur(6px) !important;
       color: #FFFFFF !important;
+    }
+
+    #scannerSection.scan-hero::before,
+    .scan-hero::before {
+      display: none !important;
     }
 
     #scannerSection.scan-hero *,
@@ -1570,6 +1575,7 @@
     let scanStream = null;
     let scanRAF = null;
     let scanLine = null;
+    let isScanning = false;
     let currentFacingMode = 'environment';
     let availableVideoDevices = [];
     let currentDeviceIndex = 0;
@@ -1620,17 +1626,30 @@
     });
 
     function stopScanner() {
-      if (scanRAF) { cancelAnimationFrame(scanRAF); scanRAF = null; }
+      isScanning = false;
+      if (scanRAF) {
+        cancelAnimationFrame(scanRAF);
+        scanRAF = null;
+      }
       if (scanStream) {
-        scanStream.getTracks().forEach(t => {
-          try { t.stop(); } catch (e) { }
-        });
+        try {
+          scanStream.getTracks().forEach(t => {
+            try {
+              t.stop();
+              t.enabled = false;
+            } catch (e) { }
+          });
+        } catch (e) { }
         scanStream = null;
       }
       const viewport = document.getElementById('viewport');
       if (viewport) {
         viewport.querySelectorAll('video').forEach(v => {
-          try { v.pause(); v.srcObject = null; v.remove(); } catch (e) { }
+          try {
+            v.pause();
+            v.srcObject = null;
+            v.remove();
+          } catch (e) { }
         });
       }
       if (scanLine && scanLine.parentNode) {
@@ -1643,11 +1662,16 @@
       const controlsRow = document.getElementById('scannerControlsRow');
       if (controlsRow) controlsRow.style.display = 'none';
 
+      const status = document.getElementById('scanStatus');
+      if (status) {
+        status.textContent = 'Scanner stopped.';
+        status.className = 'scan-status';
+      }
+
       const btn = document.getElementById('openScannerBtn');
       if (btn) {
         btn.innerHTML = '&#128247; Open scanner';
         btn.disabled = false;
-        btn.onclick = startScanner;
       }
       isTorchOn = false;
     }
@@ -1703,6 +1727,7 @@
     // File snapshot & photo upload QR reader
     async function handleQrImageFile(file) {
       if (!file) return;
+      if (isScanning || scanStream) stopScanner();
       const status = document.getElementById('scanStatus');
       status.textContent = '⏳ Analyzing tag photo…';
       status.className = 'scan-status';
@@ -1780,10 +1805,8 @@
 
     // Start live camera QR scanner
     async function startScanner() {
-      if (scanStream) {
+      if (isScanning || scanStream) {
         stopScanner();
-        const status = document.getElementById('scanStatus');
-        if (status) status.textContent = 'Scanner stopped.';
         return;
       }
 
@@ -1813,12 +1836,23 @@
         btn.disabled = true;
         status.textContent = 'Requesting camera access… please tap Allow.';
 
-        scanStream = await getCameraStream(currentFacingMode);
+        const stream = await getCameraStream(currentFacingMode);
+
+        // If user cancelled/stopped while waiting for camera access
+        if (!btn || (btn.disabled === false && !btn.innerHTML.includes('Opening'))) {
+          stream.getTracks().forEach(t => { try { t.stop(); } catch (e) { } });
+          return;
+        }
+
+        scanStream = stream;
+        isScanning = true;
 
         if (placeholder) placeholder.style.display = 'none';
 
         // Clear any old video elements
-        viewport.querySelectorAll('video').forEach(v => { v.srcObject = null; v.remove(); });
+        viewport.querySelectorAll('video').forEach(v => {
+          try { v.pause(); v.srcObject = null; v.remove(); } catch (e) { }
+        });
 
         const video = document.createElement('video');
         video.setAttribute('playsinline', '');
@@ -1839,10 +1873,6 @@
 
         btn.innerHTML = '⏹ Stop scanner';
         btn.disabled = false;
-        btn.onclick = () => {
-          stopScanner();
-          status.textContent = 'Scanner stopped.';
-        };
 
         status.textContent = '🔍 Scanning… hold the QR tag steady in the frame.';
 
@@ -1890,11 +1920,10 @@
 
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        let scanning = true;
         let debounce = false;
 
         const tick = async () => {
-          if (!scanning || !scanStream) return;
+          if (!isScanning || !scanStream) return;
 
           if (video.readyState >= video.HAVE_ENOUGH_DATA && video.videoWidth > 0) {
             if (!debounce) {
@@ -1923,8 +1952,7 @@
                   if (qr && qr.data) result = qr.data;
                 }
 
-                if (result) {
-                  scanning = false;
+                if (result && isScanning) {
                   status.textContent = '✅ QR tag detected! Loading exhibit…';
                   status.className = 'scan-status success';
                   stopScanner();
@@ -1937,14 +1965,14 @@
               setTimeout(() => { debounce = false; }, 80);
             }
           }
-          scanRAF = requestAnimationFrame(tick);
+          if (isScanning && scanStream) {
+            scanRAF = requestAnimationFrame(tick);
+          }
         };
         scanRAF = requestAnimationFrame(tick);
       } catch (err) {
         console.warn('Camera open failed:', err);
-        btn.innerHTML = '&#128247; Open scanner';
-        btn.disabled = false;
-        btn.onclick = startScanner;
+        stopScanner();
 
         if (placeholder) placeholder.style.display = 'block';
 
@@ -1960,7 +1988,18 @@
         status.className = 'scan-status error';
       }
     }
-    document.getElementById('openScannerBtn').addEventListener('click', startScanner);
+
+    const openScanBtn = document.getElementById('openScannerBtn');
+    if (openScanBtn) {
+      openScanBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (isScanning || scanStream) {
+          stopScanner();
+        } else {
+          startScanner();
+        }
+      });
+    }
 
     // ── Interactive Showcase Hero Carousel Controller (Same as Welcome Page) ──
     (function initDashboardHeroCarousel() {
