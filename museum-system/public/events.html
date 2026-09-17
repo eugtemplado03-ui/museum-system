@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>News &amp; Events — Museo Sang Bata sa Negros</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=45">
-<script src="/js/gate.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News &amp; Events — Museo Sang Bata sa Negros</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css?v=45">
+  <script src="/js/gate.js"></script>
 </head>
+
 <body>
   <!-- ── Top Navigation Bar ─────────────────────────────────────── -->
   <div class="topbar">
@@ -22,7 +26,8 @@
         <div class="brand-mark">M</div>
         <div class="brand-text">
           <div class="name">Museo Sang Bata sa Negros</div>
-          <div class="tagline" style="font-size: 9px; max-width: 400px;">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
+          <div class="tagline" style="font-size: 9px; max-width: 400px;">A Hands-on and Interactive Children's Museum.
+            Member of the Intercontinental Museum Network, SAMP</div>
         </div>
       </a>
     </div>
@@ -46,7 +51,8 @@
           <div class="page-hero events-hero">
             <div style="position:relative; z-index:1;">
               <h1>News &amp; events</h1>
-              <p>Recent happenings at the museum — anniversaries, workshops, training programs, and community outreach.</p>
+              <p>Recent happenings at the museum — anniversaries, workshops, training programs, and community outreach.
+              </p>
             </div>
             <div class="page-hero-icon" style="font-size:72px; flex-shrink:0; opacity:0.9;" aria-hidden="true">📅</div>
           </div>
@@ -56,8 +62,10 @@
             <div class="filter-toolbar-top">
               <div class="search-box-wrap">
                 <span class="search-icon">🔍</span>
-                <input type="text" id="eventSearchInput" class="search-input" placeholder="Search events by title, date, location, description…" autocomplete="off">
-                <button type="button" id="eventSearchClear" class="search-clear-btn" style="display:none;" title="Clear search">✕</button>
+                <input type="text" id="eventSearchInput" class="search-input"
+                  placeholder="Search events by title, date, location, description…" autocomplete="off">
+                <button type="button" id="eventSearchClear" class="search-clear-btn" style="display:none;"
+                  title="Clear search">✕</button>
               </div>
               <div class="filter-controls-group">
                 <select id="eventMediaFilter" class="filter-select" title="Filter by media">
@@ -81,7 +89,8 @@
 
             <div class="filter-stats-bar" id="eventStatsBar">
               <div class="filter-stats-text" id="eventFilterStats">Showing events</div>
-              <button type="button" class="filter-reset-link" id="eventResetFilters" style="display:none;">Reset search &amp; filters</button>
+              <button type="button" class="filter-reset-link" id="eventResetFilters" style="display:none;">Reset search
+                &amp; filters</button>
             </div>
           </div>
         </div>
@@ -98,35 +107,35 @@
         </div>
       </main>
 
-  <script src="/js/api.js"></script>
-  <script src="/js/chatbot.js"></script>
-  <script src="/js/carousel.js"></script>
-  <script src="/js/image-enhance.js"></script>
-  <script src="/js/lightbox.js"></script>
-  <script>
-    function escapeHtml(str){
-      return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-    }
+      <script src="/js/api.js"></script>
+      <script src="/js/chatbot.js"></script>
+      <script src="/js/carousel.js"></script>
+      <script src="/js/image-enhance.js"></script>
+      <script src="/js/lightbox.js"></script>
+      <script>
+        function escapeHtml(str) {
+          return String(str == null ? '' : str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+        }
 
-    function getAllImages(item){
-      if (Array.isArray(item.optimizedImagePaths) && item.optimizedImagePaths.length) return item.optimizedImagePaths;
-      if (Array.isArray(item.imagePaths) && item.imagePaths.length) return item.imagePaths;
-      if (item.optimizedImagePath) return [item.optimizedImagePath];
-      if (item.imagePath) return [item.imagePath];
-      return [];
-    }
+        function getAllImages(item) {
+          if (Array.isArray(item.optimizedImagePaths) && item.optimizedImagePaths.length) return item.optimizedImagePaths;
+          if (Array.isArray(item.imagePaths) && item.imagePaths.length) return item.imagePaths;
+          if (item.optimizedImagePath) return [item.optimizedImagePath];
+          if (item.imagePath) return [item.imagePath];
+          return [];
+        }
 
-    function formatDate(d){
-      if(!d) return '';
-      const parsed = new Date(d);
-      if(isNaN(parsed.getTime())) return d;
-      return parsed.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
-    }
+        function formatDate(d) {
+          if (!d) return '';
+          const parsed = new Date(d);
+          if (isNaN(parsed.getTime())) return d;
+          return parsed.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+        }
 
-    function eventCard(e){
-      const images = getAllImages(e);
-      const detailUrl = `/event.html?id=${encodeURIComponent(e.id)}`;
-      return `
+        function eventCard(e) {
+          const images = getAllImages(e);
+          const detailUrl = `/event.html?id=${encodeURIComponent(e.id)}`;
+          return `
       <div class="content-card">
         <div class="media">
           ${renderMediaBox(images, e.videoUrl, e.title, '📅')}
@@ -141,184 +150,184 @@
           </div>
         </div>
       </div>`;
-    }
-
-    let allEvents = [];
-    let searchQuery = '';
-    let timeFilter = 'all';
-    let mediaFilter = 'all';
-    let sortOption = 'date-desc';
-
-    function renderEvents(){
-      const grid = document.getElementById('eventGrid');
-      const emptyState = document.getElementById('emptyState');
-      const statsEl = document.getElementById('eventFilterStats');
-      const resetBtn = document.getElementById('eventResetFilters');
-      const clearBtn = document.getElementById('eventSearchClear');
-
-      if(clearBtn) clearBtn.style.display = searchQuery ? 'flex' : 'none';
-
-      let list = [...allEvents];
-      const today = new Date();
-      today.setHours(0,0,0,0);
-
-      // Text search
-      if(searchQuery){
-        const q = searchQuery.toLowerCase();
-        list = list.filter(ev =>
-          (ev.title || '').toLowerCase().includes(q) ||
-          (ev.description || '').toLowerCase().includes(q) ||
-          (ev.location || '').toLowerCase().includes(q) ||
-          (ev.date || '').toLowerCase().includes(q) ||
-          formatDate(ev.date).toLowerCase().includes(q)
-        );
-      }
-
-      // Time filter (upcoming vs past)
-      if(timeFilter !== 'all'){
-        if(timeFilter === 'upcoming'){
-          list = list.filter(ev => {
-            if(!ev.date) return false;
-            const d = new Date(ev.date);
-            return !isNaN(d.getTime()) && d >= today;
-          });
-        } else if(timeFilter === 'past'){
-          list = list.filter(ev => {
-            if(!ev.date) return true; // Undated or past
-            const d = new Date(ev.date);
-            return !isNaN(d.getTime()) && d < today;
-          });
         }
-      }
 
-      // Media filter
-      if(mediaFilter === 'video'){
-        list = list.filter(ev => Boolean(ev.videoUrl));
-      } else if(mediaFilter === 'photo'){
-        list = list.filter(ev => getAllImages(ev).length > 0);
-      }
+        let allEvents = [];
+        let searchQuery = '';
+        let timeFilter = 'all';
+        let mediaFilter = 'all';
+        let sortOption = 'date-desc';
 
-      // Sort
-      list.sort((a, b) => {
-        if(sortOption === 'title-asc') return (a.title || '').localeCompare(b.title || '');
-        const dateA = a.date ? new Date(a.date).getTime() : 0;
-        const dateB = b.date ? new Date(b.date).getTime() : 0;
-        if(sortOption === 'date-asc') return (isNaN(dateA) ? 0 : dateA) - (isNaN(dateB) ? 0 : dateB);
-        // date-desc (default)
-        return (isNaN(dateB) ? 0 : dateB) - (isNaN(dateA) ? 0 : dateA);
-      });
+        function renderEvents() {
+          const grid = document.getElementById('eventGrid');
+          const emptyState = document.getElementById('emptyState');
+          const statsEl = document.getElementById('eventFilterStats');
+          const resetBtn = document.getElementById('eventResetFilters');
+          const clearBtn = document.getElementById('eventSearchClear');
 
-      const isFiltered = Boolean(searchQuery || timeFilter !== 'all' || mediaFilter !== 'all');
-      if(statsEl){
-        statsEl.innerHTML = `Showing <span>${list.length}</span> of <span>${allEvents.length}</span> events${searchQuery ? ` matching "<em>${escapeHtml(searchQuery)}</em>"` : ''}`;
-      }
-      if(resetBtn){
-        resetBtn.style.display = isFiltered ? 'inline-block' : 'none';
-      }
+          if (clearBtn) clearBtn.style.display = searchQuery ? 'flex' : 'none';
 
-      if(list.length === 0){
-        if(isFiltered){
-          grid.innerHTML = `
+          let list = [...allEvents];
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+
+          // Text search
+          if (searchQuery) {
+            const q = searchQuery.toLowerCase();
+            list = list.filter(ev =>
+              (ev.title || '').toLowerCase().includes(q) ||
+              (ev.description || '').toLowerCase().includes(q) ||
+              (ev.location || '').toLowerCase().includes(q) ||
+              (ev.date || '').toLowerCase().includes(q) ||
+              formatDate(ev.date).toLowerCase().includes(q)
+            );
+          }
+
+          // Time filter (upcoming vs past)
+          if (timeFilter !== 'all') {
+            if (timeFilter === 'upcoming') {
+              list = list.filter(ev => {
+                if (!ev.date) return false;
+                const d = new Date(ev.date);
+                return !isNaN(d.getTime()) && d >= today;
+              });
+            } else if (timeFilter === 'past') {
+              list = list.filter(ev => {
+                if (!ev.date) return true; // Undated or past
+                const d = new Date(ev.date);
+                return !isNaN(d.getTime()) && d < today;
+              });
+            }
+          }
+
+          // Media filter
+          if (mediaFilter === 'video') {
+            list = list.filter(ev => Boolean(ev.videoUrl));
+          } else if (mediaFilter === 'photo') {
+            list = list.filter(ev => getAllImages(ev).length > 0);
+          }
+
+          // Sort
+          list.sort((a, b) => {
+            if (sortOption === 'title-asc') return (a.title || '').localeCompare(b.title || '');
+            const dateA = a.date ? new Date(a.date).getTime() : 0;
+            const dateB = b.date ? new Date(b.date).getTime() : 0;
+            if (sortOption === 'date-asc') return (isNaN(dateA) ? 0 : dateA) - (isNaN(dateB) ? 0 : dateB);
+            // date-desc (default)
+            return (isNaN(dateB) ? 0 : dateB) - (isNaN(dateA) ? 0 : dateA);
+          });
+
+          const isFiltered = Boolean(searchQuery || timeFilter !== 'all' || mediaFilter !== 'all');
+          if (statsEl) {
+            statsEl.innerHTML = `Showing <span>${list.length}</span> of <span>${allEvents.length}</span> events${searchQuery ? ` matching "<em>${escapeHtml(searchQuery)}</em>"` : ''}`;
+          }
+          if (resetBtn) {
+            resetBtn.style.display = isFiltered ? 'inline-block' : 'none';
+          }
+
+          if (list.length === 0) {
+            if (isFiltered) {
+              grid.innerHTML = `
             <div class="empty-state" style="grid-column:1/-1;">
               <h2>No matching events</h2>
               <p>No events found matching your search and filter criteria.</p>
               <button class="btn btn-primary btn-small" style="margin-top:10px;" onclick="resetEventFilters()">Clear search &amp; filters</button>
             </div>`;
-          emptyState.style.display = 'none';
-        } else {
-          grid.innerHTML = '';
-          emptyState.style.display = 'block';
+              emptyState.style.display = 'none';
+            } else {
+              grid.innerHTML = '';
+              emptyState.style.display = 'block';
+            }
+          } else {
+            emptyState.style.display = 'none';
+            grid.innerHTML = list.map(eventCard).join('');
+            initPhotoCarousels(grid);
+          }
         }
-      } else {
-        emptyState.style.display = 'none';
-        grid.innerHTML = list.map(eventCard).join('');
-        initPhotoCarousels(grid);
-      }
-    }
 
-    function resetEventFilters(){
-      searchQuery = '';
-      timeFilter = 'all';
-      mediaFilter = 'all';
-      sortOption = 'date-desc';
-
-      const searchInput = document.getElementById('eventSearchInput');
-      const sortSelect = document.getElementById('eventSortSelect');
-      const mediaSelect = document.getElementById('eventMediaFilter');
-      if(searchInput) searchInput.value = '';
-      if(sortSelect) sortSelect.value = 'date-desc';
-      if(mediaSelect) mediaSelect.value = 'all';
-
-      document.querySelectorAll('#eventTimeChips [data-time]').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.time === 'all');
-      });
-
-      renderEvents();
-    }
-
-    function initEventToolbar(){
-      const searchInput = document.getElementById('eventSearchInput');
-      const searchClear = document.getElementById('eventSearchClear');
-      const mediaSelect = document.getElementById('eventMediaFilter');
-      const sortSelect = document.getElementById('eventSortSelect');
-      const resetBtn = document.getElementById('eventResetFilters');
-
-      if(searchInput){
-        searchInput.addEventListener('input', (e)=>{
-          searchQuery = e.target.value.trim();
-          renderEvents();
-        });
-      }
-      if(searchClear){
-        searchClear.addEventListener('click', ()=>{
+        function resetEventFilters() {
           searchQuery = '';
-          if(searchInput){ searchInput.value = ''; searchInput.focus(); }
-          renderEvents();
-        });
-      }
-      if(mediaSelect){
-        mediaSelect.addEventListener('change', (e)=>{
-          mediaFilter = e.target.value;
-          renderEvents();
-        });
-      }
-      if(sortSelect){
-        sortSelect.addEventListener('change', (e)=>{
-          sortOption = e.target.value;
-          renderEvents();
-        });
-      }
-      if(resetBtn){
-        resetBtn.addEventListener('click', resetEventFilters);
-      }
+          timeFilter = 'all';
+          mediaFilter = 'all';
+          sortOption = 'date-desc';
 
-      document.querySelectorAll('#eventTimeChips [data-time]').forEach(btn => {
-        btn.addEventListener('click', ()=>{
-          timeFilter = btn.dataset.time;
-          document.querySelectorAll('#eventTimeChips [data-time]').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          renderEvents();
-        });
-      });
-    }
+          const searchInput = document.getElementById('eventSearchInput');
+          const sortSelect = document.getElementById('eventSortSelect');
+          const mediaSelect = document.getElementById('eventMediaFilter');
+          if (searchInput) searchInput.value = '';
+          if (sortSelect) sortSelect.value = 'date-desc';
+          if (mediaSelect) mediaSelect.value = 'all';
 
-    async function load(){
-      const grid = document.getElementById('eventGrid');
-      initEventToolbar();
-      try{
-        const { events } = await Api.listEvents();
-        allEvents = events || [];
-        if(allEvents.length === 0){
-          document.getElementById('emptyState').style.display = 'block';
-        } else {
+          document.querySelectorAll('#eventTimeChips [data-time]').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.time === 'all');
+          });
+
           renderEvents();
         }
-      }catch(e){
-        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><p>${escapeHtml(e.message)}</p></div>`;
-      }
-    }
-    load();
-  </script>
+
+        function initEventToolbar() {
+          const searchInput = document.getElementById('eventSearchInput');
+          const searchClear = document.getElementById('eventSearchClear');
+          const mediaSelect = document.getElementById('eventMediaFilter');
+          const sortSelect = document.getElementById('eventSortSelect');
+          const resetBtn = document.getElementById('eventResetFilters');
+
+          if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+              searchQuery = e.target.value.trim();
+              renderEvents();
+            });
+          }
+          if (searchClear) {
+            searchClear.addEventListener('click', () => {
+              searchQuery = '';
+              if (searchInput) { searchInput.value = ''; searchInput.focus(); }
+              renderEvents();
+            });
+          }
+          if (mediaSelect) {
+            mediaSelect.addEventListener('change', (e) => {
+              mediaFilter = e.target.value;
+              renderEvents();
+            });
+          }
+          if (sortSelect) {
+            sortSelect.addEventListener('change', (e) => {
+              sortOption = e.target.value;
+              renderEvents();
+            });
+          }
+          if (resetBtn) {
+            resetBtn.addEventListener('click', resetEventFilters);
+          }
+
+          document.querySelectorAll('#eventTimeChips [data-time]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              timeFilter = btn.dataset.time;
+              document.querySelectorAll('#eventTimeChips [data-time]').forEach(b => b.classList.remove('active'));
+              btn.classList.add('active');
+              renderEvents();
+            });
+          });
+        }
+
+        async function load() {
+          const grid = document.getElementById('eventGrid');
+          initEventToolbar();
+          try {
+            const { events } = await Api.listEvents();
+            allEvents = events || [];
+            if (allEvents.length === 0) {
+              document.getElementById('emptyState').style.display = 'block';
+            } else {
+              renderEvents();
+            }
+          } catch (e) {
+            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><p>${escapeHtml(e.message)}</p></div>`;
+          }
+        }
+        load();
+      </script>
       </main>
     </div>
   </div>
@@ -326,4 +335,5 @@
   <script src="/js/sidebar.js"></script>
   <script src="/js/footer.js"></script>
 </body>
+
 </html>

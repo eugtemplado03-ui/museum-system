@@ -6413,8 +6413,6 @@ main,
 .portal-card,
 .about-card,
 .feedback-card,
-.plaque,
-.plaque-body,
 .search-bar-wrap,
 .filter-toolbar,
 .filter-chip-bar,
@@ -7890,5 +7888,208 @@ footer a:hover {
   color: #FFFFFF !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
 }
+
+/* ── Exhibit & Item Plaque Details: Baby Blue Background with Crisp White Text ── */
+.plaque {
+  background: #5ba4e6 !important;
+  background-image: linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.45) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 12px 36px rgba(91, 164, 230, 0.35), 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+  color: #FFFFFF !important;
+  overflow: hidden !important;
+}
+
+.plaque-body {
+  background: #5ba4e6 !important;
+  background-image: linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important;
+  color: #FFFFFF !important;
+  padding: 28px 28px 32px !important;
+}
+
+.plaque-body,
+.plaque-body h1,
+.plaque-body p,
+.plaque-body span:not(.dir-step-pill),
+.plaque-body div:not(.dir-step-pill):not(.dir-icon-badge):not(.stars-input *):not(#exhibitMap *),
+.plaque-body label,
+.plaque-desc,
+.plaque-cat-detail,
+.plaque-cat-detail strong,
+.plaque-accession,
+.plaque-meta-row,
+.plaque-meta-row div b,
+.plaque-meta-row div span {
+  color: #FFFFFF !important;
+}
+
+.plaque-body h1 {
+  font-family: 'Nunito', sans-serif !important;
+  font-weight: 900 !important;
+  font-size: 26px !important;
+  color: #FFFFFF !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25) !important;
+  margin: 4px 0 6px !important;
+}
+
+.plaque-cat {
+  background: rgba(255, 255, 255, 0.25) !important;
+  color: #FFFFFF !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.6) !important;
+  border-radius: 999px !important;
+  font-weight: 800 !important;
+  font-size: 11px !important;
+  letter-spacing: 0.08em !important;
+  padding: 4px 12px !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.fav-btn-plaque {
+  background: rgba(255, 255, 255, 0.25) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.6) !important;
+  color: #FFFFFF !important;
+  border-radius: 50% !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  transition: transform 0.15s, background 0.15s !important;
+}
+
+.fav-btn-plaque:hover {
+  background: rgba(255, 255, 255, 0.45) !important;
+  transform: scale(1.08) !important;
+}
+
+.fav-btn-plaque.active {
+  background: #FFFFFF !important;
+  color: #EF4444 !important;
+  border-color: #FFFFFF !important;
+}
+
+.plaque-location-badge {
+  background: rgba(255, 255, 255, 0.22) !important;
+  color: #FFFFFF !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+.plaque-location-badge * {
+  color: #FFFFFF !important;
+}
+
+.plaque-meta-row {
+  border-top: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+  padding: 12px 0 !important;
+}
+
+.plaque-meta-row div span {
+  color: rgba(255, 255, 255, 0.90) !important;
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+.plaque-meta-row div b {
+  color: #FFFFFF !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25) !important;
+}
+
+.plaque-body label[for="langSelect"] {
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  font-size: 13.5px !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+.plaque-body #langSelect {
+  background: #FFFFFF !important;
+  color: #0F172A !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.6) !important;
+  border-radius: 8px !important;
+  padding: 6px 12px !important;
+  font-weight: 700 !important;
+  font-size: 13.5px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+.plaque-cat-detail {
+  color: #FFFFFF !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+.plaque-cat-detail strong {
+  color: #FFFFFF !important;
+  font-weight: 800 !important;
+}
+
+.plaque-desc {
+  color: #FFFFFF !important;
+  font-size: 15px !important;
+  line-height: 1.75 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+.plaque-body .tts-controls .btn,
+.plaque-body .tts-controls button {
+  background: #FFFFFF !important;
+  color: #0284C7 !important;
+  border: 1.5px solid #FFFFFF !important;
+  font-weight: 800 !important;
+  font-size: 13.5px !important;
+  padding: 8px 18px !important;
+  border-radius: 10px !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15) !important;
+  transition: transform 0.15s, background 0.15s, box-shadow 0.15s !important;
+}
+
+.plaque-body .tts-controls .btn:hover,
+.plaque-body .tts-controls button:hover {
+  background: #F0F9FF !important;
+  color: #0369A1 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.2) !important;
+}
+
+#ttsStatus {
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+.plaque-accession {
+  color: rgba(255, 255, 255, 0.92) !important;
+  font-family: 'IBM Plex Mono', monospace !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+.plaque-map-section,
+.plaque-map-image-section {
+  border-top-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+.plaque-map-section div,
+.plaque-map-image-section div {
+  color: #FFFFFF !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+.detail-back {
+  color: #FFFFFF !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+  font-weight: 800 !important;
+}
+
 
 

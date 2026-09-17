@@ -6,7 +6,7 @@
 <title>Exhibit — Museo Sang Bata sa Negros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/style.css?v=46">
 <script src="/js/gate.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <style>
@@ -280,7 +280,7 @@
               <h1>${escapeHtml(exhibit.title)}</h1>
               <!-- ── Prominent Location/Direction ── -->
               ${exhibit.location ? `
-              <div class="plaque-location-badge" style="display:inline-flex; align-items:center; gap:6px; background:var(--teal-light); color:var(--teal-dark); padding:8px 12px; border-radius:999px; font-size:13px; font-weight:600; margin:6px 0 12px; flex-wrap:wrap;">
+              <div class="plaque-location-badge" style="display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:999px; font-size:13px; font-weight:600; margin:6px 0 12px; flex-wrap:wrap;">
                 <span>📍</span>
                 <span>${escapeHtml(exhibit.location)}</span>
               </div>` : ''}
@@ -290,7 +290,7 @@
                 <div><span>Location</span><b>${escapeHtml(exhibit.location||'—')}</b></div>
               </div>
               <div style="display:flex; gap:8px; align-items:center; margin-top:6px;">
-                <label for="langSelect" style="font-size:13px; color:var(--ink-soft);">Language:</label>
+                <label for="langSelect" style="font-size:13px; font-weight:700;">Language:</label>
                 <select id="langSelect" style="padding:6px 8px; font-size:14px;">
                   <option value="original">Original (English)</option>
                   <option value="tl">Tagalog (Filipino)</option>
