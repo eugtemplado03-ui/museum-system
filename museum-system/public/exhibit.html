@@ -6,7 +6,7 @@
 <title>Exhibit — Museo Sang Bata sa Negros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=47">
+<link rel="stylesheet" href="/css/style.css?v=48">
 <script src="/js/gate.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <style>
@@ -865,18 +865,18 @@
         const comment = r.comment ? escapeHtml(r.comment) : '<em style="color:#94a3b8; font-size:12.5px;">Rated without written comment</em>';
 
         return `
-          <div class="rating-item">
-            <div class="rating-item-header">
-              <div class="reviewer-info">
-                <div class="reviewer-avatar">${initial}</div>
+          <div class="rating-item" style="background:#ffffff !important; border:1.5px solid #dbeafe !important; border-radius:16px !important; padding:18px 20px !important; box-shadow:0 4px 16px rgba(15,23,42,0.07) !important;">
+            <div class="rating-item-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+              <div class="reviewer-info" style="display:flex; align-items:center; gap:12px;">
+                <div class="reviewer-avatar" style="width:38px; height:38px; border-radius:50%; background:#e0f2fe !important; border:1.5px solid #38bdf8 !important; color:#0284c7 !important; font-family:'Nunito',sans-serif; font-weight:900; font-size:15px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">${initial}</div>
                 <div>
-                  <div class="reviewer-name">${name}</div>
-                  <div class="reviewer-date">${dateStr}</div>
+                  <div class="reviewer-name" style="font-family:'Nunito',sans-serif; font-size:15.5px; font-weight:800; color:#0f172a !important; line-height:1.25;">${name}</div>
+                  <div class="reviewer-date" style="font-size:12px; font-weight:600; color:#64748b !important; margin-top:2px;">${dateStr}</div>
                 </div>
               </div>
-              <div class="stars" title="${r.rating || 5} Stars">${stars}</div>
+              <div class="stars" title="${r.rating || 5} Stars" style="color:#f59e0b !important; font-size:16px; letter-spacing:2px;">${stars}</div>
             </div>
-            <div class="comment">${comment}</div>
+            <div class="comment" style="font-size:14px; color:#0f172a !important; font-weight:600; line-height:1.6; margin-top:4px; word-break:break-word;">${comment}</div>
           </div>
         `;
       }).join('');
