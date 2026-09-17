@@ -505,11 +505,6 @@
       will-change: transform;
     }
 
-    /* 3D Isometric View State - Tilts stage container only! */
-    .is-3d .svg-wrapper {
-      transform: perspective(1200px) rotateX(50deg) rotateZ(-28deg);
-      box-shadow: -25px 45px 80px rgba(0, 0, 0, 0.85), 0 0 0 2px var(--map-border);
-    }
 
     .svg-wrapper {
       position: relative;
@@ -2173,36 +2168,6 @@
             </button>
           </div>
 
-          <!-- 2D / 3D Isometric View Mode -->
-          <div class="segmented-control" role="group" aria-label="View Perspective Mode">
-            <button class="seg-btn active" id="btnMode2D" title="Top-down Architectural 2D Plan" style="color: #ffffff !important;">
-              <span style="color: #ffffff !important;">📐 2D CAD</span>
-            </button>
-            <button class="seg-btn" id="btnMode3D" title="Isometric 3D Architectural Model" style="color: #ffffff !important;">
-              <span style="color: #ffffff !important;">🎲 3D Model</span>
-            </button>
-          </div>
-
-          <!-- Screen Fit & Width Toggles -->
-          <div class="segmented-control" role="group" aria-label="Zoom Fit Modes">
-            <button class="seg-btn active" id="btnFitAll" title="Fit 100% of the entire building on screen" style="color: #ffffff !important;">
-              <span style="color: #ffffff !important;">⛶ Fit</span>
-            </button>
-            <button class="seg-btn" id="btnFitWidth" title="Expand map to full width" style="color: #ffffff !important;">
-              <span style="color: #ffffff !important;">⬌ Width</span>
-            </button>
-          </div>
-
-          <!-- Mouse Wheel Mode (Scroll vs Zoom) -->
-          <div class="segmented-control wheel-mode-control" role="group" aria-label="Mouse Wheel Mode">
-            <button class="seg-btn active" id="btnWheelScroll" title="Mouse wheel scrolls/pans map up and down" style="color: #ffffff !important;">
-              <span style="color: #ffffff !important;">↕️ Scroll</span>
-            </button>
-            <button class="seg-btn" id="btnWheelZoom" title="Mouse wheel zooms map in and out" style="color: #ffffff !important;">
-              <span style="color: #ffffff !important;">🔍 Zoom</span>
-            </button>
-          </div>
-
           <!-- Exhibit Pins Toggle -->
           <div class="segmented-control" role="group" aria-label="Exhibit Pinpoints Visibility">
             <button class="seg-btn active" id="btnToggleExhibitPins"
@@ -2299,15 +2264,12 @@
         </div>
       </div>
 
-      <!-- HUD Action Controls (Zoom, Fit Screen, Fit Width, Wheel Mode) -->
+      <!-- HUD Action Controls (Zoom & Fit Reset) -->
       <div class="map-hud-controls">
         <button class="hud-btn" id="btnZoomIn" title="Zoom In (+)" aria-label="Zoom in">+</button>
         <button class="hud-btn" id="btnZoomOut" title="Zoom Out (-)" aria-label="Zoom out">−</button>
         <button class="hud-btn" id="btnZoomReset" title="Fit 100% of Entire Building on Screen"
           aria-label="Fit to Screen">⛶</button>
-        <button class="hud-btn" id="btnHudFitWidth" title="Expand Map to Full Width" aria-label="Fit Width">⬌</button>
-        <button class="hud-btn" id="btnHudWheelToggle" title="Toggle Mouse Wheel: Scroll vs Zoom"
-          aria-label="Toggle Wheel Mode">↕️</button>
       </div>
 
     </main>
@@ -4074,51 +4036,22 @@
         // Base SVG viewBox dimensions: 1000 x 1300
         const baseW = 1000;
         const baseH = 1300;
-        const heightFactor = is3DMode ? 0.88 : 1.0;
 
-        const fitScale = Math.min(availW / baseW, availH / (baseH * heightFactor));
+        const fitScale = Math.min(availW / baseW, availH / baseH);
         zoomLevel = Math.max(0.35, fitScale);
         panX = 0;
         panY = 0;
         updateTransform();
-
-        const btnFit = document.getElementById('btnFitAll');
-        if (btnFit) btnFit.classList.add('active');
-        const btnW = document.getElementById('btnFitWidth');
-        if (btnW) btnW.classList.remove('active');
       }
 
-      // FIT WIDTH: Expands map to full width across widescreen monitors
+      // Automatic fitToScreen is used permanently
       function fitToWidth(animate = true) {
-        const vW = mapViewport.clientWidth;
-        if (!vW) return;
-
-        if (animate) {
-          mapStage.style.transition = 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)';
-        } else {
-          mapStage.style.transition = 'none';
-        }
-
-        const padX = 24;
-        const baseW = 1000;
-        zoomLevel = Math.max(0.5, (vW - padX) / baseW);
-        panX = 0;
-        panY = 0;
-        updateTransform();
-
-        const btnW = document.getElementById('btnFitWidth');
-        if (btnW) btnW.classList.add('active');
-        const btnFit = document.getElementById('btnFitAll');
-        if (btnFit) btnFit.classList.remove('active');
+        fitToScreen(animate);
       }
 
-      // 3D Isometric View Mode
+      // 3D Isometric View Mode disabled: Pure 2D Architectural Plan
       function set3DMode(enabled) {
-        is3DMode = enabled;
-        document.body.classList.toggle('is-3d', is3DMode);
-        document.getElementById('btnMode2D').classList.toggle('active', !is3DMode);
-        document.getElementById('btnMode3D').classList.toggle('active', is3DMode);
-        fitToScreen(true);
+        // Pure 2D mode only
       }
 
       // Generate precise architectural walking path aligned to the exact exhibit pinpoint
@@ -4409,15 +4342,9 @@
         document.getElementById('btnFloor1').addEventListener('click', () => switchFloor(1));
         document.getElementById('btnFloor2').addEventListener('click', () => switchFloor(2));
 
-        // Perspective Mode Toggle (2D / 3D)
-        document.getElementById('btnMode2D').addEventListener('click', () => set3DMode(false));
-        document.getElementById('btnMode3D').addEventListener('click', () => set3DMode(true));
-
-        // Fit Screen & Fit Width
-        document.getElementById('btnFitAll').addEventListener('click', () => fitToScreen(true));
-        document.getElementById('btnFitWidth').addEventListener('click', () => fitToWidth(true));
-        document.getElementById('btnZoomReset').addEventListener('click', () => fitToScreen(true));
-        document.getElementById('btnHudFitWidth').addEventListener('click', () => fitToWidth(true));
+        // Reset to Auto-fit
+        const btnReset = document.getElementById('btnZoomReset');
+        if (btnReset) btnReset.addEventListener('click', () => fitToScreen(true));
 
         // Toggle Directory Sidebar
         document.getElementById('btnToggleSidebar').addEventListener('click', () => {
@@ -4448,16 +4375,12 @@
         document.getElementById('btnZoomIn').addEventListener('click', () => zoom(0.2));
         document.getElementById('btnZoomOut').addEventListener('click', () => zoom(-0.2));
 
-        // Window Resize Listener (Auto-adjusts scale so it stays 100% visible)
+        // Window Resize Listener (Always automatically fits map to screen)
         let resizeTimer = null;
         window.addEventListener('resize', () => {
           clearTimeout(resizeTimer);
           resizeTimer = setTimeout(() => {
-            if (document.getElementById('btnFitWidth').classList.contains('active')) {
-              fitToWidth(false);
-            } else {
-              fitToScreen(false);
-            }
+            fitToScreen(false);
           }, 120);
         });
 
@@ -4734,36 +4657,10 @@
           }
         });
 
-        // Mouse Wheel Action: Scroll Down / Up (Default) or Zoom
-        let wheelMode = 'scroll';
-
-        function setWheelMode(mode) {
-          wheelMode = mode;
-          const isScroll = wheelMode === 'scroll';
-          const btnScroll = document.getElementById('btnWheelScroll');
-          const btnZoom = document.getElementById('btnWheelZoom');
-          if (btnScroll) btnScroll.classList.toggle('active', isScroll);
-          if (btnZoom) btnZoom.classList.toggle('active', !isScroll);
-          const hudToggle = document.getElementById('btnHudWheelToggle');
-          if (hudToggle) {
-            hudToggle.textContent = isScroll ? '↕️' : '🔍';
-            hudToggle.title = isScroll ? 'Wheel Mode: Scroll Down/Up (Click to switch to Zoom)' : 'Wheel Mode: Zoom (Click to switch to Scroll)';
-          }
-        }
-
-        const btnScrollEl = document.getElementById('btnWheelScroll');
-        if (btnScrollEl) btnScrollEl.addEventListener('click', () => setWheelMode('scroll'));
-        const btnZoomEl = document.getElementById('btnWheelZoom');
-        if (btnZoomEl) btnZoomEl.addEventListener('click', () => setWheelMode('zoom'));
-        const hudWheelToggle = document.getElementById('btnHudWheelToggle');
-        if (hudWheelToggle) hudWheelToggle.addEventListener('click', () => {
-          setWheelMode(wheelMode === 'scroll' ? 'zoom' : 'scroll');
-        });
-
-        // Mouse Wheel: Scrolls down smoothly by default, or zooms if holding Ctrl or in Zoom mode
+        // Mouse Wheel: Automatically scrolls down/up smoothly; holding Ctrl/Cmd allows zooming
         mapViewport.addEventListener('wheel', (e) => {
           e.preventDefault();
-          if (e.ctrlKey || e.metaKey || wheelMode === 'zoom') {
+          if (e.ctrlKey || e.metaKey) {
             const delta = e.deltaY > 0 ? -0.12 : 0.12;
             zoom(delta);
           } else {
