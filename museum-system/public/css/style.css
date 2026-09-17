@@ -6810,12 +6810,12 @@ table.ledger tr:hover td {
 }
 
 /* 11. Typography */
-h1:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *),
-h2:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *),
-h3:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *),
-h4:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *),
-h5:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *),
-h6:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *),
+h1:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *):not(footer *):not(#siteFooter *):not(.welcome-footer *):not(.site-footer *),
+h2:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *):not(footer *):not(#siteFooter *):not(.welcome-footer *):not(.site-footer *),
+h3:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *):not(footer *):not(#siteFooter *):not(.welcome-footer *):not(.site-footer *),
+h4:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *):not(footer *):not(#siteFooter *):not(.welcome-footer *):not(.site-footer *),
+h5:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *):not(footer *):not(#siteFooter *):not(.welcome-footer *):not(.site-footer *),
+h6:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *):not(footer *):not(#siteFooter *):not(.welcome-footer *):not(.site-footer *),
 .section-head h2,
 .content-card h2,
 .content-card h3,
@@ -6829,9 +6829,9 @@ h6:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-c
   text-shadow: none !important;
 }
 
-p:not(.gallery-item .caption *):not(.rating-item *):not(.info-card *):not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *),
-label:not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *),
-span:not(.btn):not(.tag):not(.badge):not(.dash-action-btn):not(.btn-submit):not(.admin-badge-pill):not(.yt-badge):not(.dash-kpi-badge):not(.filter-chip):not(.admin-sidebar-icon):not(.directions-floating-panel *):not(.dir-steps-list *):not(.dir-actions *):not(.gallery-item .caption *):not(.carousel-badge *):not(.rating-item *):not(.info-card *):not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *) {
+p:not(.gallery-item .caption *):not(.rating-item *):not(.info-card *):not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *):not(footer *):not(#siteFooter *):not(.welcome-footer *):not(.site-footer *),
+label:not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(footer *):not(#siteFooter *):not(.welcome-footer *):not(.site-footer *),
+span:not(.btn):not(.tag):not(.badge):not(.dash-action-btn):not(.btn-submit):not(.admin-badge-pill):not(.yt-badge):not(.dash-kpi-badge):not(.filter-chip):not(.admin-sidebar-icon):not(.directions-floating-panel *):not(.dir-steps-list *):not(.dir-actions *):not(.gallery-item .caption *):not(.carousel-badge *):not(.rating-item *):not(.info-card *):not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *):not(.page-hero *):not(.exhibits-hero *):not(.programs-hero *):not(.gallery-hero *):not(.events-hero *):not(footer *):not(#siteFooter *):not(.welcome-footer *):not(.site-footer *) {
   color: #000000 !important;
   text-shadow: none !important;
 }
@@ -7483,16 +7483,25 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22) !important;
 }
 
-/* 14. Footer (Pure White Text) */
+/* 14. Footer (Pure White Text & High Specificity) */
 #siteFooter,
 #siteFooter *,
+#siteFooter h1, #siteFooter h2, #siteFooter h3, #siteFooter h4, #siteFooter h5, #siteFooter h6,
+#siteFooter p, #siteFooter span, #siteFooter div, #siteFooter li, #siteFooter strong, #siteFooter a,
 .site-footer,
 .site-footer *,
+.site-footer h1, .site-footer h2, .site-footer h3, .site-footer h4, .site-footer h5, .site-footer h6,
+.site-footer p, .site-footer span, .site-footer div, .site-footer li, .site-footer strong, .site-footer a,
 .welcome-footer,
 .welcome-footer *,
+.welcome-footer h1, .welcome-footer h2, .welcome-footer h3, .welcome-footer h4, .welcome-footer h5, .welcome-footer h6,
+.welcome-footer p, .welcome-footer span, .welcome-footer div, .welcome-footer li, .welcome-footer strong, .welcome-footer a,
 footer,
-footer * {
+footer *,
+footer h1, footer h2, footer h3, footer h4, footer h5, footer h6,
+footer p, footer span, footer div, footer li, footer strong, footer a {
   color: #FFFFFF !important;
+  text-shadow: none !important;
 }
 
 #siteFooter,
@@ -7504,6 +7513,7 @@ footer {
 }
 
 #siteFooter a,
+.site-footer a,
 .welcome-footer a,
 footer a {
   color: #FFFFFF !important;
@@ -7511,6 +7521,7 @@ footer a {
 }
 
 #siteFooter a:hover,
+.site-footer a:hover,
 .welcome-footer a:hover,
 footer a:hover {
   color: #FFFFFF !important;

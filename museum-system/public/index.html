@@ -9,7 +9,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=43">
+  <link rel="stylesheet" href="/css/style.css?v=44">
   <style>
     :root {
       --navy: #0f172a;
@@ -1254,16 +1254,21 @@
       color: var(--blue-primary);
     }
 
-    /* ── Footer (Navy Background, All Pure White Text) ─────────────── */
+    /* ── Footer (Compact Navy Background, All Pure White Text) ─────── */
     #siteFooter,
     #siteFooter *,
+    #siteFooter h1, #siteFooter h2, #siteFooter h3, #siteFooter h4, #siteFooter h5, #siteFooter h6,
+    #siteFooter p, #siteFooter span, #siteFooter div, #siteFooter li, #siteFooter strong, #siteFooter a,
     #siteFooter.welcome-footer,
     #siteFooter.welcome-footer *,
     .welcome-footer,
     .welcome-footer *,
+    .welcome-footer h1, .welcome-footer h2, .welcome-footer h3, .welcome-footer h4, .welcome-footer h5, .welcome-footer h6,
+    .welcome-footer p, .welcome-footer span, .welcome-footer div, .welcome-footer li, .welcome-footer strong, .welcome-footer a,
     footer.welcome-footer,
     footer.welcome-footer * {
       color: #ffffff !important;
+      text-shadow: none !important;
     }
 
     #siteFooter,
@@ -1271,18 +1276,18 @@
     .welcome-footer,
     footer.welcome-footer {
       background: var(--navy, #0f172a) !important;
-      border-top: 2.5px solid rgba(255, 255, 255, 0.15) !important;
-      padding: 48px clamp(16px, 4vw, 48px) 32px !important;
-      font-size: 13.5px !important;
+      border-top: 1.5px solid rgba(255, 255, 255, 0.15) !important;
+      padding: 22px clamp(14px, 3vw, 32px) 14px !important;
+      font-size: 12.5px !important;
     }
 
     .footer-content {
       max-width: 1200px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 32px;
-      margin-bottom: 36px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px 24px;
+      margin-bottom: 14px;
     }
 
     .footer-col h4,
@@ -1290,10 +1295,10 @@
     .welcome-footer .footer-col h4 {
       font-family: 'Nunito', sans-serif;
       color: #ffffff !important;
-      font-size: 17px;
+      font-size: 14.5px;
       font-weight: 900;
-      margin: 0 0 14px;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+      margin: 0 0 6px !important;
+      text-shadow: none !important;
     }
 
     .footer-col p,
@@ -1302,10 +1307,11 @@
     #siteFooter .footer-col strong,
     .welcome-footer p,
     .welcome-footer strong {
-      margin: 0 0 10px;
-      line-height: 1.6;
+      margin: 0 0 4px !important;
+      line-height: 1.45 !important;
+      font-size: 12.5px !important;
       color: #ffffff !important;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+      text-shadow: none !important;
     }
 
     .footer-col ul {
@@ -1315,7 +1321,8 @@
     }
 
     .footer-col li {
-      margin-bottom: 8px;
+      margin-bottom: 4px !important;
+      font-size: 12.5px !important;
       color: #ffffff !important;
     }
 
@@ -1326,7 +1333,8 @@
       color: #ffffff !important;
       font-weight: 700 !important;
       text-decoration: none !important;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+      font-size: 12.5px !important;
+      text-shadow: none !important;
       transition: all 0.2s ease;
       display: inline-block;
     }
@@ -1338,7 +1346,7 @@
       color: #ffffff !important;
       text-decoration: underline !important;
       opacity: 0.88;
-      transform: translateX(3px);
+      transform: translateX(2px);
     }
 
     .footer-bottom,
@@ -1346,16 +1354,16 @@
     #siteFooter .footer-bottom {
       max-width: 1200px;
       margin: 0 auto;
-      padding-top: 24px;
-      border-top: 1.5px solid rgba(255, 255, 255, 0.15) !important;
+      padding-top: 12px !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 14px;
-      font-size: 12.5px;
+      gap: 10px;
+      font-size: 11.5px !important;
       color: #ffffff !important;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+      text-shadow: none !important;
     }
 
     .footer-bottom div,
@@ -2217,48 +2225,48 @@
 
   </main>
 
-  <!-- ── 10. Footer (Navy Background, All Pure White Text) ───── -->
-  <footer class="welcome-footer" id="siteFooter">
-    <div class="footer-content">
-      <div class="footer-col">
-        <h4>🏛️ Museo Sang Bata sa Negros</h4>
-        <p>A hands-on, interactive children's museum and alternative center for marine conservation education and
+  <!-- ── 10. Footer (Compact Navy Background, All Pure White Text) ───── -->
+  <footer class="welcome-footer" id="siteFooter" style="color:#ffffff !important;">
+    <div class="footer-content" style="color:#ffffff !important;">
+      <div class="footer-col" style="color:#ffffff !important;">
+        <h4 style="color:#ffffff !important;">🏛️ Museo Sang Bata sa Negros</h4>
+        <p style="color:#ffffff !important;">A hands-on, interactive children's museum and alternative center for marine conservation education and
           cultural heritage.</p>
-        <p>Member of SAMP Intercontinental Museum Network and West Visayan Association of Museums.</p>
+        <p style="color:#ffffff !important;">Member of SAMP Intercontinental Museum Network and West Visayan Association of Museums.</p>
       </div>
 
-      <div class="footer-col">
-        <h4>📍 Location &amp; Hours</h4>
-        <p><strong>Address:</strong><br>Barangay Old Sagay, Sagay City, Negros Occidental, Philippines 6122</p>
-        <p><strong>Operating Hours:</strong><br>Monday to Friday, 8:00 AM – 5:00 PM<br>(Weekends open for pre-booked
+      <div class="footer-col" style="color:#ffffff !important;">
+        <h4 style="color:#ffffff !important;">📍 Location &amp; Hours</h4>
+        <p style="color:#ffffff !important;"><strong style="color:#ffffff !important;">Address:</strong><br>Barangay Old Sagay, Sagay City, Negros Occidental, Philippines 6122</p>
+        <p style="color:#ffffff !important;"><strong style="color:#ffffff !important;">Operating Hours:</strong><br>Monday to Friday, 8:00 AM – 5:00 PM<br>(Weekends open for pre-booked
           tours)</p>
       </div>
 
-      <div class="footer-col">
-        <h4>🔗 Quick Navigation</h4>
-        <ul>
-          <li><a href="#aboutSection">About Museum</a></li>
-          <li><a href="#exhibitsSection">Featured Exhibits</a></li>
-          <li><a href="#programsSection">Signature Programs</a></li>
-          <li><a href="#gallerySection">Photo Gallery</a></li>
-          <li><a href="#eventsSection">Upcoming Events</a></li>
-          <li><a href="#checkinSection">Visitor Check-in</a></li>
+      <div class="footer-col" style="color:#ffffff !important;">
+        <h4 style="color:#ffffff !important;">🔗 Quick Navigation</h4>
+        <ul style="color:#ffffff !important;">
+          <li style="color:#ffffff !important;"><a href="#aboutSection" style="color:#ffffff !important;">About Museum</a></li>
+          <li style="color:#ffffff !important;"><a href="#exhibitsSection" style="color:#ffffff !important;">Featured Exhibits</a></li>
+          <li style="color:#ffffff !important;"><a href="#programsSection" style="color:#ffffff !important;">Signature Programs</a></li>
+          <li style="color:#ffffff !important;"><a href="#gallerySection" style="color:#ffffff !important;">Photo Gallery</a></li>
+          <li style="color:#ffffff !important;"><a href="#eventsSection" style="color:#ffffff !important;">Upcoming Events</a></li>
+          <li style="color:#ffffff !important;"><a href="#checkinSection" style="color:#ffffff !important;">Visitor Check-in</a></li>
         </ul>
       </div>
 
-      <div class="footer-col">
-        <h4>📞 Contact &amp; Support</h4>
-        <p><strong>Mobile:</strong> +63 917 798 7420</p>
-        <p><strong>Email:</strong> info@museosangbata.org</p>
-        <p style="margin-top:12px;">
-          <a href="/?tab=admin" style="color:#ffffff !important; font-weight:800; text-shadow:0 1px 2px rgba(0,0,0,0.3);">🔐 Staff Admin Sign-In &rarr;</a>
+      <div class="footer-col" style="color:#ffffff !important;">
+        <h4 style="color:#ffffff !important;">📞 Contact &amp; Support</h4>
+        <p style="color:#ffffff !important;"><strong style="color:#ffffff !important;">Mobile:</strong> +63 917 798 7420</p>
+        <p style="color:#ffffff !important;"><strong style="color:#ffffff !important;">Email:</strong> info@museosangbata.org</p>
+        <p style="margin-top:8px; color:#ffffff !important;">
+          <a href="/?tab=admin" style="color:#ffffff !important; font-weight:800; text-decoration:none;">🔐 Staff Admin Sign-In &rarr;</a>
         </p>
       </div>
     </div>
 
-    <div class="footer-bottom">
-      <div>&copy; 2003–2026 Museo Sang Bata sa Negros Foundation, Inc. All rights reserved.</div>
-      <div>Sagay Marine Reserve, Negros Occidental, Philippines</div>
+    <div class="footer-bottom" style="color:#ffffff !important;">
+      <div style="color:#ffffff !important;">&copy; 2003–2026 Museo Sang Bata sa Negros Foundation, Inc. All rights reserved.</div>
+      <div style="color:#ffffff !important;">Sagay Marine Reserve, Negros Occidental, Philippines</div>
     </div>
   </footer>
 
