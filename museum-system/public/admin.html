@@ -6,7 +6,7 @@
 <title>Admin — Museo Sang Bata sa Negros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=22">
+<link rel="stylesheet" href="/css/style.css?v=23">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   /* ── Dedicated Admin Navy Topbar ────────────────────────────── */
@@ -295,6 +295,90 @@
     color: #ffffff !important;
   }
 
+  /* ── 4 Operational Dashboard Cards: Solid Black Text ────────── */
+  .dash-quad-boxes-col,
+  .dash-panel-card,
+  .dash-panel-card h3,
+  .dash-panel-title,
+  .dash-panel-sub,
+  .dash-cat-list,
+  .dash-cat-row,
+  .dash-cat-row *,
+  .dash-cat-header,
+  .dash-cat-header *,
+  .dash-visitor-list,
+  .dash-visitor-row,
+  .dash-visitor-name,
+  .dash-visitor-time,
+  .dash-visitor-time *,
+  .dash-event-list,
+  .dash-event-row,
+  .dash-event-title,
+  .dash-event-sub,
+  .dash-event-day,
+  .dash-event-month,
+  .dash-panel-card p,
+  .dash-panel-card .status-badge,
+  .dash-quad-boxes-col p,
+  .dash-quad-boxes-col div:not(.dash-panel-action):not(.dash-panel-action *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.dash-cat-bar-fill):not(.dash-visitor-avatar):not(.dash-event-date-badge) {
+    color: #000000 !important;
+    text-shadow: none !important;
+  }
+  .dash-panel-title {
+    color: #000000 !important;
+    font-weight: 900 !important;
+  }
+  .dash-panel-sub {
+    color: #000000 !important;
+    font-weight: 600 !important;
+    opacity: 1 !important;
+  }
+  .dash-visitor-name {
+    color: #000000 !important;
+    font-weight: 800 !important;
+  }
+  .dash-visitor-time {
+    color: #000000 !important;
+    font-weight: 600 !important;
+    opacity: 1 !important;
+  }
+  .dash-visitor-time strong {
+    color: #000000 !important;
+    font-weight: 800 !important;
+  }
+  .dash-visitor-avatar.compact {
+    background: #e0f2fe !important;
+    border: 1.5px solid #bae6fd !important;
+    color: #000000 !important;
+    font-weight: 800 !important;
+  }
+  .dash-panel-card .status-badge {
+    color: #000000 !important;
+    background: #f1f5f9 !important;
+    border: 1px solid #cbd5e1 !important;
+    font-weight: 700 !important;
+  }
+  .dash-event-title {
+    color: #000000 !important;
+    font-weight: 800 !important;
+  }
+  .dash-event-sub {
+    color: #000000 !important;
+    font-weight: 600 !important;
+  }
+  .dash-event-day {
+    color: #000000 !important;
+    font-weight: 900 !important;
+  }
+  .dash-event-month {
+    color: #000000 !important;
+    font-weight: 800 !important;
+  }
+  .dash-event-date-badge.compact {
+    background: #ede9fe !important;
+    border: 1px solid #ddd6fe !important;
+  }
+
   /* Baby Blue Active Toggle in Pie Card & Links */
   .dash-pie-toggle-btn.active {
     background: #5ba4e6 !important;
@@ -375,7 +459,7 @@
   <script src="/js/lightbox.js"></script>
   <script src="/js/sidebar.js"></script>
   <script src="/js/carousel.js"></script>
-  <script src="/js/admin.js?v=25"></script>
+  <script src="/js/admin.js?v=26"></script>
   <script src="/js/footer.js"></script>
 </body>
 </html>

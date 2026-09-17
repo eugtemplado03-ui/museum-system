@@ -4855,8 +4855,8 @@ body.admin-portal-body {
 .dash-panel-title {
   font-family: 'Nunito', sans-serif;
   font-size: 13.5px;
-  font-weight: 800;
-  color: #ffffff;
+  font-weight: 900;
+  color: #000000 !important;
   margin: 0;
   display: flex;
   align-items: center;
@@ -4864,7 +4864,9 @@ body.admin-portal-body {
 }
 .dash-panel-sub {
   font-size: 10px;
-  color: #94a3b8;
+  color: #000000 !important;
+  font-weight: 600 !important;
+  opacity: 1 !important;
   margin-top: 1px;
 }
 .dash-panel-action {
@@ -4902,7 +4904,7 @@ body.admin-portal-body {
 .dash-cat-bar-bg.compact {
   height: 4px;
   border-radius: 2px;
-  background: rgba(255, 255, 255, 0.10);
+  background: rgba(0, 0, 0, 0.08);
   overflow: hidden;
 }
 
@@ -4922,19 +4924,19 @@ body.admin-portal-body {
   height: 24px;
   font-size: 9.5px;
   border-radius: 6px;
-  background: linear-gradient(135deg, rgba(0,240,255,0.25) 0%, rgba(16,185,129,0.3) 100%);
-  border: 1px solid rgba(0,240,255,0.3);
+  background: #e0f2fe !important;
+  border: 1px solid #bae6fd !important;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  color: #ffffff;
+  color: #000000 !important;
   flex-shrink: 0;
 }
 .dash-visitor-name.compact {
   font-size: 11px;
-  font-weight: 700;
-  color: #ffffff;
+  font-weight: 800;
+  color: #000000 !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -4942,7 +4944,8 @@ body.admin-portal-body {
 }
 .dash-visitor-time.compact {
   font-size: 9px;
-  color: #94a3b8;
+  color: #000000 !important;
+  font-weight: 600;
 }
 .status-badge.compact {
   font-size: 9px !important;
@@ -4966,8 +4969,8 @@ body.admin-portal-body {
   width: 28px;
   height: 28px;
   border-radius: 7px;
-  background: rgba(168, 85, 247, 0.2);
-  border: 1px solid rgba(168, 85, 247, 0.35);
+  background: #ede9fe !important;
+  border: 1px solid #ddd6fe !important;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -4977,19 +4980,19 @@ body.admin-portal-body {
 .dash-event-day.compact {
   font-size: 11px;
   font-weight: 900;
-  color: #ffffff;
+  color: #000000 !important;
   line-height: 1;
 }
 .dash-event-month.compact {
   font-size: 7.5px;
-  font-weight: 700;
-  color: #c084fc;
+  font-weight: 800;
+  color: #000000 !important;
   text-transform: uppercase;
 }
 .dash-event-title.compact {
   font-size: 11px;
-  font-weight: 700;
-  color: #ffffff;
+  font-weight: 800;
+  color: #000000 !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -4997,7 +5000,8 @@ body.admin-portal-body {
 }
 .dash-event-sub.compact {
   font-size: 9px;
-  color: #94a3b8;
+  color: #000000 !important;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5017,8 +5021,8 @@ body.admin-portal-body {
 .dash-panel-title {
   font-family: 'Nunito', sans-serif;
   font-size: 15px;
-  font-weight: 800;
-  color: #ffffff;
+  font-weight: 900;
+  color: #000000 !important;
   margin: 0;
   display: flex;
   align-items: center;
@@ -5026,7 +5030,9 @@ body.admin-portal-body {
 }
 .dash-panel-sub {
   font-size: 11px;
-  color: #94a3b8;
+  color: #000000 !important;
+  font-weight: 600 !important;
+  opacity: 1 !important;
   margin-top: 2px;
 }
 .dash-panel-action {

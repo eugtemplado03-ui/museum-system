@@ -557,8 +557,8 @@ async function renderDashboardHomeTab(contentEl){
             <div class="dash-panel-card compact">
               <div class="dash-panel-head">
                 <div>
-                  <h3 class="dash-panel-title">🏷️ Exhibits by Category</h3>
-                  <div class="dash-panel-sub">Collection distribution</div>
+                  <h3 class="dash-panel-title" style="color:#000000 !important; font-weight:900;">🏷️ Exhibits by Category</h3>
+                  <div class="dash-panel-sub" style="color:#000000 !important; font-weight:600; opacity:1;">Collection distribution</div>
                 </div>
                 <button type="button" class="dash-panel-action" data-tab="categories" style="border:none;">Rooms →</button>
               </div>
@@ -569,13 +569,13 @@ async function renderDashboardHomeTab(contentEl){
                   return `
                     <div class="dash-cat-row compact" data-tab="catalog" data-cat="${escapeHtml(cat)}" title="View ${count} exhibits in ${escapeHtml(cat)}">
                       <div class="dash-cat-header" style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="display:flex; align-items:center; gap:6px; font-size:11px; color:#f1f5f9; font-weight:700;">
-                          <span style="width:6px; height:6px; border-radius:50%; background:#00f0ff; box-shadow:0 0 5px #00f0ff; display:inline-block;"></span>
+                        <span style="display:flex; align-items:center; gap:6px; font-size:11.5px; color:#000000 !important; font-weight:800;">
+                          <span style="width:7px; height:7px; border-radius:50%; background:#0284c7; box-shadow:0 0 5px rgba(2,132,199,0.5); display:inline-block;"></span>
                           ${escapeHtml(cat)}
                         </span>
                         <span style="display:flex; align-items:center; gap:5px;">
-                          <span style="font-size:10px; color:#94a3b8;">${pct}%</span>
-                          <span style="background:rgba(0,240,255,0.18); border:1px solid rgba(0,240,255,0.35); color:#ffffff; font-size:10px; font-weight:800; padding:1px 6px; border-radius:999px;">${count}</span>
+                          <span style="font-size:10.5px; color:#000000 !important; font-weight:700;">${pct}%</span>
+                          <span style="background:#e0f2fe; border:1px solid #bae6fd; color:#000000 !important; font-size:10.5px; font-weight:800; padding:1px 7px; border-radius:999px;">${count}</span>
                         </span>
                       </div>
                       <div class="dash-cat-bar-bg compact">
@@ -583,7 +583,7 @@ async function renderDashboardHomeTab(contentEl){
                       </div>
                     </div>
                   `;
-                }).join('') : `<p style="color:#94a3b8; font-size:11px;">No categories configured.</p>`}
+                }).join('') : `<p style="color:#000000 !important; font-weight:600; font-size:11px;">No categories configured.</p>`}
               </div>
             </div>
 
@@ -591,8 +591,8 @@ async function renderDashboardHomeTab(contentEl){
             <div class="dash-panel-card compact">
               <div class="dash-panel-head">
                 <div>
-                  <h3 class="dash-panel-title">👥 Visitor Check-ins</h3>
-                  <div class="dash-panel-sub">Latest registered guests</div>
+                  <h3 class="dash-panel-title" style="color:#000000 !important; font-weight:900;">👥 Visitor Check-ins</h3>
+                  <div class="dash-panel-sub" style="color:#000000 !important; font-weight:600; opacity:1;">Latest registered guests</div>
                 </div>
                 <button type="button" class="dash-panel-action" data-tab="visitors" style="border:none;">Live Log →</button>
               </div>
@@ -601,19 +601,19 @@ async function renderDashboardHomeTab(contentEl){
                   const initials = (v.visitorName || 'V').split(' ').filter(Boolean).map(n=>n[0]).join('').substring(0,2).toUpperCase();
                   return `
                     <div class="dash-visitor-row compact">
-                      <div class="dash-visitor-avatar compact">${escapeHtml(initials)}</div>
+                      <div class="dash-visitor-avatar compact" style="background:#e0f2fe; border:1px solid #bae6fd; color:#000000 !important; font-weight:800;">${escapeHtml(initials)}</div>
                       <div style="flex:1; min-width:0;">
-                        <div class="dash-visitor-name compact">${escapeHtml(v.visitorName)}</div>
-                        <div class="dash-visitor-time compact">
-                          ${escapeHtml(v.visitDate || 'Today')}${v.visitTime ? ` · ${escapeHtml(v.visitTime)}` : ''} · <strong>${v.pax || 1} pax</strong>
+                        <div class="dash-visitor-name compact" style="color:#000000 !important; font-weight:800;">${escapeHtml(v.visitorName)}</div>
+                        <div class="dash-visitor-time compact" style="color:#000000 !important; font-weight:600;">
+                          ${escapeHtml(v.visitDate || 'Today')}${v.visitTime ? ` · ${escapeHtml(v.visitTime)}` : ''} · <strong style="color:#000000 !important; font-weight:800;">${v.pax || 1} pax</strong>
                         </div>
                       </div>
-                      <span class="status-badge compact ${(v.status || '').toLowerCase().replace(/[^a-z0-9]/g, '-') || 'active'}">
+                      <span class="status-badge compact ${(v.status || '').toLowerCase().replace(/[^a-z0-9]/g, '-') || 'active'}" style="color:#000000 !important; font-weight:700; background:#f1f5f9; border:1px solid #cbd5e1;">
                         ${escapeHtml(v.status || 'Checked-in')}
                       </span>
                     </div>
                   `;
-                }).join('') : `<p style="color:#94a3b8; font-size:11px;">No visitors logged.</p>`}
+                }).join('') : `<p style="color:#000000 !important; font-weight:600; font-size:11px;">No visitors logged.</p>`}
               </div>
             </div>
 
@@ -621,8 +621,8 @@ async function renderDashboardHomeTab(contentEl){
             <div class="dash-panel-card compact">
               <div class="dash-panel-head">
                 <div>
-                  <h3 class="dash-panel-title">📅 Museum Events</h3>
-                  <div class="dash-panel-sub">Workshops & exhibits</div>
+                  <h3 class="dash-panel-title" style="color:#000000 !important; font-weight:900;">📅 Museum Events</h3>
+                  <div class="dash-panel-sub" style="color:#000000 !important; font-weight:600; opacity:1;">Workshops & exhibits</div>
                 </div>
                 <button type="button" class="dash-panel-action" data-tab="events" style="border:none;">All →</button>
               </div>
@@ -633,18 +633,18 @@ async function renderDashboardHomeTab(contentEl){
                   const month = d && !isNaN(d.getTime()) ? d.toLocaleString('en-US', { month: 'short' }) : 'EVT';
                   return `
                     <div class="dash-event-row compact">
-                      <div class="dash-event-date-badge compact">
-                        <span class="dash-event-day compact">${day}</span>
-                        <span class="dash-event-month compact">${month}</span>
+                      <div class="dash-event-date-badge compact" style="background:#ede9fe; border:1px solid #ddd6fe;">
+                        <span class="dash-event-day compact" style="color:#000000 !important; font-weight:900;">${day}</span>
+                        <span class="dash-event-month compact" style="color:#000000 !important; font-weight:800;">${month}</span>
                       </div>
                       <div style="flex:1; min-width:0;">
-                        <div class="dash-event-title compact">${escapeHtml(e.title)}</div>
-                        <div class="dash-event-sub compact">📍 ${escapeHtml(e.location || 'Museo')} · ${escapeHtml(e.date || '')}</div>
+                        <div class="dash-event-title compact" style="color:#000000 !important; font-weight:800;">${escapeHtml(e.title)}</div>
+                        <div class="dash-event-sub compact" style="color:#000000 !important; font-weight:600;">📍 ${escapeHtml(e.location || 'Museo')} · ${escapeHtml(e.date || '')}</div>
                       </div>
                     </div>
                   `;
                 }).join('') : `
-                  <div style="padding:8px; text-align:center; color:#94a3b8; font-size:11px; background:rgba(0,42,54,0.4); border-radius:8px;">
+                  <div style="padding:10px 8px; text-align:center; color:#000000 !important; font-weight:700; font-size:11.5px; background:#f8fafc; border:1.5px dashed #cbd5e1; border-radius:8px;">
                     No upcoming events.
                   </div>
                 `}
@@ -655,8 +655,8 @@ async function renderDashboardHomeTab(contentEl){
             <div class="dash-panel-card compact">
               <div class="dash-panel-head">
                 <div>
-                  <h3 class="dash-panel-title">🖼️ Gallery Snapshot</h3>
-                  <div class="dash-panel-sub">Visual highlights</div>
+                  <h3 class="dash-panel-title" style="color:#000000 !important; font-weight:900;">🖼️ Gallery Snapshot</h3>
+                  <div class="dash-panel-sub" style="color:#000000 !important; font-weight:600; opacity:1;">Visual highlights</div>
                 </div>
                 <button type="button" class="dash-panel-action" data-tab="gallery" style="border:none;">Media →</button>
               </div>
@@ -666,8 +666,8 @@ async function renderDashboardHomeTab(contentEl){
                     const paths = Array.isArray(g.imagePaths) && g.imagePaths.length ? g.imagePaths : (g.imagePath ? [g.imagePath] : []);
                     const img = paths[0] || '';
                     return `
-                      <div class="home-gallery-mini-item compact" data-tab="gallery" style="border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.18); aspect-ratio:4/3; cursor:pointer;" title="${escapeHtml(g.title || 'Gallery Item')}">
-                        ${img ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(g.title || 'Gallery')}" loading="lazy" style="width:100%; height:100%; object-fit:cover; display:block;">` : `<div style="width:100%; height:100%; background:rgba(0,42,54,0.85); display:flex; align-items:center; justify-content:center; font-size:18px;">🖼️</div>`}
+                      <div class="home-gallery-mini-item compact" data-tab="gallery" style="border-radius:8px; overflow:hidden; border:1px solid rgba(0,0,0,0.12); aspect-ratio:4/3; cursor:pointer;" title="${escapeHtml(g.title || 'Gallery Item')}">
+                        ${img ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(g.title || 'Gallery')}" loading="lazy" style="width:100%; height:100%; object-fit:cover; display:block;">` : `<div style="width:100%; height:100%; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-size:18px;">🖼️</div>`}
                         <div class="home-gallery-mini-overlay">
                           <div class="home-gallery-mini-caption" style="font-size:9.5px;">${escapeHtml(g.title || g.caption || 'Museum')}</div>
                         </div>
@@ -675,7 +675,7 @@ async function renderDashboardHomeTab(contentEl){
                     `;
                   }).join('')}
                 </div>
-              ` : `<p style="color:#94a3b8; font-size:11px;">No gallery photos yet.</p>`}
+              ` : `<p style="color:#000000 !important; font-weight:600; font-size:11px;">No gallery photos yet.</p>`}
             </div>
           </div>
         </div>
