@@ -6,7 +6,7 @@
 <title>Home — Museo Sang Bata sa Negros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=32">
+<link rel="stylesheet" href="/css/style.css?v=33">
 <script src="/js/gate.js"></script>
 <style>
 /* ── Featured Video Section ── */
@@ -359,6 +359,160 @@
   background: #3B82F6 !important;
   color: #FFFFFF !important;
   font-weight: 800 !important;
+}
+
+/* ── Self-Guided Tour Scanner Card: Baby Blue Background, Pure White Text, Baby Blue Buttons ── */
+#scannerSection.scan-hero,
+.scan-hero {
+  background: #5ba4e6 !important;
+  background-image: linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.45) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 8px 32px rgba(91, 164, 230, 0.35), 0 2px 6px rgba(0, 0, 0, 0.05) !important;
+  color: #FFFFFF !important;
+}
+
+#scannerSection.scan-hero *,
+.scan-hero * {
+  color: #FFFFFF !important;
+}
+
+#scannerSection .eyebrow,
+.scan-hero .eyebrow {
+  color: #FFFFFF !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35) !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.22em !important;
+  text-transform: uppercase !important;
+}
+
+#scannerSection h1,
+.scan-hero h1 {
+  color: #FFFFFF !important;
+  font-weight: 900 !important;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+#scannerSection p,
+.scan-hero p {
+  color: #FFFFFF !important;
+  opacity: 0.98 !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25) !important;
+}
+
+#scannerSection .scanner-frame,
+.scan-hero .scanner-frame {
+  background: rgba(255, 255, 255, 0.16) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 2px solid rgba(255, 255, 255, 0.45) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12) !important;
+  color: #FFFFFF !important;
+}
+
+#scannerSection .viewport,
+.scan-hero .viewport {
+  background: rgba(255, 255, 255, 0.22) !important;
+  border: 2px solid rgba(255, 255, 255, 0.65) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 14px !important;
+}
+
+#scannerSection .viewport-placeholder,
+#scannerSection .viewport-placeholder *,
+.scan-hero .viewport-placeholder,
+.scan-hero .viewport-placeholder * {
+  color: #FFFFFF !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+  font-weight: 600 !important;
+}
+
+#scannerSection .viewport-placeholder strong,
+.scan-hero .viewport-placeholder strong {
+  color: #FFFFFF !important;
+  font-weight: 900 !important;
+}
+
+#scannerSection .corner,
+.scan-hero .corner {
+  border-color: #FFFFFF !important;
+}
+
+#scannerSection .scan-status,
+.scan-hero .scan-status {
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Baby Blue Buttons with Crisp White Text */
+#scannerSection .btn,
+#scannerSection .btn-primary,
+#scannerSection .btn-ghost,
+#scannerSection #openScannerBtn,
+#scannerSection .scan-cta a.btn,
+#scannerSection #manualGoBtn,
+#scannerSection #switchCameraBtn,
+#scannerSection #torchBtn,
+.scan-hero .btn,
+.scan-hero .btn-primary,
+.scan-hero .btn-ghost,
+.scan-hero #openScannerBtn,
+.scan-hero .scan-cta a.btn,
+.scan-hero #manualGoBtn,
+.scan-hero #switchCameraBtn,
+.scan-hero #torchBtn {
+  background: #5ba4e6 !important;
+  background-image: linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important;
+  color: #FFFFFF !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.65) !important;
+  border-radius: 10px !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+  transition: all 0.2s ease !important;
+}
+
+#scannerSection .btn:hover,
+#scannerSection .btn-primary:hover,
+#scannerSection .btn-ghost:hover,
+#scannerSection #openScannerBtn:hover,
+#scannerSection .scan-cta a.btn:hover,
+#scannerSection #manualGoBtn:hover,
+#scannerSection #switchCameraBtn:hover,
+#scannerSection #torchBtn:hover,
+.scan-hero .btn:hover,
+.scan-hero .btn-primary:hover,
+.scan-hero .btn-ghost:hover,
+.scan-hero #openScannerBtn:hover,
+.scan-hero .scan-cta a.btn:hover,
+.scan-hero #manualGoBtn:hover,
+.scan-hero #switchCameraBtn:hover,
+.scan-hero #torchBtn:hover {
+  background: #4696df !important;
+  background-image: linear-gradient(135deg, #4696df 0%, #3685ce 100%) !important;
+  color: #FFFFFF !important;
+  border-color: #FFFFFF !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.24) !important;
+}
+
+#scannerSection .manual-row input,
+.scan-hero .manual-row input {
+  background: #FFFFFF !important;
+  color: #0F172A !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.8) !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+}
+
+#scannerSection .manual-row input::placeholder,
+.scan-hero .manual-row input::placeholder {
+  color: #64748B !important;
+  opacity: 1 !important;
 }
 </style>
 </head>

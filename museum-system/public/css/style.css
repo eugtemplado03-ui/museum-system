@@ -232,14 +232,15 @@ main { padding: 32px clamp(16px, 4vw, 52px) 80px; }
   gap: 40px;
   align-items: center;
   padding: 44px clamp(20px, 4vw, 56px);
-  background: #ffffff;
-  border: 1.5px solid #dbeafe;
+  background: #5ba4e6;
+  background-image: linear-gradient(135deg, #5ba4e6 0%, #4696df 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
   border-radius: 20px;
   margin-bottom: 48px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 8px 32px rgba(91, 164, 230, 0.35), 0 2px 6px rgba(0, 0, 0, 0.05);
   position: relative;
   overflow: hidden;
-  color: #000000;
+  color: #FFFFFF;
 }
 .scan-hero::before {
   content: '';
@@ -6526,26 +6527,151 @@ main,
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18)) !important;
 }
 
-/* 7. Visitor Scanner Hero & Viewport */
-.scan-hero {
-  background: #FFFFFF !important;
-  border: 1.5px solid #DBEAFE !important;
-  border-radius: 16px !important;
-  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
-  color: #0F172A !important;
+/* 7. Visitor Scanner Hero & Viewport (Baby Blue with Crisp White Text & Baby Blue Buttons) */
+.scan-hero,
+#scannerSection {
+  background: #5ba4e6 !important;
+  background-image: linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.45) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 8px 32px rgba(91, 164, 230, 0.35), 0 2px 6px rgba(0, 0, 0, 0.05) !important;
+  color: #FFFFFF !important;
 }
 
-.scanner-frame,
+.scan-hero *,
+#scannerSection * {
+  color: #FFFFFF !important;
+}
+
+.scan-hero .eyebrow,
+#scannerSection .eyebrow {
+  color: #FFFFFF !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35) !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.22em !important;
+  text-transform: uppercase !important;
+}
+
+.scan-hero h1,
+#scannerSection h1 {
+  color: #FFFFFF !important;
+  font-weight: 900 !important;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+.scan-hero p,
+#scannerSection p {
+  color: #FFFFFF !important;
+  opacity: 0.98 !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25) !important;
+}
+
+.scanner-frame {
+  background: rgba(255, 255, 255, 0.16) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 2px solid rgba(255, 255, 255, 0.45) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12) !important;
+  color: #FFFFFF !important;
+}
+
 .viewport {
-  background: #F1F5F9 !important;
-  border: 2px solid #3B82F6 !important;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.12) !important;
+  background: rgba(255, 255, 255, 0.22) !important;
+  border: 2px solid rgba(255, 255, 255, 0.65) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 14px !important;
 }
 
-.scan-title,
-.scan-h2,
-.scan-instructions {
+.viewport-placeholder,
+.viewport-placeholder * {
+  color: #FFFFFF !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+  font-weight: 600 !important;
+}
+
+.viewport-placeholder strong {
+  color: #FFFFFF !important;
+  font-weight: 900 !important;
+}
+
+.corner {
+  border-color: #FFFFFF !important;
+}
+
+.scan-status {
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Baby Blue Buttons with White Text */
+.scan-hero .btn,
+.scan-hero .btn-primary,
+.scan-hero .btn-ghost,
+.scan-hero #openScannerBtn,
+.scan-hero .scan-cta a.btn,
+.scan-hero #manualGoBtn,
+.scan-hero #switchCameraBtn,
+.scan-hero #torchBtn,
+#scannerSection .btn,
+#scannerSection .btn-primary,
+#scannerSection .btn-ghost,
+#scannerSection #openScannerBtn,
+#scannerSection .scan-cta a.btn,
+#scannerSection #manualGoBtn,
+#scannerSection #switchCameraBtn,
+#scannerSection #torchBtn {
+  background: #5ba4e6 !important;
+  background-image: linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important;
+  color: #FFFFFF !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.65) !important;
+  border-radius: 10px !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+  transition: all 0.2s ease !important;
+}
+
+.scan-hero .btn:hover,
+.scan-hero .btn-primary:hover,
+.scan-hero .btn-ghost:hover,
+.scan-hero #openScannerBtn:hover,
+.scan-hero .scan-cta a.btn:hover,
+.scan-hero #manualGoBtn:hover,
+.scan-hero #switchCameraBtn:hover,
+.scan-hero #torchBtn:hover,
+#scannerSection .btn:hover,
+#scannerSection .btn-primary:hover,
+#scannerSection .btn-ghost:hover,
+#scannerSection #openScannerBtn:hover,
+#scannerSection .scan-cta a.btn:hover,
+#scannerSection #manualGoBtn:hover,
+#scannerSection #switchCameraBtn:hover,
+#scannerSection #torchBtn:hover {
+  background: #4696df !important;
+  background-image: linear-gradient(135deg, #4696df 0%, #3685ce 100%) !important;
+  color: #FFFFFF !important;
+  border-color: #FFFFFF !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.24) !important;
+}
+
+.scan-hero .manual-row input,
+#scannerSection .manual-row input {
+  background: #FFFFFF !important;
   color: #0F172A !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.8) !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+}
+
+.scan-hero .manual-row input::placeholder,
+#scannerSection .manual-row input::placeholder {
+  color: #64748B !important;
+  opacity: 1 !important;
 }
 
 /* 8. Search & Filters Toolbar */
@@ -6674,12 +6800,12 @@ table.ledger tr:hover td {
 }
 
 /* 11. Typography */
-h1:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *),
-h2:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *),
-h3:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *),
-h4:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *),
-h5:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *),
-h6:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *),
+h1:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *),
+h2:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *),
+h3:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *),
+h4:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *),
+h5:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *),
+h6:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *),
 .section-head h2,
 .content-card h2,
 .content-card h3,
@@ -6694,9 +6820,9 @@ h6:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-c
   text-shadow: none !important;
 }
 
-p:not(.gallery-item .caption *):not(.rating-item *):not(.info-card *):not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *),
-label:not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *),
-span:not(.btn):not(.tag):not(.badge):not(.dash-action-btn):not(.btn-submit):not(.admin-badge-pill):not(.yt-badge):not(.dash-kpi-badge):not(.filter-chip):not(.admin-sidebar-icon):not(.directions-floating-panel *):not(.dir-steps-list *):not(.dir-actions *):not(.gallery-item .caption *):not(.carousel-badge *):not(.rating-item *):not(.info-card *):not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *) {
+p:not(.gallery-item .caption *):not(.rating-item *):not(.info-card *):not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *),
+label:not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *),
+span:not(.btn):not(.tag):not(.badge):not(.dash-action-btn):not(.btn-submit):not(.admin-badge-pill):not(.yt-badge):not(.dash-kpi-badge):not(.filter-chip):not(.admin-sidebar-icon):not(.directions-floating-panel *):not(.dir-steps-list *):not(.dir-actions *):not(.gallery-item .caption *):not(.carousel-badge *):not(.rating-item *):not(.info-card *):not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *) {
   color: #000000 !important;
   text-shadow: none !important;
 }
