@@ -6,7 +6,7 @@
 <title>Admin — Museo Sang Bata sa Negros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=24">
+<link rel="stylesheet" href="/css/style.css?v=25">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   /* ── Dedicated Admin Navy Topbar ────────────────────────────── */
@@ -303,29 +303,104 @@
     font-weight: 800 !important;
   }
 
-  /* Form controls, inputs, dropdowns in admin display */
+  /* Form controls, inputs, textareas, dropdowns in admin display (Baby Blue Background & Black Text) */
   .admin-main input:not([type="submit"]):not([type="button"]):not([type="reset"]),
   .admin-main select,
   .admin-main textarea,
-  .admin-main option,
   .modal-box input:not([type="submit"]):not([type="button"]):not([type="reset"]),
   .modal-box select,
   .modal-box textarea,
-  .modal-box option,
+  .form-field input,
+  .form-field select,
+  .form-field textarea,
   .admin-search-input,
   .filter-select {
     color: #000000 !important;
-    background: #FFFFFF !important;
-    border: 1.5px solid #CBD5E1 !important;
+    background: #f0f9ff !important;
+    border: 1.5px solid #93c5fd !important;
+    border-radius: 10px !important;
     text-shadow: none !important;
     font-weight: 600 !important;
+  }
+  .admin-main input:focus,
+  .admin-main select:focus,
+  .admin-main textarea:focus,
+  .modal-box input:focus,
+  .modal-box select:focus,
+  .modal-box textarea:focus,
+  .form-field input:focus,
+  .form-field select:focus,
+  .form-field textarea:focus {
+    background: #ffffff !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22) !important;
+    color: #000000 !important;
   }
   .admin-main input::placeholder,
   .admin-main textarea::placeholder,
   .modal-box input::placeholder,
-  .modal-box textarea::placeholder {
-    color: #64748B !important;
+  .modal-box textarea::placeholder,
+  .form-field input::placeholder,
+  .form-field textarea::placeholder {
+    color: #334155 !important;
+    font-weight: 500 !important;
+    opacity: 0.85 !important;
+  }
+  .admin-main option,
+  .modal-box option,
+  select option {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* File Dropzones in Baby Blue with Bold Black Text */
+  .file-drop {
+    background: #e0f2fe !important;
+    border: 2px dashed #5ba4e6 !important;
+    color: #000000 !important;
+    font-weight: 700 !important;
+    border-radius: 12px !important;
+    padding: 22px !important;
+    text-align: center !important;
+    transition: all 0.15s ease !important;
+  }
+  .file-drop:hover,
+  .file-drop.dragover {
+    background: #bae6fd !important;
+    border-color: #2563eb !important;
+    color: #000000 !important;
+  }
+
+  /* Visible text for hints, empty states, and status notices */
+  .file-hint,
+  .form-hint,
+  .image-preview-empty,
+  [id$="UploadStatus"],
+  [id$="Status"] {
+    color: #000000 !important;
+    font-weight: 600 !important;
     opacity: 1 !important;
+  }
+
+  /* Floor Plan Picker Section in Soft Baby Blue with Black Text */
+  .floor-picker-section {
+    background: #f0f9ff !important;
+    border: 1.5px solid #bae6fd !important;
+    border-radius: 14px !important;
+    color: #000000 !important;
+  }
+  .floor-picker-title,
+  .floor-picker-title *,
+  .floor-picker-legend,
+  .floor-picker-legend *,
+  .pin-coords-badge,
+  .pin-coords-badge * {
+    color: #000000 !important;
+    text-shadow: none !important;
+  }
+  .pin-coords-badge {
+    background: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
   }
 
   /* Tables & Ledgers in admin display */
@@ -576,7 +651,7 @@
   <script src="/js/lightbox.js"></script>
   <script src="/js/sidebar.js"></script>
   <script src="/js/carousel.js"></script>
-  <script src="/js/admin.js?v=27"></script>
+  <script src="/js/admin.js?v=28"></script>
   <script src="/js/footer.js"></script>
 </body>
 </html>
