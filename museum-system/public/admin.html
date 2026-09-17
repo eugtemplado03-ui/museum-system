@@ -6,7 +6,7 @@
 <title>Admin — Museo Sang Bata sa Negros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=27">
+<link rel="stylesheet" href="/css/style.css?v=28">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   /* ── Dedicated Admin Navy Topbar ────────────────────────────── */
@@ -215,13 +215,13 @@
 
   /* Admin Display Container & All Text Elements */
   .admin-main,
-  .admin-main *:not(.admin-topbar):not(.admin-topbar *):not(.btn-primary):not(.btn-primary *):not(.dash-action-btn):not(.dash-action-btn *):not(.dash-panel-action):not(.dash-panel-action *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *):not(.dash-pie-toggle-btn.active):not(.dash-pie-toggle-btn.active *):not(.filter-chip.active):not(.filter-chip.active *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.dash-cat-bar-fill):not(.sidebar-badge):not(.sidebar-badge *),
+  .admin-main *:not(.admin-topbar):not(.admin-topbar *):not(.btn-primary):not(.btn-primary *):not(.dash-action-btn):not(.dash-action-btn *):not(.dash-panel-action):not(.dash-panel-action *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *):not(.dash-pie-toggle-btn.active):not(.dash-pie-toggle-btn.active *):not(.filter-chip.active):not(.filter-chip.active *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.gallery-item .caption):not(.gallery-item .caption *):not(.carousel-badge):not(.carousel-badge *):not(.dash-cat-bar-fill):not(.sidebar-badge):not(.sidebar-badge *),
   .admin-content,
-  .admin-content *:not(.btn-primary):not(.btn-primary *):not(.dash-action-btn):not(.dash-action-btn *):not(.dash-panel-action):not(.dash-panel-action *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *):not(.filter-chip.active):not(.filter-chip.active *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.dash-cat-bar-fill),
+  .admin-content *:not(.btn-primary):not(.btn-primary *):not(.dash-action-btn):not(.dash-action-btn *):not(.dash-panel-action):not(.dash-panel-action *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *):not(.filter-chip.active):not(.filter-chip.active *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.gallery-item .caption):not(.gallery-item .caption *):not(.carousel-badge):not(.carousel-badge *):not(.dash-cat-bar-fill),
   #tabContent,
-  #tabContent *:not(.btn-primary):not(.btn-primary *):not(.dash-action-btn):not(.dash-action-btn *):not(.dash-panel-action):not(.dash-panel-action *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *):not(.filter-chip.active):not(.filter-chip.active *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.dash-cat-bar-fill),
+  #tabContent *:not(.btn-primary):not(.btn-primary *):not(.dash-action-btn):not(.dash-action-btn *):not(.dash-panel-action):not(.dash-panel-action *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *):not(.filter-chip.active):not(.filter-chip.active *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.gallery-item .caption):not(.gallery-item .caption *):not(.carousel-badge):not(.carousel-badge *):not(.dash-cat-bar-fill),
   .dash-wrapper,
-  .dash-wrapper *:not(.btn-primary):not(.btn-primary *):not(.dash-action-btn):not(.dash-action-btn *):not(.dash-panel-action):not(.dash-panel-action *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *):not(.dash-pie-toggle-btn.active):not(.dash-pie-toggle-btn.active *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.dash-cat-bar-fill),
+  .dash-wrapper *:not(.btn-primary):not(.btn-primary *):not(.dash-action-btn):not(.dash-action-btn *):not(.dash-panel-action):not(.dash-panel-action *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *):not(.dash-pie-toggle-btn.active):not(.dash-pie-toggle-btn.active *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.gallery-item .caption):not(.gallery-item .caption *):not(.carousel-badge):not(.carousel-badge *):not(.dash-cat-bar-fill),
   .modal-overlay .modal,
   .modal-overlay .modal *:not(.btn-primary):not(.btn-primary *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *),
   .modal-overlay .modal-box,
@@ -241,16 +241,16 @@
   .admin-main h4,
   .admin-main h5,
   .admin-main h6,
-  .admin-main p,
+  .admin-main p:not(.gallery-item .caption *),
   .admin-main label,
-  .admin-main span:not(.btn-primary *):not(.dash-action-btn *):not(.dash-panel-action *):not(.btn-submit *):not(.btn-danger *):not(.btn-delete *):not(.filter-chip.active *):not(.admin-topbar *),
+  .admin-main span:not(.btn-primary *):not(.dash-action-btn *):not(.dash-panel-action *):not(.btn-submit *):not(.btn-danger *):not(.btn-delete *):not(.filter-chip.active *):not(.admin-topbar *):not(.gallery-item .caption *):not(.carousel-badge *),
   .admin-main td,
   .admin-main th,
   .admin-main li,
   .admin-main dt,
   .admin-main dd,
-  .admin-main strong,
-  .admin-main b,
+  .admin-main strong:not(.gallery-item .caption *),
+  .admin-main b:not(.gallery-item .caption *),
   .admin-main em,
   .admin-main i,
   .admin-main small,
@@ -741,7 +741,46 @@
   .kpi-stat-icon.orange { background: #FFF7ED !important; border-color: #FFEDD5 !important; }
   .kpi-stat-icon.green { background: #F0FDF4 !important; border-color: #DCFCE7 !important; }
   .kpi-stat-icon.purple { background: #FAF5FF !important; border-color: #F3E8FF !important; }
-  .kpi-stat-icon.red { background: #FEF2F2 !important; border-color: #FEE2E2 !important; }
+  /* ── Gallery Card Overlays: High-contrast Crisp White Text ── */
+  .gallery-item .caption,
+  .gallery-item .caption *,
+  .gallery-item .caption b,
+  .gallery-item .caption span,
+  .gallery-item .caption p,
+  .carousel-badge,
+  .carousel-badge * {
+    color: #FFFFFF !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85), 0 2px 8px rgba(0, 0, 0, 0.6) !important;
+  }
+  .gallery-item .caption {
+    background: linear-gradient(0deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.75) 50%, rgba(15, 23, 42, 0.3) 80%, transparent 100%) !important;
+    padding: 38px 14px 14px !important;
+  }
+  .gallery-item .caption b {
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
+    font-size: 15px !important;
+    display: block !important;
+    margin-bottom: 3px !important;
+    line-height: 1.3 !important;
+  }
+  .gallery-item .caption span {
+    color: rgba(255, 255, 255, 0.95) !important;
+    font-weight: 500 !important;
+    font-size: 12.5px !important;
+    line-height: 1.35 !important;
+    display: block !important;
+  }
+  .gallery-item .caption .btn-ghost {
+    color: #FFFFFF !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    font-weight: 700 !important;
+  }
+  .gallery-item .caption .btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.35) !important;
+    color: #FFFFFF !important;
+  }
 
   /* Baby Blue Action Buttons with Crisp White Text */
   .btn-primary,
@@ -872,7 +911,7 @@
   <script src="/js/lightbox.js"></script>
   <script src="/js/sidebar.js"></script>
   <script src="/js/carousel.js"></script>
-  <script src="/js/admin.js?v=30"></script>
+  <script src="/js/admin.js?v=31"></script>
   <script src="/js/footer.js"></script>
 </body>
 </html>
