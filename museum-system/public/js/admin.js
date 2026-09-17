@@ -274,12 +274,12 @@ async function renderDashboard(){
       <!-- Main Content Container -->
       <div class="admin-main">
         ${activeTab !== 'dashboard' ? `
-          <header class="admin-topbar">
+          <header class="admin-topbar" style="background:#5ba4e6 !important; background-image:linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important; border-bottom:1.5px solid rgba(255,255,255,0.35) !important; box-shadow:0 4px 18px rgba(91,164,230,0.28) !important; color:#ffffff !important;">
             <div class="admin-topbar-left">
-              <div class="admin-topbar-icon">${activeItem.icon}</div>
+              <div class="admin-topbar-icon" style="font-size:34px; line-height:1; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.18));">${activeItem.icon}</div>
               <div>
-                <h1 class="admin-topbar-title">${activeItem.label}</h1>
-                <p class="admin-topbar-sub">Manage ${activeItem.label.toLowerCase()} content</p>
+                <h1 class="admin-topbar-title" style="color:#ffffff !important; font-weight:800 !important; text-shadow:0 1px 3px rgba(0,0,0,0.25) !important; margin:0; line-height:1.15;">${activeItem.label}</h1>
+                <p class="admin-topbar-sub" style="color:#ffffff !important; opacity:0.95 !important; font-weight:600 !important; text-shadow:0 1px 2px rgba(0,0,0,0.2) !important; margin:3px 0 0;">Manage ${activeItem.label.toLowerCase()} content</p>
               </div>
             </div>
           </header>

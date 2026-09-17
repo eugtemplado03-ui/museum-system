@@ -974,18 +974,22 @@ main { padding: 32px clamp(16px, 4vw, 52px) 80px; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 24px 36px 20px;
-  background: rgba(6, 28, 38, 0.85);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1.5px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  padding: 22px 36px 18px;
+  background: #5ba4e6;
+  background-image: linear-gradient(135deg, #5ba4e6 0%, #4696df 100%);
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 18px rgba(91, 164, 230, 0.28);
   position: sticky;
   top: 56px;
   z-index: 10;
+  color: #ffffff;
 }
 .admin-topbar-left { display: flex; align-items: center; gap: 18px; }
-.admin-topbar-icon { font-size: 34px; line-height: 1; }
+.admin-topbar-icon {
+  font-size: 34px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18));
+}
 .admin-topbar-title {
   font-family: 'Nunito', sans-serif;
   font-size: 26px;
@@ -993,13 +997,16 @@ main { padding: 32px clamp(16px, 4vw, 52px) 80px; }
   color: #ffffff;
   margin: 0;
   line-height: 1.15;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 .admin-topbar-sub {
   font-size: 14px;
-  color: #cbd5e1;
+  color: #ffffff;
+  opacity: 0.95;
+  font-weight: 600;
   margin: 0;
   margin-top: 3px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .admin-content { padding: 32px 36px 48px; flex: 1; font-size: 15px; }
@@ -6242,6 +6249,36 @@ main,
   background: #EFF6FF !important;
   border: 1px solid #DBEAFE !important;
   color: #3B82F6 !important;
+}
+
+/* 6b. Admin Section Topbar: Baby Blue Background & Crisp White Text */
+.admin-topbar,
+.admin-topbar * {
+  color: #FFFFFF !important;
+}
+
+.admin-topbar {
+  background: #5ba4e6 !important;
+  background-image: linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+  box-shadow: 0 4px 18px rgba(91, 164, 230, 0.28) !important;
+}
+
+.admin-topbar-title {
+  color: #FFFFFF !important;
+  font-weight: 800 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25) !important;
+}
+
+.admin-topbar-sub {
+  color: #FFFFFF !important;
+  opacity: 0.95 !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+.admin-topbar-icon {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18)) !important;
 }
 
 /* 7. Visitor Scanner Hero & Viewport */
