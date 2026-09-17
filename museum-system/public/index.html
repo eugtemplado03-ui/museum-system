@@ -12,6 +12,8 @@
   <link rel="stylesheet" href="/css/style.css">
   <style>
     :root {
+      --navy: #0f172a;
+      --navy-surface: #1e293b;
       --baby-blue: #5ba4e6;
       --baby-blue-dark: #3b93dc;
       --blue-primary: #3b82f6;
@@ -55,7 +57,7 @@
       scroll-margin-top: 90px;
     }
 
-    /* ── Top Navigation Bar (Baby Blue Background) ─────────────────── */
+    /* ── Top Navigation Bar (Navy Background) ──────────────────────── */
     header.welcome-nav,
     header.welcome-nav.nav-scrolled,
     .welcome-nav,
@@ -65,16 +67,16 @@
       left: 0;
       right: 0;
       height: 68px;
-      background: var(--baby-blue, #5ba4e6) !important;
-      border-bottom: 2px solid rgba(255, 255, 255, 0.35) !important;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      background: var(--navy, #0f172a) !important;
+      border-bottom: 1.5px solid rgba(255, 255, 255, 0.12) !important;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 clamp(16px, 4vw, 48px);
       z-index: 1000;
-      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.12) !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
       transition: all 0.3s ease;
     }
 
@@ -1252,13 +1254,13 @@
       color: var(--blue-primary);
     }
 
-    /* ── Footer (Baby Blue Background, White Text) ─────────────────── */
+    /* ── Footer (Navy Background, White Text) ──────────────────────── */
     #siteFooter,
     #siteFooter.welcome-footer,
     .welcome-footer,
     footer.welcome-footer {
-      background: var(--baby-blue, #5ba4e6) !important;
-      border-top: 2.5px solid rgba(255, 255, 255, 0.35) !important;
+      background: var(--navy, #0f172a) !important;
+      border-top: 2.5px solid rgba(255, 255, 255, 0.12) !important;
       padding: 48px clamp(16px, 4vw, 48px) 32px !important;
       color: #ffffff !important;
       font-size: 13.5px !important;
@@ -1322,7 +1324,7 @@
     #siteFooter.welcome-footer a:hover,
     .welcome-footer a:hover,
     .footer-col a:hover {
-      color: #ffffff !important;
+      color: #60a5fa !important;
       text-decoration: underline !important;
       transform: translateX(3px);
     }
@@ -1333,7 +1335,7 @@
       max-width: 1200px;
       margin: 0 auto;
       padding-top: 24px;
-      border-top: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+      border-top: 1.5px solid rgba(255, 255, 255, 0.12) !important;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -1358,11 +1360,11 @@
         top: 68px;
         left: 0;
         right: 0;
-        background: var(--baby-blue, #5ba4e6) !important;
+        background: var(--navy, #0f172a) !important;
         flex-direction: column;
         padding: 18px 24px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        border-bottom: 2px solid rgba(255, 255, 255, 0.35);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        border-bottom: 2px solid rgba(255, 255, 255, 0.15);
       }
 
       .welcome-menu.open {
