@@ -9,7 +9,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=42">
+  <link rel="stylesheet" href="/css/style.css?v=43">
   <style>
     :root {
       --navy: #0f172a;
@@ -1254,15 +1254,25 @@
       color: var(--blue-primary);
     }
 
-    /* ── Footer (Navy Background, White Text) ──────────────────────── */
+    /* ── Footer (Navy Background, All Pure White Text) ─────────────── */
+    #siteFooter,
+    #siteFooter *,
+    #siteFooter.welcome-footer,
+    #siteFooter.welcome-footer *,
+    .welcome-footer,
+    .welcome-footer *,
+    footer.welcome-footer,
+    footer.welcome-footer * {
+      color: #ffffff !important;
+    }
+
     #siteFooter,
     #siteFooter.welcome-footer,
     .welcome-footer,
     footer.welcome-footer {
       background: var(--navy, #0f172a) !important;
-      border-top: 2.5px solid rgba(255, 255, 255, 0.12) !important;
+      border-top: 2.5px solid rgba(255, 255, 255, 0.15) !important;
       padding: 48px clamp(16px, 4vw, 48px) 32px !important;
-      color: #ffffff !important;
       font-size: 13.5px !important;
     }
 
@@ -1306,6 +1316,7 @@
 
     .footer-col li {
       margin-bottom: 8px;
+      color: #ffffff !important;
     }
 
     #siteFooter a,
@@ -1324,8 +1335,9 @@
     #siteFooter.welcome-footer a:hover,
     .welcome-footer a:hover,
     .footer-col a:hover {
-      color: #60a5fa !important;
+      color: #ffffff !important;
       text-decoration: underline !important;
+      opacity: 0.88;
       transform: translateX(3px);
     }
 
@@ -1335,21 +1347,21 @@
       max-width: 1200px;
       margin: 0 auto;
       padding-top: 24px;
-      border-top: 1.5px solid rgba(255, 255, 255, 0.12) !important;
+      border-top: 1.5px solid rgba(255, 255, 255, 0.15) !important;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 14px;
       font-size: 12.5px;
-      color: rgba(255, 255, 255, 0.95) !important;
+      color: #ffffff !important;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
     }
 
     .footer-bottom div,
     .welcome-footer .footer-bottom div,
     #siteFooter .footer-bottom div {
-      color: rgba(255, 255, 255, 0.95) !important;
+      color: #ffffff !important;
     }
 
     /* ── Responsive ────────────────────────────────────────────────── */
@@ -2205,7 +2217,7 @@
 
   </main>
 
-  <!-- ── 10. Footer (Blue & White, Black Text) ──────────────────── -->
+  <!-- ── 10. Footer (Navy Background, All Pure White Text) ───── -->
   <footer class="welcome-footer" id="siteFooter">
     <div class="footer-content">
       <div class="footer-col">

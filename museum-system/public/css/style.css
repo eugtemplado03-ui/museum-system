@@ -7483,20 +7483,39 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22) !important;
 }
 
-/* 14. Footer */
+/* 14. Footer (Pure White Text) */
+#siteFooter,
+#siteFooter *,
+.site-footer,
+.site-footer *,
+.welcome-footer,
+.welcome-footer *,
+footer,
+footer * {
+  color: #FFFFFF !important;
+}
+
 #siteFooter,
 .site-footer,
 .welcome-footer,
 footer {
   background: #0F172A !important;
   border-top: 1px solid #1E293B !important;
-  color: #94A3B8 !important;
 }
 
 #siteFooter a,
 .welcome-footer a,
 footer a {
-  color: #3B82F6 !important;
+  color: #FFFFFF !important;
+  text-decoration: none !important;
+}
+
+#siteFooter a:hover,
+.welcome-footer a:hover,
+footer a:hover {
+  color: #FFFFFF !important;
+  text-decoration: underline !important;
+  opacity: 0.88;
 }
 
 /* 15. Admin Public Dock & Banner */
