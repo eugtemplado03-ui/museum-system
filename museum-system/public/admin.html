@@ -6,7 +6,7 @@
 <title>Admin — Museo Sang Bata sa Negros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=23">
+<link rel="stylesheet" href="/css/style.css?v=24">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   /* ── Dedicated Admin Navy Topbar ────────────────────────────── */
@@ -200,17 +200,56 @@
     color: #FFFFFF !important;
   }
 
-  /* ── Dashboard Executive Section: Hard Black Text & Baby Blue Buttons ── */
-  .dash-wrapper {
+  /* ── Universal Admin Display: Make ALL Text Black (#000000) Across Entire Portal ── */
+  body.admin-portal-body {
+    --ink: #000000 !important;
+    --ink-soft: #000000 !important;
+    --ink-strong: #000000 !important;
+    --grey-400: #000000 !important;
+    --grey-500: #000000 !important;
+    --grey-600: #000000 !important;
+    --grey-700: #000000 !important;
+    --grey-800: #000000 !important;
     color: #000000 !important;
   }
-  .dash-wrapper p,
-  .dash-wrapper span:not(.dash-action-btn *):not(.dash-pie-toggle-btn.active *):not(.dash-panel-action *):not(.btn *):not(.badge):not(.tag),
-  .dash-wrapper label,
-  .dash-wrapper h1,
-  .dash-wrapper h2,
-  .dash-wrapper h3,
-  .dash-wrapper h4,
+
+  /* Admin Display Container & All Text Elements */
+  .admin-main,
+  .admin-main *:not(.admin-topbar):not(.admin-topbar *):not(.btn-primary):not(.btn-primary *):not(.dash-action-btn):not(.dash-action-btn *):not(.dash-panel-action):not(.dash-panel-action *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *):not(.dash-pie-toggle-btn.active):not(.dash-pie-toggle-btn.active *):not(.filter-chip.active):not(.filter-chip.active *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.dash-cat-bar-fill):not(.sidebar-badge):not(.sidebar-badge *),
+  .admin-content,
+  .admin-content *:not(.btn-primary):not(.btn-primary *):not(.dash-action-btn):not(.dash-action-btn *):not(.dash-panel-action):not(.dash-panel-action *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *):not(.filter-chip.active):not(.filter-chip.active *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.dash-cat-bar-fill),
+  #tabContent,
+  #tabContent *:not(.btn-primary):not(.btn-primary *):not(.dash-action-btn):not(.dash-action-btn *):not(.dash-panel-action):not(.dash-panel-action *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *):not(.filter-chip.active):not(.filter-chip.active *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.dash-cat-bar-fill),
+  .dash-wrapper,
+  .dash-wrapper *:not(.btn-primary):not(.btn-primary *):not(.dash-action-btn):not(.dash-action-btn *):not(.dash-panel-action):not(.dash-panel-action *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *):not(.dash-pie-toggle-btn.active):not(.dash-pie-toggle-btn.active *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.dash-cat-bar-fill),
+  .modal-overlay .modal-box,
+  .modal-overlay .modal-box *:not(.btn-primary):not(.btn-primary *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *),
+  .admin-modal-card,
+  .admin-modal-card *:not(.btn-primary):not(.btn-primary *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *) {
+    color: #000000 !important;
+    text-shadow: none !important;
+  }
+
+  /* Specific typography rules in admin display */
+  .admin-main h1:not(.admin-topbar *),
+  .admin-main h2,
+  .admin-main h3,
+  .admin-main h4,
+  .admin-main h5,
+  .admin-main h6,
+  .admin-main p,
+  .admin-main label,
+  .admin-main span:not(.btn-primary *):not(.dash-action-btn *):not(.dash-panel-action *):not(.btn-submit *):not(.btn-danger *):not(.btn-delete *):not(.filter-chip.active *):not(.admin-topbar *),
+  .admin-main td,
+  .admin-main th,
+  .admin-main li,
+  .admin-main dt,
+  .admin-main dd,
+  .admin-main strong,
+  .admin-main b,
+  .admin-main em,
+  .admin-main i,
+  .admin-main small,
   .dash-hero-title,
   .dash-hero-sub,
   .dash-hero-eyebrow,
@@ -231,43 +270,191 @@
   .dash-analytics-sub,
   .dash-metric-num,
   .dash-metric-lbl,
-  .dash-metric-sub {
+  .dash-metric-sub,
+  .dash-panel-title,
+  .dash-panel-sub,
+  .dash-visitor-name,
+  .dash-visitor-time,
+  .dash-visitor-time *,
+  .dash-event-title,
+  .dash-event-sub,
+  .dash-event-day,
+  .dash-event-month {
     color: #000000 !important;
     text-shadow: none !important;
   }
-  .dash-hero-title {
+
+  .dash-hero-title,
+  .dash-group-title,
+  .dash-panel-title,
+  .dash-event-day {
     font-weight: 900 !important;
   }
-  .dash-hero-sub {
+  .dash-hero-sub,
+  .dash-panel-sub,
+  .dash-visitor-time,
+  .dash-event-sub {
     font-weight: 600 !important;
     opacity: 1 !important;
   }
-  .dash-hero-eyebrow {
-    background: rgba(91, 164, 230, 0.15) !important;
-    border: 1px solid rgba(91, 164, 230, 0.35) !important;
+  .dash-visitor-name,
+  .dash-event-title,
+  .dash-event-month {
+    font-weight: 800 !important;
+  }
+
+  /* Form controls, inputs, dropdowns in admin display */
+  .admin-main input:not([type="submit"]):not([type="button"]):not([type="reset"]),
+  .admin-main select,
+  .admin-main textarea,
+  .admin-main option,
+  .modal-box input:not([type="submit"]):not([type="button"]):not([type="reset"]),
+  .modal-box select,
+  .modal-box textarea,
+  .modal-box option,
+  .admin-search-input,
+  .filter-select {
     color: #000000 !important;
-    font-weight: 800 !important;
-  }
-  .dash-group-title {
-    font-weight: 900 !important;
-  }
-  .dash-kpi-val {
-    font-weight: 900 !important;
-  }
-  .dash-kpi-lbl {
-    font-weight: 800 !important;
-  }
-  .dash-kpi-sub {
+    background: #FFFFFF !important;
+    border: 1.5px solid #CBD5E1 !important;
+    text-shadow: none !important;
     font-weight: 600 !important;
+  }
+  .admin-main input::placeholder,
+  .admin-main textarea::placeholder,
+  .modal-box input::placeholder,
+  .modal-box textarea::placeholder {
+    color: #64748B !important;
     opacity: 1 !important;
   }
 
-  /* Baby Blue Buttons in Dashboard Section */
+  /* Tables & Ledgers in admin display */
+  table.ledger,
+  table.ledger th,
+  table.ledger th *,
+  table.ledger td,
+  table.ledger td *,
+  table.ledger .id-cell,
+  table.ledger .title-cell,
+  table.ledger .cat-pill,
+  table.ledger .cat-count-link,
+  table.ledger td[data-label]::before,
+  .admin-table-wrap,
+  .admin-table-wrap * {
+    color: #000000 !important;
+    text-shadow: none !important;
+  }
+  table.ledger th {
+    background: #F1F5F9 !important;
+    color: #000000 !important;
+    border-bottom: 2px solid #CBD5E1 !important;
+    font-weight: 800 !important;
+  }
+  table.ledger td {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    border-bottom: 1px solid #E2E8F0 !important;
+  }
+  table.ledger tr:hover td {
+    background: #F8FAFC !important;
+  }
+  table.ledger .cat-pill {
+    background: #E0F2FE !important;
+    border: 1px solid #BAE6FD !important;
+    color: #000000 !important;
+    font-weight: 800 !important;
+  }
+  table.ledger .id-cell {
+    font-weight: 700 !important;
+    color: #000000 !important;
+  }
+  table.ledger .title-cell {
+    font-weight: 800 !important;
+    color: #000000 !important;
+  }
+
+  /* Badges & Status in admin display */
+  .admin-main .status-badge,
+  .admin-content .status-badge,
+  .dash-panel-card .status-badge {
+    color: #000000 !important;
+    font-weight: 700 !important;
+    background: #F1F5F9 !important;
+    border: 1px solid #CBD5E1 !important;
+  }
+
+  /* Ghost and Secondary buttons have crisp black text */
+  .btn-ghost,
+  .btn-secondary {
+    color: #000000 !important;
+    border: 1.5px solid #CBD5E1 !important;
+    background: #FFFFFF !important;
+    font-weight: 700 !important;
+  }
+  .btn-ghost:hover,
+  .btn-secondary:hover {
+    background: #F1F5F9 !important;
+    color: #000000 !important;
+    border-color: #94A3B8 !important;
+  }
+
+  /* Filter chips */
+  .filter-chip:not(.active) {
+    background: #F1F5F9 !important;
+    border: 1.5px solid #CBD5E1 !important;
+    color: #000000 !important;
+    font-weight: 700 !important;
+  }
+  .filter-chip.active {
+    background: #5ba4e6 !important;
+    border-color: #4696df !important;
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
+  }
+  .filter-chip.active * {
+    color: #FFFFFF !important;
+  }
+
+  /* Modals */
+  .modal-overlay .modal-box {
+    background: #FFFFFF !important;
+    border: 1.5px solid #CBD5E1 !important;
+    color: #000000 !important;
+  }
+  .modal-title,
+  .modal-sub,
+  .modal-close {
+    color: #000000 !important;
+    text-shadow: none !important;
+  }
+
+  /* Cards, Panels, Hub, Analytics */
+  .admin-card,
+  .admin-card *,
+  .panel,
+  .panel *,
+  .content-card,
+  .content-card *,
+  .stat-card,
+  .stat-card *,
+  .dash-hub-card,
+  .dash-hub-card *,
+  .dash-analytics-box,
+  .dash-analytics-box *,
+  .empty-state,
+  .empty-state * {
+    color: #000000 !important;
+    text-shadow: none !important;
+  }
+
+  /* Baby Blue Action Buttons with Crisp White Text */
+  .btn-primary,
   .dash-action-btn,
   .dash-action-btn.primary,
   .dash-action-btn.secondary,
   .dash-quick-actions button,
-  .dash-panel-action {
+  .dash-panel-action,
+  .btn-submit {
     background: #5ba4e6 !important;
     background-image: linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important;
     color: #ffffff !important;
@@ -277,106 +464,36 @@
     box-shadow: 0 4px 14px rgba(91, 164, 230, 0.35) !important;
     transition: all 0.2s ease !important;
   }
+  .btn-primary *,
   .dash-action-btn *,
   .dash-action-btn.primary *,
   .dash-action-btn.secondary *,
   .dash-quick-actions button *,
-  .dash-panel-action * {
+  .dash-panel-action *,
+  .btn-submit * {
     color: #ffffff !important;
   }
+  .btn-primary:hover,
   .dash-action-btn:hover,
   .dash-action-btn.primary:hover,
   .dash-action-btn.secondary:hover,
   .dash-quick-actions button:hover,
-  .dash-panel-action:hover {
+  .dash-panel-action:hover,
+  .btn-submit:hover {
     background: #4696df !important;
     transform: translateY(-1px) !important;
     box-shadow: 0 6px 18px rgba(91, 164, 230, 0.45) !important;
     color: #ffffff !important;
   }
 
-  /* ── 4 Operational Dashboard Cards: Solid Black Text ────────── */
-  .dash-quad-boxes-col,
-  .dash-panel-card,
-  .dash-panel-card h3,
-  .dash-panel-title,
-  .dash-panel-sub,
-  .dash-cat-list,
-  .dash-cat-row,
-  .dash-cat-row *,
-  .dash-cat-header,
-  .dash-cat-header *,
-  .dash-visitor-list,
-  .dash-visitor-row,
-  .dash-visitor-name,
-  .dash-visitor-time,
-  .dash-visitor-time *,
-  .dash-event-list,
-  .dash-event-row,
-  .dash-event-title,
-  .dash-event-sub,
-  .dash-event-day,
-  .dash-event-month,
-  .dash-panel-card p,
-  .dash-panel-card .status-badge,
-  .dash-quad-boxes-col p,
-  .dash-quad-boxes-col div:not(.dash-panel-action):not(.dash-panel-action *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.dash-cat-bar-fill):not(.dash-visitor-avatar):not(.dash-event-date-badge) {
-    color: #000000 !important;
-    text-shadow: none !important;
-  }
-  .dash-panel-title {
-    color: #000000 !important;
-    font-weight: 900 !important;
-  }
-  .dash-panel-sub {
-    color: #000000 !important;
-    font-weight: 600 !important;
-    opacity: 1 !important;
-  }
-  .dash-visitor-name {
-    color: #000000 !important;
+  /* Destructive action buttons in red with white text */
+  .btn-danger,
+  .btn-danger *,
+  .btn-delete,
+  .btn-delete * {
+    background: #DC2626 !important;
+    color: #FFFFFF !important;
     font-weight: 800 !important;
-  }
-  .dash-visitor-time {
-    color: #000000 !important;
-    font-weight: 600 !important;
-    opacity: 1 !important;
-  }
-  .dash-visitor-time strong {
-    color: #000000 !important;
-    font-weight: 800 !important;
-  }
-  .dash-visitor-avatar.compact {
-    background: #e0f2fe !important;
-    border: 1.5px solid #bae6fd !important;
-    color: #000000 !important;
-    font-weight: 800 !important;
-  }
-  .dash-panel-card .status-badge {
-    color: #000000 !important;
-    background: #f1f5f9 !important;
-    border: 1px solid #cbd5e1 !important;
-    font-weight: 700 !important;
-  }
-  .dash-event-title {
-    color: #000000 !important;
-    font-weight: 800 !important;
-  }
-  .dash-event-sub {
-    color: #000000 !important;
-    font-weight: 600 !important;
-  }
-  .dash-event-day {
-    color: #000000 !important;
-    font-weight: 900 !important;
-  }
-  .dash-event-month {
-    color: #000000 !important;
-    font-weight: 800 !important;
-  }
-  .dash-event-date-badge.compact {
-    background: #ede9fe !important;
-    border: 1px solid #ddd6fe !important;
   }
 
   /* Baby Blue Active Toggle in Pie Card & Links */
@@ -391,11 +508,11 @@
     color: #ffffff !important;
   }
   .dash-kpi-link {
-    color: #3b93dc !important;
+    color: #2563eb !important;
     font-weight: 800 !important;
   }
   .dash-kpi-link:hover {
-    color: #2563eb !important;
+    color: #1d4ed8 !important;
     text-decoration: underline !important;
   }
 </style>
@@ -459,7 +576,7 @@
   <script src="/js/lightbox.js"></script>
   <script src="/js/sidebar.js"></script>
   <script src="/js/carousel.js"></script>
-  <script src="/js/admin.js?v=26"></script>
+  <script src="/js/admin.js?v=27"></script>
   <script src="/js/footer.js"></script>
 </body>
 </html>

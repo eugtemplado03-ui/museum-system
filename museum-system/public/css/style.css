@@ -6399,7 +6399,7 @@ table.ledger {
 
 table.ledger th {
   background: #F8FAFC !important;
-  color: #64748B !important;
+  color: #000000 !important;
   border-bottom: 1.5px solid #E2E8F0 !important;
   font-weight: 800 !important;
   font-size: 11.5px !important;
@@ -6409,7 +6409,7 @@ table.ledger th {
 
 table.ledger td {
   background: #FFFFFF !important;
-  color: #0F172A !important;
+  color: #000000 !important;
   border-bottom: 1px solid #F1F5F9 !important;
 }
 
@@ -6420,11 +6420,11 @@ table.ledger tr:hover td {
 .admin-head {
   background: #EFF6FF !important;
   border-bottom: 1.5px solid #DBEAFE !important;
-  color: #0F172A !important;
+  color: #000000 !important;
 }
 
 .admin-head h2 {
-  color: #0F172A !important;
+  color: #000000 !important;
   text-shadow: none !important;
 }
 
@@ -6445,7 +6445,7 @@ h1, h2, h3, h4, h5, h6,
 }
 
 p, label, span:not(.btn):not(.tag):not(.badge):not(.dash-action-btn):not(.btn-submit):not(.admin-badge-pill):not(.yt-badge):not(.dash-kpi-badge):not(.filter-chip):not(.admin-sidebar-icon):not(.directions-floating-panel *):not(.dir-steps-list *):not(.dir-actions *) {
-  color: #0F172A !important;
+  color: #000000 !important;
   text-shadow: none !important;
 }
 
@@ -6491,7 +6491,7 @@ p, label, span:not(.btn):not(.tag):not(.badge):not(.dash-action-btn):not(.btn-su
 .btn-ghost {
   background: #FFFFFF !important;
   border: 1.5px solid #DBEAFE !important;
-  color: #0F172A !important;
+  color: #000000 !important;
   border-radius: 10px !important;
   font-weight: 700 !important;
 }
