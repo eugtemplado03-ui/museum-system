@@ -33,7 +33,7 @@
 
     /* ── Navy + White + Electric Blue Theme ─────── */
     body {
-      background: #f8fafc !important;
+      background: var(--baby-blue, #5ba4e6) !important;
       color: var(--text-black) !important;
       min-height: 100vh;
       margin: 0;
@@ -623,12 +623,12 @@
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
     }
 
-    /* ── Section Container & Typography ────────────────────────────── */
+    /* ── Section Container & Typography (Baby Blue Theme) ──────────── */
     .welcome-section {
       max-width: 1200px;
       margin: 0 auto;
       padding: 50px clamp(16px, 4vw, 40px);
-      background: #ffffff;
+      background: var(--baby-blue, #5ba4e6) !important;
     }
 
     .section-header {
@@ -644,28 +644,40 @@
       font-weight: 800;
       letter-spacing: 0.8px;
       text-transform: uppercase;
-      color: var(--blue-primary);
-      background: var(--blue-light);
-      border: 1.5px solid var(--blue-box-border-strong);
+      color: #ffffff !important;
+      background: rgba(255, 255, 255, 0.22) !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.55) !important;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       padding: 4px 14px;
       border-radius: 999px;
       margin-bottom: 10px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .section-title {
       font-family: 'Nunito', sans-serif;
       font-size: clamp(24px, 3.5vw, 34px);
       font-weight: 900;
-      color: var(--text-black);
+      color: #ffffff !important;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
       margin: 0 0 10px;
       line-height: 1.2;
     }
 
     .section-desc {
       font-size: 15px;
-      color: var(--text-dark);
+      color: #ffffff !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
       line-height: 1.6;
       margin: 0;
+    }
+
+    .section-desc strong {
+      color: #ffffff !important;
+      font-weight: 800;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     }
 
     /* ── About Museum Details Grid (Blue Boxes, Black Text) ───────── */
@@ -677,18 +689,18 @@
     }
 
     .about-card {
-      background: var(--blue-box-bg);
-      border: 1.5px solid var(--blue-box-border-strong);
+      background: #ffffff !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.8) !important;
       border-radius: 16px;
       padding: 24px 20px;
       color: var(--text-black);
-      transition: transform 0.15s, box-shadow 0.15s;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 6px 24px rgba(15, 23, 42, 0.12), 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
     .about-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(29, 78, 216, 0.10), 0 2px 6px rgba(0, 0, 0, 0.04);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18), 0 2px 6px rgba(0, 0, 0, 0.08);
     }
 
     .about-card-icon {
@@ -724,14 +736,14 @@
     }
 
     .exhibit-card {
-      background: var(--blue-box-bg);
+      background: #ffffff !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.8) !important;
       border-radius: 18px;
       overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+      box-shadow: 0 6px 24px rgba(15, 23, 42, 0.12), 0 1px 3px rgba(0, 0, 0, 0.05);
       display: flex;
       flex-direction: column;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
-      border: 1.5px solid var(--blue-box-border-strong);
     }
 
     .exhibit-card:hover {
@@ -854,20 +866,20 @@
     }
 
     .program-card {
-      background: var(--blue-box-bg);
-      border: 1.5px solid var(--blue-box-border-strong);
+      background: #ffffff !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.8) !important;
       border-radius: 16px;
       padding: 22px;
       color: var(--text-black);
       display: flex;
       flex-direction: column;
-      transition: all 0.15s ease;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+      transition: all 0.2s ease;
+      box-shadow: 0 6px 24px rgba(15, 23, 42, 0.12), 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
     .program-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(29, 78, 216, 0.10), 0 2px 6px rgba(0, 0, 0, 0.04);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18), 0 2px 6px rgba(0, 0, 0, 0.08);
     }
 
     .program-icon {
@@ -924,10 +936,10 @@
       border-radius: 16px;
       overflow: hidden;
       height: 220px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+      box-shadow: 0 6px 24px rgba(15, 23, 42, 0.12), 0 1px 3px rgba(0, 0, 0, 0.05);
       cursor: pointer;
-      border: 1.5px solid var(--blue-box-border-strong);
-      background: var(--blue-light);
+      border: 1.5px solid rgba(255, 255, 255, 0.8) !important;
+      background: #ffffff !important;
     }
 
     .gallery-preview-card img {
@@ -985,19 +997,19 @@
     }
 
     .event-card {
-      background: var(--blue-box-bg);
+      background: #ffffff !important;
       border-radius: 16px;
       padding: 22px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+      box-shadow: 0 6px 24px rgba(15, 23, 42, 0.12), 0 1px 3px rgba(0, 0, 0, 0.05);
       display: flex;
       flex-direction: column;
-      border: 1.5px solid var(--blue-box-border-strong);
-      transition: transform 0.15s ease;
+      border: 1.5px solid rgba(255, 255, 255, 0.8) !important;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .event-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(29, 78, 216, 0.10), 0 2px 6px rgba(0, 0, 0, 0.04);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18), 0 2px 6px rgba(0, 0, 0, 0.08);
     }
 
     .event-date-badge {
@@ -1029,11 +1041,11 @@
       flex: 1;
     }
 
-    /* ── Check-in & Sign-in Portal Section (Blue Boxes, Black Text) ─ */
+    /* ── Check-in & Sign-in Portal Section (Baby Blue Theme) ──────── */
     .checkin-portal-section {
       padding: 60px clamp(16px, 4vw, 40px) 80px;
-      background: var(--blue-light);
-      border-top: 2px solid var(--blue-box-border);
+      background: var(--baby-blue, #5ba4e6) !important;
+      border-top: 1.5px solid rgba(255, 255, 255, 0.35);
     }
 
     .portal-container {
