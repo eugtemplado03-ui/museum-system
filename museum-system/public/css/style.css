@@ -6800,12 +6800,12 @@ table.ledger tr:hover td {
 }
 
 /* 11. Typography */
-h1:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *),
-h2:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *),
-h3:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *),
-h4:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *),
-h5:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *),
-h6:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *),
+h1:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *),
+h2:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *),
+h3:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *),
+h4:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *),
+h5:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *),
+h6:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *),
 .section-head h2,
 .content-card h2,
 .content-card h3,
@@ -6820,9 +6820,9 @@ h6:not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-c
   text-shadow: none !important;
 }
 
-p:not(.gallery-item .caption *):not(.rating-item *):not(.info-card *):not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *),
-label:not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *),
-span:not(.btn):not(.tag):not(.badge):not(.dash-action-btn):not(.btn-submit):not(.admin-badge-pill):not(.yt-badge):not(.dash-kpi-badge):not(.filter-chip):not(.admin-sidebar-icon):not(.directions-floating-panel *):not(.dir-steps-list *):not(.dir-actions *):not(.gallery-item .caption *):not(.carousel-badge *):not(.rating-item *):not(.info-card *):not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *) {
+p:not(.gallery-item .caption *):not(.rating-item *):not(.info-card *):not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *),
+label:not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *),
+span:not(.btn):not(.tag):not(.badge):not(.dash-action-btn):not(.btn-submit):not(.admin-badge-pill):not(.yt-badge):not(.dash-kpi-badge):not(.filter-chip):not(.admin-sidebar-icon):not(.directions-floating-panel *):not(.dir-steps-list *):not(.dir-actions *):not(.gallery-item .caption *):not(.carousel-badge *):not(.rating-item *):not(.info-card *):not(.welcome-hero *):not(.welcome-nav *):not(.welcome-brand *):not(.welcome-carousel *):not(.carousel-section *):not(.carousel-overlay *):not(.photo-carousel *):not(.topbar *):not(.user-sidebar *):not(.browse-sidebar *):not(.sidebar *):not(.scan-hero *):not(#scannerSection *):not(.dashboard-hero-banner *) {
   color: #000000 !important;
   text-shadow: none !important;
 }
@@ -7028,6 +7028,56 @@ span:not(.btn):not(.tag):not(.badge):not(.dash-action-btn):not(.btn-submit):not(
   color: rgba(255, 255, 255, 0.95) !important;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6) !important;
   font-weight: 700 !important;
+}
+
+/* ── Dashboard Hero Banner (Two-Section Header with header-bg.webp) ── */
+.dashboard-hero-banner {
+  position: relative;
+  background: url('/uploads/header-bg.webp') center center / cover no-repeat !important;
+  border-radius: 24px;
+  padding: clamp(20px, 3vw, 36px) clamp(16px, 2.5vw, 32px);
+  margin-bottom: 40px;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.dashboard-hero-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.45) 0%,
+    rgba(15, 23, 42, 0.30) 45%,
+    rgba(15, 23, 42, 0.55) 100%
+  );
+  border-radius: inherit;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.dashboard-hero-banner > * {
+  position: relative;
+  z-index: 2;
+}
+
+.dashboard-hero-banner .carousel-section {
+  margin-bottom: 24px;
+  padding-bottom: 0;
+}
+
+.dashboard-hero-banner .scan-hero {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .dashboard-hero-banner {
+    padding: 14px 10px;
+    border-radius: 18px;
+    margin-bottom: 24px;
+  }
 }
 
 /* ── Welcome & Dashboard Showcase Hero Carousel ────────────────── */

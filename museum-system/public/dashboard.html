@@ -1,802 +1,902 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Home — Museo Sang Bata sa Negros</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=34">
-<script src="/js/gate.js"></script>
-<style>
-/* ── Featured Video Section ── */
-.featured-video-wrap {
-  margin-bottom: 48px;
-}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home — Museo Sang Bata sa Negros</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css?v=34">
+  <script src="/js/gate.js"></script>
+  <style>
+    /* ── Featured Video Section ── */
+    .featured-video-wrap {
+      margin-bottom: 48px;
+    }
 
-/* ── Browse Sidebar Layout ── */
-.browse-layout {
-  display: flex;
-  gap: 0;
-  align-items: flex-start;
-  margin-top: 0;
-}
-.browse-sidebar {
-  width: 190px;
-  flex-shrink: 0;
-  position: sticky;
-  top: 80px;
-  max-height: calc(100vh - 100px);
-  overflow-y: auto;
-  overflow-x: hidden;
-  border-radius: 16px;
-  background: var(--white);
-  border: 1.5px solid var(--grey-100);
-  box-shadow: var(--shadow-sm);
-  padding: 14px 10px;
-  margin-right: 24px;
-}
-.browse-sidebar-title {
-  font-family: 'Nunito', sans-serif;
-  font-size: 10.5px;
-  font-weight: 800;
-  color: var(--grey-400);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  padding: 4px 8px 10px;
-  border-bottom: 1.5px solid var(--grey-100);
-  margin-bottom: 8px;
-}
-.cat-sidebar-btn {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  width: 100%;
-  padding: 9px 10px;
-  border-radius: 10px;
-  border: none;
-  background: transparent;
-  color: var(--grey-700);
-  font-size: 13px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.15s, color 0.15s;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.cat-sidebar-btn:hover {
-  background: var(--teal-light);
-  color: var(--teal-dark);
-}
-.cat-sidebar-btn.active {
-  background: var(--teal);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(0,174,189,0.28);
-}
-.cat-sidebar-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: currentColor;
-  flex-shrink: 0;
-  opacity: 0.55;
-}
-.cat-sidebar-btn.active .cat-sidebar-dot { opacity: 1; background: rgba(255,255,255,0.8); }
-.cat-sidebar-count {
-  margin-left: auto;
-  font-size: 10.5px;
-  font-weight: 700;
-  background: rgba(0,0,0,0.07);
-  color: inherit;
-  padding: 1px 6px;
-  border-radius: 999px;
-  flex-shrink: 0;
-}
-.cat-sidebar-btn.active .cat-sidebar-count { background: rgba(255,255,255,0.2); }
+    /* ── Browse Sidebar Layout ── */
+    .browse-layout {
+      display: flex;
+      gap: 0;
+      align-items: flex-start;
+      margin-top: 0;
+    }
 
-.browse-main { flex: 1; min-width: 0; }
+    .browse-sidebar {
+      width: 190px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 80px;
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      border-radius: 16px;
+      background: var(--white);
+      border: 1.5px solid var(--grey-100);
+      box-shadow: var(--shadow-sm);
+      padding: 14px 10px;
+      margin-right: 24px;
+    }
 
-@media (max-width: 760px) {
-  .browse-layout { flex-direction: column; }
-  .browse-sidebar {
-    width: 100%;
-    position: static;
-    max-height: none;
-    border-radius: 12px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0;
-    padding: 10px 8px;
-    margin-right: 0;
-    margin-bottom: 16px;
-    overflow-x: auto;
-  }
-  .browse-sidebar-title { width: 100%; margin-bottom: 6px; }
-  .cat-sidebar-btn {
-    width: auto;
-    padding: 7px 12px;
-    font-size: 12px;
-    white-space: nowrap;
-  }
-  .cat-sidebar-count { display: none; }
-}
-.featured-video-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-.featured-video-label h2 {
-  font-family: 'Nunito', sans-serif;
-  font-weight: 800;
-  font-size: 20px;
-  color: var(--ink);
-  margin: 0;
-}
-.yt-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: #FF0000;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 3px 9px;
-  border-radius: 999px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-.featured-video-box {
-  position: relative;
-  width: 100%;
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow: 0 8px 30px rgba(0,174,189,0.18);
-  background: #000;
-  border: 2px solid var(--teal-light);
-  aspect-ratio: 16/9;
-}
-.featured-video-box iframe {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: none;
-  display: block;
-}
-.unmute-btn {
-  position: absolute;
-  bottom: 16px;
-  right: 16px;
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  background: rgba(0,0,0,0.65);
-  backdrop-filter: blur(6px);
-  color: #fff;
-  border: 1.5px solid rgba(255,255,255,0.3);
-  border-radius: 999px;
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.15s, transform 0.15s;
-  font-family: 'Nunito', sans-serif;
-}
-.unmute-btn:hover {
-  background: rgba(0,174,189,0.8);
-  transform: scale(1.04);
-}
-</style>
-<script src="/js/jsQR.js"></script>
-<style>
-/* ── Scanner Video Display & Visual Enhancements ── */
-#viewport video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: inherit;
-  display: block;
-}
-.scan-line {
-  position: absolute;
-  left: 6%;
-  right: 6%;
-  height: 3px;
-  background: linear-gradient(90deg, transparent, #00f0ff, #ffffff, #00f0ff, transparent);
-  box-shadow: 0 0 12px rgba(0, 240, 255, 0.95), 0 0 20px rgba(0, 240, 255, 0.6);
-  animation: scanMove 1.8s ease-in-out infinite alternate;
-  z-index: 10;
-  border-radius: 2px;
-  pointer-events: none;
-}
-@keyframes scanMove {
-  0%   { top: 10%; opacity: 0.85; }
-  100% { top: 90%; opacity: 1; }
-}
-.viewport.dragover {
-  border: 2px dashed #00f0ff !important;
-  background: rgba(0, 240, 255, 0.15) !important;
-}
-.scan-status.error {
-  color: #f87171 !important;
-  line-height: 1.35;
-}
-.scan-status.success {
-  color: #34d399 !important;
-}
-.manual-row {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: stretch !important;
-  gap: 8px !important;
-  width: 100% !important;
-  max-width: 320px !important;
-  box-sizing: border-box !important;
-  margin: 0 auto !important;
-}
-.manual-row input {
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  width: 0 !important;
-  box-sizing: border-box !important;
-}
-.manual-row #manualGoBtn {
-  flex: 0 0 auto !important;
-  width: auto !important;
-  min-width: 72px !important;
-  box-sizing: border-box !important;
-}
+    .browse-sidebar-title {
+      font-family: 'Nunito', sans-serif;
+      font-size: 10.5px;
+      font-weight: 800;
+      color: var(--grey-400);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 4px 8px 10px;
+      border-bottom: 1.5px solid var(--grey-100);
+      margin-bottom: 8px;
+    }
 
-/* ── Pure White Text for Dashboard Header & Sidebars ── */
-.topbar,
-.topbar *,
-.topbar .brand,
-.topbar .brand *,
-.topbar .brand-text,
-.topbar .brand-text *,
-.topbar .brand-text .name,
-.topbar .brand-text .tagline,
-.topbar .nav-links,
-.topbar .nav-links *,
-.topbar .nav-btn,
-.topbar .nav-btn *,
-.sidebar-toggle-btn,
-.sidebar-toggle-btn *,
-.sidebar-toggle-btn .toggle-bar,
-.user-sidebar,
-.user-sidebar *,
-.user-sidebar-brand,
-.user-sidebar-brand *,
-.user-sidebar-title,
-.user-sidebar-title *,
-.user-sidebar-section-title,
-.user-sidebar-btn,
-.user-sidebar-btn *,
-.user-sidebar-icon,
-.user-sidebar-label,
-.user-sidebar-count,
-.user-sidebar-close,
-.user-sidebar-footer,
-.user-sidebar-footer *,
-.user-sidebar-sublink,
-.user-sidebar-sublink *,
-.browse-sidebar,
-.browse-sidebar *,
-.browse-sidebar-title,
-.cat-sidebar-btn,
-.cat-sidebar-btn *,
-.cat-sidebar-dot,
-.cat-sidebar-count {
-  color: #FFFFFF !important;
-}
+    .cat-sidebar-btn {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      width: 100%;
+      padding: 9px 10px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: var(--grey-700);
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-.topbar .brand .name,
-.brand-text .name {
-  color: #FFFFFF !important;
-  font-weight: 800 !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
-}
+    .cat-sidebar-btn:hover {
+      background: var(--teal-light);
+      color: var(--teal-dark);
+    }
 
-.topbar .brand .tagline,
-.brand-text .tagline {
-  color: rgba(255, 255, 255, 0.9) !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
-}
+    .cat-sidebar-btn.active {
+      background: var(--teal);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 174, 189, 0.28);
+    }
 
-.topbar .nav-btn {
-  color: rgba(255, 255, 255, 0.92) !important;
-  font-weight: 700 !important;
-}
+    .cat-sidebar-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+      opacity: 0.55;
+    }
 
-.topbar .nav-btn:hover {
-  background: rgba(255, 255, 255, 0.15) !important;
-  color: #FFFFFF !important;
-}
+    .cat-sidebar-btn.active .cat-sidebar-dot {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.8);
+    }
 
-.topbar .nav-btn.active {
-  background: #3B82F6 !important;
-  color: #FFFFFF !important;
-  font-weight: 800 !important;
-}
+    .cat-sidebar-count {
+      margin-left: auto;
+      font-size: 10.5px;
+      font-weight: 700;
+      background: rgba(0, 0, 0, 0.07);
+      color: inherit;
+      padding: 1px 6px;
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
 
-.user-sidebar-title,
-.user-sidebar-title span {
-  color: #FFFFFF !important;
-  font-weight: 800 !important;
-}
+    .cat-sidebar-btn.active .cat-sidebar-count {
+      background: rgba(255, 255, 255, 0.2);
+    }
 
-.user-sidebar-section-title,
-.browse-sidebar-title {
-  color: rgba(255, 255, 255, 0.85) !important;
-  font-weight: 900 !important;
-}
+    .browse-main {
+      flex: 1;
+      min-width: 0;
+    }
 
-.user-sidebar-btn,
-.cat-sidebar-btn {
-  color: #FFFFFF !important;
-  font-weight: 700 !important;
-}
+    @media (max-width: 760px) {
+      .browse-layout {
+        flex-direction: column;
+      }
 
-.user-sidebar-label {
-  color: #FFFFFF !important;
-}
+      .browse-sidebar {
+        width: 100%;
+        position: static;
+        max-height: none;
+        border-radius: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0;
+        padding: 10px 8px;
+        margin-right: 0;
+        margin-bottom: 16px;
+        overflow-x: auto;
+      }
 
-.user-sidebar-btn:hover,
-.cat-sidebar-btn:hover {
-  background: rgba(255, 255, 255, 0.12) !important;
-  color: #FFFFFF !important;
-}
+      .browse-sidebar-title {
+        width: 100%;
+        margin-bottom: 6px;
+      }
 
-.user-sidebar-btn.active,
-.cat-sidebar-btn.active {
-  background: #3B82F6 !important;
-  color: #FFFFFF !important;
-  font-weight: 800 !important;
-}
+      .cat-sidebar-btn {
+        width: auto;
+        padding: 7px 12px;
+        font-size: 12px;
+        white-space: nowrap;
+      }
 
-/* ── Self-Guided Tour Scanner Card: Baby Blue Background, Pure White Text, Baby Blue Buttons ── */
-#scannerSection.scan-hero,
-.scan-hero {
-  background: #5ba4e6 !important;
-  background-image: linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.45) !important;
-  border-radius: 20px !important;
-  box-shadow: 0 8px 32px rgba(91, 164, 230, 0.35), 0 2px 6px rgba(0, 0, 0, 0.05) !important;
-  color: #FFFFFF !important;
-}
+      .cat-sidebar-count {
+        display: none;
+      }
+    }
 
-#scannerSection.scan-hero *,
-.scan-hero * {
-  color: #FFFFFF !important;
-}
+    .featured-video-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
 
-#scannerSection .eyebrow,
-.scan-hero .eyebrow {
-  color: #FFFFFF !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35) !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.22em !important;
-  text-transform: uppercase !important;
-}
+    .featured-video-label h2 {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      color: var(--ink);
+      margin: 0;
+    }
 
-#scannerSection h1,
-.scan-hero h1 {
-  color: #FFFFFF !important;
-  font-weight: 900 !important;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
-}
+    .yt-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #FF0000;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
 
-#scannerSection p,
-.scan-hero p {
-  color: #FFFFFF !important;
-  opacity: 0.98 !important;
-  font-weight: 600 !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25) !important;
-}
+    .featured-video-box {
+      position: relative;
+      width: 100%;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0, 174, 189, 0.18);
+      background: #000;
+      border: 2px solid var(--teal-light);
+      aspect-ratio: 16/9;
+    }
 
-#scannerSection .scanner-frame,
-.scan-hero .scanner-frame {
-  background: rgba(255, 255, 255, 0.16) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-  border: 2px solid rgba(255, 255, 255, 0.45) !important;
-  border-radius: 18px !important;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12) !important;
-  color: #FFFFFF !important;
-}
+    .featured-video-box iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
 
-#scannerSection .viewport,
-.scan-hero .viewport {
-  background: rgba(255, 255, 255, 0.22) !important;
-  border: 2px solid rgba(255, 255, 255, 0.65) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
-  border-radius: 14px !important;
-}
+    .unmute-btn {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(6px);
+      color: #fff;
+      border: 1.5px solid rgba(255, 255, 255, 0.3);
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.15s;
+      font-family: 'Nunito', sans-serif;
+    }
 
-#scannerSection .viewport-placeholder,
-#scannerSection .viewport-placeholder *,
-.scan-hero .viewport-placeholder,
-.scan-hero .viewport-placeholder * {
-  color: #FFFFFF !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
-  font-weight: 600 !important;
-}
+    .unmute-btn:hover {
+      background: rgba(0, 174, 189, 0.8);
+      transform: scale(1.04);
+    }
+  </style>
+  <script src="/js/jsQR.js"></script>
+  <style>
+    /* ── Scanner Video Display & Visual Enhancements ── */
+    #viewport video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: inherit;
+      display: block;
+    }
 
-#scannerSection .viewport-placeholder strong,
-.scan-hero .viewport-placeholder strong {
-  color: #FFFFFF !important;
-  font-weight: 900 !important;
-}
+    .scan-line {
+      position: absolute;
+      left: 6%;
+      right: 6%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #00f0ff, #ffffff, #00f0ff, transparent);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.95), 0 0 20px rgba(0, 240, 255, 0.6);
+      animation: scanMove 1.8s ease-in-out infinite alternate;
+      z-index: 10;
+      border-radius: 2px;
+      pointer-events: none;
+    }
 
-#scannerSection .corner,
-.scan-hero .corner {
-  border-color: #FFFFFF !important;
-}
+    @keyframes scanMove {
+      0% {
+        top: 10%;
+        opacity: 0.85;
+      }
 
-#scannerSection .scan-status,
-.scan-hero .scan-status {
-  color: #FFFFFF !important;
-  font-weight: 700 !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
-}
+      100% {
+        top: 90%;
+        opacity: 1;
+      }
+    }
 
-/* Baby Blue Buttons with Crisp White Text */
-#scannerSection .btn,
-#scannerSection .btn-primary,
-#scannerSection .btn-ghost,
-#scannerSection #openScannerBtn,
-#scannerSection .scan-cta a.btn,
-#scannerSection #manualGoBtn,
-#scannerSection #switchCameraBtn,
-#scannerSection #torchBtn,
-.scan-hero .btn,
-.scan-hero .btn-primary,
-.scan-hero .btn-ghost,
-.scan-hero #openScannerBtn,
-.scan-hero .scan-cta a.btn,
-.scan-hero #manualGoBtn,
-.scan-hero #switchCameraBtn,
-.scan-hero #torchBtn {
-  background: #5ba4e6 !important;
-  background-image: linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important;
-  color: #FFFFFF !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.65) !important;
-  border-radius: 10px !important;
-  font-weight: 800 !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16) !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
-  transition: all 0.2s ease !important;
-}
+    .viewport.dragover {
+      border: 2px dashed #00f0ff !important;
+      background: rgba(0, 240, 255, 0.15) !important;
+    }
 
-#scannerSection .btn:hover,
-#scannerSection .btn-primary:hover,
-#scannerSection .btn-ghost:hover,
-#scannerSection #openScannerBtn:hover,
-#scannerSection .scan-cta a.btn:hover,
-#scannerSection #manualGoBtn:hover,
-#scannerSection #switchCameraBtn:hover,
-#scannerSection #torchBtn:hover,
-.scan-hero .btn:hover,
-.scan-hero .btn-primary:hover,
-.scan-hero .btn-ghost:hover,
-.scan-hero #openScannerBtn:hover,
-.scan-hero .scan-cta a.btn:hover,
-.scan-hero #manualGoBtn:hover,
-.scan-hero #switchCameraBtn:hover,
-.scan-hero #torchBtn:hover {
-  background: #4696df !important;
-  background-image: linear-gradient(135deg, #4696df 0%, #3685ce 100%) !important;
-  color: #FFFFFF !important;
-  border-color: #FFFFFF !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.24) !important;
-}
+    .scan-status.error {
+      color: #f87171 !important;
+      line-height: 1.35;
+    }
 
-#scannerSection .manual-row input,
-.scan-hero .manual-row input {
-  background: #FFFFFF !important;
-  color: #0F172A !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.8) !important;
-  border-radius: 10px !important;
-  font-weight: 600 !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
-}
+    .scan-status.success {
+      color: #34d399 !important;
+    }
 
-#scannerSection .manual-row input::placeholder,
-.scan-hero .manual-row input::placeholder {
-  color: #64748B !important;
-  opacity: 1 !important;
-}
+    .manual-row {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: stretch !important;
+      gap: 8px !important;
+      width: 100% !important;
+      max-width: 320px !important;
+      box-sizing: border-box !important;
+      margin: 0 auto !important;
+    }
 
-/* ── Dashboard Hero Showcase Carousel (Identical to Welcome Page) ── */
-.carousel-section {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding-bottom: 24px;
-  position: relative;
-  width: 100%;
-  box-sizing: border-box;
-}
+    .manual-row input {
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+      width: 0 !important;
+      box-sizing: border-box !important;
+    }
 
-.welcome-carousel {
-  position: relative;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
-  border: none;
-  background: #000;
-  width: 100%;
-}
+    .manual-row #manualGoBtn {
+      flex: 0 0 auto !important;
+      width: auto !important;
+      min-width: 72px !important;
+      box-sizing: border-box !important;
+    }
 
-.carousel-stage {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  min-height: 360px;
-  max-height: 520px;
-  overflow: hidden;
-}
+    /* ── Pure White Text for Dashboard Header & Sidebars ── */
+    .topbar,
+    .topbar *,
+    .topbar .brand,
+    .topbar .brand *,
+    .topbar .brand-text,
+    .topbar .brand-text *,
+    .topbar .brand-text .name,
+    .topbar .brand-text .tagline,
+    .topbar .nav-links,
+    .topbar .nav-links *,
+    .topbar .nav-btn,
+    .topbar .nav-btn *,
+    .sidebar-toggle-btn,
+    .sidebar-toggle-btn *,
+    .sidebar-toggle-btn .toggle-bar,
+    .user-sidebar,
+    .user-sidebar *,
+    .user-sidebar-brand,
+    .user-sidebar-brand *,
+    .user-sidebar-title,
+    .user-sidebar-title *,
+    .user-sidebar-section-title,
+    .user-sidebar-btn,
+    .user-sidebar-btn *,
+    .user-sidebar-icon,
+    .user-sidebar-label,
+    .user-sidebar-count,
+    .user-sidebar-close,
+    .user-sidebar-footer,
+    .user-sidebar-footer *,
+    .user-sidebar-sublink,
+    .user-sidebar-sublink *,
+    .browse-sidebar,
+    .browse-sidebar *,
+    .browse-sidebar-title,
+    .cat-sidebar-btn,
+    .cat-sidebar-btn *,
+    .cat-sidebar-dot,
+    .cat-sidebar-count {
+      color: #FFFFFF !important;
+    }
 
-@media (max-width: 768px) {
-  .carousel-stage {
-    aspect-ratio: 16 / 10;
-    min-height: 300px;
-  }
-}
+    .topbar .brand .name,
+    .brand-text .name {
+      color: #FFFFFF !important;
+      font-weight: 800 !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+    }
 
-@media (max-width: 600px) {
-  .carousel-stage {
-    aspect-ratio: 4 / 3;
-    min-height: 280px;
-  }
+    .topbar .brand .tagline,
+    .brand-text .tagline {
+      color: rgba(255, 255, 255, 0.9) !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+    }
 
-  .carousel-arrow {
-    width: 36px;
-    height: 36px;
-    font-size: 15px;
-  }
+    .topbar .nav-btn {
+      color: rgba(255, 255, 255, 0.92) !important;
+      font-weight: 700 !important;
+    }
 
-  .carousel-indicators {
-    bottom: 14px;
-  }
-}
+    .topbar .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.15) !important;
+      color: #FFFFFF !important;
+    }
 
-.carousel-slide-item {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-}
+    .topbar .nav-btn.active {
+      background: #3B82F6 !important;
+      color: #FFFFFF !important;
+      font-weight: 800 !important;
+    }
 
-.carousel-slide-item.active {
-  opacity: 1;
-  visibility: visible;
-}
+    .user-sidebar-title,
+    .user-sidebar-title span {
+      color: #FFFFFF !important;
+      font-weight: 800 !important;
+    }
 
-.carousel-slide-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
+    .user-sidebar-section-title,
+    .browse-sidebar-title {
+      color: rgba(255, 255, 255, 0.85) !important;
+      font-weight: 900 !important;
+    }
 
-.carousel-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.05) 0%,
-    rgba(0, 0, 0, 0.25) 40%,
-    rgba(0, 0, 0, 0.85) 100%
-  );
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: clamp(20px, 4vw, 36px);
-  color: #ffffff !important;
-  text-align: left;
-}
+    .user-sidebar-btn,
+    .cat-sidebar-btn {
+      color: #FFFFFF !important;
+      font-weight: 700 !important;
+    }
 
-.carousel-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: #ffffff !important;
-  font-family: 'Nunito', sans-serif;
-  font-size: 12px;
-  font-weight: 800;
-  padding: 4px 14px;
-  border-radius: 999px;
-  margin-bottom: 10px;
-  width: fit-content;
-  text-shadow:
-    0 1px 2px rgba(0,0,0,0.7),
-    0 2px 6px rgba(0,0,0,0.4);
-}
+    .user-sidebar-label {
+      color: #FFFFFF !important;
+    }
 
-.carousel-title {
-  font-family: 'Nunito', sans-serif;
-  font-size: clamp(20px, 3vw, 30px);
-  font-weight: 900;
-  margin: 0 0 10px;
-  color: #ffffff !important;
-  text-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.95),
-    0 2px 8px rgba(0, 0, 0, 0.7),
-    0 4px 18px rgba(0, 0, 0, 0.45);
-}
+    .user-sidebar-btn:hover,
+    .cat-sidebar-btn:hover {
+      background: rgba(255, 255, 255, 0.12) !important;
+      color: #FFFFFF !important;
+    }
 
-.carousel-desc {
-  font-size: clamp(13px, 1.6vw, 15px);
-  color: #ffffff !important;
-  max-width: 680px;
-  margin: 0 0 16px;
-  line-height: 1.55;
-  font-weight: 500;
-  text-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.85),
-    0 2px 8px rgba(0, 0, 0, 0.6),
-    0 4px 14px rgba(0, 0, 0, 0.35);
-}
+    .user-sidebar-btn.active,
+    .cat-sidebar-btn.active {
+      background: #3B82F6 !important;
+      color: #FFFFFF !important;
+      font-weight: 800 !important;
+    }
 
-.carousel-cta-btn {
-  background: rgba(255, 255, 255, 0.16) !important;
-  color: #ffffff !important;
-  font-family: 'Nunito', sans-serif;
-  font-size: 13.5px;
-  font-weight: 800;
-  padding: 10px 20px;
-  border-radius: 12px;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  width: fit-content;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  text-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.9),
-    0 2px 6px rgba(0, 0, 0, 0.6);
-  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-  cursor: pointer;
-}
+    /* ── Self-Guided Tour Scanner Card: Baby Blue Background, Pure White Text, Baby Blue Buttons ── */
+    #scannerSection.scan-hero,
+    .scan-hero {
+      background: #5ba4e6 !important;
+      background-image: linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.45) !important;
+      border-radius: 20px !important;
+      box-shadow: 0 8px 32px rgba(91, 164, 230, 0.35), 0 2px 6px rgba(0, 0, 0, 0.05) !important;
+      color: #FFFFFF !important;
+    }
 
-.carousel-cta-btn:hover {
-  background: rgba(255, 255, 255, 0.28) !important;
-  border-color: rgba(255, 255, 255, 0.85) !important;
-  color: #ffffff !important;
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-}
+    #scannerSection.scan-hero *,
+    .scan-hero * {
+      color: #FFFFFF !important;
+    }
 
-.carousel-cta-btn:active {
-  transform: translateY(0) scale(0.98);
-}
+    #scannerSection .eyebrow,
+    .scan-hero .eyebrow {
+      color: #FFFFFF !important;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35) !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.22em !important;
+      text-transform: uppercase !important;
+    }
 
-/* Carousel Controls */
-.carousel-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.16) !important;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
-  color: #ffffff !important;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 10;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-}
+    #scannerSection h1,
+    .scan-hero h1 {
+      color: #FFFFFF !important;
+      font-weight: 900 !important;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+    }
 
-.carousel-arrow:hover {
-  background: rgba(255, 255, 255, 0.30) !important;
-  border-color: rgba(255, 255, 255, 0.9) !important;
-  color: #ffffff !important;
-  transform: translateY(-50%) scale(1.08);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-}
+    #scannerSection p,
+    .scan-hero p {
+      color: #FFFFFF !important;
+      opacity: 0.98 !important;
+      font-weight: 600 !important;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25) !important;
+    }
 
-.carousel-arrow:active {
-  transform: translateY(-50%) scale(0.96);
-}
+    #scannerSection .scanner-frame,
+    .scan-hero .scanner-frame {
+      background: rgba(255, 255, 255, 0.16) !important;
+      backdrop-filter: blur(10px) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
+      border: 2px solid rgba(255, 255, 255, 0.45) !important;
+      border-radius: 18px !important;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12) !important;
+      color: #FFFFFF !important;
+    }
 
-.carousel-arrow.prev {
-  left: 16px;
-}
+    #scannerSection .viewport,
+    .scan-hero .viewport {
+      background: rgba(255, 255, 255, 0.22) !important;
+      border: 2px solid rgba(255, 255, 255, 0.65) !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+      border-radius: 14px !important;
+    }
 
-.carousel-arrow.next {
-  right: 16px;
-}
+    #scannerSection .viewport-placeholder,
+    #scannerSection .viewport-placeholder *,
+    .scan-hero .viewport-placeholder,
+    .scan-hero .viewport-placeholder * {
+      color: #FFFFFF !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+      font-weight: 600 !important;
+    }
 
-.carousel-indicators {
-  position: absolute;
-  bottom: 20px;
-  right: clamp(20px, 4vw, 40px);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  z-index: 10;
-}
+    #scannerSection .viewport-placeholder strong,
+    .scan-hero .viewport-placeholder strong {
+      color: #FFFFFF !important;
+      font-weight: 900 !important;
+    }
 
-.carousel-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  cursor: pointer;
-  padding: 0;
-  transition: all 0.2s ease;
-}
+    #scannerSection .corner,
+    .scan-hero .corner {
+      border-color: #FFFFFF !important;
+    }
 
-.carousel-dot.active {
-  width: 26px;
-  border-radius: 999px;
-  background: #ffffff;
-  border-color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
+    #scannerSection .scan-status,
+    .scan-hero .scan-status {
+      color: #FFFFFF !important;
+      font-weight: 700 !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+    }
 
-.carousel-counter-badge {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  background: rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  color: #ffffff;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 999px;
-  z-index: 10;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-}
+    /* Baby Blue Buttons with Crisp White Text */
+    #scannerSection .btn,
+    #scannerSection .btn-primary,
+    #scannerSection .btn-ghost,
+    #scannerSection #openScannerBtn,
+    #scannerSection .scan-cta a.btn,
+    #scannerSection #manualGoBtn,
+    #scannerSection #switchCameraBtn,
+    #scannerSection #torchBtn,
+    .scan-hero .btn,
+    .scan-hero .btn-primary,
+    .scan-hero .btn-ghost,
+    .scan-hero #openScannerBtn,
+    .scan-hero .scan-cta a.btn,
+    .scan-hero #manualGoBtn,
+    .scan-hero #switchCameraBtn,
+    .scan-hero #torchBtn {
+      background: #5ba4e6 !important;
+      background-image: linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important;
+      color: #FFFFFF !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.65) !important;
+      border-radius: 10px !important;
+      font-weight: 800 !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16) !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+      transition: all 0.2s ease !important;
+    }
 
-.carousel-section,
-.carousel-section *,
-.welcome-carousel,
-.welcome-carousel *,
-.carousel-stage,
-.carousel-stage *,
-.carousel-slide-item,
-.carousel-slide-item *,
-.carousel-overlay,
-.carousel-overlay *,
-.carousel-title,
-.carousel-desc,
-.carousel-tag,
-.carousel-cta-btn,
-.carousel-cta-btn * {
-  color: #FFFFFF !important;
-}
-</style>
+    #scannerSection .btn:hover,
+    #scannerSection .btn-primary:hover,
+    #scannerSection .btn-ghost:hover,
+    #scannerSection #openScannerBtn:hover,
+    #scannerSection .scan-cta a.btn:hover,
+    #scannerSection #manualGoBtn:hover,
+    #scannerSection #switchCameraBtn:hover,
+    #scannerSection #torchBtn:hover,
+    .scan-hero .btn:hover,
+    .scan-hero .btn-primary:hover,
+    .scan-hero .btn-ghost:hover,
+    .scan-hero #openScannerBtn:hover,
+    .scan-hero .scan-cta a.btn:hover,
+    .scan-hero #manualGoBtn:hover,
+    .scan-hero #switchCameraBtn:hover,
+    .scan-hero #torchBtn:hover {
+      background: #4696df !important;
+      background-image: linear-gradient(135deg, #4696df 0%, #3685ce 100%) !important;
+      color: #FFFFFF !important;
+      border-color: #FFFFFF !important;
+      transform: translateY(-2px) !important;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.24) !important;
+    }
+
+    #scannerSection .manual-row input,
+    .scan-hero .manual-row input {
+      background: #FFFFFF !important;
+      color: #0F172A !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.8) !important;
+      border-radius: 10px !important;
+      font-weight: 600 !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+    }
+
+    #scannerSection .manual-row input::placeholder,
+    .scan-hero .manual-row input::placeholder {
+      color: #64748B !important;
+      opacity: 1 !important;
+    }
+
+    /* ── Dashboard Hero Banner (Two-Section Container with header-bg.webp) ── */
+    .dashboard-hero-banner {
+      position: relative;
+      background: url('/uploads/header-bg.webp') center center / cover no-repeat !important;
+      border-radius: 24px;
+      padding: clamp(20px, 3vw, 36px) clamp(16px, 2.5vw, 32px);
+      margin-bottom: 38px;
+      border: 1.5px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 10px 36px rgba(0, 0, 0, 0.16);
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    .dashboard-hero-banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg,
+          rgba(15, 23, 42, 0.45) 0%,
+          rgba(15, 23, 42, 0.30) 45%,
+          rgba(15, 23, 42, 0.55) 100%);
+      border-radius: inherit;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .dashboard-hero-banner>* {
+      position: relative;
+      z-index: 2;
+    }
+
+    .dashboard-hero-banner .carousel-section {
+      margin-bottom: 22px !important;
+      padding-bottom: 0 !important;
+    }
+
+    .dashboard-hero-banner .scan-hero {
+      margin-bottom: 0 !important;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-hero-banner {
+        padding: 14px 10px;
+        border-radius: 18px;
+        margin-bottom: 24px;
+      }
+    }
+
+    /* ── Dashboard Hero Showcase Carousel (Identical to Welcome Page) ── */
+    .carousel-section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding-bottom: 24px;
+      position: relative;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .welcome-carousel {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
+      border: none;
+      background: #000;
+      width: 100%;
+    }
+
+    .carousel-stage {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      min-height: 360px;
+      max-height: 520px;
+      overflow: hidden;
+    }
+
+    @media (max-width: 768px) {
+      .carousel-stage {
+        aspect-ratio: 16 / 10;
+        min-height: 300px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .carousel-stage {
+        aspect-ratio: 4 / 3;
+        min-height: 280px;
+      }
+
+      .carousel-arrow {
+        width: 36px;
+        height: 36px;
+        font-size: 15px;
+      }
+
+      .carousel-indicators {
+        bottom: 14px;
+      }
+    }
+
+    .carousel-slide-item {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .carousel-slide-item.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .carousel-slide-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .carousel-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg,
+          rgba(0, 0, 0, 0.05) 0%,
+          rgba(0, 0, 0, 0.25) 40%,
+          rgba(0, 0, 0, 0.85) 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: clamp(20px, 4vw, 36px);
+      color: #ffffff !important;
+      text-align: left;
+    }
+
+    .carousel-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: #ffffff !important;
+      font-family: 'Nunito', sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 4px 14px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+      width: fit-content;
+      text-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.7),
+        0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .carousel-title {
+      font-family: 'Nunito', sans-serif;
+      font-size: clamp(20px, 3vw, 30px);
+      font-weight: 900;
+      margin: 0 0 10px;
+      color: #ffffff !important;
+      text-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.95),
+        0 2px 8px rgba(0, 0, 0, 0.7),
+        0 4px 18px rgba(0, 0, 0, 0.45);
+    }
+
+    .carousel-desc {
+      font-size: clamp(13px, 1.6vw, 15px);
+      color: #ffffff !important;
+      max-width: 680px;
+      margin: 0 0 16px;
+      line-height: 1.55;
+      font-weight: 500;
+      text-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.85),
+        0 2px 8px rgba(0, 0, 0, 0.6),
+        0 4px 14px rgba(0, 0, 0, 0.35);
+    }
+
+    .carousel-cta-btn {
+      background: rgba(255, 255, 255, 0.16) !important;
+      color: #ffffff !important;
+      font-family: 'Nunito', sans-serif;
+      font-size: 13.5px;
+      font-weight: 800;
+      padding: 10px 20px;
+      border-radius: 12px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      text-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.9),
+        0 2px 6px rgba(0, 0, 0, 0.6);
+      transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+      cursor: pointer;
+    }
+
+    .carousel-cta-btn:hover {
+      background: rgba(255, 255, 255, 0.28) !important;
+      border-color: rgba(255, 255, 255, 0.85) !important;
+      color: #ffffff !important;
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+
+    .carousel-cta-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    /* Carousel Controls */
+    .carousel-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.16) !important;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1.5px solid rgba(255, 255, 255, 0.5) !important;
+      color: #ffffff !important;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+      transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .carousel-arrow:hover {
+      background: rgba(255, 255, 255, 0.30) !important;
+      border-color: rgba(255, 255, 255, 0.9) !important;
+      color: #ffffff !important;
+      transform: translateY(-50%) scale(1.08);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+
+    .carousel-arrow:active {
+      transform: translateY(-50%) scale(0.96);
+    }
+
+    .carousel-arrow.prev {
+      left: 16px;
+    }
+
+    .carousel-arrow.next {
+      right: 16px;
+    }
+
+    .carousel-indicators {
+      position: absolute;
+      bottom: 20px;
+      right: clamp(20px, 4vw, 40px);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 10;
+    }
+
+    .carousel-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+      padding: 0;
+      transition: all 0.2s ease;
+    }
+
+    .carousel-dot.active {
+      width: 26px;
+      border-radius: 999px;
+      background: #ffffff;
+      border-color: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .carousel-counter-badge {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      color: #ffffff;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      z-index: 10;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .carousel-section,
+    .carousel-section *,
+    .welcome-carousel,
+    .welcome-carousel *,
+    .carousel-stage,
+    .carousel-stage *,
+    .carousel-slide-item,
+    .carousel-slide-item *,
+    .carousel-overlay,
+    .carousel-overlay *,
+    .carousel-title,
+    .carousel-desc,
+    .carousel-tag,
+    .carousel-cta-btn,
+    .carousel-cta-btn * {
+      color: #FFFFFF !important;
+    }
+  </style>
 </head>
+
 <body>
   <!-- ── Top Navigation Bar ─────────────────────────────────────── -->
   <div class="topbar">
@@ -810,7 +910,8 @@
         <div class="brand-mark">M</div>
         <div class="brand-text">
           <div class="name">Museo Sang Bata sa Negros</div>
-          <div class="tagline" style="font-size: 9px; max-width: 400px;">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
+          <div class="tagline" style="font-size: 9px; max-width: 400px;">A Hands-on and Interactive Children's Museum.
+            Member of the Intercontinental Museum Network, SAMP</div>
         </div>
       </a>
     </div>
@@ -891,11 +992,17 @@
       </nav>
 
       <div class="user-sidebar-footer">
-        <div style="font-size:11.5px; color:rgba(255,255,255,0.75); margin-bottom:8px; padding:6px 8px; background:rgba(0,0,0,0.25); border-radius:8px; display:flex; align-items:center; justify-content:space-between;">
-          <a href="#" onclick="event.preventDefault(); window.openVisitorHistoryModal();" style="color:#5eead4; text-decoration:none; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">
-            ${localStorage.getItem('museum_visitor_name') ? '👤 ' + String(localStorage.getItem('museum_visitor_name')).replace(/[&<>"']/g, '') : '🟢 Verified Visitor'}
+        <div
+          style="font-size:11.5px; color:rgba(255,255,255,0.75); margin-bottom:8px; padding:6px 8px; background:rgba(0,0,0,0.25); border-radius:8px; display:flex; align-items:center; justify-content:space-between;">
+          <a href="#" onclick="event.preventDefault(); window.openVisitorHistoryModal();"
+            style="color:#5eead4; text-decoration:none; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">
+            ${localStorage.getItem('museum_visitor_name') ? '👤 ' +
+            String(localStorage.getItem('museum_visitor_name')).replace(/[&<>"']/g, '') : '🟢 Verified Visitor'}
           </a>
-          <a href="#" onclick="event.preventDefault(); localStorage.removeItem('museum_visitor_checked_in'); localStorage.removeItem('museum_visitor_name'); window.location.href='/checkin.html';" style="color:#f87171; text-decoration:none; font-weight:700; font-size:11px; margin-left:6px;" title="Sign out / Switch visitor">Switch</a>
+          <a href="#"
+            onclick="event.preventDefault(); localStorage.removeItem('museum_visitor_checked_in'); localStorage.removeItem('museum_visitor_name'); window.location.href='/checkin.html';"
+            style="color:#f87171; text-decoration:none; font-weight:700; font-size:11px; margin-left:6px;"
+            title="Sign out / Switch visitor">Switch</a>
         </div>
         <a class="user-sidebar-sublink" href="/donate.html">
           <span>💖</span> Support Us
@@ -908,128 +1015,145 @@
 
     <!-- ── Main Content Area ────────────────────────────────────── -->
     <div class="user-main">
-      <main style="padding: clamp(14px, 2.5vw, 32px) clamp(10px, 2.5vw, 24px); flex: 1; min-width: 0; max-width: 100%; width: 100%; box-sizing: border-box;">
+      <main
+        style="padding: clamp(14px, 2.5vw, 32px) clamp(10px, 2.5vw, 24px); flex: 1; min-width: 0; max-width: 100%; width: 100%; box-sizing: border-box;">
         <div class="wrap" style="max-width: 1100px; margin: 0 auto; width: 100%; box-sizing: border-box;">
-          <!-- ── 0. Showcase Hero Carousel (Same as Welcome Page) ──── -->
-          <div class="carousel-section" id="dashboardCarouselSection" aria-label="Museum Showcase Carousel" style="margin-bottom: 28px;">
-            <div class="welcome-carousel" id="dashboardCarousel">
-              <div class="carousel-counter-badge" id="dashCarouselCounter">1 / 5</div>
+          <!-- ── Top Hero Banner (Carousel + Tag Scanner with header-bg.webp) ── -->
+          <div class="dashboard-hero-banner" id="dashboardHeroBanner">
+            <!-- ── 0. Showcase Hero Carousel (Same as Welcome Page) ──── -->
+            <div class="carousel-section" id="dashboardCarouselSection" aria-label="Museum Showcase Carousel">
+              <div class="welcome-carousel" id="dashboardCarousel">
+                <div class="carousel-counter-badge" id="dashCarouselCounter">1 / 5</div>
 
-              <button type="button" class="carousel-arrow prev" id="dashCarouselPrevBtn"
-                aria-label="Previous slide">&#10094;</button>
-              <button type="button" class="carousel-arrow next" id="dashCarouselNextBtn"
-                aria-label="Next slide">&#10095;</button>
+                <button type="button" class="carousel-arrow prev" id="dashCarouselPrevBtn"
+                  aria-label="Previous slide">&#10094;</button>
+                <button type="button" class="carousel-arrow next" id="dashCarouselNextBtn"
+                  aria-label="Next slide">&#10095;</button>
 
-              <div class="carousel-stage" id="dashCarouselStage">
-                <!-- Slide 1: Museum Building & Grounds -->
-                <div class="carousel-slide-item active" data-index="0" data-code="EX-001" data-title="Museum Grounds">
-                  <img src="/uploads/ex3.jpg" alt="Museo Sang Bata sa Negros Facade and Grounds">
-                  <div class="carousel-overlay">
-                    <span class="carousel-tag">Coastal Sanctuary</span>
-                    <h2 class="carousel-title">Museo Sang Bata sa Negros</h2>
-                    <p class="carousel-desc">A premier hands-on children's museum located on the sunlit coast of Barangay
-                      Old Sagay beside the 32,000-hectare Sagay Marine Reserve.</p>
-                    <a class="carousel-cta-btn" href="/exhibits.html">
-                      <span>🏛️</span> Explore All Exhibits &rarr;
-                    </a>
+                <div class="carousel-stage" id="dashCarouselStage">
+                  <!-- Slide 1: Museum Building & Grounds -->
+                  <div class="carousel-slide-item active" data-index="0" data-code="EX-001" data-title="Museum Grounds">
+                    <img src="/uploads/ex3.jpg" alt="Museo Sang Bata sa Negros Facade and Grounds">
+                    <div class="carousel-overlay">
+                      <span class="carousel-tag">Coastal Sanctuary</span>
+                      <h2 class="carousel-title">Museo Sang Bata sa Negros</h2>
+                      <p class="carousel-desc">A premier hands-on children's museum located on the sunlit coast of
+                        Barangay
+                        Old Sagay beside the 32,000-hectare Sagay Marine Reserve.</p>
+                      <a class="carousel-cta-btn" href="/exhibits.html">
+                        <span>🏛️</span> Explore All Exhibits &rarr;
+                      </a>
+                    </div>
+                  </div>
+
+                  <!-- Slide 2: Under the Sea -->
+                  <div class="carousel-slide-item" data-index="1" data-code="EX-001" data-title="Under the Sea">
+                    <img src="https://museosangbata.org/wp-content/uploads/2014/11/under-the-sea-banner-260x170.jpg"
+                      alt="Under the Sea Marine Exhibit">
+                    <div class="carousel-overlay">
+                      <span class="carousel-tag">Featured Flagship Exhibit</span>
+                      <h2 class="carousel-title">Under the Sea (Main Marine Gallery)</h2>
+                      <p class="carousel-desc">Discover how sand forms, how vibrant coral reefs grow, and encounter
+                        clownfish,
+                        sea stars, and the marine mammals of Sagay Marine Reserve.</p>
+                      <a class="carousel-cta-btn" href="/exhibit.html?code=EX-001">
+                        <span>🐟</span> View Exhibit Details &amp; Audio Tour &rarr;
+                      </a>
+                    </div>
+                  </div>
+
+                  <!-- Slide 3: Splash Zone (Touch Pool) -->
+                  <div class="carousel-slide-item" data-index="2" data-code="EX-003"
+                    data-title="Splash Zone (Touch Pool)">
+                    <img src="https://museosangbata.org/wp-content/uploads/2014/11/splash-banner-260x170.jpg"
+                      alt="Splash Zone Touch Pool">
+                    <div class="carousel-overlay">
+                      <span class="carousel-tag">Hands-on Touch Pool</span>
+                      <h2 class="carousel-title">Splash Zone — Live Seashore Creatures</h2>
+                      <p class="carousel-desc">Gently touch and observe live sea stars, sea cucumbers, snails, and tidal
+                        organisms in an engaging, educator-led touch pool.</p>
+                      <a class="carousel-cta-btn" href="/exhibit.html?code=EX-003">
+                        <span>✋</span> Explore Touch Pool Details &rarr;
+                      </a>
+                    </div>
+                  </div>
+
+                  <!-- Slide 4: Mobile Library on Wheels -->
+                  <div class="carousel-slide-item" data-index="3" data-code="EX-010"
+                    data-title="Books and Exhibit on Wheels">
+                    <img src="/uploads/ex4.jpg" alt="Mobile Library and Outreach">
+                    <div class="carousel-overlay">
+                      <span class="carousel-tag">Community Outreach</span>
+                      <h2 class="carousel-title">Books &amp; Exhibits on Wheels</h2>
+                      <p class="carousel-desc">Bringing marine conservation literature, storytelling, and interactive
+                        science
+                        modules to children and schools across coastal communities.</p>
+                      <a class="carousel-cta-btn" href="/programs.html">
+                        <span>🌱</span> Explore Signature Programs &rarr;
+                      </a>
+                    </div>
+                  </div>
+
+                  <!-- Slide 5: Junior Guides & Cultural Heritage -->
+                  <div class="carousel-slide-item" data-index="4" data-code="EX-006" data-title="Junior Museum Guides">
+                    <img src="/uploads/ex2.jpg" alt="Junior Museum Guides and Mascots">
+                    <div class="carousel-overlay">
+                      <span class="carousel-tag">Youth Leadership</span>
+                      <h2 class="carousel-title">Junior Museum Guides &amp; Mascots</h2>
+                      <p class="carousel-desc">Meet our passionate young docents trained in marine biodiversity, ready
+                        to
+                        guide visitors through thrilling interactive museum experiences.</p>
+                      <a class="carousel-cta-btn" href="/programs.html">
+                        <span>🏆</span> Meet the Junior Guides &rarr;
+                      </a>
+                    </div>
                   </div>
                 </div>
 
-                <!-- Slide 2: Under the Sea -->
-                <div class="carousel-slide-item" data-index="1" data-code="EX-001" data-title="Under the Sea">
-                  <img src="https://museosangbata.org/wp-content/uploads/2014/11/under-the-sea-banner-260x170.jpg"
-                    alt="Under the Sea Marine Exhibit">
-                  <div class="carousel-overlay">
-                    <span class="carousel-tag">Featured Flagship Exhibit</span>
-                    <h2 class="carousel-title">Under the Sea (Main Marine Gallery)</h2>
-                    <p class="carousel-desc">Discover how sand forms, how vibrant coral reefs grow, and encounter clownfish,
-                      sea stars, and the marine mammals of Sagay Marine Reserve.</p>
-                    <a class="carousel-cta-btn" href="/exhibit.html?code=EX-001">
-                      <span>🐟</span> View Exhibit Details &amp; Audio Tour &rarr;
-                    </a>
-                  </div>
+                <div class="carousel-indicators" id="dashCarouselIndicators">
+                  <button type="button" class="carousel-dot active" data-slide="0" aria-label="Slide 1"></button>
+                  <button type="button" class="carousel-dot" data-slide="1" aria-label="Slide 2"></button>
+                  <button type="button" class="carousel-dot" data-slide="2" aria-label="Slide 3"></button>
+                  <button type="button" class="carousel-dot" data-slide="3" aria-label="Slide 4"></button>
+                  <button type="button" class="carousel-dot" data-slide="4" aria-label="Slide 5"></button>
                 </div>
-
-                <!-- Slide 3: Splash Zone (Touch Pool) -->
-                <div class="carousel-slide-item" data-index="2" data-code="EX-003" data-title="Splash Zone (Touch Pool)">
-                  <img src="https://museosangbata.org/wp-content/uploads/2014/11/splash-banner-260x170.jpg"
-                    alt="Splash Zone Touch Pool">
-                  <div class="carousel-overlay">
-                    <span class="carousel-tag">Hands-on Touch Pool</span>
-                    <h2 class="carousel-title">Splash Zone — Live Seashore Creatures</h2>
-                    <p class="carousel-desc">Gently touch and observe live sea stars, sea cucumbers, snails, and tidal
-                      organisms in an engaging, educator-led touch pool.</p>
-                    <a class="carousel-cta-btn" href="/exhibit.html?code=EX-003">
-                      <span>✋</span> Explore Touch Pool Details &rarr;
-                    </a>
-                  </div>
-                </div>
-
-                <!-- Slide 4: Mobile Library on Wheels -->
-                <div class="carousel-slide-item" data-index="3" data-code="EX-010" data-title="Books and Exhibit on Wheels">
-                  <img src="/uploads/ex4.jpg" alt="Mobile Library and Outreach">
-                  <div class="carousel-overlay">
-                    <span class="carousel-tag">Community Outreach</span>
-                    <h2 class="carousel-title">Books &amp; Exhibits on Wheels</h2>
-                    <p class="carousel-desc">Bringing marine conservation literature, storytelling, and interactive science
-                      modules to children and schools across coastal communities.</p>
-                    <a class="carousel-cta-btn" href="/programs.html">
-                      <span>🌱</span> Explore Signature Programs &rarr;
-                    </a>
-                  </div>
-                </div>
-
-                <!-- Slide 5: Junior Guides & Cultural Heritage -->
-                <div class="carousel-slide-item" data-index="4" data-code="EX-006" data-title="Junior Museum Guides">
-                  <img src="/uploads/ex2.jpg" alt="Junior Museum Guides and Mascots">
-                  <div class="carousel-overlay">
-                    <span class="carousel-tag">Youth Leadership</span>
-                    <h2 class="carousel-title">Junior Museum Guides &amp; Mascots</h2>
-                    <p class="carousel-desc">Meet our passionate young docents trained in marine biodiversity, ready to
-                      guide visitors through thrilling interactive museum experiences.</p>
-                    <a class="carousel-cta-btn" href="/programs.html">
-                      <span>🏆</span> Meet the Junior Guides &rarr;
-                    </a>
-                  </div>
-                </div>
-              </div>
-
-              <div class="carousel-indicators" id="dashCarouselIndicators">
-                <button type="button" class="carousel-dot active" data-slide="0" aria-label="Slide 1"></button>
-                <button type="button" class="carousel-dot" data-slide="1" aria-label="Slide 2"></button>
-                <button type="button" class="carousel-dot" data-slide="2" aria-label="Slide 3"></button>
-                <button type="button" class="carousel-dot" data-slide="3" aria-label="Slide 4"></button>
-                <button type="button" class="carousel-dot" data-slide="4" aria-label="Slide 5"></button>
-              </div>
-            </div>
-          </div>
-
-          <div class="scan-hero" id="scannerSection">
-            <div>
-              <div class="eyebrow">Self-guided tour</div>
-              <h1>Point your camera at any exhibit tag.</h1>
-              <p>Every exhibit at Museo Sang Bata sa Negros carries its own tag. Scan it here to learn what you're looking at and where to find it in the museum — no app to install.</p>
-              <div class="scan-cta" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-                <button class="btn btn-primary" id="openScannerBtn">&#128247; Open scanner</button>
-                <a class="btn btn-ghost" href="/exhibits.html">Browse all exhibits</a>
               </div>
             </div>
-            <div class="scanner-frame">
-              <div class="viewport" id="viewport" title="Live camera viewfinder or drag-and-drop QR image here">
-                <div class="viewport-placeholder" id="viewportPlaceholder">
-                  <div style="font-size: 28px; margin-bottom: 8px;">📷</div>
-                  Tap <strong>"Open scanner"</strong> to activate your camera to scan an exhibit tag.
+
+            <div class="scan-hero" id="scannerSection">
+              <div>
+                <div class="eyebrow">Self-guided tour</div>
+                <h1>Point your camera at any exhibit tag.</h1>
+                <p>Every exhibit at Museo Sang Bata sa Negros carries its own tag. Scan it here to learn what you're
+                  looking at and where to find it in the museum — no app to install.</p>
+                <div class="scan-cta" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                  <button class="btn btn-primary" id="openScannerBtn">&#128247; Open scanner</button>
+                  <a class="btn btn-ghost" href="/exhibits.html">Browse all exhibits</a>
                 </div>
-                <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
               </div>
-              <div class="scan-status" id="scanStatus"></div>
-              <div class="scanner-controls-row" id="scannerControlsRow" style="display: none; gap: 8px; justify-content: center; width: 100%; flex-wrap: wrap;">
-                <button type="button" class="btn btn-ghost dark btn-small" id="switchCameraBtn" style="display:none;">🔄 Switch Camera</button>
-                <button type="button" class="btn btn-ghost dark btn-small" id="torchBtn" style="display:none;">💡 Flashlight</button>
-              </div>
-              <div class="manual-row">
-                <input type="text" id="manualCode" placeholder="e.g. EX-001 or paste tag link" class="mono">
-                <button class="btn btn-ghost dark btn-small" id="manualGoBtn">Go</button>
+              <div class="scanner-frame">
+                <div class="viewport" id="viewport" title="Live camera viewfinder or drag-and-drop QR image here">
+                  <div class="viewport-placeholder" id="viewportPlaceholder">
+                    <div style="font-size: 28px; margin-bottom: 8px;">📷</div>
+                    Tap <strong>"Open scanner"</strong> to activate your camera to scan an exhibit tag.
+                  </div>
+                  <div class="corner tl"></div>
+                  <div class="corner tr"></div>
+                  <div class="corner bl"></div>
+                  <div class="corner br"></div>
+                </div>
+                <div class="scan-status" id="scanStatus"></div>
+                <div class="scanner-controls-row" id="scannerControlsRow"
+                  style="display: none; gap: 8px; justify-content: center; width: 100%; flex-wrap: wrap;">
+                  <button type="button" class="btn btn-ghost dark btn-small" id="switchCameraBtn"
+                    style="display:none;">🔄 Switch Camera</button>
+                  <button type="button" class="btn btn-ghost dark btn-small" id="torchBtn" style="display:none;">💡
+                    Flashlight</button>
+                </div>
+                <div class="manual-row">
+                  <input type="text" id="manualCode" placeholder="e.g. EX-001 or paste tag link" class="mono">
+                  <button class="btn btn-ghost dark btn-small" id="manualGoBtn">Go</button>
+                </div>
               </div>
             </div>
           </div>
@@ -1041,14 +1165,11 @@
               <span class="yt-badge">&#9654; YouTube</span>
             </div>
             <div class="featured-video-box" id="featuredVideoBox">
-              <iframe
-                id="featuredYT"
+              <iframe id="featuredYT"
                 src="https://www.youtube.com/embed/fAkjwVlPhvA?autoplay=1&mute=1&loop=1&playlist=fAkjwVlPhvA&rel=0&modestbranding=1&playsinline=1&enablejsapi=1"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                referrerpolicy="strict-origin-when-cross-origin"
-                allowfullscreen
-                title="Museo Sang Bata sa Negros — Featured Video"
-              ></iframe>
+                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen
+                title="Museo Sang Bata sa Negros — Featured Video"></iframe>
               <button class="unmute-btn" id="unmuteBtn" onclick="toggleMute()">
                 <span class="icon">&#128263;</span><span id="unmuteBtnLabel">Tap to unmute</span>
               </button>
@@ -1058,22 +1179,30 @@
           <!-- ── Minimal Previews: Exhibits, Programs, Events & Gallery ──── -->
           <div class="home-previews-container">
             <!-- ⭐ Recommended & Top-Rated Exhibits Preview -->
-            <section class="home-preview-block" id="homeRecommendedBlock" style="border: 1.5px solid #dbeafe; background: #ffffff; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03); border-radius: 16px;">
+            <section class="home-preview-block" id="homeRecommendedBlock"
+              style="border: 1.5px solid #dbeafe; background: #ffffff; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03); border-radius: 16px;">
               <div class="home-preview-head">
                 <div class="home-preview-title-group">
-                  <div class="home-preview-icon" style="background: #eff6ff; border: 1.5px solid #bfdbfe; color:#1d4ed8;">⭐</div>
+                  <div class="home-preview-icon"
+                    style="background: #eff6ff; border: 1.5px solid #bfdbfe; color:#1d4ed8;">⭐</div>
                   <div>
-                    <h3 class="home-preview-title" style="color: #000000; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <h3 class="home-preview-title"
+                      style="color: #000000; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                       Top-Rated &amp; Recommended Exhibits
-                      <span style="font-size: 10.5px; font-weight: 800; background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; padding: 2px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.08em;">Visitor Choice</span>
+                      <span
+                        style="font-size: 10.5px; font-weight: 800; background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; padding: 2px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.08em;">Visitor
+                        Choice</span>
                     </h3>
-                    <p class="home-preview-sub" style="color: #000000;">Highest rated hands-on experiences based on real visitor feedback</p>
+                    <p class="home-preview-sub" style="color: #000000;">Highest rated hands-on experiences based on real
+                      visitor feedback</p>
                   </div>
                 </div>
-                <a href="/exhibits.html" class="home-preview-viewall" style="color: #1d4ed8; font-weight:700;">Browse all exhibits &rarr;</a>
+                <a href="/exhibits.html" class="home-preview-viewall" style="color: #1d4ed8; font-weight:700;">Browse
+                  all exhibits &rarr;</a>
               </div>
               <div class="home-minimal-grid" id="homeRecommendedGrid">
-                <div style="color:rgba(255,255,255,0.7); font-size:13px; grid-column:1/-1;">Loading recommendations&hellip;</div>
+                <div style="color:rgba(255,255,255,0.7); font-size:13px; grid-column:1/-1;">Loading
+                  recommendations&hellip;</div>
               </div>
             </section>
 
@@ -1161,8 +1290,8 @@
     let _ytMuted = true;
     function toggleMute() {
       const iframe = document.getElementById('featuredYT');
-      const label  = document.getElementById('unmuteBtnLabel');
-      const btn    = document.getElementById('unmuteBtn');
+      const label = document.getElementById('unmuteBtnLabel');
+      const btn = document.getElementById('unmuteBtn');
       _ytMuted = !_ytMuted;
 
       try {
@@ -1177,34 +1306,34 @@
       label.textContent = _ytMuted ? 'Tap to unmute' : 'Mute';
     }
 
-    function escapeHtml(str){
-      return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    function escapeHtml(str) {
+      return String(str == null ? '' : str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
     }
 
     // ── Minimal Previews Loader (Exhibits, Programs, Events, Gallery) ────
-    async function loadHomePreviews(){
+    async function loadHomePreviews() {
       try {
         const [recRes, exhibitRes, progRes, eventRes, galleryRes] = await Promise.all([
-          Api.listRecommendedExhibits(3).catch(()=>({ exhibits: [] })),
-          Api.listExhibits().catch(()=>({ exhibits: [] })),
-          Api.listPrograms().catch(()=>({ programs: [] })),
-          Api.listEvents().catch(()=>({ events: [] })),
-          Api.listGallery().catch(()=>({ gallery: [] }))
+          Api.listRecommendedExhibits(3).catch(() => ({ exhibits: [] })),
+          Api.listExhibits().catch(() => ({ exhibits: [] })),
+          Api.listPrograms().catch(() => ({ programs: [] })),
+          Api.listEvents().catch(() => ({ events: [] })),
+          Api.listGallery().catch(() => ({ gallery: [] }))
         ]);
 
-        const ICONS = {'Marine & Nature':'🐟','Touch & Play':'✋','Toys & Collections':'🧸','Character & Heritage':'🏆','Environmental':'♻️','Reading & Learning':'📖','Other':'🏛️'};
+        const ICONS = { 'Marine & Nature': '🐟', 'Touch & Play': '✋', 'Toys & Collections': '🧸', 'Character & Heritage': '🏆', 'Environmental': '♻️', 'Reading & Learning': '📖', 'Other': '🏛️' };
 
         // 0. ⭐ Recommended & Top-Rated Exhibits (based on visitor ratings)
         const recExhibits = (recRes && Array.isArray(recRes.exhibits)) ? recRes.exhibits : [];
         const recGrid = document.getElementById('homeRecommendedGrid');
-        if(recGrid){
-          if(recExhibits.length === 0){
+        if (recGrid) {
+          if (recExhibits.length === 0) {
             recGrid.innerHTML = `<div style="color:rgba(255,255,255,0.7); font-size:13px; grid-column:1/-1;">No ratings recorded yet. Visit exhibits and leave the first review!</div>`;
           } else {
             recGrid.innerHTML = recExhibits.map(ex => {
               const imgs = Array.isArray(ex.optimizedImagePaths) && ex.optimizedImagePaths.length ? ex.optimizedImagePaths
-                         : Array.isArray(ex.imagePaths) && ex.imagePaths.length ? ex.imagePaths
-                         : ex.imagePath ? [ex.imagePath] : [];
+                : Array.isArray(ex.imagePaths) && ex.imagePaths.length ? ex.imagePaths
+                  : ex.imagePath ? [ex.imagePath] : [];
               const img = imgs[0] || '';
               const icon = ICONS[ex.category] || '🏛️';
               const hasRating = ex.ratingAverage != null;
@@ -1216,14 +1345,14 @@
                 <a href="/exhibit.html?code=${encodeURIComponent(ex.code)}" class="home-mini-card home-exhibit-card recommended-card">
                   <div class="home-mini-card-top">
                     ${img
-                      ? `<div class="home-exhibit-media"><img src="${escapeHtml(img)}" alt="${escapeHtml(ex.title)}" loading="lazy"></div>`
-                      : `<div class="home-exhibit-media placeholder">${icon}</div>`
-                    }
+                  ? `<div class="home-exhibit-media"><img src="${escapeHtml(img)}" alt="${escapeHtml(ex.title)}" loading="lazy"></div>`
+                  : `<div class="home-exhibit-media placeholder">${icon}</div>`
+                }
                     <div class="home-mini-badges">
                       ${hasRating
-                        ? `<span class="rating-badge-pill"><span class="stars-gold">${starStr}</span> <strong>${ex.ratingAverage.toFixed(1)}</strong> <span class="rev-count">(${reviewCount})</span></span>`
-                        : `<span class="rating-badge-pill fresh">✨ Recommended</span>`
-                      }
+                  ? `<span class="rating-badge-pill"><span class="stars-gold">${starStr}</span> <strong>${ex.ratingAverage.toFixed(1)}</strong> <span class="rev-count">(${reviewCount})</span></span>`
+                  : `<span class="rating-badge-pill fresh">✨ Recommended</span>`
+                }
                       ${ex.category ? `<span class="home-mini-badge">${escapeHtml(ex.category)}</span>` : ''}
                     </div>
                     <h4 class="home-mini-title">${escapeHtml(ex.title)}</h4>
@@ -1250,15 +1379,15 @@
         const exhibits = (exhibitRes && Array.isArray(exhibitRes.exhibits)) ? exhibitRes.exhibits : [];
         const exGrid = document.getElementById('homeExhibitsGrid');
 
-        if(exGrid){
-          if(exhibits.length === 0){
+        if (exGrid) {
+          if (exhibits.length === 0) {
             exGrid.innerHTML = `<div style="color:var(--ink-soft); font-size:13px; grid-column:1/-1;">No exhibits catalogued yet.</div>`;
           } else {
             const previewEx = exhibits.slice(0, 3);
             exGrid.innerHTML = previewEx.map(ex => {
               const imgs = Array.isArray(ex.optimizedImagePaths) && ex.optimizedImagePaths.length ? ex.optimizedImagePaths
-                         : Array.isArray(ex.imagePaths) && ex.imagePaths.length ? ex.imagePaths
-                         : ex.imagePath ? [ex.imagePath] : [];
+                : Array.isArray(ex.imagePaths) && ex.imagePaths.length ? ex.imagePaths
+                  : ex.imagePath ? [ex.imagePath] : [];
               const img = imgs[0] || '';
               const icon = ICONS[ex.category] || '🏛️';
               const hasRating = ex.ratingAverage != null;
@@ -1268,9 +1397,9 @@
                 <a href="/exhibit.html?code=${encodeURIComponent(ex.code)}" class="home-mini-card home-exhibit-card">
                   <div class="home-mini-card-top">
                     ${img
-                      ? `<div class="home-exhibit-media"><img src="${escapeHtml(img)}" alt="${escapeHtml(ex.title)}" loading="lazy"></div>`
-                      : `<div class="home-exhibit-media placeholder">${icon}</div>`
-                    }
+                  ? `<div class="home-exhibit-media"><img src="${escapeHtml(img)}" alt="${escapeHtml(ex.title)}" loading="lazy"></div>`
+                  : `<div class="home-exhibit-media placeholder">${icon}</div>`
+                }
                     <div class="home-mini-badges">
                       ${hasRating ? `<span class="rating-badge-pill"><span class="stars-gold">${starStr}</span> <strong>${ex.ratingAverage.toFixed(1)}</strong></span>` : ''}
                       ${ex.category ? `<span class="home-mini-badge">${escapeHtml(ex.category)}</span>` : ''}
@@ -1290,7 +1419,7 @@
 
         // Populate Home Sidebar Categories
         const catContainer = document.getElementById('homeSidebarCategories');
-        if(catContainer && exhibits.length > 0){
+        if (catContainer && exhibits.length > 0) {
           const uniqueCats = Array.from(new Set(exhibits.map(e => String(e.category || 'Other').trim()).filter(Boolean)));
           catContainer.innerHTML = uniqueCats.map(cat => {
             const count = exhibits.filter(e => String(e.category || 'Other').trim().toLowerCase() === cat.toLowerCase()).length;
@@ -1308,25 +1437,25 @@
         // 1. Programs (max 3 — with visible photo thumbnails)
         const programs = (progRes && Array.isArray(progRes.programs)) ? progRes.programs : [];
         const progGrid = document.getElementById('homeProgramsGrid');
-        if(progGrid){
-          if(programs.length === 0){
+        if (progGrid) {
+          if (programs.length === 0) {
             progGrid.innerHTML = `<div style="color:var(--ink-soft); font-size:13px; grid-column:1/-1;">No programs published yet.</div>`;
           } else {
             const previewProgs = programs.slice(0, 3);
             progGrid.innerHTML = previewProgs.map(p => {
               const imgs = Array.isArray(p.optimizedImagePaths) && p.optimizedImagePaths.length ? p.optimizedImagePaths
-                         : Array.isArray(p.imagePaths) && p.imagePaths.length ? p.imagePaths
-                         : (p.imagePath ? [p.imagePath] : []);
+                : Array.isArray(p.imagePaths) && p.imagePaths.length ? p.imagePaths
+                  : (p.imagePath ? [p.imagePath] : []);
               const img = imgs[0] || '';
               return `
               <a href="/program.html?id=${encodeURIComponent(p.id)}" class="home-mini-card home-exhibit-card">
                 <div class="home-mini-card-top">
                   ${img
-                    ? `<div class="home-exhibit-media"><img src="${escapeHtml(img)}" alt="${escapeHtml(p.title)}" loading="lazy"></div>`
-                    : (p.videoUrl
-                      ? `<div class="home-exhibit-media placeholder" style="background:#1a2b38; color:#fff; font-size:32px;">▶️</div>`
-                      : `<div class="home-exhibit-media placeholder" style="background:#e8f5e9; color:#2e7d32; font-size:36px;">🌱</div>`)
-                  }
+                  ? `<div class="home-exhibit-media"><img src="${escapeHtml(img)}" alt="${escapeHtml(p.title)}" loading="lazy"></div>`
+                  : (p.videoUrl
+                    ? `<div class="home-exhibit-media placeholder" style="background:#1a2b38; color:#fff; font-size:32px;">▶️</div>`
+                    : `<div class="home-exhibit-media placeholder" style="background:#e8f5e9; color:#2e7d32; font-size:36px;">🌱</div>`)
+                }
                   <div class="home-mini-badges">
                     ${p.ageRange ? `<span class="home-mini-badge">${escapeHtml(p.ageRange)}</span>` : ''}
                     ${p.schedule ? `<span class="home-mini-badge date">${escapeHtml(p.schedule)}</span>` : ''}
@@ -1347,25 +1476,25 @@
         // 2. Events (max 3 — with visible photo thumbnails)
         const events = (eventRes && Array.isArray(eventRes.events)) ? eventRes.events : [];
         const eventGrid = document.getElementById('homeEventsGrid');
-        if(eventGrid){
-          if(events.length === 0){
+        if (eventGrid) {
+          if (events.length === 0) {
             eventGrid.innerHTML = `<div style="color:var(--ink-soft); font-size:13px; grid-column:1/-1;">No upcoming events at this time.</div>`;
           } else {
             const previewEvents = events.slice(0, 3);
             eventGrid.innerHTML = previewEvents.map(ev => {
               const imgs = Array.isArray(ev.optimizedImagePaths) && ev.optimizedImagePaths.length ? ev.optimizedImagePaths
-                         : Array.isArray(ev.imagePaths) && ev.imagePaths.length ? ev.imagePaths
-                         : (ev.imagePath ? [ev.imagePath] : []);
+                : Array.isArray(ev.imagePaths) && ev.imagePaths.length ? ev.imagePaths
+                  : (ev.imagePath ? [ev.imagePath] : []);
               const img = imgs[0] || '';
               return `
               <a href="/event.html?id=${encodeURIComponent(ev.id)}" class="home-mini-card home-exhibit-card">
                 <div class="home-mini-card-top">
                   ${img
-                    ? `<div class="home-exhibit-media"><img src="${escapeHtml(img)}" alt="${escapeHtml(ev.title)}" loading="lazy"></div>`
-                    : (ev.videoUrl
-                      ? `<div class="home-exhibit-media placeholder" style="background:#1a2b38; color:#fff; font-size:32px;">▶️</div>`
-                      : `<div class="home-exhibit-media placeholder" style="background:#fff3e6; color:var(--orange); font-size:36px;">📅</div>`)
-                  }
+                  ? `<div class="home-exhibit-media"><img src="${escapeHtml(img)}" alt="${escapeHtml(ev.title)}" loading="lazy"></div>`
+                  : (ev.videoUrl
+                    ? `<div class="home-exhibit-media placeholder" style="background:#1a2b38; color:#fff; font-size:32px;">▶️</div>`
+                    : `<div class="home-exhibit-media placeholder" style="background:#fff3e6; color:var(--orange); font-size:36px;">📅</div>`)
+                }
                   <div class="home-mini-badges">
                     ${ev.date ? `<span class="home-mini-badge date">📅 ${escapeHtml(ev.date)}</span>` : ''}
                     ${ev.location ? `<span class="home-mini-badge">📍 ${escapeHtml(ev.location)}</span>` : ''}
@@ -1386,8 +1515,8 @@
         // 3. Gallery (max 4 items)
         const gallery = (galleryRes && Array.isArray(galleryRes.gallery)) ? galleryRes.gallery : [];
         const galleryGrid = document.getElementById('homeGalleryGrid');
-        if(galleryGrid){
-          if(gallery.length === 0){
+        if (galleryGrid) {
+          if (gallery.length === 0) {
             galleryGrid.innerHTML = `<div style="color:var(--ink-soft); font-size:13px; grid-column:1/-1;">No photos or media uploaded yet.</div>`;
           } else {
             const previewGallery = gallery.slice(0, 4);
@@ -1406,7 +1535,7 @@
             }).join('');
           }
         }
-      } catch(err){
+      } catch (err) {
         console.warn('Could not load home preview items', err);
       }
     }
@@ -1469,14 +1598,14 @@
       if (scanRAF) { cancelAnimationFrame(scanRAF); scanRAF = null; }
       if (scanStream) {
         scanStream.getTracks().forEach(t => {
-          try { t.stop(); } catch(e) {}
+          try { t.stop(); } catch (e) { }
         });
         scanStream = null;
       }
       const viewport = document.getElementById('viewport');
       if (viewport) {
         viewport.querySelectorAll('video').forEach(v => {
-          try { v.pause(); v.srcObject = null; v.remove(); } catch(e) {}
+          try { v.pause(); v.srcObject = null; v.remove(); } catch (e) { }
         });
       }
       if (scanLine && scanLine.parentNode) {
@@ -1533,7 +1662,7 @@
           if (codes && codes.length > 0 && codes[0].rawValue) {
             return codes[0].rawValue;
           }
-        } catch(e) {}
+        } catch (e) { }
       }
 
       // 2. jsQR fallback
@@ -1709,7 +1838,7 @@
                 isTorchOn = !isTorchOn;
                 await track.applyConstraints({ advanced: [{ torch: isTorchOn }] });
                 torchBtn.textContent = isTorchOn ? '💡 Turn Off Light' : '💡 Flashlight';
-              } catch(e) {}
+              } catch (e) { }
             };
             hasControls = true;
           } else if (torchBtn) {
@@ -1731,7 +1860,7 @@
         // Native BarcodeDetector if available
         let detector = null;
         if (typeof BarcodeDetector !== 'undefined') {
-          try { detector = new BarcodeDetector({ formats: ['qr_code'] }); } catch (e) {}
+          try { detector = new BarcodeDetector({ formats: ['qr_code'] }); } catch (e) { }
         }
 
         const canvas = document.createElement('canvas');
@@ -1755,7 +1884,7 @@
                     if (codes && codes.length > 0 && codes[0].rawValue) {
                       result = codes[0].rawValue;
                     }
-                  } catch(e) {}
+                  } catch (e) { }
                 }
 
                 // 2. jsQR on canvas
@@ -1889,4 +2018,5 @@
   <script src="/js/sidebar.js"></script>
   <script src="/js/footer.js"></script>
 </body>
+
 </html>
