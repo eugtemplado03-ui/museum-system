@@ -5791,17 +5791,10 @@ body.admin-portal-body {
 .info-link-label {
   color: #ffffff !important;
   font-weight: 800 !important;
-  text-decoration: underline !important;
 }
-.info-link-arrow {
-  color: rgba(255, 255, 255, 0.85) !important;
-  margin: 0 4px !important;
-}
+.info-link-arrow,
 .info-link-href {
-  color: #ffffff !important;
-  font-family: 'IBM Plex Mono', monospace !important;
-  font-size: 13px !important;
-  opacity: 0.95 !important;
+  display: none !important;
 }
 
 /* ── Admin & Portal Modals & Form Inputs ── */

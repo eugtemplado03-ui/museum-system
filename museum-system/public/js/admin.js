@@ -4853,7 +4853,7 @@ async function renderMuseumInfoTab(contentEl){
           <span class="info-card-icon">🔗</span> Footer Links
         </h3>
         <ul class="info-list">
-          ${(info.footerLinks || []).map(f => `<li><strong class="info-link-label">${escapeHtml(f.label)}</strong> <span class="info-link-arrow">→</span> <span class="info-link-href">${escapeHtml(f.href)}</span></li>`).join('')}
+          ${(info.footerLinks || []).map(f => `<li><strong class="info-link-label">${escapeHtml(f.label)}</strong></li>`).join('')}
         </ul>
       </div>
     </div>
