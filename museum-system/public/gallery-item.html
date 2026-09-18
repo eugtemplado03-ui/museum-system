@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery Details — Museo Sang Bata sa Negros</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css?v=50">
+<script src="/js/gate.js"></script>
+</head>
+<body>
+  <!-- ── Top Navigation Bar ─────────────────────────────────────── -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle navigation sidebar" title="Open Menu">
+        <span class="toggle-bar"></span>
+        <span class="toggle-bar"></span>
+        <span class="toggle-bar"></span>
+      </button>
+      <a class="brand" href="/dashboard.html">
+        <div class="brand-mark">M</div>
+        <div class="brand-text">
+          <div class="name">Museo Sang Bata sa Negros</div>
+          <div class="tagline" style="font-size: 9px; max-width: 400px;">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
+        </div>
+      </a>
+    </div>
+    <div class="nav-links">
+      <a class="nav-btn" href="/dashboard.html">Home</a>
+      <a class="nav-btn" href="/exhibits.html">Exhibits</a>
+      <a class="nav-btn" href="/programs.html">Programs</a>
+      <a class="nav-btn active" href="/gallery.html">Gallery</a>
+      <a class="nav-btn" href="/events.html">Events</a>
+      <a class="nav-btn" href="/admin.html">Admin</a>
+    </div>
+  </div>
+
+  <div class="user-layout">
+    <div class="user-main">
+      <main style="padding: clamp(16px, 2.5vw, 32px) clamp(12px, 2vw, 24px) 80px; flex: 1;">
+        <div class="wrap detail-wrap" style="width: 92%; max-width: 1000px; margin: 0 auto; padding: 0 4px;">
+          <a class="detail-back" href="/gallery.html">&larr; Back to gallery</a>
+          <div id="content">Loading gallery details…</div>
+          <div id="relatedGallery" style="margin-top: 48px;"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <footer id="siteFooter"></footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/chatbot.js"></script>
+  <script src="/js/carousel.js"></script>
+  <script src="/js/image-enhance.js"></script>
+  <script src="/js/lightbox.js"></script>
+  <script>
+    function escapeHtml(str){
+      return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function getAllImages(item){
+      if (Array.isArray(item.optimizedImagePaths) && item.optimizedImagePaths.length) return item.optimizedImagePaths;
+      if (Array.isArray(item.imagePaths) && item.imagePaths.length) return item.imagePaths;
+      if (item.optimizedImagePath) return [item.optimizedImagePath];
+      if (item.imagePath) return [item.imagePath];
+      return [];
+    }
+
+    function formatDate(d){
+      if(!d) return '';
+      const parsed = new Date(d);
+      if(isNaN(parsed.getTime())) return d;
+      return parsed.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    async function load(){
+      const params = new URLSearchParams(location.search);
+      const id = params.get('id');
+      const content = document.getElementById('content');
+      if(!id){
+        content.innerHTML = `<div class="empty-state"><h2>No gallery item selected</h2><p>Please select a photo or video from the gallery.</p><a class="btn btn-primary" href="/gallery.html">View all gallery items</a></div>`;
+        return;
+      }
+      try{
+        let item = null;
+        try {
+          const res = await Api.getGalleryItem(id);
+          item = res.gallery || res.item;
+        } catch(err) {
+          // Fallback to list search
+          const { gallery } = await Api.listGallery();
+          item = (gallery || []).find(g => g.id === id);
+        }
+
+        if(!item){
+          content.innerHTML = `<div class="empty-state"><h2>Gallery item not found</h2><p>The photo or video you are looking for may have been removed or updated.</p><a class="btn btn-primary" href="/gallery.html">Back to all gallery items</a></div>`;
+          return;
+        }
+
+        document.title = (item.title || item.caption || 'Gallery') + ' — Gallery — Museo Sang Bata sa Negros';
+        const images = getAllImages(item);
+        const hasVideo = Boolean(item.videoUrl && String(item.videoUrl).trim());
+        const hasPhotos = images.length > 0;
+        
+        let badge = '';
+        if (hasVideo && hasPhotos) {
+          badge = `<span class="tag" style="background:rgba(217,79,61,0.2); color:#ff8585; border:1px solid rgba(217,79,61,0.35);">🎬 Video + 📷 ${images.length} Photos</span>`;
+        } else if (hasVideo) {
+          badge = `<span class="tag" style="background:rgba(217,79,61,0.2); color:#ff8585; border:1px solid rgba(217,79,61,0.35);">▶ Video</span>`;
+        } else if (images.length > 1) {
+          badge = `<span class="tag">📷 ${images.length} Photos</span>`;
+        } else {
+          badge = `<span class="tag">📷 Photo</span>`;
+        }
+
+        const dateStr = formatDate(item.createdAt);
+        const mediaTypeDesc = hasVideo ? (hasPhotos ? `Video & Photo Album (${images.length} images)` : 'Video') : (images.length > 1 ? `${images.length} Photos Album` : 'High-Resolution Photograph');
+
+        content.innerHTML = `
+          <div class="plaque">
+            <div class="plaque-media gallery-detail-media-wrap">
+              ${renderMediaBox(images, item.videoUrl, item.title || item.caption || 'Gallery photo', '📷')}
+            </div>
+            <div class="plaque-body">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+                <div class="plaque-cat">${badge}</div>
+              </div>
+              <h1>${escapeHtml(item.title || item.caption || 'Museum Gallery')}</h1>
+              
+              <div class="plaque-meta-row">
+                ${dateStr ? `<div><span>Date Added</span><b>${escapeHtml(dateStr)}</b></div>` : ''}
+                <div><span>Media Type</span><b>${escapeHtml(mediaTypeDesc)}</b></div>
+              </div>
+
+              <div style="display:flex; gap:8px; align-items:center; margin-top:2px;">
+                <label for="langSelect" style="font-size:12.5px; color:var(--grey-400); font-weight:600;">Language:</label>
+                <select id="langSelect" style="padding:5px 10px; font-size:13px; border-radius:8px; border:1px solid var(--grey-200); background:#fff; font-family:inherit; color:var(--ink); cursor:pointer;">
+                  <option value="original">Original (English)</option>
+                  <option value="tl">Tagalog (Filipino)</option>
+                  <option value="cb">Bisaya (Cebuano)</option>
+                  <option value="hil">Hiligaynon (Ilonggo)</option>
+                </select>
+              </div>
+
+              <div class="plaque-desc" id="plaqueDesc" data-desc-original="${escapeHtml(item.caption || item.description || '')}" data-desc-tl="${escapeHtml(item.caption_tl || item.description_tl || '')}" data-desc-cb="${escapeHtml(item.caption_cb || item.description_cb || '')}" data-desc-hil="${escapeHtml(item.caption_hil || item.description_hil || '')}">
+                ${escapeHtml(item.caption || item.description || 'No detailed caption provided for this gallery item.')}
+              </div>
+
+              <div class="tts-controls">
+                <button class="btn btn-secondary btn-small" id="ttsPlayBtn">🔊 Listen to description</button>
+                <button class="btn btn-secondary btn-small" id="ttsStopBtn">■ Stop</button>
+                <div id="ttsStatus" style="font-size:12px; color:var(--grey-400);"></div>
+              </div>
+            </div>
+          </div>`;
+
+        initPhotoCarousels(content);
+        wireTranslationAndTTS(item);
+
+        const v = content.querySelector('video');
+        if (v) {
+          if (v.videoWidth && v.videoHeight) {
+            window.applyVideoOrientation(v);
+          } else {
+            v.addEventListener('loadedmetadata', () => window.applyVideoOrientation(v), { once: true });
+          }
+        }
+
+        // Load Related Gallery Items
+        loadRelatedGallery(id);
+      }catch(e){
+        console.error('Error loading gallery details:', e);
+        content.innerHTML = `<div class="empty-state"><h2>Gallery item not found</h2><p>The photo or video you are looking for could not be loaded.</p><a class="btn btn-primary" href="/gallery.html">Back to all gallery items</a></div>`;
+      }
+    }
+
+    async function loadRelatedGallery(currentId) {
+      try {
+        const { gallery } = await Api.listGallery();
+        const otherItems = (gallery || []).filter(g => g.id !== currentId).slice(0, 3);
+        if (!otherItems.length) return;
+
+        const wrap = document.getElementById('relatedGallery');
+        wrap.innerHTML = `
+          <h2 style="font-size: 20px; font-weight: 800; color: #000000; margin-bottom: 18px;">More from our Gallery</h2>
+          <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+            ${otherItems.map(g => {
+              const imgs = getAllImages(g);
+              return `
+                <div class="content-card gallery-content-card" style="display:flex; flex-direction:column; background:#ffffff; border-radius:14px; overflow:hidden; border:1px solid #e2e8f0; box-shadow:0 4px 14px rgba(0,0,0,0.06);">
+                  <div class="media" style="height: 180px; position:relative; overflow:hidden;">
+                    ${renderMediaBox(imgs, g.videoUrl, g.title || g.caption || 'Gallery photo', '📷')}
+                  </div>
+                  <div class="body" style="padding:16px; display:flex; flex-direction:column; flex:1;">
+                    <h3 style="margin:0 0 6px; font-size:16px;"><a href="/gallery-item.html?id=${encodeURIComponent(g.id)}" style="color:#0f172a; text-decoration:none;">${escapeHtml(g.title || g.caption || 'Gallery Photo')}</a></h3>
+                    <p class="desc" style="font-size:13px; color:#475569; margin:0 0 12px; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${escapeHtml(g.caption || '')}</p>
+                    <div style="margin-top:auto; padding-top:8px;">
+                      <a class="btn btn-ghost dark btn-small" href="/gallery-item.html?id=${encodeURIComponent(g.id)}" style="color:#000000 !important; font-weight:800; background:#ffffff !important;">View details &rarr;</a>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+        initPhotoCarousels(wrap);
+      } catch (err) {
+        /* ignore related errors */
+      }
+    }
+
+    function wireTranslationAndTTS(item){
+      const playBtn    = document.getElementById('ttsPlayBtn');
+      const stopBtn    = document.getElementById('ttsStopBtn');
+      const statusEl   = document.getElementById('ttsStatus');
+      const descEl     = document.getElementById('plaqueDesc');
+      const langSelect = document.getElementById('langSelect');
+      if (!playBtn || !stopBtn || !descEl) return;
+
+      const _cache = {
+        original: descEl.dataset.descOriginal || item.caption || item.description || '',
+        tl: descEl.dataset.descTl || item.caption_tl || item.description_tl || '',
+        cb: descEl.dataset.descCb || item.caption_cb || item.description_cb || '',
+        hil: descEl.dataset.descHil || item.caption_hil || item.description_hil || ''
+      };
+      let _currentText = _cache.original;
+
+      function setStatus(msg, isLoading) {
+        statusEl.textContent = msg;
+        playBtn.disabled = isLoading || false;
+      }
+
+      async function fetchTranslation(targetLang) {
+        if (_cache[targetLang] && _cache[targetLang].trim()) return _cache[targetLang].trim();
+        const originalText = _cache.original || '';
+        if (!originalText.trim()) return originalText;
+
+        setStatus('Translating…', true);
+        try {
+          const resp = await fetch('/api/tts/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: originalText, targetLang }),
+          });
+          if (!resp.ok) throw new Error('Translation error');
+          const { translatedText } = await resp.json();
+          if (translatedText) _cache[targetLang] = translatedText;
+          setStatus('', false);
+          return translatedText || originalText;
+        } catch (e) {
+          setStatus('Translation unavailable — using original text.', false);
+          return originalText;
+        }
+      }
+
+      let _audioEl = null;
+      function stopAudio() {
+        if (_audioEl) { _audioEl.pause(); _audioEl.src = ''; _audioEl = null; }
+        setStatus('', false);
+      }
+
+      if (langSelect) {
+        langSelect.addEventListener('change', async () => {
+          stopAudio();
+          const v = langSelect.value;
+          if (v === 'original') {
+            _currentText = _cache.original;
+            descEl.textContent = _currentText || 'No detailed caption provided for this gallery item.';
+            setStatus('', false);
+          } else {
+            const translated = await fetchTranslation(v);
+            _currentText = translated;
+            descEl.textContent = translated || 'No detailed caption provided for this gallery item.';
+          }
+        });
+      }
+
+      playBtn.addEventListener('click', async () => {
+        stopAudio();
+        const textToSpeak = _currentText || item.title || item.caption || '';
+        if (!textToSpeak.trim()) { setStatus('Nothing to read.', false); return; }
+        setStatus('⏳ Generating audio…', true);
+        try {
+          const currentLang = (langSelect && langSelect.value !== 'original') ? langSelect.value : 'en';
+          const resp = await fetch('/api/tts/speak', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: textToSpeak, lang: currentLang }),
+          });
+          if (!resp.ok) throw new Error('TTS error ' + resp.status);
+          const blob = await resp.blob();
+          const url = URL.createObjectURL(blob);
+          _audioEl = new Audio(url);
+          _audioEl.onplay  = () => setStatus('🔊 Playing…', true);
+          _audioEl.onended = () => { URL.revokeObjectURL(url); _audioEl = null; setStatus('', false); };
+          _audioEl.onerror = () => { URL.revokeObjectURL(url); _audioEl = null; setStatus('Playback error.', false); };
+          await _audioEl.play();
+        } catch(e) {
+          console.warn('[TTS speak] server TTS failed, trying browser fallback:', e);
+          try {
+            setStatus('🔊 Playing (browser voice)…', true);
+            const utter = new SpeechSynthesisUtterance(textToSpeak);
+            utter.lang = (langSelect?.value === 'tl' || langSelect?.value === 'cb' || langSelect?.value === 'hil') ? 'fil-PH' : 'en-US';
+            utter.onend = () => setStatus('', false);
+            utter.onerror = () => setStatus('Audio unavailable.', false);
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utter);
+          } catch (e2) {
+            console.error('[TTS speak] both failed:', e2);
+            setStatus('Audio unavailable — check connection.', false);
+          }
+        }
+      });
+
+      stopBtn.addEventListener('click', stopAudio);
+      window.addEventListener('pagehide', stopAudio);
+    }
+
+    load();
+  </script>
+  <script src="/js/sidebar.js"></script>
+  <script src="/js/footer.js"></script>
+</body>
+</html>

@@ -59,6 +59,11 @@ const Api = (() => {
       if (ev) return { event: ev };
     }
     if (path === '/api/gallery') return { gallery: db.gallery || [] };
+    if (path.startsWith('/api/gallery/')) {
+      const id = decodeURIComponent(path.replace('/api/gallery/', '').split('?')[0]);
+      const g = (db.gallery || []).find(item => item.id === id);
+      if (g) return { gallery: g, item: g };
+    }
     if (path === '/api/museum-info') return { info: db.museumInfo || {} };
     if (path === '/api/carousel' || path === '/api/carousel/admin') {
       return {
@@ -168,6 +173,7 @@ const Api = (() => {
     assignExhibitsToCategory: (category, exhibitIds) => request('/api/exhibits/categories/' + encodeURIComponent(category) + '/assign', { method: 'POST', body: JSON.stringify({ exhibitIds }) }),
 
     listGallery: () => request('/api/gallery'),
+    getGalleryItem: (id) => request('/api/gallery/' + encodeURIComponent(id)),
     createGalleryItem: (payload) => request('/api/gallery', { method: 'POST', body: JSON.stringify(payload) }),
     updateGalleryItem: (id, payload) => request('/api/gallery/' + id, { method: 'PUT', body: JSON.stringify(payload) }),
     deleteGalleryItem: (id) => request('/api/gallery/' + id, { method: 'DELETE' }),

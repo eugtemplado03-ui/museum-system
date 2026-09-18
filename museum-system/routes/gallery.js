@@ -12,6 +12,16 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/:id', async (req, res) => {
+  try {
+    const item = await gallery.findById(req.params.id);
+    if (!item) return res.status(404).json({ error: 'Gallery item not found.' });
+    res.json({ gallery: item, item });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch gallery item' });
+  }
+});
+
 router.post('/', requireAuth, async (req, res) => {
   const hasMedia = (req.body && (req.body.imagePath || (Array.isArray(req.body.imagePaths) && req.body.imagePaths.length > 0) || (req.body.videoUrl && String(req.body.videoUrl).trim())));
   if (!hasMedia) {
