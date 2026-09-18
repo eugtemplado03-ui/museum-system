@@ -5361,17 +5361,25 @@ function openSlideModal(slide, allSlides) {
       <div class="form-field full">
         <label>Slide Photo *</label>
         <div style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
-          <input type="text" id="csImagePath" value="${escapeHtml(slide?.imagePath || '')}" placeholder="/uploads/ex3.jpg or https://..." style="flex:1;">
+          <input type="text" id="csImagePath" value="${escapeHtml(slide?.imagePath || '/uploads/ex3.jpg')}" placeholder="/uploads/ex3.jpg or https://..." style="flex:1;">
           <label class="btn btn-secondary btn-small" style="cursor:pointer; margin:0; flex-shrink:0;">
             📁 Browse Photo
             <input type="file" id="csFileInput" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none;">
           </label>
         </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; align-items:center;">
+          <span style="font-size:11px; font-weight:800; color:#475569;">Quick Presets:</span>
+          <button type="button" class="btn btn-ghost btn-small preset-img-btn" data-url="/uploads/ex3.jpg" style="font-size:11px; padding:2px 8px;">Museum Facade</button>
+          <button type="button" class="btn btn-ghost btn-small preset-img-btn" data-url="/uploads/ex2.jpg" style="font-size:11px; padding:2px 8px;">Junior Guides</button>
+          <button type="button" class="btn btn-ghost btn-small preset-img-btn" data-url="/uploads/ex4.jpg" style="font-size:11px; padding:2px 8px;">Mobile Library</button>
+          <button type="button" class="btn btn-ghost btn-small preset-img-btn" data-url="https://museosangbata.org/wp-content/uploads/2014/11/under-the-sea-banner-260x170.jpg" style="font-size:11px; padding:2px 8px;">Under the Sea</button>
+          <button type="button" class="btn btn-ghost btn-small preset-img-btn" data-url="https://museosangbata.org/wp-content/uploads/2014/11/splash-banner-260x170.jpg" style="font-size:11px; padding:2px 8px;">Splash Zone</button>
+        </div>
         <div id="csUploadStatus" style="font-size:12px; color:#2563eb; margin-bottom:6px;"></div>
         
         <!-- Live Image Preview inside modal -->
         <div style="width:100%; height:160px; border-radius:10px; border:1.5px dashed #cbd5e1; background:#f8fafc; overflow:hidden; display:flex; align-items:center; justify-content:center; position:relative;">
-          <img id="csImgPreview" src="${escapeHtml(slide?.imagePath || '/uploads/ex3.jpg')}" alt="Preview" style="width:100%; height:100%; object-fit:cover; display:${slide?.imagePath ? 'block' : 'block'};">
+          <img id="csImgPreview" src="${escapeHtml(slide?.imagePath || '/uploads/ex3.jpg')}" alt="Preview" style="width:100%; height:100%; object-fit:cover;">
         </div>
       </div>
 
@@ -5399,6 +5407,18 @@ function openSlideModal(slide, allSlides) {
       previewImg.src = val;
       previewImg.style.display = 'block';
     }
+  });
+
+  document.querySelectorAll('.preset-img-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const url = btn.dataset.url;
+      if (url && pathInput && previewImg) {
+        pathInput.value = url;
+        previewImg.src = url;
+        previewImg.style.display = 'block';
+        if (statusEl) statusEl.textContent = 'Selected preset photo';
+      }
+    });
   });
 
   fileInput?.addEventListener('change', async (e) => {
