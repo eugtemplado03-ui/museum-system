@@ -16,6 +16,7 @@ const galleryRoutes = require('./routes/gallery');
 const visitorsRoutes = require('./routes/visitors');
 const artifactLogsRoutes = require('./routes/artifact-logs');
 const museumInfoRoutes = require('./routes/museum-info');
+const carouselRoutes = require('./routes/carousel');
 const { UPLOAD_DIR } = require('./middleware/upload');
 
 const app = express();
@@ -120,6 +121,7 @@ app.use('/api/gallery', galleryRoutes);
 app.use('/api/visitors', visitorsRoutes);
 app.use('/api/artifact-logs', artifactLogsRoutes);
 app.use('/api/museum-info', museumInfoRoutes);
+app.use('/api/carousel', carouselRoutes);
 
 const mongoose = require('mongoose');
 

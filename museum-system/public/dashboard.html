@@ -2170,20 +2170,67 @@
       });
     }
 
-    // ── Interactive Showcase Hero Carousel Controller (Same as Welcome Page) ──
-    (function initDashboardHeroCarousel() {
+    // ── Interactive Showcase Hero Carousel Controller (Dynamic & 5s Auto-advance) ──
+    (async function initDashboardHeroCarousel() {
       const carousel = document.getElementById('dashboardCarousel');
       if (!carousel) return;
-      const slides = carousel.querySelectorAll('.carousel-slide-item');
-      const dots = carousel.querySelectorAll('.carousel-dot');
+
+      const stage = document.getElementById('dashCarouselStage');
+      const indicators = document.getElementById('dashCarouselIndicators');
       const prevBtn = document.getElementById('dashCarouselPrevBtn');
       const nextBtn = document.getElementById('dashCarouselNextBtn');
       const counter = document.getElementById('dashCarouselCounter');
+
       let currentSlide = 0;
-      const totalSlides = slides.length;
+      let totalSlides = 5;
       let timer = null;
+      let isPaused = false;
+      let intervalMs = 5000;
+
+      // Dynamic fetch from API
+      try {
+        const res = await fetch('/api/carousel');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && Array.isArray(data.slides) && data.slides.length > 0) {
+            const slides = data.slides;
+            if (stage && indicators) {
+              stage.innerHTML = slides.map((s, idx) => {
+                const targetUrl = s.linkUrl || (s.code ? `/exhibit.html?code=${encodeURIComponent(s.code)}` : '/exhibits.html');
+                return `
+                  <div class="carousel-slide-item${idx === 0 ? ' active' : ''}" data-index="${idx}" data-code="${escapeHtml(s.code || '')}" data-title="${escapeHtml(s.title || '')}">
+                    <img src="${escapeHtml(s.imagePath || '/uploads/ex3.jpg')}" alt="${escapeHtml(s.title || 'Museum Slide')}">
+                    <div class="carousel-overlay">
+                      ${s.tag ? `<span class="carousel-tag">${escapeHtml(s.tag)}</span>` : ''}
+                      <h2 class="carousel-title">${escapeHtml(s.title)}</h2>
+                      <p class="carousel-desc">${escapeHtml(s.description || '')}</p>
+                      <a class="carousel-cta-btn" href="${escapeHtml(targetUrl)}">
+                        <span>🏛️</span> ${escapeHtml(s.ctaText || 'Explore More')} &rarr;
+                      </a>
+                    </div>
+                  </div>
+                `;
+              }).join('');
+
+              indicators.innerHTML = slides.map((_, idx) => `
+                <button type="button" class="carousel-dot${idx === 0 ? ' active' : ''}" data-slide="${idx}" aria-label="Slide ${idx + 1}"></button>
+              `).join('');
+            }
+          }
+          if (data && data.settings && typeof data.settings.autoplayInterval === 'number') {
+            intervalMs = data.settings.autoplayInterval;
+          }
+        }
+      } catch (e) {
+        // Fall back to pre-rendered HTML slides
+      }
+
+      const slides = carousel.querySelectorAll('.carousel-slide-item');
+      const dots = carousel.querySelectorAll('.carousel-dot');
+      totalSlides = slides.length;
 
       function goTo(index) {
+        if (totalSlides <= 0) return;
         currentSlide = (index + totalSlides) % totalSlides;
         slides.forEach((s, i) => s.classList.toggle('active', i === currentSlide));
         dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
@@ -2192,7 +2239,12 @@
 
       function startTimer() {
         if (timer) clearInterval(timer);
-        timer = setInterval(() => goTo(currentSlide + 1), 5000);
+        if (totalSlides <= 1) return;
+        timer = setInterval(() => {
+          if (!isPaused && document.visibilityState !== 'hidden') {
+            goTo(currentSlide + 1);
+          }
+        }, intervalMs);
       }
 
       function resetTimer() {
@@ -2224,26 +2276,44 @@
         });
       });
 
-      carousel.addEventListener('mouseenter', () => { if (timer) clearInterval(timer); });
-      carousel.addEventListener('mouseleave', startTimer);
+      carousel.addEventListener('mouseenter', () => {
+        isPaused = true;
+        if (timer) clearInterval(timer);
+      });
+      carousel.addEventListener('mouseleave', () => {
+        isPaused = false;
+        startTimer();
+      });
 
       // Touch swipe support for mobile
       let touchStartX = 0;
       let touchEndX = 0;
       carousel.addEventListener('touchstart', (e) => {
+        isPaused = true;
+        if (timer) clearInterval(timer);
         touchStartX = e.changedTouches[0].screenX;
       }, { passive: true });
+
       carousel.addEventListener('touchend', (e) => {
         touchEndX = e.changedTouches[0].screenX;
         if (touchStartX - touchEndX > 50) {
           goTo(currentSlide + 1);
-          resetTimer();
         } else if (touchEndX - touchStartX > 50) {
           goTo(currentSlide - 1);
-          resetTimer();
         }
+        isPaused = false;
+        resetTimer();
       }, { passive: true });
 
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+          if (timer) clearInterval(timer);
+        } else {
+          startTimer();
+        }
+      });
+
+      goTo(0);
       startTimer();
     })();
   </script>

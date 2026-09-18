@@ -307,6 +307,9 @@
         if (typeof carousel._updateSlide === 'function') {
           carousel._updateSlide(parseInt(carousel.dataset.slide, 10) || 0, false);
         }
+        if (typeof carousel._restartAutoPlay === 'function') {
+          carousel._restartAutoPlay();
+        }
         return;
       }
       carousel._carouselInitialized = true;
@@ -318,6 +321,37 @@
       const currentLabel = carousel.querySelector('.carousel-badge .current');
       const total = parseInt(carousel.dataset.total, 10) || 1;
       let currentIndex = 0;
+
+      // Autoplay timer every 5 seconds (5000ms)
+      const AUTOPLAY_INTERVAL = 5000;
+      let autoPlayTimer = null;
+      let isPaused = false;
+
+      function startAutoPlay() {
+        stopAutoPlay();
+        if (total <= 1) return;
+        autoPlayTimer = setInterval(() => {
+          if (!isPaused && document.visibilityState !== 'hidden') {
+            updateSlide(currentIndex + 1);
+          }
+        }, AUTOPLAY_INTERVAL);
+      }
+
+      function stopAutoPlay() {
+        if (autoPlayTimer) {
+          clearInterval(autoPlayTimer);
+          autoPlayTimer = null;
+        }
+      }
+
+      function restartAutoPlay() {
+        stopAutoPlay();
+        startAutoPlay();
+      }
+
+      carousel._stopAutoPlay = stopAutoPlay;
+      carousel._startAutoPlay = startAutoPlay;
+      carousel._restartAutoPlay = restartAutoPlay;
 
       function updateSlide(index, animate = true) {
         currentIndex = (index + total) % total;
@@ -344,6 +378,7 @@
           e.preventDefault();
           e.stopPropagation();
           updateSlide(currentIndex - 1);
+          restartAutoPlay();
         });
       }
 
@@ -352,6 +387,7 @@
           e.preventDefault();
           e.stopPropagation();
           updateSlide(currentIndex + 1);
+          restartAutoPlay();
         });
       }
 
@@ -360,7 +396,19 @@
           e.preventDefault();
           e.stopPropagation();
           updateSlide(idx);
+          restartAutoPlay();
         });
+      });
+
+      // Pause on hover, resume on mouse leave
+      carousel.addEventListener('mouseenter', () => {
+        isPaused = true;
+        stopAutoPlay();
+      });
+
+      carousel.addEventListener('mouseleave', () => {
+        isPaused = false;
+        startAutoPlay();
       });
 
       // Touch swipe gestures
@@ -371,6 +419,8 @@
 
       carousel.addEventListener('touchstart', (e) => {
         if (e.touches.length !== 1) return;
+        isPaused = true;
+        stopAutoPlay();
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
         touchDeltaX = 0;
@@ -399,12 +449,27 @@
         } else if (touchDeltaX > swipeThreshold) {
           updateSlide(currentIndex - 1);
         }
+        isPaused = false;
+        restartAutoPlay();
       }, { passive: true });
 
-      // Initialize initial state
+      // Initialize initial state and launch 5-second autoplay
       updateSlide(0, false);
+      startAutoPlay();
     });
   };
+
+  // Pause carousels when tab is hidden, resume when tab is visible
+  document.addEventListener('visibilitychange', () => {
+    const isHidden = document.visibilityState === 'hidden';
+    document.querySelectorAll('.photo-carousel.multiple').forEach(carousel => {
+      if (isHidden) {
+        if (typeof carousel._stopAutoPlay === 'function') carousel._stopAutoPlay();
+      } else {
+        if (typeof carousel._startAutoPlay === 'function') carousel._startAutoPlay();
+      }
+    });
+  });
 
   // Global listeners for video metadata loading and playback
   document.addEventListener('loadedmetadata', function(e) {

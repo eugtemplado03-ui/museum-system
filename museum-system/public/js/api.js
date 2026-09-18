@@ -60,6 +60,18 @@ const Api = (() => {
     }
     if (path === '/api/gallery') return { gallery: db.gallery || [] };
     if (path === '/api/museum-info') return { info: db.museumInfo || {} };
+    if (path === '/api/carousel' || path === '/api/carousel/admin') {
+      return {
+        slides: [
+          { id: 'slide-grounds', title: 'Museo Sang Bata sa Negros', tag: 'Coastal Sanctuary', description: "A premier hands-on children's museum located on the sunlit coast of Barangay Old Sagay beside the 32,000-hectare Sagay Marine Reserve.", imagePath: '/uploads/ex3.jpg', ctaText: 'Check In to Enter Museum', linkUrl: '/checkin.html', code: 'EX-001', order: 0, active: true },
+          { id: 'slide-marine', title: 'Under the Sea (Main Marine Gallery)', tag: 'Featured Flagship Exhibit', description: 'Discover how sand forms, how vibrant coral reefs grow, and encounter clownfish, sea stars, and the marine mammals of Sagay Marine Reserve.', imagePath: 'https://museosangbata.org/wp-content/uploads/2014/11/under-the-sea-banner-260x170.jpg', ctaText: 'Check In to View Exhibit Details & Audio Tour', linkUrl: '/exhibit.html?code=EX-001', code: 'EX-001', order: 1, active: true },
+          { id: 'slide-touchpool', title: 'Splash Zone — Live Seashore Creatures', tag: 'Hands-on Touch Pool', description: 'Gently touch and observe live sea stars, sea cucumbers, snails, and tidal organisms in an engaging, educator-led touch pool.', imagePath: 'https://museosangbata.org/wp-content/uploads/2014/11/splash-banner-260x170.jpg', ctaText: 'Check In to View Touch Pool Details', linkUrl: '/exhibit.html?code=EX-003', code: 'EX-003', order: 2, active: true },
+          { id: 'slide-mobile-lib', title: 'Books & Exhibits on Wheels', tag: 'Community Outreach', description: 'Bringing marine conservation literature, storytelling, and interactive science modules to children and schools across coastal communities.', imagePath: '/uploads/ex4.jpg', ctaText: 'Check In to Learn About Outreach', linkUrl: '/programs.html', code: 'EX-010', order: 3, active: true },
+          { id: 'slide-jr-guides', title: 'Junior Museum Guides & Mascots', tag: 'Youth Leadership', description: 'Meet our passionate young docents trained in marine biodiversity, ready to guide visitors through thrilling interactive museum experiences.', imagePath: '/uploads/ex2.jpg', ctaText: 'Check In to Meet the Junior Guides', linkUrl: '/programs.html', code: 'EX-006', order: 4, active: true }
+        ],
+        settings: { autoplayInterval: 5000, autoPlayEnabled: true }
+      };
+    }
     if (path.startsWith('/api/favorites/')) return { favorites: [] };
     if (path.includes('/ratings')) return { ratings: [], average: 5, count: 0 };
     return null;
@@ -175,6 +187,15 @@ const Api = (() => {
     deleteArtifactLog: (id) => request('/api/artifact-logs/' + id, { method: 'DELETE' }),
 
     getMuseumInfo: () => request('/api/museum-info'),
-    updateMuseumInfo: (payload) => request('/api/museum-info', { method: 'PUT', body: JSON.stringify(payload) })
+    updateMuseumInfo: (payload) => request('/api/museum-info', { method: 'PUT', body: JSON.stringify(payload) }),
+
+    getCarousel: () => request('/api/carousel'),
+    getAdminCarousel: () => request('/api/carousel/admin'),
+    createCarouselSlide: (payload) => request('/api/carousel', { method: 'POST', body: JSON.stringify(payload) }),
+    updateCarouselSlide: (id, payload) => request('/api/carousel/' + id, { method: 'PUT', body: JSON.stringify(payload) }),
+    deleteCarouselSlide: (id) => request('/api/carousel/' + id, { method: 'DELETE' }),
+    reorderCarouselSlides: (order) => request('/api/carousel/reorder', { method: 'POST', body: JSON.stringify({ order }) }),
+    updateCarouselSettings: (payload) => request('/api/carousel/settings', { method: 'PUT', body: JSON.stringify(payload) }),
+    resetCarouselSlides: () => request('/api/carousel/reset', { method: 'POST' })
   };
 })();

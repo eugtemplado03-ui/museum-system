@@ -2353,71 +2353,131 @@
       }, 500);
     }
 
-    // ── Interactive Image Carousel Controller ──────────────────────
-    const carouselSlides = document.querySelectorAll('.carousel-slide-item');
-    const carouselDots = document.querySelectorAll('.carousel-dot');
-    const carouselPrevBtn = document.getElementById('carouselPrevBtn');
-    const carouselNextBtn = document.getElementById('carouselNextBtn');
-    const carouselCounter = document.getElementById('carouselCounter');
-    const museumCarousel = document.getElementById('museumCarousel');
-    let currentSlide = 0;
-    const totalSlides = carouselSlides.length;
-    let carouselInterval = null;
+    // ── Interactive Image Carousel Controller (Dynamic & 5s Auto-advance) ──
+    (async function initWelcomeCarousel() {
+      const museumCarousel = document.getElementById('museumCarousel');
+      if (!museumCarousel) return;
 
-    function goToSlide(index) {
-      currentSlide = (index + totalSlides) % totalSlides;
-      carouselSlides.forEach((slide, i) => {
-        slide.classList.toggle('active', i === currentSlide);
-      });
-      carouselDots.forEach((dot, i) => {
-        dot.classList.toggle('active', i === currentSlide);
-      });
-      if (carouselCounter) {
-        carouselCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+      const stage = document.getElementById('carouselStage');
+      const indicators = document.getElementById('carouselIndicators');
+      const prevBtn = document.getElementById('carouselPrevBtn');
+      const nextBtn = document.getElementById('carouselNextBtn');
+      const counter = document.getElementById('carouselCounter');
+
+      let currentSlide = 0;
+      let totalSlides = 5;
+      let carouselInterval = null;
+      let isPaused = false;
+      let autoplayIntervalMs = 5000;
+
+      // Try fetching active carousel slides from API
+      try {
+        const res = await fetch('/api/carousel');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && Array.isArray(data.slides) && data.slides.length > 0) {
+            const slides = data.slides;
+            if (stage && indicators) {
+              stage.innerHTML = slides.map((s, idx) => {
+                let actionAttr = '';
+                if (s.code) {
+                  actionAttr = `onclick="directToCheckin('${escapeHtml(s.code)}', '${escapeHtml(s.title)}')"` ;
+                } else if (s.linkUrl) {
+                  actionAttr = `onclick="window.location.href='${escapeHtml(s.linkUrl)}'"`;
+                } else {
+                  actionAttr = `onclick="directToCheckin('EX-001', 'Under the Sea')"`;
+                }
+                return `
+                  <div class="carousel-slide-item${idx === 0 ? ' active' : ''}" data-index="${idx}" data-code="${escapeHtml(s.code || '')}" data-title="${escapeHtml(s.title || '')}">
+                    <img src="${escapeHtml(s.imagePath || '/uploads/ex3.jpg')}" alt="${escapeHtml(s.title || 'Museum Slide')}">
+                    <div class="carousel-overlay">
+                      ${s.tag ? `<span class="carousel-tag">${escapeHtml(s.tag)}</span>` : ''}
+                      <h2 class="carousel-title">${escapeHtml(s.title)}</h2>
+                      <p class="carousel-desc">${escapeHtml(s.description || '')}</p>
+                      <button type="button" class="carousel-cta-btn" ${actionAttr}>
+                        <span>🎫</span> ${escapeHtml(s.ctaText || 'Check In to Enter')} &rarr;
+                      </button>
+                    </div>
+                  </div>
+                `;
+              }).join('');
+
+              indicators.innerHTML = slides.map((_, idx) => `
+                <button type="button" class="carousel-dot${idx === 0 ? ' active' : ''}" data-slide="${idx}" aria-label="Slide ${idx + 1}"></button>
+              `).join('');
+            }
+          }
+          if (data && data.settings && typeof data.settings.autoplayInterval === 'number') {
+            autoplayIntervalMs = data.settings.autoplayInterval;
+          }
+        }
+      } catch (err) {
+        // Fall back to existing pre-rendered HTML slides
       }
-    }
 
-    if (carouselPrevBtn) {
-      carouselPrevBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        goToSlide(currentSlide - 1);
-        resetCarouselTimer();
+      const carouselSlides = museumCarousel.querySelectorAll('.carousel-slide-item');
+      const carouselDots = museumCarousel.querySelectorAll('.carousel-dot');
+      totalSlides = carouselSlides.length;
+
+      function goToSlide(index) {
+        if (totalSlides <= 0) return;
+        currentSlide = (index + totalSlides) % totalSlides;
+        carouselSlides.forEach((slide, i) => {
+          slide.classList.toggle('active', i === currentSlide);
+        });
+        carouselDots.forEach((dot, i) => {
+          dot.classList.toggle('active', i === currentSlide);
+        });
+        if (counter) {
+          counter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+        }
+      }
+
+      function startCarouselTimer() {
+        if (carouselInterval) clearInterval(carouselInterval);
+        if (totalSlides <= 1) return;
+        carouselInterval = setInterval(() => {
+          if (!isPaused && document.visibilityState !== 'hidden') {
+            goToSlide(currentSlide + 1);
+          }
+        }, autoplayIntervalMs);
+      }
+
+      function resetCarouselTimer() {
+        startCarouselTimer();
+      }
+
+      if (prevBtn) {
+        prevBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          goToSlide(currentSlide - 1);
+          resetCarouselTimer();
+        });
+      }
+
+      if (nextBtn) {
+        nextBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          goToSlide(currentSlide + 1);
+          resetCarouselTimer();
+        });
+      }
+
+      carouselDots.forEach(dot => {
+        dot.addEventListener('click', (e) => {
+          e.preventDefault();
+          const slideIdx = parseInt(dot.getAttribute('data-slide'), 10) || 0;
+          goToSlide(slideIdx);
+          resetCarouselTimer();
+        });
       });
-    }
 
-    if (carouselNextBtn) {
-      carouselNextBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        goToSlide(currentSlide + 1);
-        resetCarouselTimer();
-      });
-    }
-
-    carouselDots.forEach(dot => {
-      dot.addEventListener('click', (e) => {
-        e.preventDefault();
-        const slideIdx = parseInt(dot.getAttribute('data-slide'), 10) || 0;
-        goToSlide(slideIdx);
-        resetCarouselTimer();
-      });
-    });
-
-    function startCarouselTimer() {
-      carouselInterval = setInterval(() => {
-        goToSlide(currentSlide + 1);
-      }, 5000);
-    }
-
-    function resetCarouselTimer() {
-      if (carouselInterval) clearInterval(carouselInterval);
-      startCarouselTimer();
-    }
-
-    if (museumCarousel) {
       museumCarousel.addEventListener('mouseenter', () => {
+        isPaused = true;
         if (carouselInterval) clearInterval(carouselInterval);
       });
       museumCarousel.addEventListener('mouseleave', () => {
+        isPaused = false;
         startCarouselTimer();
       });
 
@@ -2425,21 +2485,33 @@
       let touchStartX = 0;
       let touchEndX = 0;
       museumCarousel.addEventListener('touchstart', (e) => {
+        isPaused = true;
+        if (carouselInterval) clearInterval(carouselInterval);
         touchStartX = e.changedTouches[0].screenX;
       }, { passive: true });
+
       museumCarousel.addEventListener('touchend', (e) => {
         touchEndX = e.changedTouches[0].screenX;
         if (touchStartX - touchEndX > 50) {
           goToSlide(currentSlide + 1);
-          resetCarouselTimer();
         } else if (touchEndX - touchStartX > 50) {
           goToSlide(currentSlide - 1);
-          resetCarouselTimer();
         }
+        isPaused = false;
+        resetCarouselTimer();
       }, { passive: true });
-    }
 
-    startCarouselTimer();
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+          if (carouselInterval) clearInterval(carouselInterval);
+        } else {
+          startCarouselTimer();
+        }
+      });
+
+      goToSlide(0);
+      startCarouselTimer();
+    })();
 
     // ── Existing Gate & Form Handlers (Preserved for compatibility) ─
     const urlParams = new URLSearchParams(window.location.search);

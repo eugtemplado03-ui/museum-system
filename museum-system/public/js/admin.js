@@ -174,6 +174,7 @@ const SIDEBAR_ITEMS = [
   { id: 'analytics',      label: 'Analytics',         icon: '📈', group: 'Overview' },
   { id: 'catalog',        label: 'Catalog',           icon: '🏛️', group: 'Collections' },
   { id: 'categories',     label: 'Categories',        icon: '🏷️', group: 'Collections' },
+  { id: 'carousel',       label: 'Showcase Carousel', icon: '🎠', group: 'Collections' },
   { id: 'artifacts',      label: 'Artifacts Log',     icon: '🏺', group: 'Collections' },
   { id: 'gallery',        label: 'Gallery',           icon: '🖼️', group: 'Collections' },
   { id: 'visitors',       label: 'Visitor Log',       icon: '🟢', group: 'Operations' },
@@ -310,6 +311,7 @@ async function renderDashboard(){
   if(activeTab === 'dashboard') await renderDashboardHomeTab(contentEl);
   else if(activeTab === 'catalog') await renderCatalogTab(contentEl);
   else if(activeTab === 'categories') await renderCategoriesTab(contentEl);
+  else if(activeTab === 'carousel') await renderCarouselTab(contentEl);
   else if(activeTab === 'visitors') await renderVisitorsTab(contentEl);
   else if(activeTab === 'visitorHistory') await renderVisitorHistoryTab(contentEl);
   else if(activeTab === 'artifacts') await renderArtifactsTab(contentEl);
@@ -4992,6 +4994,548 @@ function openMuseumInfoModal(info){
       renderDashboard();
     }catch(err){
       errorEl.textContent = err.message;
+    }
+  });
+}
+
+// ─── Showcase Carousel Management Tab ─────────────────────────────────────────
+
+let _adminPreviewTimer = null;
+
+async function renderCarouselTab(contentEl) {
+  if (_adminPreviewTimer) {
+    clearInterval(_adminPreviewTimer);
+    _adminPreviewTimer = null;
+  }
+
+  let slides = [];
+  let settings = { autoplayInterval: 5000, autoPlayEnabled: true };
+
+  try {
+    const res = await Api.getAdminCarousel();
+    slides = res.slides || [];
+    settings = res.settings || settings;
+  } catch (e) {
+    contentEl.innerHTML = `<div class="empty-state"><h2>Could not load carousel data</h2><p>${escapeHtml(e.message)}</p></div>`;
+    return;
+  }
+
+  const activeSlides = slides.filter(s => s.active);
+  const activeCount = activeSlides.length;
+  const intervalSec = Math.round((settings.autoplayInterval || 5000) / 1000);
+
+  contentEl.innerHTML = `
+    <div class="admin-toolbar-wrap" style="padding: 16px 24px; border-bottom: 1px solid #e2e8f0; background: #ffffff; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;">
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <button class="btn btn-primary btn-small" id="addCarouselSlideBtn">
+          <span>+</span> Add Carousel Slide
+        </button>
+        <button class="btn btn-secondary btn-small" id="editCarouselSettingsBtn">
+          <span>⏱️</span> Autoplay: <strong>${intervalSec}s</strong> ${settings.autoPlayEnabled !== false ? '(Active)' : '(Paused)'}
+        </button>
+        <button class="btn btn-ghost dark btn-small" id="resetCarouselBtn" title="Restore original 5 museum showcase slides">
+          <span>↺</span> Reset to Defaults
+        </button>
+      </div>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <span class="status-badge" style="font-size: 12.5px; padding: 4px 12px; border-radius: 20px;">
+          ${slides.length} slide${slides.length === 1 ? '' : 's'} (${activeCount} visible)
+        </span>
+      </div>
+    </div>
+
+    <!-- Live Interactive Showcase Preview -->
+    <div style="padding: 20px 24px 0;">
+      <div style="background: #0f172a; border-radius: 16px; padding: 18px 20px; color: #ffffff; box-shadow: 0 4px 20px rgba(15,23,42,0.18);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 18px;">📺</span>
+            <strong style="color: #ffffff !important; font-size: 14.5px;">Live Carousel Display Preview</strong>
+            <span style="font-size: 11px; background: rgba(59,130,246,0.3); border: 1px solid rgba(59,130,246,0.5); padding: 2px 8px; border-radius: 10px; color: #93c5fd;">Auto-advances every ${intervalSec}s</span>
+          </div>
+          <a href="/dashboard.html" target="_blank" style="color: #60a5fa !important; font-size: 12.5px; text-decoration: none; font-weight: 700;">Open Public Visitor Site ↗</a>
+        </div>
+
+        <div class="welcome-carousel" id="adminPreviewCarousel" style="max-height: 260px; border-radius: 12px; overflow: hidden; position: relative; background: #1e293b;">
+          ${activeSlides.length > 0 ? `
+            <div class="carousel-counter-badge" id="adminPreviewCounter" style="position: absolute; top: 12px; right: 14px; z-index: 10; background: rgba(15,23,42,0.85); color: #fff; padding: 3px 10px; border-radius: 14px; font-size: 12px; font-weight: 800;">1 / ${activeSlides.length}</div>
+            <button type="button" class="carousel-arrow prev" id="adminPreviewPrevBtn" aria-label="Previous slide" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); z-index: 10; background: rgba(15,23,42,0.7); color: #fff; border: 1px solid rgba(255,255,255,0.3); width: 34px; height: 34px; border-radius: 50%; font-size: 15px; cursor: pointer;">&#10094;</button>
+            <button type="button" class="carousel-arrow next" id="adminPreviewNextBtn" aria-label="Next slide" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); z-index: 10; background: rgba(15,23,42,0.7); color: #fff; border: 1px solid rgba(255,255,255,0.3); width: 34px; height: 34px; border-radius: 50%; font-size: 15px; cursor: pointer;">&#10095;</button>
+
+            <div class="carousel-stage" id="adminPreviewStage" style="height: 260px; position: relative;">
+              ${activeSlides.map((s, idx) => `
+                <div class="carousel-slide-item${idx === 0 ? ' active' : ''}" data-index="${idx}" style="position: absolute; inset: 0; opacity: ${idx === 0 ? 1 : 0}; transition: opacity 0.4s ease; pointer-events: ${idx === 0 ? 'auto' : 'none'};">
+                  <img src="${escapeHtml(s.imagePath || '/uploads/ex3.jpg')}" alt="${escapeHtml(s.title)}" style="width: 100%; height: 100%; object-fit: cover;">
+                  <div class="carousel-overlay" style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15,23,42,0.1) 0%, rgba(15,23,42,0.88) 100%); display: flex; flex-direction: column; justify-content: flex-end; padding: 18px 22px; color: #fff;">
+                    ${s.tag ? `<span class="carousel-tag" style="background: #3b82f6; color: #ffffff !important; padding: 2px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; align-self: flex-start; margin-bottom: 6px;">${escapeHtml(s.tag)}</span>` : ''}
+                    <h3 style="color: #ffffff !important; font-size: 18px; font-weight: 800; margin: 0 0 4px; text-shadow: 0 1px 3px rgba(0,0,0,0.6);">${escapeHtml(s.title)}</h3>
+                    <p style="color: rgba(255,255,255,0.92) !important; font-size: 12px; margin: 0 0 10px; max-width: 600px; line-height: 1.35; text-shadow: 0 1px 2px rgba(0,0,0,0.6);">${escapeHtml(s.description || '')}</p>
+                    <span style="background: rgba(255,255,255,0.22); border: 1.5px solid rgba(255,255,255,0.5); color: #ffffff !important; padding: 4px 12px; border-radius: 8px; font-size: 11.5px; font-weight: 800; align-self: flex-start; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">
+                      🎫 ${escapeHtml(s.ctaText || 'Learn More')} &rarr;
+                    </span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="carousel-indicators" id="adminPreviewIndicators" style="position: absolute; bottom: 10px; right: 14px; display: flex; gap: 6px; z-index: 10;">
+              ${activeSlides.map((_, idx) => `
+                <button type="button" class="carousel-dot${idx === 0 ? ' active' : ''}" data-slide="${idx}" style="width: 8px; height: 8px; border-radius: 50%; border: none; background: ${idx === 0 ? '#3b82f6' : 'rgba(255,255,255,0.45)'}; cursor: pointer;"></button>
+              `).join('')}
+            </div>
+          ` : `
+            <div style="height: 200px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; color: #94a3b8;">
+              <span style="font-size: 28px;">📭</span>
+              <span>All carousel slides are currently hidden. Toggle visibility to display them.</span>
+            </div>
+          `}
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide Cards Management Section -->
+    <div style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 18px; font-weight: 800; color: #000000; margin: 0;">Showcase Slides (${slides.length})</h2>
+        <span style="font-size: 12.5px; color: #475569;">Use ▲ / ▼ to reorder slides, or click Edit to update images and text</span>
+      </div>
+
+      ${slides.length === 0 ? `
+        <div class="empty-state" style="padding: 40px 20px; text-align: center; border: 2px dashed #cbd5e1; border-radius: 14px; background: #fff;">
+          <h3 style="margin-bottom: 8px; color: #000000;">No Carousel Slides Found</h3>
+          <p style="color: #64748b; margin-bottom: 16px;">Create your first slide or restore defaults to show highlights on the visitor welcome page.</p>
+          <button class="btn btn-primary" id="emptyAddSlideBtn">+ Add First Slide</button>
+        </div>
+      ` : `
+        <div style="display: flex; flex-direction: column; gap: 12px;" id="adminSlidesList">
+          ${slides.map((slide, index) => {
+            const isFirst = index === 0;
+            const isLast = index === slides.length - 1;
+            return `
+              <div class="card admin-slide-card" data-slide-id="${escapeHtml(slide.id)}" style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; padding: 14px 18px; background: #ffffff; border: 1.5px solid ${slide.active ? '#cbd5e1' : '#e2e8f0'}; border-radius: 14px; opacity: ${slide.active ? 1 : 0.65}; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                <!-- Left: Order & Thumbnail -->
+                <div style="display: flex; align-items: center; gap: 14px; min-width: 0; flex: 1;">
+                  <div style="display: flex; flex-direction: column; gap: 4px; flex-shrink: 0;">
+                    <button type="button" class="btn btn-ghost btn-small slide-move-up" data-id="${escapeHtml(slide.id)}" ${isFirst ? 'disabled style="opacity:0.25; cursor:not-allowed;"' : ''} title="Move Up" style="padding: 2px 7px; font-size: 11px;">▲</button>
+                    <span style="font-size: 11.5px; font-weight: 800; text-align: center; color: #000000;">#${index + 1}</span>
+                    <button type="button" class="btn btn-ghost btn-small slide-move-down" data-id="${escapeHtml(slide.id)}" ${isLast ? 'disabled style="opacity:0.25; cursor:not-allowed;"' : ''} title="Move Down" style="padding: 2px 7px; font-size: 11px;">▼</button>
+                  </div>
+
+                  <div style="width: 105px; height: 70px; border-radius: 8px; overflow: hidden; background: #f1f5f9; border: 1px solid #cbd5e1; flex-shrink: 0;">
+                    <img src="${escapeHtml(slide.imagePath || '/uploads/ex3.jpg')}" alt="${escapeHtml(slide.title)}" style="width: 100%; height: 100%; object-fit: cover;">
+                  </div>
+
+                  <div style="display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1;">
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                      ${slide.tag ? `<span style="background: #dbeafe; color: #1e40af; padding: 1px 8px; border-radius: 6px; font-size: 11px; font-weight: 800;">${escapeHtml(slide.tag)}</span>` : ''}
+                      <strong style="color: #000000; font-size: 15px; word-break: break-word;">${escapeHtml(slide.title)}</strong>
+                    </div>
+                    <p style="margin: 0; font-size: 12.5px; color: #334155; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.35;">
+                      ${escapeHtml(slide.description || 'No description provided.')}
+                    </p>
+                    <div style="font-size: 11.5px; color: #475569; margin-top: 2px;">
+                      Button: <em style="color:#000000;">"${escapeHtml(slide.ctaText || 'Learn More')}"</em> &rarr; 
+                      <span style="font-family: monospace; color: #1e293b; font-weight: 600;">${escapeHtml(slide.linkUrl || slide.code || '/checkin.html')}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right: Status Badge & Actions -->
+                <div style="display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0;">
+                  <button type="button" class="btn btn-ghost btn-small toggle-slide-active" data-id="${escapeHtml(slide.id)}" data-active="${slide.active}" title="${slide.active ? 'Click to hide this slide from visitors' : 'Click to make visible to visitors'}">
+                    ${slide.active ? '🟢 Visible' : '⚪ Hidden'}
+                  </button>
+                  <button type="button" class="btn btn-primary btn-small edit-slide-btn" data-id="${escapeHtml(slide.id)}">
+                    ✏️ Edit
+                  </button>
+                  <button type="button" class="btn btn-danger btn-small delete-slide-btn" data-id="${escapeHtml(slide.id)}" data-title="${escapeHtml(slide.title)}">
+                    🗑️ Delete
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `}
+    </div>
+  `;
+
+  // Initialize Interactive Preview Autoplay (5s timer)
+  if (activeSlides.length > 1 && settings.autoPlayEnabled !== false) {
+    let previewIdx = 0;
+    const pStage = document.getElementById('adminPreviewStage');
+    const pCounter = document.getElementById('adminPreviewCounter');
+    const pDots = contentEl.querySelectorAll('#adminPreviewIndicators .carousel-dot');
+    const pSlides = pStage ? pStage.querySelectorAll('.carousel-slide-item') : [];
+
+    function updatePreviewSlide(index) {
+      if (!pSlides.length) return;
+      previewIdx = (index + pSlides.length) % pSlides.length;
+      pSlides.forEach((s, i) => {
+        s.style.opacity = i === previewIdx ? '1' : '0';
+        s.style.pointerEvents = i === previewIdx ? 'auto' : 'none';
+        s.classList.toggle('active', i === previewIdx);
+      });
+      pDots.forEach((d, i) => {
+        d.style.background = i === previewIdx ? '#3b82f6' : 'rgba(255,255,255,0.45)';
+        d.classList.toggle('active', i === previewIdx);
+      });
+      if (pCounter) {
+        pCounter.textContent = `${previewIdx + 1} / ${pSlides.length}`;
+      }
+    }
+
+    function startPreviewTimer() {
+      if (_adminPreviewTimer) clearInterval(_adminPreviewTimer);
+      _adminPreviewTimer = setInterval(() => {
+        updatePreviewSlide(previewIdx + 1);
+      }, settings.autoplayInterval || 5000);
+    }
+
+    startPreviewTimer();
+
+    const pPrevBtn = document.getElementById('adminPreviewPrevBtn');
+    const pNextBtn = document.getElementById('adminPreviewNextBtn');
+    if (pPrevBtn) {
+      pPrevBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        updatePreviewSlide(previewIdx - 1);
+        startPreviewTimer();
+      });
+    }
+    if (pNextBtn) {
+      pNextBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        updatePreviewSlide(previewIdx + 1);
+        startPreviewTimer();
+      });
+    }
+    pDots.forEach((dot, idx) => {
+      dot.addEventListener('click', (e) => {
+        e.preventDefault();
+        updatePreviewSlide(idx);
+        startPreviewTimer();
+      });
+    });
+
+    const pContainer = document.getElementById('adminPreviewCarousel');
+    if (pContainer) {
+      pContainer.addEventListener('mouseenter', () => {
+        if (_adminPreviewTimer) clearInterval(_adminPreviewTimer);
+      });
+      pContainer.addEventListener('mouseleave', () => {
+        startPreviewTimer();
+      });
+    }
+  }
+
+  // Wire Toolbar & Section Actions
+  document.getElementById('addCarouselSlideBtn')?.addEventListener('click', () => openSlideModal(null, slides));
+  document.getElementById('emptyAddSlideBtn')?.addEventListener('click', () => openSlideModal(null, slides));
+  document.getElementById('editCarouselSettingsBtn')?.addEventListener('click', () => openCarouselSettingsModal(settings));
+
+  document.getElementById('resetCarouselBtn')?.addEventListener('click', () => {
+    openModal(`
+      <h2>↺ Reset Carousel to Defaults</h2>
+      <p style="color:#000000; font-size:14px; line-height:1.5; margin:14px 0 20px;">
+        Are you sure you want to reset the carousel display? This will restore the 5 original flagship slides (Museum Grounds, Under the Sea, Splash Zone, Books on Wheels, Junior Guides).
+      </p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost dark" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" id="confirmResetCarouselBtn">Yes, Reset to Defaults</button>
+      </div>
+    `);
+    document.getElementById('confirmResetCarouselBtn')?.addEventListener('click', async () => {
+      try {
+        await Api.resetCarouselSlides();
+        toast('Showcase carousel reset to default slides');
+        closeModal();
+        renderDashboard();
+      } catch (err) {
+        toast('Reset failed: ' + err.message, true);
+      }
+    });
+  });
+
+  // Wire Slide Actions (Edit, Delete, Visibility, Move Up/Down)
+  contentEl.querySelectorAll('.edit-slide-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const slide = slides.find(s => s.id === btn.dataset.id);
+      if (slide) openSlideModal(slide, slides);
+    });
+  });
+
+  contentEl.querySelectorAll('.delete-slide-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      confirmDeleteSlide(btn.dataset.id, btn.dataset.title);
+    });
+  });
+
+  contentEl.querySelectorAll('.toggle-slide-active').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const currentActive = btn.dataset.active === 'true';
+      try {
+        await Api.updateCarouselSlide(btn.dataset.id, { active: !currentActive });
+        toast(`Slide ${!currentActive ? 'is now visible' : 'is now hidden'}`);
+        renderDashboard();
+      } catch (err) {
+        toast('Update failed: ' + err.message, true);
+      }
+    });
+  });
+
+  contentEl.querySelectorAll('.slide-move-up').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.id;
+      const idx = slides.findIndex(s => s.id === id);
+      if (idx > 0) {
+        const newOrder = [...slides];
+        const temp = newOrder[idx - 1];
+        newOrder[idx - 1] = newOrder[idx];
+        newOrder[idx] = temp;
+        try {
+          await Api.reorderCarouselSlides(newOrder.map(s => s.id));
+          toast('Slide order updated');
+          renderDashboard();
+        } catch (err) {
+          toast('Reorder failed: ' + err.message, true);
+        }
+      }
+    });
+  });
+
+  contentEl.querySelectorAll('.slide-move-down').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.id;
+      const idx = slides.findIndex(s => s.id === id);
+      if (idx >= 0 && idx < slides.length - 1) {
+        const newOrder = [...slides];
+        const temp = newOrder[idx + 1];
+        newOrder[idx + 1] = newOrder[idx];
+        newOrder[idx] = temp;
+        try {
+          await Api.reorderCarouselSlides(newOrder.map(s => s.id));
+          toast('Slide order updated');
+          renderDashboard();
+        } catch (err) {
+          toast('Reorder failed: ' + err.message, true);
+        }
+      }
+    });
+  });
+}
+
+function openSlideModal(slide, allSlides) {
+  const isEditing = Boolean(slide);
+  const title = isEditing ? 'Edit Carousel Slide' : 'Add New Carousel Slide';
+
+  openModal(`
+    <h2>${escapeHtml(title)}</h2>
+    <div class="form-grid" style="display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 20px;">
+      <div class="form-field full">
+        <label>Slide Title *</label>
+        <input type="text" id="csTitle" value="${escapeHtml(slide?.title || '')}" placeholder="e.g. Under the Sea (Main Marine Gallery)" required>
+      </div>
+
+      <div class="form-field">
+        <label>Badge / Category Tag</label>
+        <input type="text" id="csTag" value="${escapeHtml(slide?.tag || '')}" placeholder="e.g. Coastal Sanctuary, Featured Exhibit">
+      </div>
+
+      <div class="form-field">
+        <label>CTA Button Label</label>
+        <input type="text" id="csCtaText" value="${escapeHtml(slide?.ctaText || 'Check In to Enter')}" placeholder="e.g. Check In to Enter Museum">
+      </div>
+
+      <div class="form-field full">
+        <label>Destination Link or Exhibit Code</label>
+        <input type="text" id="csLinkUrl" value="${escapeHtml(slide?.linkUrl || (slide?.code ? `/exhibit.html?code=${slide.code}` : ''))}" placeholder="e.g. EX-001 or /programs.html or /checkin.html">
+        <small style="font-size:11.5px; color:#475569; margin-top:3px; display:block;">Enter an exhibit code (e.g. EX-001) or page path (e.g. /programs.html, /checkin.html).</small>
+      </div>
+
+      <div class="form-field full">
+        <label>Slide Description</label>
+        <textarea id="csDesc" rows="3" placeholder="Brief summary displayed prominently on the showcase banner...">${escapeHtml(slide?.description || '')}</textarea>
+      </div>
+
+      <div class="form-field full">
+        <label>Slide Photo *</label>
+        <div style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
+          <input type="text" id="csImagePath" value="${escapeHtml(slide?.imagePath || '')}" placeholder="/uploads/ex3.jpg or https://..." style="flex:1;">
+          <label class="btn btn-secondary btn-small" style="cursor:pointer; margin:0; flex-shrink:0;">
+            📁 Browse Photo
+            <input type="file" id="csFileInput" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none;">
+          </label>
+        </div>
+        <div id="csUploadStatus" style="font-size:12px; color:#2563eb; margin-bottom:6px;"></div>
+        
+        <!-- Live Image Preview inside modal -->
+        <div style="width:100%; height:160px; border-radius:10px; border:1.5px dashed #cbd5e1; background:#f8fafc; overflow:hidden; display:flex; align-items:center; justify-content:center; position:relative;">
+          <img id="csImgPreview" src="${escapeHtml(slide?.imagePath || '/uploads/ex3.jpg')}" alt="Preview" style="width:100%; height:100%; object-fit:cover; display:${slide?.imagePath ? 'block' : 'block'};">
+        </div>
+      </div>
+
+      <div class="form-field full" style="display:flex; align-items:center; gap:10px; padding:6px 0;">
+        <input type="checkbox" id="csActive" ${slide ? (slide.active ? 'checked' : '') : 'checked'} style="width:18px; height:18px; accent-color:#2563eb;">
+        <label for="csActive" style="margin:0; font-size:14px; font-weight:700; cursor:pointer;">Visible on public visitor homepage &amp; dashboard</label>
+      </div>
+
+      <div class="form-error" id="csError" style="grid-column: 1 / -1; color:#dc2626; font-size:13px; font-weight:700;"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost dark" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="saveSlideSubmitBtn">${isEditing ? 'Save Changes' : 'Create Slide'}</button>
+    </div>
+  `);
+
+  const fileInput = document.getElementById('csFileInput');
+  const pathInput = document.getElementById('csImagePath');
+  const previewImg = document.getElementById('csImgPreview');
+  const statusEl = document.getElementById('csUploadStatus');
+
+  pathInput?.addEventListener('input', () => {
+    const val = pathInput.value.trim();
+    if (val) {
+      previewImg.src = val;
+      previewImg.style.display = 'block';
+    }
+  });
+
+  fileInput?.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    statusEl.textContent = 'Uploading photo…';
+    try {
+      const { path } = await Api.uploadImage(file);
+      pathInput.value = path;
+      previewImg.src = path;
+      previewImg.style.display = 'block';
+      statusEl.textContent = 'Photo uploaded successfully!';
+    } catch (err) {
+      statusEl.textContent = 'Upload failed: ' + err.message;
+    }
+  });
+
+  document.getElementById('saveSlideSubmitBtn')?.addEventListener('click', async () => {
+    const errorEl = document.getElementById('csError');
+    const titleVal = document.getElementById('csTitle').value.trim();
+    if (!titleVal) {
+      errorEl.textContent = 'Slide title is required.';
+      return;
+    }
+
+    const imagePathVal = pathInput.value.trim();
+    if (!imagePathVal) {
+      errorEl.textContent = 'Please select or enter an image for the slide.';
+      return;
+    }
+
+    const linkVal = document.getElementById('csLinkUrl').value.trim();
+    const isCode = /^EX-\d+/i.test(linkVal);
+
+    const payload = {
+      title: titleVal,
+      tag: document.getElementById('csTag').value.trim(),
+      ctaText: document.getElementById('csCtaText').value.trim() || 'Learn More',
+      linkUrl: linkVal,
+      code: isCode ? linkVal : (slide?.code || ''),
+      description: document.getElementById('csDesc').value.trim(),
+      imagePath: imagePathVal,
+      active: document.getElementById('csActive').checked
+    };
+
+    try {
+      if (isEditing) {
+        await Api.updateCarouselSlide(slide.id, payload);
+        toast('Carousel slide updated');
+      } else {
+        await Api.createCarouselSlide(payload);
+        toast('New carousel slide created');
+      }
+      closeModal();
+      renderDashboard();
+    } catch (err) {
+      errorEl.textContent = err.message;
+    }
+  });
+}
+
+function openCarouselSettingsModal(settings) {
+  const currentSec = Math.round((settings.autoplayInterval || 5000) / 1000);
+
+  openModal(`
+    <h2>⏱️ Carousel Autoplay Settings</h2>
+    <div class="form-grid" style="display:grid; grid-template-columns:1fr; gap:16px;">
+      <div class="form-field full">
+        <label>Autoplay Transition Interval (seconds) *</label>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <input type="number" id="csAutoplaySec" min="1" max="60" value="${currentSec}" style="width:120px;" required>
+          <span style="font-size:14px; font-weight:700; color:#000000;">seconds (Default: 5 seconds)</span>
+        </div>
+        <small style="color:#475569; font-size:12px; margin-top:4px; display:block;">
+          How long each slide displays before automatically advancing to the next.
+        </small>
+      </div>
+
+      <div class="form-field full" style="display:flex; align-items:center; gap:10px; padding:8px 0;">
+        <input type="checkbox" id="csAutoplayEnabled" ${settings.autoPlayEnabled !== false ? 'checked' : ''} style="width:18px; height:18px; accent-color:#2563eb;">
+        <label for="csAutoplayEnabled" style="margin:0; font-size:14px; font-weight:700; cursor:pointer;">
+          Enable automatic slideshow rotation across all visitor pages
+        </label>
+      </div>
+
+      <div class="form-error" id="csSettingsError" style="color:#dc2626; font-size:13px; font-weight:700;"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost dark" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="saveCarouselSettingsBtn">Save Settings</button>
+    </div>
+  `);
+
+  document.getElementById('saveCarouselSettingsBtn')?.addEventListener('click', async () => {
+    const errorEl = document.getElementById('csSettingsError');
+    const secVal = parseInt(document.getElementById('csAutoplaySec').value, 10);
+    if (!Number.isFinite(secVal) || secVal < 1 || secVal > 60) {
+      errorEl.textContent = 'Please enter a valid interval between 1 and 60 seconds.';
+      return;
+    }
+
+    const payload = {
+      autoplayInterval: secVal * 1000,
+      autoPlayEnabled: document.getElementById('csAutoplayEnabled').checked
+    };
+
+    try {
+      await Api.updateCarouselSettings(payload);
+      toast(`Carousel autoplay set to ${secVal} seconds`);
+      closeModal();
+      renderDashboard();
+    } catch (err) {
+      errorEl.textContent = err.message;
+    }
+  });
+}
+
+function confirmDeleteSlide(id, title) {
+  openModal(`
+    <h2>🗑️ Delete Carousel Slide</h2>
+    <p style="color:#000000; font-size:14px; line-height:1.5; margin:14px 0 20px;">
+      Are you sure you want to delete slide <strong>"${escapeHtml(title)}"</strong>? This action cannot be undone.
+    </p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost dark" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" id="confirmDeleteSlideBtn">Delete Slide</button>
+    </div>
+  `);
+
+  document.getElementById('confirmDeleteSlideBtn')?.addEventListener('click', async () => {
+    try {
+      await Api.deleteCarouselSlide(id);
+      toast('Carousel slide deleted');
+      closeModal();
+      renderDashboard();
+    } catch (err) {
+      toast('Delete failed: ' + err.message, true);
     }
   });
 }
