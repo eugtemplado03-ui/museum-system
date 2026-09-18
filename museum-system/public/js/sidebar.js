@@ -36,19 +36,18 @@
   function initSidebar() {
     // 1. Place Navigation Button in the VERY LEFT CORNER of .topbar
     const topbar = document.querySelector('.topbar');
+    const topbarLeft = topbar ? topbar.querySelector('.topbar-left') : null;
     let toggleBtn = document.getElementById('sidebarToggleBtn');
 
     const isAdmin = activeKey === 'admin';
-    if (isAdmin) {
-      if (toggleBtn) toggleBtn.remove();
-    } else if (topbar && !toggleBtn) {
+    if (!toggleBtn && (topbarLeft || topbar)) {
       toggleBtn = document.createElement('button');
       toggleBtn.type = 'button';
       toggleBtn.id = 'sidebarToggleBtn';
       toggleBtn.className = 'sidebar-toggle-btn';
       toggleBtn.setAttribute('aria-label', 'Open navigation sidebar');
       toggleBtn.setAttribute('aria-expanded', 'false');
-      toggleBtn.setAttribute('aria-controls', 'userSidebar');
+      toggleBtn.setAttribute('aria-controls', isAdmin ? 'adminSidebar' : 'userSidebar');
       toggleBtn.title = 'Open Menu';
       toggleBtn.innerHTML = `
         <span class="toggle-bar"></span>
@@ -56,11 +55,12 @@
         <span class="toggle-bar"></span>
       `;
 
-      // Insert at the VERY START of topbar
-      if (topbar.firstChild) {
-        topbar.insertBefore(toggleBtn, topbar.firstChild);
+      // Insert at the VERY START of topbar-left or topbar
+      const targetContainer = topbarLeft || topbar;
+      if (targetContainer.firstChild) {
+        targetContainer.insertBefore(toggleBtn, targetContainer.firstChild);
       } else {
-        topbar.appendChild(toggleBtn);
+        targetContainer.appendChild(toggleBtn);
       }
     }
 

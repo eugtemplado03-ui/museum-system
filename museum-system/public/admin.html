@@ -59,6 +59,26 @@
   .sidebar-toggle-btn .toggle-bar {
     background: #FFFFFF !important;
   }
+  @media (max-width: 1023px) {
+    .admin-topbar-header .sidebar-toggle-btn,
+    body.admin-portal-body #sidebarToggleBtn {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      margin-right: 6px !important;
+      flex-shrink: 0 !important;
+    }
+    .admin-sidebar.open {
+      transform: translateX(0) !important;
+      box-shadow: 10px 0 40px rgba(0, 0, 0, 0.6) !important;
+    }
+  }
+  @media (min-width: 1024px) {
+    .admin-topbar-header .sidebar-toggle-btn,
+    body.admin-portal-body #sidebarToggleBtn {
+      display: none !important;
+    }
+  }
 
   /* ── Dedicated Admin Sidebar: Compact & Bold White Text ─────── */
   .admin-sidebar {
@@ -1255,6 +1275,11 @@
   <!-- Dedicated Admin Management Topbar (Replaces public visitor navigation) -->
   <div class="topbar admin-topbar-header" style="background:#0F172A !important; color:#ffffff !important;">
     <div class="topbar-left">
+      <button class="sidebar-toggle-btn" id="sidebarToggleBtn" type="button" aria-label="Toggle navigation sidebar" aria-expanded="false" aria-controls="adminSidebar" title="Open Menu">
+        <span class="toggle-bar"></span>
+        <span class="toggle-bar"></span>
+        <span class="toggle-bar"></span>
+      </button>
       <a class="brand admin-brand" href="/admin.html" style="color:#ffffff !important;">
         <div class="brand-mark" style="background:#3B82F6 !important; color:#ffffff !important;">M</div>
         <div class="brand-text">

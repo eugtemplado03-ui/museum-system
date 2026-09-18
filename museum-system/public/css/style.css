@@ -8498,12 +8498,27 @@ footer a:hover {
   min-height: 260px !important;
 }
 
-/* Hide sidebar toggle button in admin only */
-body.admin-portal-body .sidebar-toggle-btn,
-.admin-topbar-header .sidebar-toggle-btn,
-body.admin-portal-body #sidebarToggleBtn,
-.admin-topbar-header #sidebarToggleBtn {
-  display: none !important;
+/* Sidebar toggle button in admin: visible on mobile view (< 1024px) where sidebar is off-canvas */
+@media (max-width: 1023px) {
+  body.admin-portal-body .sidebar-toggle-btn,
+  .admin-topbar-header .sidebar-toggle-btn,
+  body.admin-portal-body #sidebarToggleBtn,
+  .admin-topbar-header #sidebarToggleBtn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-right: 6px !important;
+    flex-shrink: 0 !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  body.admin-portal-body .sidebar-toggle-btn,
+  .admin-topbar-header .sidebar-toggle-btn,
+  body.admin-portal-body #sidebarToggleBtn,
+  .admin-topbar-header #sidebarToggleBtn {
+    display: none !important;
+  }
 }
 
 
