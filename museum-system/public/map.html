@@ -995,39 +995,6 @@
       color: #fff !important;
     }
 
-    .btn-dir-info {
-      flex: 1;
-      min-height: 28px;
-      height: 28px;
-      padding: 2px 8px;
-      border-radius: 7px;
-      border: 1.5px solid #00f0ff;
-      background: rgba(15, 23, 42, 0.85);
-      color: #00f0ff;
-      font-family: 'Nunito', sans-serif;
-      font-weight: 800;
-      font-size: 11px;
-      letter-spacing: 0.1px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 2px 8px rgba(0, 240, 255, 0.15);
-      white-space: nowrap;
-    }
-
-    .btn-dir-info:hover {
-      background: #00f0ff;
-      color: #0f172a;
-      box-shadow: 0 4px 18px rgba(0, 240, 255, 0.45);
-      transform: translateY(-1px);
-    }
-
-    .btn-dir-info:active {
-      transform: translateY(0);
-    }
 
     @keyframes pulseStop {
 
@@ -2129,25 +2096,6 @@
         box-shadow: 0 0 16px rgba(239, 68, 68, 0.6) !important;
       }
 
-      .btn-dir-info {
-        flex: 1;
-        width: auto;
-        min-height: 25px;
-        height: 25px;
-        font-size: 9.5px;
-        font-weight: 800;
-        border-radius: 6px;
-        padding: 1px 5px;
-        gap: 4px;
-        border: 1.5px solid #00f0ff;
-        background: rgba(15, 23, 42, 0.85);
-        color: #00f0ff;
-        box-shadow: 0 2px 8px rgba(0, 240, 255, 0.2);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        white-space: nowrap;
-      }
 
       /* Compact Collapsed / Minimized State for Walking Directions */
       .directions-floating-panel.minimized {
@@ -2400,7 +2348,6 @@
           <ol class="dir-steps-list" id="dirStepsList"></ol>
           <div class="dir-actions">
             <button class="btn-dir-voice" id="dirVoiceBtn">🔊 Read Aloud</button>
-            <button class="btn-dir-info" id="dirExhibitInfoBtn" style="display:none;">📖 Exhibit Details</button>
           </div>
         </div>
       </div>
@@ -4395,25 +4342,6 @@
           dirBtn.disabled = false;
         }
 
-        const infoBtn = document.getElementById('dirExhibitInfoBtn');
-        if (infoBtn) {
-          infoBtn.style.display = 'inline-flex';
-          infoBtn.onclick = (e) => {
-            if (e) e.stopPropagation();
-            if (targetExhibit) {
-              const pRoom = findRoomForExhibit(targetExhibit.code);
-              if (pRoom) {
-                openCategoryRoomDrawer(pRoom, targetExhibit.code);
-              } else {
-                window.location.href = `/exhibit.html?code=${encodeURIComponent(targetExhibit.code)}`;
-              }
-            } else if (parentRoom) {
-              openCategoryRoomDrawer(parentRoom);
-            } else if (activeRouteKey && CATEGORY_ROOMS[activeRouteKey]) {
-              openCategoryRoomDrawer(CATEGORY_ROOMS[activeRouteKey]);
-            }
-          };
-        }
 
         directionsPanel.classList.add('active');
         directionsPanel.classList.remove('minimized');
@@ -4430,8 +4358,6 @@
         activeRouteKey = null;
         activeDirectionsSpeech = null;
         directionsPanel.classList.remove('active');
-        const infoBtn = document.getElementById('dirExhibitInfoBtn');
-        if (infoBtn) infoBtn.style.display = 'none';
         const routeLayer = document.getElementById('routeLayer');
         if (routeLayer) routeLayer.innerHTML = '';
         document.querySelectorAll('.individual-exhibit-pin.active-pin').forEach(el => {
