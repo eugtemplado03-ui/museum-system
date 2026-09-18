@@ -18,7 +18,8 @@
   "jest": {
     "testMatch": [
       "<rootDir>/test/admin.test.js",
-      "<rootDir>/test/api.test.js"
+      "<rootDir>/test/api.test.js",
+      "<rootDir>/test/tts.test.js"
     ]
   },
   "keywords": [],

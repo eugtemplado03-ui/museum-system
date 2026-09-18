@@ -1165,6 +1165,7 @@
     /* Multilingual Tabs */
     .lang-selector-tabs {
       display: flex;
+      flex-wrap: wrap;
       gap: 6px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       padding-bottom: 8px;
@@ -2469,7 +2470,8 @@
       <div class="lang-selector-tabs">
         <button class="lang-btn active" data-lang="en">English</button>
         <button class="lang-btn" data-lang="tl">Tagalog</button>
-        <button class="lang-btn" data-lang="cb">Cebuano / Bisaya</button>
+        <button class="lang-btn" data-lang="cb">Bisaya (Cebuano)</button>
+        <button class="lang-btn" data-lang="hil">Hiligaynon (Ilonggo)</button>
       </div>
 
       <p class="drawer-desc" id="drawerDesc">
@@ -4592,7 +4594,7 @@
             return;
           }
 
-          const field = lang === 'tl' ? 'description_tl' : (lang === 'cb' ? 'description_cb' : 'description_' + lang);
+          const field = lang === 'tl' ? 'description_tl' : (lang === 'cb' ? 'description_cb' : (lang === 'hil' ? 'description_hil' : 'description_' + lang));
 
           // 1. Check if already present on selectedExhibit
           if (selectedExhibit[field] && selectedExhibit[field].trim()) {
@@ -4621,7 +4623,7 @@
             return;
           }
 
-          const langName = lang === 'tl' ? 'Tagalog' : (lang === 'cb' ? 'Cebuano / Bisaya' : lang);
+          const langName = lang === 'tl' ? 'Tagalog' : (lang === 'cb' ? 'Cebuano / Bisaya' : (lang === 'hil' ? 'Hiligaynon (Ilonggo)' : lang));
           descEl.textContent = `⏳ Translating narration to ${langName}…`;
 
           try {
@@ -4665,6 +4667,7 @@
           if (!textToSpeak || textToSpeak.startsWith('⏳ Translating')) {
             if (lang === 'tl' && selectedExhibit.description_tl) textToSpeak = selectedExhibit.description_tl;
             else if (lang === 'cb' && selectedExhibit.description_cb) textToSpeak = selectedExhibit.description_cb;
+            else if (lang === 'hil' && selectedExhibit.description_hil) textToSpeak = selectedExhibit.description_hil;
             else textToSpeak = selectedExhibit.description || selectedExhibit.title;
           }
 
