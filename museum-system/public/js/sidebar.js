@@ -38,7 +38,10 @@
     const topbar = document.querySelector('.topbar');
     let toggleBtn = document.getElementById('sidebarToggleBtn');
 
-    if (topbar && !toggleBtn) {
+    const isAdmin = activeKey === 'admin';
+    if (isAdmin) {
+      if (toggleBtn) toggleBtn.remove();
+    } else if (topbar && !toggleBtn) {
       toggleBtn = document.createElement('button');
       toggleBtn.type = 'button';
       toggleBtn.id = 'sidebarToggleBtn';

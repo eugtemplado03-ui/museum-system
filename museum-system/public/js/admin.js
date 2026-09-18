@@ -199,7 +199,7 @@ function handleSignOut() {
 
 async function renderDashboard(){
   const toggleBtn = document.getElementById('sidebarToggleBtn');
-  if (toggleBtn) toggleBtn.style.display = '';
+  if (toggleBtn) toggleBtn.remove();
 
   const activeItem = SIDEBAR_ITEMS.find(s => s.id === activeTab) || SIDEBAR_ITEMS[0];
 
