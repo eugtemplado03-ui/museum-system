@@ -4556,13 +4556,22 @@ body.admin-portal-body {
 
 /* Dashboard Hero Banner */
 .dash-hero-banner {
-  background: linear-gradient(135deg, rgba(0, 48, 62, 0.80) 0%, rgba(0, 32, 44, 0.86) 100%) !important;
+  background-image: linear-gradient(
+    105deg,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(255, 255, 255, 0.90) 42%,
+    rgba(255, 255, 255, 0.62) 75%,
+    rgba(255, 255, 255, 0.35) 100%
+  ), url('/uploads/ex3.jpg') !important;
+  background-size: cover !important;
+  background-position: center right !important;
+  background-repeat: no-repeat !important;
   backdrop-filter: blur(14px) !important;
   -webkit-backdrop-filter: blur(14px) !important;
-  border: 1.5px solid rgba(0, 240, 255, 0.32);
+  border: 1.5px solid #bfdbfe;
   border-radius: 18px;
   padding: 20px 22px;
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -6608,10 +6617,24 @@ main,
 
 /* 6. Hero Banner / Control Center Callout */
 .dash-hero-banner {
-  background: #FFFFFF !important;
-  border: 1.5px solid #DBEAFE !important;
-  border-radius: 16px !important;
-  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+  position: relative !important;
+  background-image: linear-gradient(
+    105deg,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(255, 255, 255, 0.90) 42%,
+    rgba(255, 255, 255, 0.62) 75%,
+    rgba(255, 255, 255, 0.35) 100%
+  ), url('/uploads/ex3.jpg') !important;
+  background-size: cover !important;
+  background-position: center right !important;
+  background-repeat: no-repeat !important;
+  border: 1.5px solid #bfdbfe !important;
+  border-radius: 18px !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04) !important;
+  overflow: hidden !important;
+}
+.dash-hero-banner::after {
+  display: none !important;
 }
 
 .dash-hero-title {
@@ -6626,8 +6649,11 @@ main,
 }
 
 .dash-hero-eyebrow {
-  background: rgba(91, 164, 230, 0.15) !important;
-  border: 1px solid rgba(91, 164, 230, 0.35) !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(91, 164, 230, 0.45) !important;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05) !important;
   color: #000000 !important;
   font-weight: 800 !important;
 }
