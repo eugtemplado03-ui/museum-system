@@ -348,6 +348,13 @@
       border-right: none;
     }
 
+    .mobile-sidepanel-fab,
+    .mobile-sidepanel-hud-btn,
+    .sidebar-mobile-close-btn,
+    .map-sidebar-backdrop {
+      display: none;
+    }
+
     .sidebar-header {
       padding: 12px 16px;
       border-bottom: 1.5px solid #1e293b;
@@ -1816,6 +1823,107 @@
         width: min(300px, 84vw) !important;
       }
 
+      /* Mobile Side Panel Floating Action Button & Backdrop */
+      .map-sidebar-backdrop {
+        display: block !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        background: rgba(15, 23, 42, 0.65) !important;
+        backdrop-filter: blur(3px) !important;
+        -webkit-backdrop-filter: blur(3px) !important;
+        z-index: 80 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transition: opacity 0.25s ease !important;
+      }
+
+      .map-sidebar-backdrop.visible {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+      }
+
+      .mobile-sidepanel-hud-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+      .mobile-sidepanel-hud-btn.active {
+        background: #38bdf8 !important;
+        color: #0f172a !important;
+      }
+
+      .sidebar-mobile-close-btn {
+        display: inline-flex !important;
+        background: rgba(255, 255, 255, 0.15) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        color: #ffffff !important;
+        width: 28px !important;
+        height: 28px !important;
+        border-radius: 50% !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 13px !important;
+        font-weight: 900 !important;
+        cursor: pointer !important;
+        padding: 0 !important;
+        line-height: 1 !important;
+        transition: all 0.15s ease !important;
+      }
+      .sidebar-mobile-close-btn:hover,
+      .sidebar-mobile-close-btn:active {
+        background: rgba(239, 68, 68, 0.85) !important;
+        border-color: rgba(239, 68, 68, 1) !important;
+        transform: scale(1.05) !important;
+      }
+
+      .mobile-sidepanel-fab {
+        display: inline-flex !important;
+        position: absolute !important;
+        bottom: 18px !important;
+        left: 12px !important;
+        z-index: 55 !important;
+        align-items: center !important;
+        gap: 8px !important;
+        background: #0f172a !important;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+        border: 1.5px solid #38bdf8 !important;
+        color: #ffffff !important;
+        font-family: 'Nunito', sans-serif !important;
+        font-weight: 800 !important;
+        font-size: 12.5px !important;
+        padding: 8px 15px !important;
+        border-radius: 999px !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.55), 0 0 14px rgba(56, 189, 248, 0.35) !important;
+        cursor: pointer !important;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease !important;
+        user-select: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+      }
+      .mobile-sidepanel-fab:active {
+        transform: scale(0.96) !important;
+      }
+      .mobile-sidepanel-fab.active {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+        border-color: #7dd3fc !important;
+        box-shadow: 0 4px 14px rgba(2, 132, 199, 0.6) !important;
+      }
+      .mobile-sidepanel-fab .fab-icon {
+        font-size: 15px !important;
+        line-height: 1 !important;
+      }
+      .mobile-sidepanel-fab .fab-badge {
+        background: #38bdf8 !important;
+        color: #0f172a !important;
+        font-size: 10.5px !important;
+        font-weight: 900 !important;
+        padding: 1px 6px !important;
+        border-radius: 999px !important;
+        margin-left: 2px !important;
+      }
+
       /* Compact HUD Controls in Top-Right on Mobile */
       .map-hud-controls {
         right: 8px;
@@ -2250,14 +2358,20 @@
 
     <!-- Interactive Room & Exhibit Directory Sidebar -->
     <aside class="map-directory-sidebar" id="mapSidebar" aria-label="Exhibit Directory" style="background: #0f172a !important; color: #ffffff !important;">
-      <div class="sidebar-header" style="background: #0f172a !important; color: #ffffff !important;">
-        <h3 class="sidebar-title" style="color: #ffffff !important;">🏛️ Rooms Directory</h3>
-        <span style="font-size: 11px; color: #ffffff !important; opacity: 0.95;" id="sidebarCountLabel">6 Rooms • 11 Exhibits</span>
+      <div class="sidebar-header" style="background: #0f172a !important; color: #ffffff !important; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h3 class="sidebar-title" style="color: #ffffff !important; margin: 0;">🏛️ Rooms Directory</h3>
+          <span style="font-size: 11px; color: #ffffff !important; opacity: 0.95;" id="sidebarCountLabel">6 Rooms • 11 Exhibits</span>
+        </div>
+        <button type="button" class="sidebar-mobile-close-btn" id="sidebarMobileCloseBtn" aria-label="Close Side Panel" title="Close Directory">✕</button>
       </div>
       <div class="sidebar-content" id="sidebarList" style="background: #0f172a !important; color: #ffffff !important;">
         <!-- Rendered dynamically -->
       </div>
     </aside>
+
+    <!-- Backdrop for Mobile Side Panel -->
+    <div class="map-sidebar-backdrop" id="mapSidebarBackdrop" aria-hidden="true"></div>
 
     <!-- Main Map Viewport & Stage -->
     <main class="map-viewport" id="mapViewport" aria-label="Museum Map Viewport">
@@ -2298,13 +2412,21 @@
         </div>
       </div>
 
-      <!-- HUD Action Controls (Zoom & Fit Reset) -->
+      <!-- HUD Action Controls (Zoom & Fit Reset + Mobile Side Panel Button) -->
       <div class="map-hud-controls">
+        <button class="hud-btn mobile-sidepanel-hud-btn" id="btnMobileHudSidepanel" title="Rooms Directory Side Panel" aria-label="Toggle Side Panel" style="color: #000000 !important; background: #ffffff !important;"><span style="color: #000000 !important; font-size: 16px; font-weight: 900; line-height: 1;">🏛️</span></button>
         <button class="hud-btn" id="btnZoomIn" title="Zoom In (+)" aria-label="Zoom in" style="color: #000000 !important; background: #ffffff !important;"><span style="color: #000000 !important; font-size: 22px; font-weight: 900; line-height: 1;">+</span></button>
         <button class="hud-btn" id="btnZoomOut" title="Zoom Out (-)" aria-label="Zoom out" style="color: #000000 !important; background: #ffffff !important;"><span style="color: #000000 !important; font-size: 22px; font-weight: 900; line-height: 1;">−</span></button>
         <button class="hud-btn" id="btnZoomReset" title="Fit 100% of Entire Building on Screen"
           aria-label="Fit to Screen" style="color: #000000 !important; background: #ffffff !important;"><span style="color: #000000 !important; font-size: 20px; font-weight: 900; line-height: 1;">⛶</span></button>
       </div>
+
+      <!-- Mobile Floating Side Panel Action Button -->
+      <button class="mobile-sidepanel-fab" id="mobileSidepanelFab" type="button" aria-label="Toggle Rooms Directory Side Panel" title="Open Rooms Directory">
+        <span class="fab-icon">🏛️</span>
+        <span class="fab-label">Rooms Directory</span>
+        <span class="fab-badge" id="mobileSidebarCountBadge">6</span>
+      </button>
 
     </main>
   </div>
@@ -3327,6 +3449,8 @@
         const totalExhibits = roomsOnFloor.reduce((acc, r) => acc + r.exhibitCodes.length, 0);
 
         document.getElementById('sidebarCountLabel').textContent = `${roomsOnFloor.length} Rooms • ${totalExhibits} Exhibits`;
+        const mobileBadge = document.getElementById('mobileSidebarCountBadge');
+        if (mobileBadge) mobileBadge.textContent = roomsOnFloor.length;
 
         let html = `
         <div class="sidebar-section-title" style="color: #ffffff !important;">
@@ -3387,34 +3511,22 @@
               <div class="room-dir-info" style="color: #ffffff !important;"><span style="color: #ffffff !important;">🚪</span><span style="color: #ffffff !important;">Main Entrance &amp; Foyer</span></div>
               <span style="font-size:10px; color:#ffffff !important; opacity:0.9;">Entry</span>
             </div>
-            <div class="room-dir-item" data-zone="zone_staff_office" style="color: #ffffff !important;">
-              <div class="room-dir-info" style="color: #ffffff !important;"><span style="color: #ffffff !important;">💼</span><span style="color: #ffffff !important;">Staff Office (Under Stairs)</span></div>
-              <span style="font-size:10px; color:#ffffff !important; opacity:0.9;">Admin</span>
-            </div>
             <div class="room-dir-item" data-zone="zone_function_hall" style="color: #ffffff !important;">
-              <div class="room-dir-info" style="color: #ffffff !important;"><span style="color: #ffffff !important;">🏛️</span><span style="color: #ffffff !important;">Central Function Hall</span></div>
-              <span style="font-size:10px; color:#ffffff !important; opacity:0.9;">Great Hall</span>
+              <div class="room-dir-info" style="color: #ffffff !important;"><span style="color: #ffffff !important;">🏛️</span><span style="color: #ffffff !important;">Function Hall &amp; Gathering Area</span></div>
+              <span style="font-size:10px; color:#ffffff !important; opacity:0.9;">Core</span>
             </div>
-            <div class="room-dir-item" data-zone="zone_stairs" style="color: #ffffff !important;">
-              <div class="room-dir-info" style="color: #ffffff !important;"><span style="color: #ffffff !important;">🪜</span><span style="color: #ffffff !important;">Staircase to Level 2</span></div>
-              <span style="font-size:10px; color:#ffffff !important; opacity:0.9;">Stairs Up</span>
-            </div>
-            <div class="room-dir-item" data-zone="zone_aquarium" style="color: #ffffff !important;">
-              <div class="room-dir-info" style="color: #ffffff !important;"><span style="color: #ffffff !important;">🐠</span><span style="color: #ffffff !important;">Aquarium &amp; Live Reef</span></div>
-              <span style="font-size:10px; color:#ffffff !important; opacity:0.9;">Tanks</span>
+            <div class="room-dir-item" data-zone="zone_staff_office" style="color: #ffffff !important;">
+              <div class="room-dir-info" style="color: #ffffff !important;"><span style="color: #ffffff !important;">🏢</span><span style="color: #ffffff !important;">Staff Office &amp; Administration</span></div>
+              <span style="font-size:10px; color:#ffffff !important; opacity:0.9;">Staff</span>
             </div>
           </div>
         `;
-        } else {
+        } else if (currentFloor === 2) {
           html += `
           <div class="sidebar-section-title" style="margin-top:14px; color: #ffffff !important;">
-            <span style="color: #ffffff !important;">Mezzanine Features</span>
+            <span style="color: #ffffff !important;">Level 2 Overlooks &amp; Balconies</span>
           </div>
           <div class="room-dir-list">
-            <div class="room-dir-item" data-zone="zone_stairs_landing" style="color: #ffffff !important;">
-              <div class="room-dir-info" style="color: #ffffff !important;"><span style="color: #ffffff !important;">🪜</span><span style="color: #ffffff !important;">Stairs Down to Ground</span></div>
-              <span style="font-size:10px; color:#ffffff !important; opacity:0.9;">Landing</span>
-            </div>
             <div class="room-dir-item" data-zone="zone_mezzanine_void" style="color: #ffffff !important;">
               <div class="room-dir-info" style="color: #ffffff !important;"><span style="color: #ffffff !important;">👀</span><span style="color: #ffffff !important;">Mezzanine Void Balcony</span></div>
               <span style="font-size:10px; color:#ffffff !important; opacity:0.9;">Overlook</span>
@@ -3445,11 +3557,8 @@
             renderRoute(room.id);
 
             // On mobile, collapse directory so walking route is visible
-            if (window.innerWidth <= 768) {
-              mapSidebar.classList.add('collapsed');
-              mapSidebar.classList.remove('open');
-              const btnToggle = document.getElementById('btnToggleSidebar');
-              if (btnToggle) btnToggle.classList.remove('active');
+            if (window.innerWidth <= 860 && window.toggleSidePanel) {
+              window.toggleSidePanel(false);
             }
           });
         });
@@ -3488,11 +3597,8 @@
             }, 80);
 
             // On mobile, collapse directory so walking route is visible
-            if (window.innerWidth <= 768) {
-              mapSidebar.classList.add('collapsed');
-              mapSidebar.classList.remove('open');
-              const btnToggle = document.getElementById('btnToggleSidebar');
-              if (btnToggle) btnToggle.classList.remove('active');
+            if (window.innerWidth <= 860 && window.toggleSidePanel) {
+              window.toggleSidePanel(false);
             }
           });
         });
@@ -4313,11 +4419,8 @@
         directionsPanel.classList.remove('minimized');
         const collapseIcon = document.getElementById('dirCollapseIcon');
         if (collapseIcon) collapseIcon.textContent = '▼';
-        if (mapViewport.clientWidth < 600 || window.innerWidth <= 768) {
-          mapSidebar.classList.add('collapsed');
-          mapSidebar.classList.remove('open');
-          const btnToggle = document.getElementById('btnToggleSidebar');
-          if (btnToggle) btnToggle.classList.remove('active');
+        if (mapViewport.clientWidth < 600 || window.innerWidth <= 860) {
+          if (window.toggleSidePanel) window.toggleSidePanel(false);
           panY = -60;
           updateTransform();
         }
@@ -4378,21 +4481,43 @@
         const btnReset = document.getElementById('btnZoomReset');
         if (btnReset) btnReset.addEventListener('click', () => fitToScreen(true));
 
-        // Toggle Directory Sidebar
-        document.getElementById('btnToggleSidebar').addEventListener('click', () => {
-          const isMobile = window.innerWidth <= 768;
+        // Universal Side Panel Toggle function (works for header button, mobile FAB, mobile HUD button, close button, and backdrop)
+        function toggleSidePanel(forceState) {
+          const isMobile = window.innerWidth <= 860;
+          const currentlyOpen = isMobile ? mapSidebar.classList.contains('open') : !mapSidebar.classList.contains('collapsed');
+          const willOpen = typeof forceState === 'boolean' ? forceState : !currentlyOpen;
+
           if (isMobile) {
-            const willOpen = !mapSidebar.classList.contains('open');
             mapSidebar.classList.toggle('open', willOpen);
             mapSidebar.classList.toggle('collapsed', !willOpen);
-            document.getElementById('btnToggleSidebar').classList.toggle('active', willOpen);
+            const backdrop = document.getElementById('mapSidebarBackdrop');
+            if (backdrop) backdrop.classList.toggle('visible', willOpen);
           } else {
-            mapSidebar.classList.toggle('collapsed');
-            const isCollapsed = mapSidebar.classList.contains('collapsed');
-            document.getElementById('btnToggleSidebar').classList.toggle('active', !isCollapsed);
+            mapSidebar.classList.toggle('collapsed', !willOpen);
+            mapSidebar.classList.remove('open');
+            const backdrop = document.getElementById('mapSidebarBackdrop');
+            if (backdrop) backdrop.classList.remove('visible');
           }
+
+          const btnToggle = document.getElementById('btnToggleSidebar');
+          if (btnToggle) btnToggle.classList.toggle('active', willOpen);
+
+          const fab = document.getElementById('mobileSidepanelFab');
+          if (fab) fab.classList.toggle('active', willOpen);
+
+          const hudBtn = document.getElementById('btnMobileHudSidepanel');
+          if (hudBtn) hudBtn.classList.toggle('active', willOpen);
+
           setTimeout(() => fitToScreen(true), 320);
-        });
+        }
+        window.toggleSidePanel = toggleSidePanel;
+
+        // Toggle Directory Sidebar & Mobile Side Panel Listeners
+        document.getElementById('btnToggleSidebar')?.addEventListener('click', () => toggleSidePanel());
+        document.getElementById('mobileSidepanelFab')?.addEventListener('click', () => toggleSidePanel());
+        document.getElementById('btnMobileHudSidepanel')?.addEventListener('click', () => toggleSidePanel());
+        document.getElementById('sidebarMobileCloseBtn')?.addEventListener('click', () => toggleSidePanel(false));
+        document.getElementById('mapSidebarBackdrop')?.addEventListener('click', () => toggleSidePanel(false));
 
 
         // Zoom Controls
@@ -4807,11 +4932,8 @@
           fitToScreen(false);
         });
 
-        if (window.innerWidth <= 768) {
-          mapSidebar.classList.add('collapsed');
-          mapSidebar.classList.remove('open');
-          const btnToggle = document.getElementById('btnToggleSidebar');
-          if (btnToggle) btnToggle.classList.remove('active');
+        if (window.innerWidth <= 860) {
+          if (window.toggleSidePanel) window.toggleSidePanel(false);
         }
 
         const hasRouteIntent = routeParam && (
