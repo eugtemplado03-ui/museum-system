@@ -215,13 +215,13 @@
 
   /* Admin Display Container & All Text Elements */
   .admin-main,
-  .admin-main *:not(.admin-topbar):not(.admin-topbar *):not(.btn-primary):not(.btn-primary *):not(.dash-action-btn):not(.dash-action-btn *):not(.dash-panel-action):not(.dash-panel-action *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *):not(.dash-pie-toggle-btn.active):not(.dash-pie-toggle-btn.active *):not(.filter-chip.active):not(.filter-chip.active *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.gallery-item .caption):not(.gallery-item .caption *):not(.carousel-badge):not(.carousel-badge *):not(.rating-item):not(.rating-item *):not(.info-card):not(.info-card *):not(.dash-cat-bar-fill):not(.sidebar-badge):not(.sidebar-badge *),
+  .admin-main *:not(.admin-topbar):not(.admin-topbar *):not(.btn-primary):not(.btn-primary *):not(.dash-action-btn):not(.dash-action-btn *):not(.dash-panel-action):not(.dash-panel-action *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *):not(.dash-pie-mode-toggles):not(.dash-pie-mode-toggles *):not(.dash-pie-toggle-btn):not(.dash-pie-toggle-btn *):not(.filter-chip.active):not(.filter-chip.active *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.gallery-item .caption):not(.gallery-item .caption *):not(.carousel-badge):not(.carousel-badge *):not(.rating-item):not(.rating-item *):not(.info-card):not(.info-card *):not(.dash-cat-bar-fill):not(.sidebar-badge):not(.sidebar-badge *),
   .admin-content,
-  .admin-content *:not(.btn-primary):not(.btn-primary *):not(.dash-action-btn):not(.dash-action-btn *):not(.dash-panel-action):not(.dash-panel-action *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *):not(.filter-chip.active):not(.filter-chip.active *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.gallery-item .caption):not(.gallery-item .caption *):not(.carousel-badge):not(.carousel-badge *):not(.rating-item):not(.rating-item *):not(.info-card):not(.info-card *):not(.dash-cat-bar-fill),
+  .admin-content *:not(.btn-primary):not(.btn-primary *):not(.dash-action-btn):not(.dash-action-btn *):not(.dash-panel-action):not(.dash-panel-action *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *):not(.dash-pie-mode-toggles):not(.dash-pie-mode-toggles *):not(.dash-pie-toggle-btn):not(.dash-pie-toggle-btn *):not(.filter-chip.active):not(.filter-chip.active *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.gallery-item .caption):not(.gallery-item .caption *):not(.carousel-badge):not(.carousel-badge *):not(.rating-item):not(.rating-item *):not(.info-card):not(.info-card *):not(.dash-cat-bar-fill),
   #tabContent,
-  #tabContent *:not(.btn-primary):not(.btn-primary *):not(.dash-action-btn):not(.dash-action-btn *):not(.dash-panel-action):not(.dash-panel-action *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *):not(.filter-chip.active):not(.filter-chip.active *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.gallery-item .caption):not(.gallery-item .caption *):not(.carousel-badge):not(.carousel-badge *):not(.rating-item):not(.rating-item *):not(.info-card):not(.info-card *):not(.dash-cat-bar-fill),
+  #tabContent *:not(.btn-primary):not(.btn-primary *):not(.dash-action-btn):not(.dash-action-btn *):not(.dash-panel-action):not(.dash-panel-action *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *):not(.dash-pie-mode-toggles):not(.dash-pie-mode-toggles *):not(.dash-pie-toggle-btn):not(.dash-pie-toggle-btn *):not(.filter-chip.active):not(.filter-chip.active *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.gallery-item .caption):not(.gallery-item .caption *):not(.carousel-badge):not(.carousel-badge *):not(.rating-item):not(.rating-item *):not(.info-card):not(.info-card *):not(.dash-cat-bar-fill),
   .dash-wrapper,
-  .dash-wrapper *:not(.btn-primary):not(.btn-primary *):not(.dash-action-btn):not(.dash-action-btn *):not(.dash-panel-action):not(.dash-panel-action *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *):not(.dash-pie-toggle-btn.active):not(.dash-pie-toggle-btn.active *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.gallery-item .caption):not(.gallery-item .caption *):not(.carousel-badge):not(.carousel-badge *):not(.rating-item):not(.rating-item *):not(.info-card):not(.info-card *):not(.dash-cat-bar-fill),
+  .dash-wrapper *:not(.btn-primary):not(.btn-primary *):not(.dash-action-btn):not(.dash-action-btn *):not(.dash-panel-action):not(.dash-panel-action *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *):not(.dash-pie-mode-toggles):not(.dash-pie-mode-toggles *):not(.dash-pie-toggle-btn):not(.dash-pie-toggle-btn *):not(.home-gallery-mini-overlay):not(.home-gallery-mini-caption):not(.gallery-item .caption):not(.gallery-item .caption *):not(.carousel-badge):not(.carousel-badge *):not(.rating-item):not(.rating-item *):not(.info-card):not(.info-card *):not(.dash-cat-bar-fill),
   .modal-overlay .modal,
   .modal-overlay .modal *:not(.btn-primary):not(.btn-primary *):not(.btn-submit):not(.btn-submit *):not(.btn-danger):not(.btn-danger *):not(.btn-delete):not(.btn-delete *),
   .modal-overlay .modal-box,
@@ -917,16 +917,70 @@
     font-weight: 800 !important;
   }
 
-  /* Baby Blue Active Toggle in Pie Card & Links */
+  /* ── Segmented Toggle Pills in Pie Card (Exhibits | Resources) ── */
+  .dash-pie-mode-toggles {
+    display: inline-flex !important;
+    background: #334155 !important;
+    border: 1.5px solid #475569 !important;
+    border-radius: 10px !important;
+    padding: 3px !important;
+    gap: 3px !important;
+    align-items: center !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  .dash-pie-toggle-btn {
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    color: #f1f5f9 !important;
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 11.5px !important;
+    padding: 4px 12px !important;
+    border-radius: 7px !important;
+    cursor: pointer !important;
+    transition: background 0.18s ease, color 0.18s ease, transform 0.15s ease, box-shadow 0.18s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-shadow: none !important;
+    outline: none !important;
+    user-select: none !important;
+  }
+  .dash-pie-toggle-btn * {
+    color: inherit !important;
+  }
+
+  /* Inactive Toggle Hover Effect */
+  .dash-pie-toggle-btn:not(.active):hover {
+    background: rgba(255, 255, 255, 0.24) !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+  }
+  .dash-pie-toggle-btn:not(.active):active {
+    transform: translateY(0) !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+  }
+
+  /* Active Toggle State */
   .dash-pie-toggle-btn.active {
     background: #5ba4e6 !important;
+    background-image: linear-gradient(135deg, #5ba4e6 0%, #4696df 100%) !important;
     color: #ffffff !important;
-    border: 1px solid #4696df !important;
-    box-shadow: 0 2px 8px rgba(91, 164, 230, 0.35) !important;
+    border: 1px solid rgba(255, 255, 255, 0.45) !important;
+    box-shadow: 0 2px 8px rgba(91, 164, 230, 0.45) !important;
     font-weight: 800 !important;
   }
   .dash-pie-toggle-btn.active * {
     color: #ffffff !important;
+  }
+  .dash-pie-toggle-btn.active:hover {
+    background: #4696df !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(91, 164, 230, 0.55) !important;
+    transform: translateY(-1px) !important;
   }
   .dash-kpi-link {
     color: #2563eb !important;
@@ -1132,7 +1186,7 @@
   <script src="/js/lightbox.js"></script>
   <script src="/js/sidebar.js"></script>
   <script src="/js/carousel.js?v=2"></script>
-  <script src="/js/admin.js?v=35"></script>
+  <script src="/js/admin.js?v=36"></script>
   <script src="/js/footer.js"></script>
 </body>
 </html>

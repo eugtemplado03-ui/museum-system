@@ -492,7 +492,7 @@ async function renderDashboardHomeTab(contentEl){
                 <div class="dash-pie-sub" id="dashPieSub" style="color:#000000 !important; font-weight:600 !important;">Exhibits by Category & Room</div>
               </div>
               <div class="dash-pie-mode-toggles">
-                <button type="button" class="dash-pie-toggle-btn active" id="pieToggleCategories" title="Show Exhibits by Category" style="background:#5ba4e6 !important; color:#ffffff !important; border:1px solid #4696df !important; font-weight:800 !important;">Exhibits</button>
+                <button type="button" class="dash-pie-toggle-btn active" id="pieToggleCategories" title="Show Exhibits by Category">Exhibits</button>
                 <button type="button" class="dash-pie-toggle-btn" id="pieToggleResources" title="Show All Museum Metrics">Resources</button>
               </div>
             </div>
