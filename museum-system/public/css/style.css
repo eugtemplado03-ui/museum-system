@@ -1416,6 +1416,9 @@ body.sidebar-open {
   z-index: 6;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
+.gallery-detail-media-wrap .media-combo-nav {
+  padding-right: 58px !important;
+}
 .media-combo-tab {
   flex: 1;
   padding: 6px 12px;
@@ -2619,21 +2622,21 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
 
 /* ── Lightbox ───────────────────────────────────────────────────── */
 .lightbox-overlay {
-  position: fixed;
-  inset: 0;
+  position: fixed !important;
+  inset: 0 !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 24, 32, 0.88);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  z-index: 300;
+  background: rgba(0, 16, 24, 0.92) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  z-index: 999999 !important;
   padding: 24px;
   user-select: none;
   touch-action: pan-y;
   transition: opacity 0.2s ease;
 }
-.lightbox-overlay.open { background: rgba(0, 20, 28, 0.94); }
+.lightbox-overlay.open { background: rgba(0, 16, 24, 0.96) !important; }
 .lightbox-wrap {
   position: relative;
   max-width: calc(100% - 48px);
@@ -2669,29 +2672,42 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
 .lightbox-caption { color: var(--white); font-size: 14px; text-align: center; max-width: 90%; line-height: 1.4; }
 
 .lightbox-close {
-  position: fixed;
-  right: 20px;
-  top: 20px;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
-  color: var(--white);
-  font-size: 20px;
-  border-radius: 50%;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 310;
-  transition: background 0.15s, transform 0.15s;
+  position: fixed !important;
+  right: max(20px, env(safe-area-inset-right, 20px)) !important;
+  top: max(20px, env(safe-area-inset-top, 20px)) !important;
+  background: rgba(15, 23, 42, 0.88) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 2px solid rgba(255, 255, 255, 0.85) !important;
+  color: #ffffff !important;
+  font-size: 24px !important;
+  font-weight: 800 !important;
+  border-radius: 50% !important;
+  width: 48px !important;
+  height: 48px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  z-index: 1000000 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6) !important;
+  transition: background 0.15s, transform 0.15s, border-color 0.15s !important;
 }
 .lightbox-close:hover {
-  background: rgba(217, 79, 61, 0.85);
-  border-color: #ffffff;
-  transform: scale(1.08);
+  background: #ef4444 !important;
+  border-color: #ffffff !important;
+  color: #ffffff !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 6px 24px rgba(239, 68, 68, 0.6) !important;
+}
+
+.modal-overlay-close-btn:hover,
+.gallery-detail-media-wrap .modal-close-btn:hover {
+  background: #ef4444 !important;
+  border-color: #ffffff !important;
+  color: #ffffff !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6) !important;
 }
 
 .lightbox-nav-btn {
@@ -2711,7 +2727,7 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 310;
+  z-index: 1000000 !important;
   transition: background 0.15s, transform 0.15s, border-color 0.15s;
   padding: 0;
   line-height: 1;
@@ -2742,7 +2758,7 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
   padding: 5px 14px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.25);
-  z-index: 310;
+  z-index: 1000000 !important;
   pointer-events: none;
   letter-spacing: 0.05em;
 }
@@ -3276,6 +3292,14 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
   .plaque-media { min-height: 280px; }
   .form-grid { grid-template-columns: 1fr; }
   .topbar { height: auto; padding: 12px 16px; flex-wrap: wrap; gap: 10px; }
+  .lightbox-close {
+    right: max(12px, env(safe-area-inset-right, 12px)) !important;
+    top: max(12px, env(safe-area-inset-top, 12px)) !important;
+    width: 42px !important;
+    height: 42px !important;
+    font-size: 20px !important;
+    z-index: 1000000 !important;
+  }
   .lightbox-nav-btn { width: 42px; height: 42px; font-size: 18px; }
   .lightbox-nav-btn.prev { left: 10px; }
   .lightbox-nav-btn.next { right: 10px; }
