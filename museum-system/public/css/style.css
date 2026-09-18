@@ -1890,17 +1890,43 @@ body.sidebar-open {
 
 /* ── Exhibit Detail (Minimal Plaque) ────────────────────────────── */
 .detail-back {
-  color: #ffffff;
-  font-size: 13px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 16px;
-  font-weight: 700;
-  text-shadow: 0 2px 6px rgba(0, 20, 30, 0.85);
-  transition: opacity 0.15s;
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 9999px !important;
+  padding: 8px 18px !important;
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-bottom: 20px !important;
+  text-decoration: none !important;
+  text-shadow: none !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  cursor: pointer;
 }
-.detail-back:hover { opacity: 0.75; }
+
+.detail-back,
+.detail-back * {
+  color: #000000 !important;
+  text-shadow: none !important;
+}
+
+.detail-back:hover {
+  background: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
+  color: #000000 !important;
+  transform: translateX(-4px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06) !important;
+  opacity: 1 !important;
+}
+
+.detail-back:active {
+  transform: translateX(-1px) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+}
 
 .plaque {
   max-width: 1000px;
@@ -8132,8 +8158,8 @@ footer a:hover {
 }
 
 .detail-back {
-  color: #FFFFFF !important;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+  color: #000000 !important;
+  text-shadow: none !important;
   font-weight: 800 !important;
 }
 
