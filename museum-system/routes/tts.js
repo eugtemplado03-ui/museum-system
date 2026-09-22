@@ -5,6 +5,10 @@ const router = express.Router();
 // In-memory caches for instant response and reliability
 const translationCache = new Map();
 const audioCache = new Map();
+const audioCacheMeta = new Map();
+
+// Groq API base URL
+const GROQ_API_BASE = 'https://api.groq.com/openai/v1';
 
 function splitIntoChunks(str, maxLen = 140) {
   const clean = str.replace(/[\r\n]+/g, ' ').trim();
@@ -143,20 +147,21 @@ CRITICAL RULES FOR FILIPINO (TAGALOG):
 
 // ── Translation status endpoint ──────────────────────────────────
 router.get('/status', (req, res) => {
+  const hasGroqKey = Boolean((process.env.GROQ_API_KEY || '').trim());
   const hasFishKey = Boolean((process.env.FISH_AUDIO_API_KEY || '').trim());
-  const hasTranslationKey = Boolean((process.env.TRANSLATION_API_KEY || process.env.OPENROUTER_API_KEY || '').trim());
   res.json({
-    translationConfigured: hasTranslationKey,
+    translationConfigured: hasGroqKey,
+    groqConfigured: hasGroqKey,
     fishAudioConfigured: hasFishKey,
     fishAudioModel: process.env.FISH_AUDIO_MODEL || 's2.1-pro-free',
-    fishAudioVoiceId: process.env.FISH_AUDIO_VOICE_ID || process.env.FISH_AUDIO_REFERENCE_ID || null
+    fishAudioVoiceId: process.env.FISH_AUDIO_VOICE_ID || process.env.FISH_AUDIO_REFERENCE_ID || null,
+    ttsProvider: hasGroqKey ? 'groq-orpheus' : 'google-tts-fallback'
   });
 });
 
-// ── Translation endpoint ──────────────────────────────────────────
+// ── Translation endpoint (Groq openai/gpt-oss-120b) ──────────────
 router.post('/translate', async (req, res) => {
-  const apiKey = process.env.TRANSLATION_API_KEY || process.env.OPENROUTER_API_KEY;
-  const primaryModel = process.env.TRANSLATION_MODEL || process.env.OPENROUTER_MODEL || 'openai/gpt-4o-mini';
+  const groqKey = process.env.GROQ_API_KEY;
 
   const text = req.body && req.body.text;
   const rawLang = (req.body && (req.body.targetLang || req.body.lang || req.body.language)) || '';
@@ -180,58 +185,39 @@ router.post('/translate', async (req, res) => {
     return res.json({ translatedText: translationCache.get(cacheKey) });
   }
 
-  if (!apiKey) {
-    return res.status(503).json({ error: 'Translation service not configured. Set TRANSLATION_API_KEY or OPENROUTER_API_KEY in .env.' });
+  if (!groqKey || !groqKey.trim()) {
+    return res.status(503).json({ error: 'Translation service not configured. Set GROQ_API_KEY in .env.' });
   }
 
   const systemPrompt = getSystemPrompt(targetLang);
-  // Calculate a proportional max_tokens so we never trigger OpenRouter credit over-reservation
-  const calculatedTokens = Math.min(500, Math.max(150, Math.ceil(trimmedText.length * 1.5)));
 
-  const callModel = async (modelName) => {
-    return await fetch('https://openrouter.ai/api/v1/chat/completions', {
+  try {
+    console.log(`[Translation] Translating to ${targetLang} using Groq openai/gpt-oss-120b...`);
+
+    const response = await fetch(`${GROQ_API_BASE}/chat/completions`, {
       method: 'POST',
       headers: {
-        'content-type': 'application/json',
-        Authorization: 'Bearer ' + apiKey,
-        'HTTP-Referer': process.env.SITE_URL || 'http://localhost:3000',
-        'X-Title': process.env.SITE_NAME || 'Museo Sang Bata sa Negros'
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + groqKey.trim()
       },
       body: JSON.stringify({
-        model: modelName,
-        max_tokens: calculatedTokens,
-        temperature: 0.1,
+        model: 'openai/gpt-oss-120b',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: trimmedText }
-        ]
+        ],
+        temperature: 1,
+        max_completion_tokens: 2048,
+        top_p: 1,
+        reasoning_effort: 'medium',
+        stream: false,
+        stop: null
       })
     });
-  };
-
-  try {
-    let response = await callModel(primaryModel);
-
-    // If primary model failed due to credit limit or unavailability, attempt fallback
-    if (!response.ok && response.status === 402) {
-      console.warn(`[Translation] Primary model ${primaryModel} returned 402. Attempting fallback free model...`);
-      const fallbackModels = ['google/gemma-4-26b-a4b-it:free', 'deepseek/deepseek-v4-flash-0731:free'];
-      for (const fallback of fallbackModels) {
-        try {
-          const fbResp = await callModel(fallback);
-          if (fbResp.ok) {
-            response = fbResp;
-            break;
-          }
-        } catch (e) {
-          /* try next fallback */
-        }
-      }
-    }
 
     if (!response.ok) {
       const errBody = await response.text();
-      console.error('[Translation] OpenRouter translation error:', response.status, errBody);
+      console.error('[Translation] Groq translation error:', response.status, errBody);
       return res.status(502).json({ error: 'Translation service error.' });
     }
 
@@ -247,14 +233,15 @@ router.post('/translate', async (req, res) => {
       translationCache.set(cacheKey, translatedText);
     }
 
+    console.log(`[Translation] Done — ${trimmedText.length} chars -> ${translatedText.length} chars (${targetLang}).`);
     res.json({ translatedText });
   } catch (err) {
-    console.error('[Translation] Translation request failed:', err);
+    console.error('[Translation] Groq request failed:', err);
     res.status(502).json({ error: 'Translation failed.' });
   }
 });
 
-// ── TTS endpoint (Fish Audio AI API with natural high-fidelity streaming fallback) ──
+// ── TTS endpoint (Groq Orpheus primary → Google TTS fallback) ─────
 router.post('/speak', async (req, res) => {
   const rawLang = (req.body && (req.body.lang || req.body.targetLang || req.body.language)) || 'tl';
   const lang = normalizeTargetLang(rawLang);
@@ -268,66 +255,62 @@ router.post('/speak', async (req, res) => {
 
   if (audioCache.has(cacheKey)) {
     const cachedBuffer = audioCache.get(cacheKey);
-    res.set('Content-Type', 'audio/mpeg');
+    const cachedMeta = audioCacheMeta.get(cacheKey) || { type: 'audio/wav', provider: 'cached' };
+    res.set('Content-Type', cachedMeta.type);
     res.set('Content-Length', cachedBuffer.byteLength);
     res.set('X-TTS-Provider', 'cached');
     return res.send(cachedBuffer);
   }
 
-  // ── 1. Fish Audio AI API Integration ──────────────────────────────
-  const fishKey = (req.body && req.body.fishApiKey) || req.headers['x-fish-audio-key'] || process.env.FISH_AUDIO_API_KEY;
-  if (fishKey && String(fishKey).trim()) {
-    const apiKeyClean = String(fishKey).trim();
+  // ── 1. Groq Orpheus TTS ───────────────────────────────────────────
+  const groqKey = process.env.GROQ_API_KEY;
+  if (groqKey && groqKey.trim()) {
     try {
-      const fishPayload = {
-        text: cleanText,
-        format: 'mp3',
-        latency: 'balanced',
-        prosody: {
-          speed: 1.0,
-          volume: 0
-        }
-      };
-
-      const voiceRef = req.body.reference_id || req.body.voice || process.env.FISH_AUDIO_VOICE_ID || process.env.FISH_AUDIO_REFERENCE_ID || (process.env.FISH_AUDIO_MODEL && process.env.FISH_AUDIO_MODEL !== 's2.1-pro-free' && process.env.FISH_AUDIO_MODEL !== 's2.1-pro' ? process.env.FISH_AUDIO_MODEL : null);
-      if (voiceRef) {
-        fishPayload.reference_id = voiceRef;
-      }
+      console.log(`[TTS] Generating speech with Groq Orpheus (canopylabs/orpheus-v1-english)...`);
 
       const controller = new AbortController();
-      const fishTimeout = setTimeout(() => controller.abort(), 15000);
+      const groqTimeout = setTimeout(() => controller.abort(), 20000);
 
-      const response = await fetch('https://api.fish.audio/v1/tts', {
+      const response = await fetch(`${GROQ_API_BASE}/audio/speech`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + apiKeyClean,
-          model: process.env.FISH_AUDIO_MODEL || 's2.1-pro-free'
+          'Authorization': 'Bearer ' + groqKey.trim()
         },
-        body: JSON.stringify(fishPayload),
+        body: JSON.stringify({
+          model: 'canopylabs/orpheus-v1-english',
+          voice: 'autumn',
+          response_format: 'wav',
+          input: cleanText
+        }),
         signal: controller.signal
       });
-      clearTimeout(fishTimeout);
+      clearTimeout(groqTimeout);
 
       if (response.ok) {
         const audioBuffer = await response.arrayBuffer();
         const buf = Buffer.from(audioBuffer);
         audioCache.set(cacheKey, buf);
-        res.set('Content-Type', 'audio/mpeg');
+        audioCacheMeta.set(cacheKey, { type: 'audio/wav', provider: 'groq-orpheus' });
+        res.set('Content-Type', 'audio/wav');
         res.set('Content-Length', buf.byteLength);
-        res.set('X-TTS-Provider', 'fish-audio');
-        console.log(`[TTS] Voice audio generated with Fish Audio AI API (${buf.byteLength} bytes).`);
+        res.set('X-TTS-Provider', 'groq-orpheus');
+        console.log(`[TTS] Groq Orpheus audio generated (${buf.byteLength} bytes, WAV).`);
         return res.send(buf);
       } else {
         const errText = await response.text();
-        console.warn(`[TTS] Fish Audio returned status ${response.status}: ${errText}. Falling back to natural audio streaming.`);
+        console.warn(`[TTS] Groq Orpheus returned status ${response.status}: ${errText}. Falling back to Google TTS.`);
       }
     } catch (err) {
-      console.error('[TTS] Fish Audio request error:', err.message, '- Using natural voice fallback.');
+      if (err.name === 'AbortError') {
+        console.warn('[TTS] Groq Orpheus request timed out. Falling back to Google TTS.');
+      } else {
+        console.error('[TTS] Groq Orpheus request error:', err.message, '- Falling back to Google TTS.');
+      }
     }
   }
 
-  // ── 2. Natural High-Fidelity Voice Streaming Fallback ────────────
+  // ── 2. Google TTS Fallback ────────────────────────────────────────
   try {
     const ttsLang = (lang === 'cb' || lang === 'tl' || lang === 'hil') ? 'tl' : 'en';
     const chunks = splitIntoChunks(cleanText, 140);
@@ -354,10 +337,11 @@ router.post('/speak', async (req, res) => {
 
     const combinedBuffer = Buffer.concat(audioBuffers);
     audioCache.set(cacheKey, combinedBuffer);
+    audioCacheMeta.set(cacheKey, { type: 'audio/mpeg', provider: 'google-tts' });
 
     res.set('Content-Type', 'audio/mpeg');
     res.set('Content-Length', combinedBuffer.byteLength);
-    res.set('X-TTS-Provider', 'natural-stream');
+    res.set('X-TTS-Provider', 'google-tts-fallback');
     res.send(combinedBuffer);
   } catch (err) {
     console.error('[TTS] Voice audio request failed:', err);
