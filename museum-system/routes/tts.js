@@ -161,7 +161,7 @@ router.get('/status', (req, res) => {
 
 // ── Translation endpoint (Groq openai/gpt-oss-120b) ──────────────
 router.post('/translate', async (req, res) => {
-  const groqKey = process.env.GROQ_API_KEY;
+  const groqKey = (process.env.GROQ_API_KEY || '').trim();
 
   const text = req.body && req.body.text;
   const rawLang = (req.body && (req.body.targetLang || req.body.lang || req.body.language)) || '';
@@ -185,8 +185,8 @@ router.post('/translate', async (req, res) => {
     return res.json({ translatedText: translationCache.get(cacheKey) });
   }
 
-  if (!groqKey || !groqKey.trim()) {
-    return res.status(503).json({ error: 'Translation service not configured. Set GROQ_API_KEY in .env.' });
+  if (!groqKey) {
+    return res.status(503).json({ error: 'Translation service not configured. Set GROQ_API_KEY in .env and restart the server.' });
   }
 
   const systemPrompt = getSystemPrompt(targetLang);
@@ -198,7 +198,7 @@ router.post('/translate', async (req, res) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + groqKey.trim()
+        'Authorization': 'Bearer ' + groqKey
       },
       body: JSON.stringify({
         model: 'openai/gpt-oss-120b',
@@ -207,37 +207,43 @@ router.post('/translate', async (req, res) => {
           { role: 'user', content: trimmedText }
         ],
         temperature: 1,
-        max_completion_tokens: 2048,
+        max_tokens: 2048,
         top_p: 1,
-        reasoning_effort: 'medium',
-        stream: false,
-        stop: null
+        reasoning_effort: 'default',
+        stream: false
       })
     });
 
     if (!response.ok) {
       const errBody = await response.text();
-      console.error('[Translation] Groq translation error:', response.status, errBody);
-      return res.status(502).json({ error: 'Translation service error.' });
+      console.error('[Translation] Groq API error:', response.status, errBody);
+      return res.status(502).json({ error: 'Translation service error: ' + response.status });
     }
 
     const data = await response.json();
-    let translatedText = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content || '').trim();
+    const msg = data.choices && data.choices[0] && data.choices[0].message;
+    // gpt-oss-120b is a reasoning model — content holds the final answer
+    let translatedText = (msg && msg.content || '').trim();
 
     // Clean up surrounding quotes if the model wrapped output
-    if ((translatedText.startsWith('"') && translatedText.endsWith('"')) || (translatedText.startsWith("'") && translatedText.endsWith("'"))) {
+    if (
+      (translatedText.startsWith('"') && translatedText.endsWith('"')) ||
+      (translatedText.startsWith("'") && translatedText.endsWith("'"))
+    ) {
       translatedText = translatedText.slice(1, -1).trim();
     }
 
-    if (translatedText) {
-      translationCache.set(cacheKey, translatedText);
+    if (!translatedText) {
+      console.warn('[Translation] Empty response from Groq, returning original text.');
+      return res.json({ translatedText: trimmedText });
     }
 
-    console.log(`[Translation] Done — ${trimmedText.length} chars -> ${translatedText.length} chars (${targetLang}).`);
+    translationCache.set(cacheKey, translatedText);
+    console.log(`[Translation] Done (${targetLang}): "${translatedText.substring(0, 60)}..."`);
     res.json({ translatedText });
   } catch (err) {
-    console.error('[Translation] Groq request failed:', err);
-    res.status(502).json({ error: 'Translation failed.' });
+    console.error('[Translation] Groq request threw:', err.message);
+    res.status(502).json({ error: 'Translation failed: ' + err.message });
   }
 });
 
