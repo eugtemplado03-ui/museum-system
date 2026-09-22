@@ -2677,20 +2677,10 @@
             </div>
           </div>
 
-          <!-- Auto-Forward / Countdown Banner -->
-          <div id="passForwardCountdownBox" style="display:none; background:#e0f2fe; border:1.5px solid #7dd3fc; border-radius:14px; padding:12px 16px; margin-top:20px; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; text-align:left;">
-            <div style="font-size:13.5px; font-weight:700; color:#0369a1; display:flex; align-items:center; gap:8px;">
-              <span style="font-size:20px;">⏱️</span>
-              <span id="passForwardCountdownText">Entering Museum Dashboard in <strong>5</strong>s...</span>
-            </div>
-            <button type="button" id="btnPausePassCountdown" style="background:#ffffff; border:1.5px solid #0284c7; color:#0284c7; border-radius:8px; padding:6px 14px; font-size:12px; font-weight:800; cursor:pointer; transition:all 0.15s;">
-              ⏸️ Stay on Pass
-            </button>
-          </div>
-
-          <div style="display:flex; flex-direction:column; gap:12px; width:100%; margin-top:14px;">
-            <a class="btn-submit" id="continueToDestBtn" href="/dashboard.html" style="text-decoration:none; font-size:16px; padding:15px 22px;">
-              <span>🚀 Enter Museum Dashboard Now</span> <span>&rarr;</span>
+          <!-- Navigation Action Buttons (Manual user progression to Explore Museum / Dashboard) -->
+          <div style="display:flex; flex-direction:column; gap:12px; width:100%; margin-top:20px;">
+            <a class="btn-submit" id="continueToDestBtn" href="/dashboard.html" style="text-decoration:none; font-size:16px; padding:15px 22px; display:flex; align-items:center; justify-content:center; gap:10px;">
+              <span>🏛️ Continue to Explore Museum</span> <span>&rarr;</span>
             </a>
             <button type="button" class="btn-submit" id="checkinAnotherBtn"
               style="background:#ffffff; color:var(--blue-primary); border:2px solid var(--blue-primary); box-shadow:none;">
@@ -3226,19 +3216,9 @@
       }
     }
 
-    // ── Checkin Success Handler & Auto-Forward Timer ──────────────
-    let passCountdownTimer = null;
-    let passCountdownSecs = 5;
-
-    function pausePassCountdown(msg) {
-      if (passCountdownTimer) {
-        clearInterval(passCountdownTimer);
-        passCountdownTimer = null;
-      }
-      const countdownText = document.getElementById('passForwardCountdownText');
-      const pauseBtn = document.getElementById('btnPausePassCountdown');
-      if (countdownText) countdownText.innerHTML = msg || 'Auto-navigation paused. Feel free to save, copy, or print your pass!';
-      if (pauseBtn) pauseBtn.textContent = '▶️ Resume Auto-Enter';
+    // ── Checkin Success Handler (Manual progression to Explore Museum) ──
+    function pausePassCountdown() {
+      // Manual progression mode - auto-navigation removed
     }
 
     function showCheckinSuccess(v, visitorCode, qrCodeDataUrl, visitorName, isReturning, finalDestination) {
@@ -3269,13 +3249,13 @@
       renderDigitalVisitorPass(v, visitorCode, qrCodeDataUrl);
       successMessage.classList.add('visible');
 
-      // 4. Update the primary Action Button
+      // 4. Update the primary Action Button to Continue to Explore Museum (manual progression)
       if (continueToDestBtn) {
         continueToDestBtn.href = targetUrl;
         if (isExhibitTarget) {
-          continueToDestBtn.innerHTML = '<span>🚀 Unlock Exhibit Now &rarr;</span>';
+          continueToDestBtn.innerHTML = '<span>🔓 Continue to Explore Museum &amp; Unlock Exhibit</span> <span>&rarr;</span>';
         } else {
-          continueToDestBtn.innerHTML = '<span>🚀 Enter Museum Dashboard Now &rarr;</span>';
+          continueToDestBtn.innerHTML = '<span>🏛️ Continue to Explore Museum</span> <span>&rarr;</span>';
         }
       }
 
@@ -3283,53 +3263,6 @@
       try {
         successMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
       } catch (e) {}
-
-      // 6. Start friendly 5-second countdown to destination / dashboard
-      const countdownBox = document.getElementById('passForwardCountdownBox');
-      const countdownText = document.getElementById('passForwardCountdownText');
-      const pauseBtn = document.getElementById('btnPausePassCountdown');
-
-      if (countdownBox && countdownText) {
-        countdownBox.style.display = 'flex';
-        passCountdownSecs = 5;
-        const destLabel = isExhibitTarget ? 'Exhibit' : 'Museum Dashboard';
-        countdownText.innerHTML = `Entering ${destLabel} in <strong>${passCountdownSecs}</strong>s...`;
-
-        if (passCountdownTimer) clearInterval(passCountdownTimer);
-        passCountdownTimer = setInterval(() => {
-          passCountdownSecs--;
-          if (passCountdownSecs > 0) {
-            countdownText.innerHTML = `Entering ${destLabel} in <strong>${passCountdownSecs}</strong>s...`;
-          } else {
-            clearInterval(passCountdownTimer);
-            passCountdownTimer = null;
-            window.location.replace(targetUrl);
-          }
-        }, 1000);
-
-        if (pauseBtn) {
-          pauseBtn.textContent = '⏸️ Stay on Pass';
-          pauseBtn.onclick = () => {
-            if (passCountdownTimer) {
-              pausePassCountdown();
-            } else {
-              passCountdownSecs = 5;
-              countdownText.innerHTML = `Entering ${destLabel} in <strong>${passCountdownSecs}</strong>s...`;
-              pauseBtn.textContent = '⏸️ Stay on Pass';
-              passCountdownTimer = setInterval(() => {
-                passCountdownSecs--;
-                if (passCountdownSecs > 0) {
-                  countdownText.innerHTML = `Entering ${destLabel} in <strong>${passCountdownSecs}</strong>s...`;
-                } else {
-                  clearInterval(passCountdownTimer);
-                  passCountdownTimer = null;
-                  window.location.replace(targetUrl);
-                }
-              }, 1000);
-            }
-          };
-        }
-      }
     }
 
     // ── Quick Re-Checkin Handler ──────────────────────────────────
@@ -3927,13 +3860,6 @@
     });
 
     checkinAnotherBtn?.addEventListener('click', () => {
-      if (passCountdownTimer) {
-        clearInterval(passCountdownTimer);
-        passCountdownTimer = null;
-      }
-      const countdownBox = document.getElementById('passForwardCountdownBox');
-      if (countdownBox) countdownBox.style.display = 'none';
-
       form.reset();
       const fpForm = document.getElementById('fastPassForm');
       if (fpForm) fpForm.reset();
