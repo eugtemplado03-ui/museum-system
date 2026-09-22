@@ -97,140 +97,18 @@
                 ${program.ageRange ? `<div><span>Target Group</span><b>Ages ${escapeHtml(program.ageRange)}</b></div>` : ''}
               </div>
 
-              <div style="display:flex; gap:8px; align-items:center; margin-top:2px;">
-                <label for="langSelect" style="font-size:12.5px; color:var(--grey-400); font-weight:600;">Language:</label>
-                <select id="langSelect" style="padding:5px 10px; font-size:13px; border-radius:8px; border:1px solid var(--grey-200); background:#fff; font-family:inherit; color:var(--ink); cursor:pointer;">
-                  <option value="original">Original (English)</option>
-                  <option value="tl">Tagalog (Filipino)</option>
-                  <option value="cb">Bisaya (Cebuano)</option>
-                  <option value="hil">Hiligaynon (Ilonggo)</option>
-                </select>
-              </div>
-
-              <div class="plaque-desc" id="plaqueDesc" data-desc-original="${escapeHtml(program.description || '')}" data-desc-tl="${escapeHtml(program.description_tl || '')}" data-desc-cb="${escapeHtml(program.description_cb || '')}" data-desc-hil="${escapeHtml(program.description_hil || '')}">
+              <div class="plaque-desc" id="plaqueDesc">
                 ${escapeHtml(program.description || 'No detailed description available for this program.')}
               </div>
 
-              <div class="tts-controls">
-                <button class="btn btn-secondary btn-small" id="ttsPlayBtn">🔊 Listen to description</button>
-                <button class="btn btn-secondary btn-small" id="ttsStopBtn">■ Stop</button>
-                <div id="ttsStatus" style="font-size:12px; color:var(--grey-400);"></div>
-              </div>
             </div>
           </div>`;
 
+
         initPhotoCarousels(content);
-        wireTranslationAndTTS(program);
       }catch(e){
         content.innerHTML = `<div class="empty-state"><h2>Program not found</h2><p>The program you are looking for may have ended or been updated.</p><a class="btn btn-primary" href="/programs.html">Back to all programs</a></div>`;
       }
-    }
-
-    function wireTranslationAndTTS(program){
-      const playBtn    = document.getElementById('ttsPlayBtn');
-      const stopBtn    = document.getElementById('ttsStopBtn');
-      const statusEl   = document.getElementById('ttsStatus');
-      const descEl     = document.getElementById('plaqueDesc');
-      const langSelect = document.getElementById('langSelect');
-      if (!playBtn || !stopBtn || !descEl) return;
-
-      const _cache = {
-        original: descEl.dataset.descOriginal || program.description || '',
-        tl: descEl.dataset.descTl || program.description_tl || '',
-        cb: descEl.dataset.descCb || program.description_cb || '',
-        hil: descEl.dataset.descHil || program.description_hil || ''
-      };
-      let _currentText = _cache.original;
-
-      function setStatus(msg, isLoading) {
-        statusEl.textContent = msg;
-        playBtn.disabled = isLoading || false;
-      }
-
-      async function fetchTranslation(targetLang) {
-        if (_cache[targetLang] && _cache[targetLang].trim()) return _cache[targetLang].trim();
-        const originalText = _cache.original || '';
-        if (!originalText.trim()) return originalText;
-
-        setStatus('Translating…', true);
-        try {
-          const resp = await fetch('/api/tts/translate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: originalText, targetLang }),
-          });
-          if (!resp.ok) throw new Error('Translation error');
-          const { translatedText } = await resp.json();
-          if (translatedText) _cache[targetLang] = translatedText;
-          setStatus('', false);
-          return translatedText || originalText;
-        } catch (e) {
-          setStatus('Translation unavailable — using original text.', false);
-          return originalText;
-        }
-      }
-
-      let _audioEl = null;
-      function stopAudio() {
-        if (_audioEl) { _audioEl.pause(); _audioEl.src = ''; _audioEl = null; }
-        setStatus('', false);
-      }
-
-      if (langSelect) {
-        langSelect.addEventListener('change', async () => {
-          stopAudio();
-          const v = langSelect.value;
-          if (v === 'original') {
-            _currentText = _cache.original;
-            descEl.textContent = _currentText || 'No detailed description available for this program.';
-            setStatus('', false);
-          } else {
-            const translated = await fetchTranslation(v);
-            _currentText = translated;
-            descEl.textContent = translated || 'No detailed description available for this program.';
-          }
-        });
-      }
-
-      playBtn.addEventListener('click', async () => {
-        stopAudio();
-        const textToSpeak = _currentText || program.title || '';
-        if (!textToSpeak.trim()) { setStatus('Nothing to read.', false); return; }
-        setStatus('⏳ Generating audio…', true);
-        try {
-          const currentLang = (langSelect && langSelect.value !== 'original') ? langSelect.value : 'en';
-          const resp = await fetch('/api/tts/speak', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: textToSpeak, lang: currentLang }),
-          });
-          if (!resp.ok) throw new Error('TTS error ' + resp.status);
-          const blob = await resp.blob();
-          const url = URL.createObjectURL(blob);
-          _audioEl = new Audio(url);
-          _audioEl.onplay  = () => setStatus('🔊 Playing…', true);
-          _audioEl.onended = () => { URL.revokeObjectURL(url); _audioEl = null; setStatus('', false); };
-          _audioEl.onerror = () => { URL.revokeObjectURL(url); _audioEl = null; setStatus('Playback error.', false); };
-          await _audioEl.play();
-        } catch(e) {
-          console.warn('[TTS speak] server TTS failed, trying browser fallback:', e);
-          try {
-            setStatus('🔊 Playing (browser voice)…', true);
-            const utter = new SpeechSynthesisUtterance(textToSpeak);
-            utter.lang = (langSelect?.value === 'tl' || langSelect?.value === 'cb' || langSelect?.value === 'hil') ? 'fil-PH' : 'en-US';
-            utter.onend = () => setStatus('', false);
-            utter.onerror = () => setStatus('Audio unavailable.', false);
-            window.speechSynthesis.cancel();
-            window.speechSynthesis.speak(utter);
-          } catch (e2) {
-            console.error('[TTS speak] both failed:', e2);
-            setStatus('Audio unavailable — check connection.', false);
-          }
-        }
-      });
-
-      stopBtn.addEventListener('click', stopAudio);
-      window.addEventListener('pagehide', stopAudio);
     }
 
     load();
