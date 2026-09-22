@@ -3208,7 +3208,18 @@
       }
     });
 
-    if (urlParams.get('action') === 'signup' || urlParams.get('signup') === '1') {
+    if (urlParams.get('action') === 'signout' || urlParams.get('signout') === '1' || urlParams.get('signed_out') === '1') {
+      if (typeof Gate !== 'undefined') Gate.clearVisitorCheckin();
+      switchTab('visitor');
+      const notice = document.getElementById('portalTagNotice');
+      const title = document.getElementById('tagNoticeTitle');
+      const sub = document.getElementById('tagNoticeSubtitle');
+      if (notice) {
+        notice.style.display = 'flex';
+        title.textContent = '👋 Signed Out';
+        sub.textContent = 'You have successfully signed out of the museum dashboard. Check in anytime or use Fast Pass to re-enter.';
+      }
+    } else if (urlParams.get('action') === 'signup' || urlParams.get('signup') === '1') {
       if (typeof Gate !== 'undefined') Gate.clearAllSessions();
       switchTab('visitor');
       const notice = document.getElementById('portalTagNotice');

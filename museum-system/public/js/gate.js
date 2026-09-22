@@ -44,7 +44,7 @@ const Gate = (() => {
 
   function logoutVisitor() {
     clearVisitorCheckin();
-    window.location.href = '/';
+    window.location.href = '/?action=signout';
   }
 
   function clearVisitorCheckin() {
@@ -82,9 +82,8 @@ const Gate = (() => {
     const isGate = isGatePage();
     const urlParams = new URLSearchParams(window.location.search);
 
-    // 1. If arriving at gate with action=signup or signup=1:
-    // Security: user explicitly requested sign-up or backed out from admin
-    if (isGate && (urlParams.get('action') === 'signup' || urlParams.get('signup') === '1' || urlParams.get('reset') === '1')) {
+    // 1. If arriving at gate with action=signup/signout or reset:
+    if (isGate && (urlParams.get('action') === 'signup' || urlParams.get('signup') === '1' || urlParams.get('reset') === '1' || urlParams.get('action') === 'signout' || urlParams.get('signout') === '1')) {
       clearAllSessions();
       return;
     }
@@ -319,3 +318,11 @@ const Gate = (() => {
     injectAdminPublicControls
   };
 })();
+
+if (typeof window !== 'undefined') {
+  window.handleUserSignOut = function() {
+    if (typeof Gate !== 'undefined' && Gate.logoutVisitor) {
+      Gate.logoutVisitor();
+    }
+  };
+}

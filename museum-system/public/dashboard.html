@@ -379,6 +379,22 @@
       font-weight: 800 !important;
     }
 
+    .topbar .nav-btn.nav-btn-signout {
+      border: 1.5px solid rgba(248, 113, 113, 0.6) !important;
+      color: #fecaca !important;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.18s ease;
+    }
+
+    .topbar .nav-btn.nav-btn-signout:hover {
+      background: rgba(239, 68, 68, 0.25) !important;
+      border-color: #ef4444 !important;
+      color: #FFFFFF !important;
+    }
+
     .user-sidebar-title,
     .user-sidebar-title span {
       color: #FFFFFF !important;
@@ -1117,7 +1133,7 @@
       <a class="nav-btn" href="/programs.html">Programs</a>
       <a class="nav-btn" href="/gallery.html">Gallery</a>
       <a class="nav-btn" href="/events.html">Events</a>
-      <a class="nav-btn" href="/admin.html">Admin</a>
+      <a class="nav-btn nav-btn-signout" id="userSignOutBtn" href="#" onclick="event.preventDefault(); handleUserSignOut();" title="Sign out of museum dashboard">Sign Out</a>
     </div>
   </div>
 
@@ -1201,8 +1217,8 @@
         <a class="user-sidebar-sublink" href="/donate.html">
           <span>💖</span> Support Us
         </a>
-        <a class="user-sidebar-sublink" href="/checkin.html?tab=admin">
-          <span>⚙️</span> Staff Admin
+        <a class="user-sidebar-sublink" id="sidebarSignOutBtn" href="#" onclick="event.preventDefault(); handleUserSignOut();" style="color: #fca5a5;">
+          <span>🚪</span> Sign Out
         </a>
       </div>
     </aside>
@@ -1485,6 +1501,38 @@
   <script src="/js/image-enhance.js"></script>
   <script src="/js/lightbox.js"></script>
   <script>
+    // ── User Dashboard Sign Out ──────────────────────────────────
+    function handleUserSignOut() {
+      try {
+        if (typeof Gate !== 'undefined' && typeof Gate.logoutVisitor === 'function') {
+          Gate.logoutVisitor();
+          return;
+        }
+      } catch (e) {}
+
+      try {
+        sessionStorage.removeItem('museum_visitor_checked_in');
+        sessionStorage.removeItem('museum_visitor_name');
+        sessionStorage.removeItem('museum_visitor_session');
+        localStorage.removeItem('museum_visitor_checked_in');
+        localStorage.removeItem('museum_visitor_name');
+        localStorage.removeItem('museum_visitor_date');
+        localStorage.removeItem('museum_visitor_session');
+      } catch (e) {}
+
+      window.location.href = '/?action=signout';
+    }
+    window.handleUserSignOut = handleUserSignOut;
+
+    document.getElementById('userSignOutBtn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      handleUserSignOut();
+    });
+    document.getElementById('sidebarSignOutBtn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      handleUserSignOut();
+    });
+
     // ── Featured video mute toggle ────────────────────────────────
     let _ytMuted = true;
     function toggleMute() {
