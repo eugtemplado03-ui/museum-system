@@ -286,7 +286,7 @@
           <a href="#" id="sidebarVisitorNameLink" onclick="event.preventDefault(); if(window.openVisitorHistoryModal) window.openVisitorHistoryModal(); else window.location.href='/dashboard.html#history';" style="color:#5eead4; text-decoration:none; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">
             👤 Verified Visitor
           </a>
-          <a href="/checkin.html" onclick="localStorage.removeItem('museum_visitor_checked_in'); localStorage.removeItem('museum_visitor_name');" style="color:#f87171; text-decoration:none; font-weight:700; font-size:11px; margin-left:6px;" title="Sign out / Switch visitor">Switch</a>
+          <a href="#" onclick="event.preventDefault(); if (typeof Gate !== 'undefined') Gate.clearVisitorCheckin(); else { localStorage.clear(); sessionStorage.clear(); } window.location.href='/?action=signup';" style="color:#f87171; text-decoration:none; font-weight:700; font-size:11px; margin-left:6px;" title="Sign out / Switch visitor">Switch</a>
         </div>
         <a class="user-sidebar-sublink" href="/donate.html">
           <span>💖</span> Support Us

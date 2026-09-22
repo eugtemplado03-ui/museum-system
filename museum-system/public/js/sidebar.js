@@ -158,7 +158,7 @@
             <a href="#" onclick="event.preventDefault(); window.openVisitorHistoryModal();" style="color:#5eead4; text-decoration:none; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">
               ${localStorage.getItem('museum_visitor_name') ? '👤 ' + String(localStorage.getItem('museum_visitor_name')).replace(/[&<>"']/g, '') : '🟢 Verified Visitor'}
             </a>
-            <a href="#" onclick="event.preventDefault(); localStorage.removeItem('museum_visitor_checked_in'); localStorage.removeItem('museum_visitor_name'); window.location.href='/checkin.html';" style="color:#f87171; text-decoration:none; font-weight:700; font-size:11px; margin-left:6px;" title="Sign out / Switch visitor">Switch</a>
+            <a href="#" onclick="event.preventDefault(); if (typeof Gate !== 'undefined') Gate.clearVisitorCheckin(); else { localStorage.clear(); sessionStorage.clear(); } window.location.href='/?action=signup';" style="color:#f87171; text-decoration:none; font-weight:700; font-size:11px; margin-left:6px;" title="Sign out / Switch visitor">Switch</a>
           </div>
           <a class="user-sidebar-sublink" href="/donate.html">
             <span>💖</span> Support Us
@@ -434,38 +434,38 @@
           <button type="button" class="modal-close-btn" onclick="document.getElementById('visitorHistoryOverlay').remove()" style="width:32px; height:32px; border-radius:50%; border:1.5px solid rgba(255,255,255,0.3); background:rgba(0,0,0,0.4); color:#fff; font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
         </div>
 
-        <!-- Active Pass Badge -->
-        <div style="background:linear-gradient(135deg, rgba(0,174,189,0.25) 0%, rgba(6,28,38,0.9) 100%); border:1.5px solid var(--teal); border-radius:14px; padding:16px 18px; margin-bottom:18px; box-shadow:0 8px 24px rgba(0,174,189,0.2);">
+        <!-- Active Pass Badge (Baby Blue Style) -->
+        <div style="background:linear-gradient(145deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%); border:2px solid #7dd3fc; border-radius:18px; padding:18px 20px; margin-bottom:18px; box-shadow:0 8px 24px rgba(2, 132, 199, 0.16); color:#0c4a6e;">
           <div style="display:flex; justify-content:space-between; align-items:flex-start;">
             <div>
-              <div style="font-size:11px; font-weight:800; color:#5eead4; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:2px;">Verified Visitor Pass</div>
-              <div style="font-size:18px; font-weight:800; color:#ffffff;">${currentName.replace(/[&<>"']/g, '')}</div>
+              <div style="font-size:11px; font-weight:800; color:#0284c7; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:2px;">Verified Visitor Pass</div>
+              <div style="font-size:20px; font-weight:900; color:#082f49;">${currentName.replace(/[&<>"']/g, '')}</div>
             </div>
-            <span class="status-badge checked-in" style="font-size:11px; padding:3px 9px;">Active</span>
+            <span style="font-size:11px; font-weight:800; background:#dcfce7; color:#166534; border:1px solid #86efac; padding:3px 9px; border-radius:999px;">Active Visit</span>
           </div>
 
           ${passCode ? `
-            <div style="margin-top:12px; padding:8px 12px; background:rgba(15,23,42,0.65); border:1px dashed #38bdf8; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="margin-top:12px; padding:10px 14px; background:#ffffff; border:1.5px solid #0284c7; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
               <div>
-                <span style="font-size:10px; font-weight:800; color:#38bdf8; text-transform:uppercase; letter-spacing:0.5px;">Pass Code:</span>
-                <span style="font-family:monospace; font-weight:800; font-size:15px; color:#ffffff; margin-left:6px;">${passCode}</span>
+                <span style="font-size:10px; font-weight:800; color:#0284c7; text-transform:uppercase; letter-spacing:0.5px;">Pass Code:</span>
+                <span style="font-family:monospace; font-weight:900; font-size:16px; color:#0c4a6e; margin-left:6px; letter-spacing:1px;">${passCode}</span>
               </div>
-              <button type="button" id="btnModalCopyPass" onclick="navigator.clipboard.writeText('${passCode}').then(()=>{ this.textContent='✓ Copied'; setTimeout(()=>{ this.textContent='📋 Copy'; }, 2000); })" style="background:#0284c7; color:#fff; border:none; border-radius:6px; padding:4px 10px; font-size:11px; font-weight:700; cursor:pointer;">
+              <button type="button" id="btnModalCopyPass" onclick="navigator.clipboard.writeText('${passCode}').then(()=>{ this.textContent='✓ Copied'; setTimeout(()=>{ this.textContent='📋 Copy'; }, 2000); })" style="background:#0284c7; color:#fff; border:none; border-radius:6px; padding:5px 10px; font-size:11.5px; font-weight:700; cursor:pointer;">
                 📋 Copy
               </button>
             </div>
           ` : ''}
 
-          <div style="margin-top:10px; font-size:12px; color:#cbd5e1; display:flex; gap:12px; flex-wrap:wrap;">
+          <div style="margin-top:10px; font-size:12px; color:#0369a1; display:flex; gap:12px; flex-wrap:wrap; font-weight:600;">
             <span>📅 ${lastVisit.date || 'Today'}</span>
             <span>⏰ ${lastVisit.time || 'Checked In'}</span>
             <span>🏛️ Museo Sang Bata sa Negros</span>
           </div>
 
           ${visitorPass.qrCodeDataUrl ? `
-            <div style="margin-top:12px; text-align:center; background:#ffffff; padding:10px; border-radius:10px;">
-              <img src="${visitorPass.qrCodeDataUrl}" alt="Visitor QR Code" style="width:120px; height:120px; display:block; margin:0 auto;">
-              <span style="font-size:11px; color:#334155; font-weight:700;">Your Fast-Pass QR Code</span>
+            <div style="margin-top:14px; text-align:center; background:#ffffff; border:1.5px solid #bae6fd; padding:12px; border-radius:12px;">
+              <img src="${visitorPass.qrCodeDataUrl}" alt="Visitor QR Code" style="width:140px; height:140px; display:block; margin:0 auto; object-fit:contain;">
+              <span style="font-size:11px; color:#0369a1; font-weight:800; margin-top:4px; display:block;">Your Fast-Pass QR Code</span>
             </div>
           ` : ''}
         </div>

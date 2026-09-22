@@ -2707,9 +2707,20 @@
             </div>
           </div>
 
-          <div style="display:flex; flex-direction:column; gap:12px; width:100%; margin-top:24px;">
-            <a class="btn-submit" id="continueToDestBtn" href="/dashboard.html" style="text-decoration:none;">
-              <span>Explore Museum Exhibits &amp; Floor Map</span> <span>&rarr;</span>
+          <!-- Auto-Forward / Countdown Banner -->
+          <div id="passForwardCountdownBox" style="display:none; background:#e0f2fe; border:1.5px solid #7dd3fc; border-radius:14px; padding:12px 16px; margin-top:20px; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; text-align:left;">
+            <div style="font-size:13.5px; font-weight:700; color:#0369a1; display:flex; align-items:center; gap:8px;">
+              <span style="font-size:20px;">⏱️</span>
+              <span id="passForwardCountdownText">Entering Museum Dashboard in <strong>5</strong>s...</span>
+            </div>
+            <button type="button" id="btnPausePassCountdown" style="background:#ffffff; border:1.5px solid #0284c7; color:#0284c7; border-radius:8px; padding:6px 14px; font-size:12px; font-weight:800; cursor:pointer; transition:all 0.15s;">
+              ⏸️ Stay on Pass
+            </button>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:12px; width:100%; margin-top:14px;">
+            <a class="btn-submit" id="continueToDestBtn" href="/dashboard.html" style="text-decoration:none; font-size:16px; padding:15px 22px;">
+              <span>🚀 Enter Museum Dashboard Now</span> <span>&rarr;</span>
             </a>
             <button type="button" class="btn-submit" id="checkinAnotherBtn"
               style="background:#ffffff; color:var(--blue-primary); border:2px solid var(--blue-primary); box-shadow:none;">
@@ -3198,6 +3209,109 @@
       }
     }
 
+    // ── Checkin Success Handler & Auto-Forward Timer ──────────────
+    let passCountdownTimer = null;
+    let passCountdownSecs = 5;
+
+    function pausePassCountdown(msg) {
+      if (passCountdownTimer) {
+        clearInterval(passCountdownTimer);
+        passCountdownTimer = null;
+      }
+      const countdownText = document.getElementById('passForwardCountdownText');
+      const pauseBtn = document.getElementById('btnPausePassCountdown');
+      if (countdownText) countdownText.innerHTML = msg || 'Auto-navigation paused. Feel free to save, copy, or print your pass!';
+      if (pauseBtn) pauseBtn.textContent = '▶️ Resume Auto-Enter';
+    }
+
+    function showCheckinSuccess(v, visitorCode, qrCodeDataUrl, visitorName, isReturning, finalDestination) {
+      // 1. Hide the input form portal card
+      const portalCard = document.querySelector('.portal-card');
+      if (portalCard) portalCard.style.display = 'none';
+
+      const directNoticeEl = document.getElementById('directUnlockNotice');
+      if (directNoticeEl) directNoticeEl.style.display = 'none';
+
+      const targetUrl = (finalDestination && (typeof Gate === 'undefined' || !Gate.isGatePage(finalDestination)))
+        ? finalDestination
+        : '/dashboard.html';
+
+      const isExhibitTarget = targetUrl.includes('exhibit.html');
+
+      // 2. Set descriptive congratulations text
+      if (isReturning) {
+        successDetails.innerHTML = `Welcome back, <strong>${escapeHtml(visitorName)}</strong>! Your return visit on <strong>${escapeHtml(v.visitDate || '')} at ${escapeHtml(v.visitTime || '')}</strong> has been logged. Your saved information was used automatically.`;
+      } else {
+        successDetails.innerHTML = `Welcome, <strong>${escapeHtml(visitorName)}</strong>! Your visit on <strong>${escapeHtml(v.visitDate || '')} at ${escapeHtml(v.visitTime || '')}</strong> has been verified. Here is your official Digital Visitor Pass Card.`;
+      }
+
+      // 3. Render pass card with visitor details & QR
+      renderDigitalVisitorPass(v, visitorCode, qrCodeDataUrl);
+      successMessage.classList.add('visible');
+
+      // 4. Update the primary Action Button
+      if (continueToDestBtn) {
+        continueToDestBtn.href = targetUrl;
+        if (isExhibitTarget) {
+          continueToDestBtn.innerHTML = '<span>🚀 Unlock Exhibit Now &rarr;</span>';
+        } else {
+          continueToDestBtn.innerHTML = '<span>🚀 Enter Museum Dashboard Now &rarr;</span>';
+        }
+      }
+
+      // 5. Scroll smoothly to the pass card so it is clearly visible
+      try {
+        successMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (e) {}
+
+      // 6. Start friendly 5-second countdown to destination / dashboard
+      const countdownBox = document.getElementById('passForwardCountdownBox');
+      const countdownText = document.getElementById('passForwardCountdownText');
+      const pauseBtn = document.getElementById('btnPausePassCountdown');
+
+      if (countdownBox && countdownText) {
+        countdownBox.style.display = 'flex';
+        passCountdownSecs = 5;
+        const destLabel = isExhibitTarget ? 'Exhibit' : 'Museum Dashboard';
+        countdownText.innerHTML = `Entering ${destLabel} in <strong>${passCountdownSecs}</strong>s...`;
+
+        if (passCountdownTimer) clearInterval(passCountdownTimer);
+        passCountdownTimer = setInterval(() => {
+          passCountdownSecs--;
+          if (passCountdownSecs > 0) {
+            countdownText.innerHTML = `Entering ${destLabel} in <strong>${passCountdownSecs}</strong>s...`;
+          } else {
+            clearInterval(passCountdownTimer);
+            passCountdownTimer = null;
+            window.location.replace(targetUrl);
+          }
+        }, 1000);
+
+        if (pauseBtn) {
+          pauseBtn.textContent = '⏸️ Stay on Pass';
+          pauseBtn.onclick = () => {
+            if (passCountdownTimer) {
+              pausePassCountdown();
+            } else {
+              passCountdownSecs = 5;
+              countdownText.innerHTML = `Entering ${destLabel} in <strong>${passCountdownSecs}</strong>s...`;
+              pauseBtn.textContent = '⏸️ Stay on Pass';
+              passCountdownTimer = setInterval(() => {
+                passCountdownSecs--;
+                if (passCountdownSecs > 0) {
+                  countdownText.innerHTML = `Entering ${destLabel} in <strong>${passCountdownSecs}</strong>s...`;
+                } else {
+                  clearInterval(passCountdownTimer);
+                  passCountdownTimer = null;
+                  window.location.replace(targetUrl);
+                }
+              }, 1000);
+            }
+          };
+        }
+      }
+    }
+
     // ── Quick Re-Checkin Handler ──────────────────────────────────
     async function executeQuickCheckin(codeOrData, triggerBtn) {
       const errorEl = document.getElementById('returningErrorMessage');
@@ -3259,26 +3373,7 @@
         } catch (e) {}
 
         const finalDestination = directTargetUrl || redirectUrl;
-        if (finalDestination && (typeof Gate === 'undefined' || !Gate.isGatePage(finalDestination))) {
-          if (triggerBtn) triggerBtn.innerHTML = '<span>Verified! Opening exhibit...</span>';
-          setTimeout(() => {
-            window.location.replace(finalDestination);
-          }, 350);
-          return;
-        }
-
-        document.querySelector('.portal-card').style.display = 'none';
-        const directNoticeEl = document.getElementById('directUnlockNotice');
-        if (directNoticeEl) directNoticeEl.style.display = 'none';
-
-        successDetails.innerHTML = `Welcome back, <strong>${escapeHtml(visitorName)}</strong>! Your return visit on <strong>${escapeHtml(v.visitDate || '')} at ${escapeHtml(v.visitTime || '')}</strong> has been logged. Your saved information was used automatically.`;
-        if (continueToDestBtn) {
-          continueToDestBtn.href = '/dashboard.html';
-          continueToDestBtn.innerHTML = '<span>Explore Museum Exhibits &rarr;</span>';
-        }
-
-        renderDigitalVisitorPass(v, visitorCode, qrCodeDataUrl);
-        successMessage.classList.add('visible');
+        showCheckinSuccess(v, visitorCode, qrCodeDataUrl, visitorName, true, finalDestination);
 
       } catch (err) {
         if (errorEl) {
@@ -3447,6 +3542,7 @@
     // Print Pass Card
     const btnPrintPassCard = document.getElementById('btnPrintPassCard');
     btnPrintPassCard?.addEventListener('click', () => {
+      pausePassCountdown('Auto-navigation paused while you print your pass.');
       if (!currentPassData) return;
       const win = window.open('', '_blank', 'width=620,height=760');
       if (!win) {
@@ -3506,6 +3602,7 @@
     // Download Pass Card as High-Res PNG
     const btnDownloadPassCard = document.getElementById('btnDownloadPassCard');
     btnDownloadPassCard?.addEventListener('click', () => {
+      pausePassCountdown('Auto-navigation paused while you download your pass.');
       if (!currentPassData) return;
 
       const canvas = document.createElement('canvas');
@@ -3740,37 +3837,27 @@
         } catch (e) { }
 
         const finalDestination = directTargetUrl || redirectUrl;
-
-        if (finalDestination && (typeof Gate === 'undefined' || !Gate.isGatePage(finalDestination))) {
-          submitBtn.innerHTML = '<span>Check-in Verified! Opening exhibit...</span>';
-          setTimeout(() => {
-            window.location.replace(finalDestination);
-          }, 350);
-          return;
-        }
-
-        document.querySelector('.portal-card').style.display = 'none';
-        const directNoticeEl = document.getElementById('directUnlockNotice');
-        if (directNoticeEl) directNoticeEl.style.display = 'none';
-
-        successDetails.innerHTML = `Welcome, <strong>${escapeHtml(visitorName)}</strong>! Your visit on <strong>${escapeHtml(v.visitDate || '')} at ${escapeHtml(v.visitTime || '')}</strong> has been verified. Here is your official Digital Visitor Pass Card.`;
-        if (continueToDestBtn) {
-          continueToDestBtn.href = '/dashboard.html';
-          continueToDestBtn.innerHTML = '<span>Explore Museum Exhibits &rarr;</span>';
-        }
-
-        renderDigitalVisitorPass(v, visitorCode, qrCodeDataUrl);
-        successMessage.classList.add('visible');
+        showCheckinSuccess(v, visitorCode, qrCodeDataUrl, visitorName, false, finalDestination);
 
       } catch (err) {
         errorMessage.textContent = err.message;
         errorMessage.classList.add('visible');
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<span>Check In &amp; Get Visitor Pass Card</span> <span>&rarr;</span>';
+        try {
+          errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } catch (e) {}
       }
     });
 
     checkinAnotherBtn?.addEventListener('click', () => {
+      if (passCountdownTimer) {
+        clearInterval(passCountdownTimer);
+        passCountdownTimer = null;
+      }
+      const countdownBox = document.getElementById('passForwardCountdownBox');
+      if (countdownBox) countdownBox.style.display = 'none';
+
       form.reset();
       const fpForm = document.getElementById('fastPassForm');
       if (fpForm) fpForm.reset();

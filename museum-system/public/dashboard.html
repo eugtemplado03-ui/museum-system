@@ -229,6 +229,29 @@
       background: rgba(0, 174, 189, 0.8);
       transform: scale(1.04);
     }
+
+    /* ── Dashboard Active Visitor Pass Banner ── */
+    .dashboard-pass-banner {
+      animation: fadeInPass 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes fadeInPass {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (max-width: 680px) {
+      .dash-pass-grid {
+        grid-template-columns: 1fr !important;
+        text-align: center;
+      }
+      .dash-pass-col-main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .dash-pass-col-qr {
+        margin: 0 auto;
+      }
+    }
   </style>
   <script src="/js/jsQR.js"></script>
   <style>
@@ -1189,13 +1212,12 @@
       <div class="user-sidebar-footer">
         <div
           style="font-size:11.5px; color:rgba(255,255,255,0.75); margin-bottom:8px; padding:6px 8px; background:rgba(0,0,0,0.25); border-radius:8px; display:flex; align-items:center; justify-content:space-between;">
-          <a href="#" onclick="event.preventDefault(); window.openVisitorHistoryModal();"
-            style="color:#5eead4; text-decoration:none; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">
-            ${localStorage.getItem('museum_visitor_name') ? '👤 ' +
-            String(localStorage.getItem('museum_visitor_name')).replace(/[&<>"']/g, '') : '🟢 Verified Visitor'}
+          <a href="#" id="sidebarVisitorNameLink" onclick="event.preventDefault(); window.openVisitorHistoryModal();"
+            style="color:#5eead4; text-decoration:none; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;" title="View My Digital Pass & History">
+            👤 Verified Visitor
           </a>
           <a href="#"
-            onclick="event.preventDefault(); localStorage.removeItem('museum_visitor_checked_in'); localStorage.removeItem('museum_visitor_name'); window.location.href='/checkin.html';"
+            onclick="event.preventDefault(); if (typeof Gate !== 'undefined') Gate.clearVisitorCheckin(); else { localStorage.clear(); sessionStorage.clear(); } window.location.href='/?action=signup';"
             style="color:#f87171; text-decoration:none; font-weight:700; font-size:11px; margin-left:6px;"
             title="Sign out / Switch visitor">Switch</a>
         </div>
@@ -1210,6 +1232,70 @@
 
     <!-- ── Main Content Area ────────────────────────────────────── -->
     <div class="user-main">
+      <!-- ── Active Digital Visitor Pass Card Banner ──────────────── -->
+      <section class="dashboard-pass-banner" id="dashboardPassBanner" style="display:none; margin: 18px clamp(12px, 3vw, 24px) 14px;">
+        <div class="dash-pass-card" style="background: linear-gradient(145deg, #f0f9ff 0%, #e0f2fe 45%, #bae6fd 100%); border: 2px solid #7dd3fc; border-radius: 20px; padding: 20px 22px; box-shadow: 0 10px 30px rgba(2, 132, 199, 0.14); color: #0c4a6e; position: relative; overflow: hidden;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; border-bottom: 1.5px solid rgba(2, 132, 199, 0.2); padding-bottom: 12px; margin-bottom: 14px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #0284c7, #0369a1); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25); flex-shrink: 0;">🏛️</div>
+              <div>
+                <div style="font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 900; color: #0c4a6e; line-height: 1.2;">Museo Sang Bata sa Negros</div>
+                <div style="font-size: 11.5px; color: #0369a1; font-weight: 700;">Official Digital Visitor Pass Card • Sagay City</div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 11.5px; font-weight: 800; background: #dcfce7; color: #166534; border: 1.5px solid #86efac; padding: 4px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px;">
+                <span style="width: 7px; height: 7px; border-radius: 50%; background: #16a34a; display: inline-block;"></span> Active Verified Visit
+              </span>
+              <button type="button" id="btnToggleDashPass" onclick="toggleDashboardPassCard()" style="background: rgba(255, 255, 255, 0.85); border: 1px solid #7dd3fc; border-radius: 8px; padding: 4px 10px; font-size: 12px; cursor: pointer; color: #0369a1; font-weight: 800;" title="Minimize / Expand pass">
+                ▲ Collapse
+              </button>
+            </div>
+          </div>
+
+          <div id="dashPassBody" class="dash-pass-grid" style="display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center;">
+            <div class="dash-pass-col-main" style="min-width: 0;">
+              <div style="font-family: 'Nunito', sans-serif; font-size: 22px; font-weight: 900; color: #082f49; margin-bottom: 2px;" id="dashPassVisitorName">Visitor Name</div>
+              <div style="font-size: 12.5px; color: #0284c7; font-weight: 700; margin-bottom: 12px;" id="dashPassSubinfo">Sagay City, Negros Occidental</div>
+
+              <!-- Pass Code Pill -->
+              <div style="display: inline-flex; align-items: center; gap: 10px; background: #ffffff; border: 1.5px solid #0284c7; border-radius: 12px; padding: 8px 14px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(2, 132, 199, 0.1);">
+                <span style="font-size: 11px; font-weight: 800; color: #0284c7; text-transform: uppercase; letter-spacing: 0.5px;">Pass Code:</span>
+                <span id="dashPassCodeDisplay" style="font-family: monospace; font-size: 17px; font-weight: 900; color: #0c4a6e; letter-spacing: 1.5px;">MSBN-XXXXXX</span>
+                <button type="button" id="btnCopyDashPass" onclick="copyDashboardPassCode()" style="background: #0284c7; color: #ffffff; border: none; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                  📋 Copy
+                </button>
+              </div>
+
+              <div style="display: flex; gap: 14px; font-size: 12px; color: #0369a1; flex-wrap: wrap; margin-bottom: 14px;">
+                <span>📅 <strong>Date:</strong> <span id="dashPassDate">--</span></span>
+                <span>⏰ <strong>Time:</strong> <span id="dashPassTime">--</span></span>
+                <span>🏛️ <strong>Access:</strong> Full Museum Exhibits</span>
+              </div>
+
+              <!-- Actions -->
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button type="button" onclick="openVisitorHistoryModal()" style="background: #0284c7; color: #ffffff; border: none; border-radius: 8px; padding: 8px 14px; font-size: 12.5px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);">
+                  <span>🔍</span> View Full QR Card
+                </button>
+                <button type="button" onclick="downloadDashboardPass()" style="background: #ffffff; color: #0284c7; border: 1.5px solid #0284c7; border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                  <span>💾</span> Download Card (PNG)
+                </button>
+                <button type="button" onclick="printDashboardPass()" style="background: #ffffff; color: #0284c7; border: 1.5px solid #0284c7; border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                  <span>🖨️</span> Print Pass
+                </button>
+              </div>
+            </div>
+
+            <!-- QR code thumb preview -->
+            <div class="dash-pass-col-qr" style="text-align: center; background: #ffffff; border: 2px solid #7dd3fc; border-radius: 14px; padding: 10px; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.12); cursor: pointer;" onclick="openVisitorHistoryModal()" title="Click to view full size QR Pass">
+              <img id="dashPassQrImage" src="" alt="Visitor QR Pass" style="width: 115px; height: 115px; display: block; object-fit: contain;">
+              <span style="font-size: 10.5px; font-weight: 800; color: #0369a1; margin-top: 4px; display: block;">🔍 Tap for Big QR</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- ── Top Hero Banner (Carousel + Tag Scanner with header-bg.webp) ── -->
       <!-- Full side-to-side and flush directly against the topbar -->
       <section class="dashboard-hero-banner" id="dashboardHeroBanner">
@@ -2316,6 +2402,284 @@
       goTo(0);
       startTimer();
     })();
+
+    // ── Active Digital Visitor Pass Widget Logic ──────────────────
+    let _dashPassCollapsed = false;
+
+    function toggleDashboardPassCard() {
+      const body = document.getElementById('dashPassBody');
+      const btn = document.getElementById('btnToggleDashPass');
+      if (!body || !btn) return;
+      _dashPassCollapsed = !_dashPassCollapsed;
+      body.style.display = _dashPassCollapsed ? 'none' : 'grid';
+      btn.textContent = _dashPassCollapsed ? '▼ Show Pass' : '▲ Collapse';
+    }
+
+    function copyDashboardPassCode() {
+      const codeEl = document.getElementById('dashPassCodeDisplay');
+      const btn = document.getElementById('btnCopyDashPass');
+      const code = codeEl ? codeEl.textContent.trim() : '';
+      if (!code) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(() => {
+          if (btn) {
+            btn.textContent = '✓ Copied!';
+            setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
+          }
+        }).catch(() => fallbackDashCopy(code));
+      } else {
+        fallbackDashCopy(code);
+      }
+    }
+
+    function fallbackDashCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        const btn = document.getElementById('btnCopyDashPass');
+        if (btn) {
+          btn.textContent = '✓ Copied!';
+          setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
+        }
+      } catch (e) {}
+      document.body.removeChild(ta);
+    }
+
+    function downloadDashboardPass() {
+      let pass = {};
+      try { pass = JSON.parse(localStorage.getItem('museum_visitor_pass') || '{}'); } catch(e) {}
+      const lastVisit = JSON.parse(localStorage.getItem('museum_last_visit') || '{}');
+      const visitorName = (typeof Gate !== 'undefined' ? Gate.getVisitorName() : '') || pass.visitorName || 'Valued Visitor';
+      const visitorCode = pass.visitorCode || lastVisit.code || 'MSBN-PASS';
+      const qrCodeDataUrl = pass.qrCodeDataUrl || '';
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 750;
+      canvas.height = 920;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const grad = ctx.createLinearGradient(0, 0, 0, 920);
+      grad.addColorStop(0, '#f0f9ff');
+      grad.addColorStop(0.5, '#e0f2fe');
+      grad.addColorStop(1, '#bae6fd');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(0, 0, 750, 920, 24);
+      else ctx.rect(0, 0, 750, 920);
+      ctx.fill();
+
+      ctx.strokeStyle = '#7dd3fc';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(0, 0, 750, 110);
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(0, 110, 750, 4);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 26px -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('🏛️ MUSEO SANG BATA SA NEGROS', 375, 55);
+
+      ctx.fillStyle = '#e0f2fe';
+      ctx.font = 'bold 13px -apple-system, sans-serif';
+      ctx.fillText('SAGAY CITY, NEGROS OCCIDENTAL • OFFICIAL VISITOR PASS', 375, 85);
+
+      ctx.fillStyle = '#082f49';
+      ctx.font = 'bold 34px -apple-system, sans-serif';
+      ctx.fillText(visitorName, 375, 175);
+
+      ctx.fillStyle = '#0284c7';
+      ctx.font = 'bold 15px -apple-system, sans-serif';
+      const subParts = [];
+      if (pass.age) subParts.push(`Age ${pass.age}`);
+      if (pass.sex) subParts.push(pass.sex);
+      if (pass.address) subParts.push(pass.address);
+      ctx.fillText(subParts.join(' • ') || 'Negros Occidental, Philippines', 375, 205);
+
+      ctx.fillStyle = '#ffffff';
+      if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(75, 235, 600, 85, 14); ctx.fill(); }
+      else { ctx.fillRect(75, 235, 600, 85); }
+      ctx.strokeStyle = '#0284c7';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = '#0284c7';
+      ctx.font = 'bold 12px -apple-system, sans-serif';
+      ctx.fillText('PERMANENT VISITOR PASS CODE', 375, 262);
+
+      ctx.fillStyle = '#0c4a6e';
+      ctx.font = 'bold 36px monospace';
+      ctx.fillText(visitorCode, 375, 302);
+
+      function finishSave() {
+        const a = document.createElement('a');
+        a.download = `MSBN-Visitor-Pass-${visitorCode}.png`;
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+      }
+
+      function drawFooter() {
+        ctx.fillStyle = '#0369a1';
+        ctx.font = 'bold 13px -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Scan this QR code at any museum terminal for instant re-entry', 375, 595);
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(75, 620, 600, 150, 14); ctx.fill(); }
+        else { ctx.fillRect(75, 620, 600, 150); }
+        ctx.strokeStyle = '#bae6fd';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#0284c7';
+        ctx.font = 'bold 12px -apple-system, sans-serif';
+        ctx.fillText('DATE OF VISIT', 110, 655);
+        ctx.fillText('TIME LOGGED', 400, 655);
+        ctx.fillText('GROUP / ORGANIZATION', 110, 715);
+        ctx.fillText('ACCESS LEVEL', 400, 715);
+
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 16px -apple-system, sans-serif';
+        ctx.fillText(lastVisit.date || pass.lastVisitDate || new Date().toISOString().slice(0, 10), 110, 680);
+        ctx.fillText(lastVisit.time || pass.lastVisitTime || new Date().toTimeString().slice(0, 5), 400, 680);
+        ctx.fillText(pass.groupName || 'Individual / Walk-in', 110, 740);
+
+        ctx.fillStyle = '#16a34a';
+        ctx.fillText('Verified Full Access', 400, 740);
+
+        finishSave();
+      }
+
+      if (qrCodeDataUrl) {
+        const img = new Image();
+        img.onload = () => {
+          ctx.fillStyle = '#ffffff';
+          if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(265, 345, 220, 220, 16); ctx.fill(); }
+          else { ctx.fillRect(265, 345, 220, 220); }
+          ctx.drawImage(img, 275, 355, 200, 200);
+          drawFooter();
+        };
+        img.onerror = () => drawFooter();
+        img.src = qrCodeDataUrl;
+      } else {
+        drawFooter();
+      }
+    }
+
+    function printDashboardPass() {
+      let pass = {};
+      try { pass = JSON.parse(localStorage.getItem('museum_visitor_pass') || '{}'); } catch(e) {}
+      const lastVisit = JSON.parse(localStorage.getItem('museum_last_visit') || '{}');
+      const visitorName = (typeof Gate !== 'undefined' ? Gate.getVisitorName() : '') || pass.visitorName || 'Valued Visitor';
+      const visitorCode = pass.visitorCode || lastVisit.code || 'MSBN-PASS';
+      const qrCodeDataUrl = pass.qrCodeDataUrl || '';
+
+      const win = window.open('', '_blank', 'width=620,height=760');
+      if (!win) { window.print(); return; }
+      win.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Museum Visitor Pass - ${escapeHtml(visitorCode)}</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 20px; background: #ffffff; color: #0f172a; text-align: center; }
+            .card { max-width: 480px; margin: 0 auto; background: #f0f9ff; border: 2.5px solid #38bdf8; border-radius: 20px; padding: 26px 22px; box-shadow: 0 8px 24px rgba(2, 132, 199, 0.12); }
+            .brand { font-size: 20px; font-weight: 900; color: #0c4a6e; margin-bottom: 2px; }
+            .sub { font-size: 11px; color: #0284c7; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+            .name { font-size: 24px; font-weight: 900; color: #082f49; margin-bottom: 4px; }
+            .addr { font-size: 13px; color: #0284c7; font-weight: 600; margin-bottom: 14px; }
+            .code-box { background: #ffffff; border: 2px dashed #0284c7; border-radius: 12px; padding: 12px; margin: 16px 0; }
+            .code-label { font-size: 11px; font-weight: 800; color: #0284c7; text-transform: uppercase; letter-spacing: 0.5px; }
+            .code-val { font-family: monospace; font-size: 26px; font-weight: 900; color: #0c4a6e; letter-spacing: 2px; display: block; margin-top: 4px; }
+            .qr-img { width: 175px; height: 175px; margin: 14px auto; display: block; border: 2px solid #bae6fd; border-radius: 12px; background: #fff; padding: 6px; }
+            .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: left; background: #ffffff; border: 1.5px solid #bae6fd; padding: 14px; border-radius: 12px; font-size: 12px; margin-top: 14px; }
+            .meta div strong { color: #0284c7; }
+            .tip { font-size: 11.5px; color: #0369a1; margin-top: 14px; line-height: 1.4; border-top: 1px solid #bae6fd; padding-top: 10px; font-weight: 600; }
+            @media print { body { margin: 0; } .card { border: 2px solid #000; box-shadow: none; background: #fff; } }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <div class="brand">🏛️ Museo Sang Bata sa Negros</div>
+            <div class="sub">Sagay City, Negros Occidental • Official Digital Visitor Pass</div>
+            <div class="name">${escapeHtml(visitorName)}</div>
+            <div class="addr">${escapeHtml(pass.address || '')}</div>
+            <div class="code-box">
+              <div class="code-label">Permanent Visitor Pass Code</div>
+              <span class="code-val">${escapeHtml(visitorCode)}</span>
+            </div>
+            ${qrCodeDataUrl ? `<img src="${qrCodeDataUrl}" class="qr-img" alt="QR Pass">` : ''}
+            <div class="meta">
+              <div><strong>Visit Date:</strong> ${escapeHtml(lastVisit.date || pass.lastVisitDate || new Date().toISOString().slice(0, 10))}</div>
+              <div><strong>Time:</strong> ${escapeHtml(lastVisit.time || pass.lastVisitTime || new Date().toTimeString().slice(0, 5))}</div>
+              <div><strong>Group / Org:</strong> ${escapeHtml(pass.groupName || 'Individual')}</div>
+              <div><strong>Access:</strong> Full Museum</div>
+            </div>
+            <div class="tip">Show this card or QR code on your next visit to Museo Sang Bata sa Negros to check in instantly without filling out forms again.</div>
+          </div>
+          <script>
+            window.onload = function() { setTimeout(function() { window.print(); }, 250); };
+          <\/script>
+        </body>
+        </html>
+      `);
+      win.document.close();
+    }
+
+    function initDashboardVisitorPass() {
+      const isChecked = (typeof Gate !== 'undefined' && Gate.isVisitorCheckedIn());
+      if (!isChecked) return;
+
+      const visitorName = (typeof Gate !== 'undefined' ? Gate.getVisitorName() : '') || 'Valued Visitor';
+      let pass = {};
+      try { pass = JSON.parse(localStorage.getItem('museum_visitor_pass') || '{}'); } catch(e) {}
+      const lastVisit = JSON.parse(localStorage.getItem('museum_last_visit') || '{}');
+      const code = pass.visitorCode || lastVisit.code || '';
+      const qrUrl = pass.qrCodeDataUrl || '';
+
+      const banner = document.getElementById('dashboardPassBanner');
+      if (banner) {
+        banner.style.display = 'block';
+        const nameEl = document.getElementById('dashPassVisitorName');
+        const codeEl = document.getElementById('dashPassCodeDisplay');
+        const qrEl = document.getElementById('dashPassQrImage');
+        const dateEl = document.getElementById('dashPassDate');
+        const timeEl = document.getElementById('dashPassTime');
+        const subinfoEl = document.getElementById('dashPassSubinfo');
+
+        if (nameEl) nameEl.textContent = visitorName;
+        if (codeEl) codeEl.textContent = code || 'MSBN-PASS';
+        if (dateEl) dateEl.textContent = lastVisit.date || pass.lastVisitDate || new Date().toISOString().slice(0, 10);
+        if (timeEl) timeEl.textContent = lastVisit.time || pass.lastVisitTime || new Date().toTimeString().slice(0, 5);
+        if (qrEl && qrUrl) qrEl.src = qrUrl;
+
+        const parts = [];
+        if (pass.age) parts.push(`Age ${pass.age}`);
+        if (pass.sex) parts.push(pass.sex);
+        if (pass.address) parts.push(pass.address);
+        if (subinfoEl) subinfoEl.textContent = parts.join(' • ') || 'Sagay City, Negros Occidental';
+      }
+
+      const sidebarLink = document.getElementById('sidebarVisitorNameLink');
+      if (sidebarLink) {
+        sidebarLink.textContent = '👤 ' + visitorName;
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initDashboardVisitorPass);
+    } else {
+      initDashboardVisitorPass();
+    }
   </script>
   <footer id="siteFooter"></footer>
   <script src="/js/sidebar.js"></script>
