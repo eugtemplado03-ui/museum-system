@@ -2484,24 +2484,25 @@
               </div>
 
               <div class="form-group">
-                <label for="contactNumber">Contact Number</label>
-                <input type="tel" id="contactNumber" name="contactNumber" placeholder="+63 9XX XXX XXXX"
-                  autocomplete="tel">
+                <label for="contactNumber">Contact Number <span class="required">*</span></label>
+                <input type="tel" id="contactNumber" name="contactNumber" placeholder="09XXXXXXXXX (11 digits)"
+                  maxlength="11" inputmode="numeric" pattern="[0-9]{11}" autocomplete="tel" required>
+                <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 3px;">11 digits only (e.g. 09123456789)</div>
               </div>
 
               <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email">
+                <label for="email">Email Address <span class="required">*</span></label>
+                <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required>
               </div>
 
               <div class="form-group">
-                <label for="groupName">Group / Organization (optional)</label>
-                <input type="text" id="groupName" name="groupName" placeholder="e.g. School name, Family group, etc.">
+                <label for="groupName">Group / Organization <span class="required">*</span></label>
+                <input type="text" id="groupName" name="groupName" placeholder="e.g. Individual, Carlos Family, School Name" required>
               </div>
 
               <div class="form-group">
-                <label for="notes">Notes (optional)</label>
-                <textarea id="notes" name="notes" placeholder="Any special requests or comments..."></textarea>
+                <label for="notes">Notes / Purpose of Visit <span class="required">*</span></label>
+                <textarea id="notes" name="notes" placeholder="e.g. Educational tour, general viewing, or write None" required></textarea>
               </div>
 
               <button type="submit" class="btn-submit" id="submitBtn">
@@ -3799,22 +3800,122 @@
     const successDetails = document.getElementById('successDetails');
     const checkinAnotherBtn = document.getElementById('checkinAnotherBtn');
     const continueToDestBtn = document.getElementById('continueToDestBtn');
+    const contactNumberInput = document.getElementById('contactNumber');
+
+    // Restrict contact number to only numbers and strictly 11 digits
+    if (contactNumberInput) {
+      contactNumberInput.addEventListener('input', (e) => {
+        let cleaned = e.target.value.replace(/\D/g, '');
+        if (cleaned.length > 11) {
+          cleaned = cleaned.slice(0, 11);
+        }
+        e.target.value = cleaned;
+      });
+
+      contactNumberInput.addEventListener('keydown', (e) => {
+        const allowedKeys = ['Backspace', 'Tab', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter', 'Home', 'End'];
+        if (allowedKeys.includes(e.key) || e.ctrlKey || e.metaKey) {
+          return;
+        }
+        // Allow only digits 0-9
+        if (!/^[0-9]$/.test(e.key)) {
+          e.preventDefault();
+          return;
+        }
+        // Prevent typing more than 11 digits
+        const currentDigits = contactNumberInput.value.replace(/\D/g, '');
+        if (currentDigits.length >= 11 && contactNumberInput.selectionStart === contactNumberInput.selectionEnd) {
+          e.preventDefault();
+        }
+      });
+
+      contactNumberInput.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData)?.getData('text') || '';
+        const digits = text.replace(/\D/g, '');
+        const current = contactNumberInput.value.replace(/\D/g, '');
+        contactNumberInput.value = (current + digits).slice(0, 11);
+      });
+    }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       errorMessage.classList.remove('visible');
+
+      function showValidationError(msg, inputEl) {
+        errorMessage.textContent = msg;
+        errorMessage.classList.add('visible');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Check In &amp; Get Visitor Pass Card</span> <span>&rarr;</span>';
+        if (inputEl) {
+          try { inputEl.focus(); } catch (err) {}
+        }
+      }
+
+      const vName = (document.getElementById('visitorName')?.value || '').trim();
+      const addr = (document.getElementById('address')?.value || '').trim();
+      const sSex = (document.getElementById('sex')?.value || '').trim();
+      const sAge = (document.getElementById('age')?.value || '').trim();
+      const cNumber = (document.getElementById('contactNumber')?.value || '').trim().replace(/\D/g, '');
+      const sEmail = (document.getElementById('email')?.value || '').trim();
+      const gName = (document.getElementById('groupName')?.value || '').trim();
+      const sNotes = (document.getElementById('notes')?.value || '').trim();
+
+      // Enforce all required fields
+      if (!vName) {
+        showValidationError('Please enter your full name.', document.getElementById('visitorName'));
+        return;
+      }
+      if (!addr) {
+        showValidationError('Please enter your complete address.', document.getElementById('address'));
+        return;
+      }
+      if (!sSex) {
+        showValidationError('Please select your sex.', document.getElementById('sex'));
+        return;
+      }
+      if (!sAge || isNaN(parseInt(sAge, 10)) || parseInt(sAge, 10) < 1 || parseInt(sAge, 10) > 120) {
+        showValidationError('Please enter a valid age between 1 and 120.', document.getElementById('age'));
+        return;
+      }
+      if (!cNumber) {
+        showValidationError('Please enter your 11-digit contact number.', document.getElementById('contactNumber'));
+        return;
+      }
+      if (cNumber.length !== 11) {
+        showValidationError('Contact number must be exactly 11 digits (e.g. 09123456789).', document.getElementById('contactNumber'));
+        return;
+      }
+      if (!sEmail) {
+        showValidationError('Please enter your email address.', document.getElementById('email'));
+        return;
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(sEmail)) {
+        showValidationError('Please enter a valid email address (e.g. you@example.com).', document.getElementById('email'));
+        return;
+      }
+      if (!gName) {
+        showValidationError('Please enter your group or organization (or write "Individual").', document.getElementById('groupName'));
+        return;
+      }
+      if (!sNotes) {
+        showValidationError('Please enter your notes or purpose of visit (or write "None").', document.getElementById('notes'));
+        return;
+      }
+
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<span>Verifying &amp; Generating Pass...</span>';
 
       const payload = {
-        visitorName: document.getElementById('visitorName').value,
-        address: document.getElementById('address').value,
-        sex: document.getElementById('sex').value,
-        age: document.getElementById('age').value,
-        contactNumber: document.getElementById('contactNumber').value,
-        email: document.getElementById('email').value,
-        groupName: document.getElementById('groupName').value,
-        notes: document.getElementById('notes').value
+        visitorName: vName,
+        address: addr,
+        sex: sSex,
+        age: sAge,
+        contactNumber: cNumber,
+        email: sEmail,
+        groupName: gName,
+        notes: sNotes
       };
 
       try {
