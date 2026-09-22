@@ -209,7 +209,7 @@ router.post('/translate', async (req, res) => {
         temperature: 1,
         max_tokens: 2048,
         top_p: 1,
-        reasoning_effort: 'default',
+        reasoning_effort: 'medium',
         stream: false
       })
     });
