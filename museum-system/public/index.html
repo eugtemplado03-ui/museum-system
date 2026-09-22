@@ -1255,15 +1255,19 @@
       color: var(--blue-primary);
     }
 
-    /* ── Digital Visitor Pass Card Styles (Usercard) ───────────────── */
+    /* ── Digital Visitor Pass Card Styles (Baby Blue Aesthetic) ──────── */
     .visitor-pass-card {
-      background: linear-gradient(145deg, #021b29 0%, #032c42 50%, #01131c 100%);
-      border: 2px solid #00f0ff;
-      box-shadow: 0 12px 40px rgba(0, 240, 255, 0.22), 0 4px 16px rgba(0, 0, 0, 0.6);
-      border-radius: 20px;
-      padding: 24px 20px;
-      color: #ffffff;
-      text-align: center;
+      background-color: #e0f2fe;
+      background-image: 
+        radial-gradient(circle at 10% 12%, rgba(255, 255, 255, 0.95) 0%, transparent 45%),
+        radial-gradient(circle at 90% 88%, rgba(56, 189, 248, 0.28) 0%, transparent 55%),
+        linear-gradient(145deg, #f0f9ff 0%, #e0f2fe 45%, #bae6fd 100%);
+      border: 2px solid #7dd3fc;
+      box-shadow: 0 16px 44px rgba(2, 132, 199, 0.18), 0 4px 14px rgba(14, 165, 233, 0.12);
+      border-radius: 24px;
+      padding: 26px 22px;
+      color: #0c4a6e;
+      text-align: left;
       position: relative;
       overflow: hidden;
       margin: 18px 0 20px;
@@ -1272,162 +1276,239 @@
     .visitor-pass-card::before {
       content: '';
       position: absolute;
-      top: -40%;
-      left: -40%;
-      width: 180%;
-      height: 180%;
-      background: radial-gradient(circle at center, rgba(0, 240, 255, 0.07) 0%, transparent 65%);
+      top: -35px;
+      right: -35px;
+      width: 190px;
+      height: 190px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.3) 0%, transparent 70%);
+      border-radius: 50%;
       pointer-events: none;
+    }
+
+    .visitor-pass-card::after {
+      content: '🏛️';
+      position: absolute;
+      right: 14px;
+      bottom: 18px;
+      font-size: 130px;
+      opacity: 0.06;
+      pointer-events: none;
+      user-select: none;
+      line-height: 1;
     }
 
     .pass-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid rgba(0, 240, 255, 0.25);
-      padding-bottom: 12px;
+      border-bottom: 2px solid rgba(2, 132, 199, 0.2);
+      padding-bottom: 14px;
       margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
     }
 
     .pass-brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       text-align: left;
     }
 
-    .pass-mark {
-      width: 34px;
-      height: 34px;
-      border-radius: 8px;
-      background: linear-gradient(135deg, #00f0ff, #0284c7);
-      color: #02131c;
-      font-weight: 900;
-      font-size: 18px;
+    .pass-brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0284c7, #0369a1);
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
       flex-shrink: 0;
+      color: #ffffff;
     }
 
     .pass-brand-title {
-      font-size: 13px;
+      font-size: 16px;
       font-weight: 900;
-      color: #ffffff;
-      line-height: 1.2;
+      color: #0c4a6e !important;
+      line-height: 1.25;
       font-family: 'Nunito', sans-serif;
+      margin: 0 0 2px;
     }
 
     .pass-brand-sub {
-      font-size: 10px;
-      color: #94a3b8;
+      font-size: 11px;
+      color: #0369a1 !important;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      margin: 0;
     }
 
     .pass-status-pill {
-      background: rgba(34, 197, 94, 0.2);
-      border: 1px solid #22c55e;
-      color: #4ade80;
-      font-size: 11px;
+      background: #dcfce7;
+      border: 1.5px solid #86efac;
+      color: #166534;
+      font-size: 11.5px;
       font-weight: 800;
-      padding: 4px 10px;
+      padding: 4px 12px;
       border-radius: 999px;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
+      box-shadow: 0 2px 6px rgba(34, 197, 94, 0.15);
+      flex-shrink: 0;
     }
 
     .pass-visitor-name {
       font-family: 'Nunito', sans-serif;
       font-weight: 900;
-      font-size: 24px;
-      color: #ffffff;
-      margin: 10px 0 6px;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+      font-size: 27px;
+      color: #082f49 !important;
+      margin: 12px 0 3px;
+      letter-spacing: -0.4px;
+      line-height: 1.2;
+      position: relative;
+      z-index: 1;
+      text-shadow: none;
+    }
+
+    .pass-visitor-subinfo {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0284c7 !important;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
     }
 
     .pass-code-container {
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 8px;
-      background: rgba(0, 0, 0, 0.5);
-      border: 1.5px dashed rgba(0, 240, 255, 0.6);
-      padding: 6px 14px;
-      border-radius: 10px;
-      margin-bottom: 16px;
+      justify-content: space-between;
+      gap: 12px;
+      background: #ffffff;
+      border: 2px dashed #0284c7;
+      padding: 12px 18px;
+      border-radius: 14px;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.08);
+      position: relative;
+      z-index: 1;
+    }
+
+    .pass-code-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: #0284c7 !important;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      display: block;
+      margin-bottom: 3px;
     }
 
     .pass-code-text {
       font-family: 'IBM Plex Mono', monospace;
-      font-weight: 800;
-      font-size: 18px;
-      color: #00f0ff;
+      font-weight: 900;
+      font-size: 23px;
+      color: #0c4a6e !important;
       letter-spacing: 2px;
+      display: block;
     }
 
     .pass-copy-btn {
-      background: rgba(0, 240, 255, 0.2);
-      border: 1px solid rgba(0, 240, 255, 0.4);
-      color: #ffffff;
-      border-radius: 6px;
-      padding: 3px 8px;
-      font-size: 11px;
-      font-weight: 700;
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      border: none;
+      color: #ffffff !important;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 12.5px;
+      font-weight: 800;
       cursor: pointer;
+      box-shadow: 0 3px 10px rgba(2, 132, 199, 0.25);
       transition: all 0.15s ease;
+      white-space: nowrap;
+      flex-shrink: 0;
+      font-family: 'Nunito', sans-serif;
     }
 
     .pass-copy-btn:hover {
-      background: #00f0ff;
-      color: #02131c;
+      background: linear-gradient(135deg, #0369a1, #075985);
+      transform: translateY(-1px);
+      box-shadow: 0 5px 14px rgba(2, 132, 199, 0.35);
     }
 
-    .pass-qr-box {
-      width: 170px;
-      height: 170px;
+    .pass-qr-showcase {
       background: #ffffff;
-      border-radius: 14px;
-      padding: 8px;
-      margin: 0 auto 16px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+      border: 2px solid #bae6fd;
+      border-radius: 18px;
+      padding: 18px 20px;
+      box-shadow: 0 8px 24px rgba(2, 132, 199, 0.12);
+      margin: 0 auto 18px;
+      text-align: center;
+      max-width: 290px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .pass-qr-frame {
+      width: 175px;
+      height: 175px;
+      margin: 0 auto;
       display: flex;
       align-items: center;
       justify-content: center;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #ffffff;
     }
 
-    .pass-qr-box img {
+    .pass-qr-frame img {
       width: 100%;
       height: 100%;
       object-fit: contain;
       display: block;
     }
 
+    .pass-qr-hint {
+      margin-top: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #0369a1 !important;
+      text-align: center;
+      line-height: 1.4;
+    }
+
     .pass-meta-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      background: rgba(0, 0, 0, 0.35);
-      border-radius: 10px;
-      padding: 10px 14px;
-      text-align: left;
-      font-size: 12px;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1.5px solid #bae6fd;
+      border-radius: 14px;
+      padding: 14px 16px;
       margin-bottom: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.06);
+      position: relative;
+      z-index: 1;
     }
 
-    .pass-meta-label {
-      color: #94a3b8;
+    .pass-meta-item .pass-meta-label {
+      color: #0284c7 !important;
       display: block;
-      font-size: 10px;
+      font-size: 10.5px;
       text-transform: uppercase;
-      font-weight: 700;
-      margin-bottom: 2px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      margin-bottom: 3px;
     }
 
-    .pass-meta-val {
-      font-weight: 700;
-      color: #f1f5f9;
+    .pass-meta-item .pass-meta-val {
+      font-weight: 800;
+      color: #0f172a !important;
+      font-size: 13.5px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1435,60 +1516,69 @@
     }
 
     .pass-tip {
-      font-size: 12px;
-      color: #bae6fd;
+      font-size: 12.5px;
+      color: #075985 !important;
       line-height: 1.5;
-      background: rgba(2, 132, 199, 0.2);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      padding: 10px 14px;
-      border-radius: 10px;
+      background: #f0f9ff;
+      border: 1.5px solid #93c5fd;
+      padding: 12px 16px;
+      border-radius: 12px;
       margin-bottom: 18px;
       display: flex;
       align-items: flex-start;
       gap: 10px;
       text-align: left;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.06);
+      position: relative;
+      z-index: 1;
     }
 
     .btn-pass-download {
-      background: linear-gradient(135deg, #00f0ff, #0284c7);
-      color: #02131c;
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: #ffffff !important;
       font-weight: 900;
-      font-size: 13.5px;
-      padding: 11px 18px;
-      border-radius: 10px;
+      font-size: 14px;
+      padding: 12px 18px;
+      border-radius: 12px;
       border: none;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
-      box-shadow: 0 4px 14px rgba(0, 240, 255, 0.3);
+      box-shadow: 0 4px 16px rgba(2, 132, 199, 0.28);
       transition: all 0.15s ease;
       font-family: 'Nunito', sans-serif;
     }
 
     .btn-pass-download:hover {
-      background: linear-gradient(135deg, #5eead4, #38bdf8);
+      background: linear-gradient(135deg, #0369a1, #075985);
       transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.38);
     }
 
     .btn-pass-print {
-      background: rgba(255, 255, 255, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      color: #ffffff;
+      background: #ffffff;
+      border: 2px solid #0284c7;
+      color: #0284c7 !important;
       font-weight: 800;
-      font-size: 13.5px;
-      padding: 11px 18px;
-      border-radius: 10px;
+      font-size: 14px;
+      padding: 12px 18px;
+      border-radius: 12px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.08);
       transition: all 0.15s ease;
       font-family: 'Nunito', sans-serif;
     }
 
     .btn-pass-print:hover {
-      background: rgba(255, 255, 255, 0.25);
+      background: #f0f9ff;
+      border-color: #0369a1;
+      color: #0369a1 !important;
       transform: translateY(-1px);
     }
 
@@ -2543,22 +2633,25 @@
           <p id="successDetails" style="margin-bottom:20px;">Thank you for visiting Museo Sang Bata sa Negros. Your visit has been logged.</p>
 
           <!-- Digital Visitor Pass Card -->
-          <div class="visitor-pass-card" id="digitalPassCard" style="display:none; text-align:left;">
+          <!-- Digital Visitor Pass Card (Baby Blue Aesthetic) -->
+          <div class="visitor-pass-card" id="digitalPassCard" style="display:none;">
             <div class="pass-header">
               <div class="pass-brand">
                 <div class="pass-brand-icon">🏛️</div>
                 <div class="pass-brand-text">
-                  <h3>Museo Sang Bata sa Negros</h3>
-                  <p>Sagay City, Negros Occidental • Official Digital Pass</p>
+                  <div class="pass-brand-title">Museo Sang Bata sa Negros</div>
+                  <div class="pass-brand-sub">Sagay City, Negros Occidental • Official Digital Pass</div>
                 </div>
               </div>
-              <span class="pass-status-pill">Active Visit</span>
+              <span class="pass-status-pill">
+                <span style="display:inline-block; width:7px; height:7px; background:#16a34a; border-radius:50%;"></span> Active Visit
+              </span>
             </div>
 
             <div class="pass-visitor-name" id="passVisitorName">Visitor Name</div>
-            <div style="font-size:12.5px; color:#64748b; margin-top:-6px; margin-bottom:14px;" id="passVisitorSubinfo">Sagay City, Negros Occidental</div>
+            <div class="pass-visitor-subinfo" id="passVisitorSubinfo">Sagay City, Negros Occidental</div>
 
-            <!-- Pass Code Display -->
+            <!-- Pass Code Container -->
             <div class="pass-code-container">
               <div>
                 <span class="pass-code-label">Permanent Visitor Pass Code</span>
@@ -2569,42 +2662,47 @@
               </button>
             </div>
 
-            <!-- QR Box -->
-            <div class="pass-qr-box">
-              <img id="passQrImage" src="" alt="Visitor Pass QR Code" style="width:160px; height:160px; border-radius:8px; display:block; margin:0 auto; background:#ffffff;">
-              <div style="font-size:11.5px; color:#475569; margin-top:8px; font-weight:600; text-align:center;">Scan this QR pass at any entrance terminal to re-enter instantly</div>
+            <!-- QR Showcase Container -->
+            <div class="pass-qr-showcase">
+              <div class="pass-qr-frame">
+                <img id="passQrImage" src="" alt="Visitor Pass QR Code">
+              </div>
+              <div class="pass-qr-hint">Scan this QR pass at any entrance terminal to re-enter instantly</div>
             </div>
 
             <div class="pass-meta-grid">
               <div class="pass-meta-item">
-                <span class="label">Date of Visit</span>
-                <span class="val" id="passVisitDate">--</span>
+                <span class="pass-meta-label">Date of Visit</span>
+                <span class="pass-meta-val" id="passVisitDate">--</span>
               </div>
               <div class="pass-meta-item">
-                <span class="label">Time Logged</span>
-                <span class="val" id="passVisitTime">--</span>
+                <span class="pass-meta-label">Time Logged</span>
+                <span class="pass-meta-val" id="passVisitTime">--</span>
               </div>
               <div class="pass-meta-item">
-                <span class="label">Group / School</span>
-                <span class="val" id="passGroupName">Individual</span>
+                <span class="pass-meta-label">Group / School</span>
+                <span class="pass-meta-val" id="passGroupName">Individual</span>
               </div>
               <div class="pass-meta-item">
-                <span class="label">Access Level</span>
-                <span class="val" style="color:var(--blue-primary); font-weight:700;">Full Museum</span>
+                <span class="pass-meta-label">Access Level</span>
+                <span class="pass-meta-val" style="color:#0284c7; font-weight:800;">Full Museum Access</span>
               </div>
             </div>
 
             <div class="pass-tip">
-              💡 <strong>Next Visit Tip:</strong> Keep this card or take a screenshot! Next time you visit, simply enter this code or scan the QR code to check in in 1 second without filling out forms again.
+              <span style="font-size:18px; flex-shrink:0;">💡</span>
+              <div>
+                <strong style="color:#0369a1;">Next Visit Tip:</strong> Keep this card or take a screenshot! Next time you visit, simply enter this code or scan the QR code to check in in 1 second without filling out forms again.
+              </div>
             </div>
 
             <!-- Pass Card Actions -->
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:18px;">
               <button type="button" class="btn-pass-download" id="btnDownloadPassCard">
-                💾 Download Card (PNG)
+                <span>💾</span> Download Card (PNG)
               </button>
               <button type="button" class="btn-pass-print" id="btnPrintPassCard">
-                🖨️ Print Pass Card
+                <span>🖨️</span> Print Pass Card
               </button>
             </div>
           </div>
@@ -3362,19 +3460,19 @@
           <title>Museum Visitor Pass - ${escapeHtml(currentPassData.visitorCode || '')}</title>
           <style>
             body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 20px; background: #ffffff; color: #0f172a; text-align: center; }
-            .card { max-width: 480px; margin: 0 auto; border: 2px solid #0d5989; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-            .brand { font-size: 20px; font-weight: 800; color: #0d5989; margin-bottom: 2px; }
-            .sub { font-size: 11px; color: #64748b; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; }
-            .name { font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
-            .addr { font-size: 13px; color: #475569; margin-bottom: 14px; }
-            .code-box { background: #f0f9ff; border: 1.5px dashed #0284c7; border-radius: 10px; padding: 12px; margin: 16px 0; }
-            .code-label { font-size: 11px; font-weight: 700; color: #0369a1; text-transform: uppercase; letter-spacing: 0.5px; }
+            .card { max-width: 480px; margin: 0 auto; background: #f0f9ff; border: 2.5px solid #38bdf8; border-radius: 20px; padding: 26px 22px; box-shadow: 0 8px 24px rgba(2, 132, 199, 0.12); }
+            .brand { font-size: 20px; font-weight: 900; color: #0c4a6e; margin-bottom: 2px; }
+            .sub { font-size: 11px; color: #0284c7; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+            .name { font-size: 24px; font-weight: 900; color: #082f49; margin-bottom: 4px; }
+            .addr { font-size: 13px; color: #0284c7; font-weight: 600; margin-bottom: 14px; }
+            .code-box { background: #ffffff; border: 2px dashed #0284c7; border-radius: 12px; padding: 12px; margin: 16px 0; }
+            .code-label { font-size: 11px; font-weight: 800; color: #0284c7; text-transform: uppercase; letter-spacing: 0.5px; }
             .code-val { font-family: monospace; font-size: 26px; font-weight: 900; color: #0c4a6e; letter-spacing: 2px; display: block; margin-top: 4px; }
-            .qr-img { width: 180px; height: 180px; margin: 12px auto; display: block; border: 1px solid #e2e8f0; border-radius: 8px; }
-            .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: left; background: #f8fafc; padding: 12px; border-radius: 8px; font-size: 12px; margin-top: 14px; }
-            .meta div strong { color: #334155; }
-            .tip { font-size: 11.5px; color: #64748b; margin-top: 14px; line-height: 1.4; border-top: 1px solid #e2e8f0; padding-top: 10px; }
-            @media print { body { margin: 0; } .card { border: 2px solid #000; box-shadow: none; } }
+            .qr-img { width: 175px; height: 175px; margin: 14px auto; display: block; border: 2px solid #bae6fd; border-radius: 12px; background: #fff; padding: 6px; }
+            .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: left; background: #ffffff; border: 1.5px solid #bae6fd; padding: 14px; border-radius: 12px; font-size: 12px; margin-top: 14px; }
+            .meta div strong { color: #0284c7; }
+            .tip { font-size: 11.5px; color: #0369a1; margin-top: 14px; line-height: 1.4; border-top: 1px solid #bae6fd; padding-top: 10px; font-weight: 600; }
+            @media print { body { margin: 0; } .card { border: 2px solid #000; box-shadow: none; background: #fff; } }
           </style>
         </head>
         <body>
@@ -3416,10 +3514,11 @@
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
-      // Card Background Gradient
+      // Baby Blue Card Background Gradient
       const grad = ctx.createLinearGradient(0, 0, 0, 920);
-      grad.addColorStop(0, '#0d5989');
-      grad.addColorStop(1, '#052a44');
+      grad.addColorStop(0, '#f0f9ff');
+      grad.addColorStop(0.5, '#e0f2fe');
+      grad.addColorStop(1, '#bae6fd');
       ctx.fillStyle = grad;
       ctx.beginPath();
       if (ctx.roundRect) {
@@ -3429,11 +3528,16 @@
       }
       ctx.fill();
 
+      // Card Outline
+      ctx.strokeStyle = '#7dd3fc';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
       // Top Accent Header
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.fillStyle = '#0284c7';
       ctx.fillRect(0, 0, 750, 110);
 
-      // Gold Brand Line
+      // Gold Brand Accent Line
       ctx.fillStyle = '#f59e0b';
       ctx.fillRect(0, 110, 750, 4);
 
@@ -3443,25 +3547,25 @@
       ctx.textAlign = 'center';
       ctx.fillText('🏛️ MUSEO SANG BATA SA NEGROS', 375, 55);
 
-      ctx.fillStyle = '#bae6fd';
-      ctx.font = '600 13px -apple-system, sans-serif';
+      ctx.fillStyle = '#e0f2fe';
+      ctx.font = 'bold 13px -apple-system, sans-serif';
       ctx.fillText('SAGAY CITY, NEGROS OCCIDENTAL • OFFICIAL VISITOR PASS', 375, 85);
 
-      // Visitor Name
-      ctx.fillStyle = '#ffffff';
+      // Visitor Name in Deep Navy
+      ctx.fillStyle = '#082f49';
       ctx.font = 'bold 34px -apple-system, sans-serif';
       ctx.fillText(currentPassData.visitorName || 'Valued Visitor', 375, 175);
 
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = '15px -apple-system, sans-serif';
+      ctx.fillStyle = '#0284c7';
+      ctx.font = 'bold 15px -apple-system, sans-serif';
       const subParts = [];
       if (currentPassData.age) subParts.push(`Age ${currentPassData.age}`);
       if (currentPassData.sex) subParts.push(currentPassData.sex);
       if (currentPassData.address) subParts.push(currentPassData.address);
       ctx.fillText(subParts.join(' • ') || 'Negros Occidental, Philippines', 375, 205);
 
-      // Code Box
-      ctx.fillStyle = '#0f172a';
+      // Code Box in crisp white
+      ctx.fillStyle = '#ffffff';
       if (ctx.roundRect) {
         ctx.beginPath();
         ctx.roundRect(75, 235, 600, 85, 14);
@@ -3469,15 +3573,15 @@
       } else {
         ctx.fillRect(75, 235, 600, 85);
       }
-      ctx.strokeStyle = '#38bdf8';
+      ctx.strokeStyle = '#0284c7';
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      ctx.fillStyle = '#38bdf8';
+      ctx.fillStyle = '#0284c7';
       ctx.font = 'bold 12px -apple-system, sans-serif';
       ctx.fillText('PERMANENT VISITOR PASS CODE', 375, 262);
 
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = '#0c4a6e';
       ctx.font = 'bold 36px monospace';
       ctx.fillText(currentPassData.visitorCode || 'MSBN-PASS', 375, 302);
 
@@ -3490,13 +3594,13 @@
 
       function drawMetaAndFooter() {
         // QR Subtext
-        ctx.fillStyle = '#cbd5e1';
-        ctx.font = '13px -apple-system, sans-serif';
+        ctx.fillStyle = '#0369a1';
+        ctx.font = 'bold 13px -apple-system, sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText('Scan this QR code at any museum terminal for instant re-entry', 375, 595);
 
         // Meta Grid Box
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.07)';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
         if (ctx.roundRect) {
           ctx.beginPath();
           ctx.roundRect(75, 620, 600, 150, 14);
@@ -3504,30 +3608,33 @@
         } else {
           ctx.fillRect(75, 620, 600, 150);
         }
+        ctx.strokeStyle = '#bae6fd';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
 
         ctx.textAlign = 'left';
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '12px -apple-system, sans-serif';
+        ctx.fillStyle = '#0284c7';
+        ctx.font = 'bold 12px -apple-system, sans-serif';
         ctx.fillText('DATE OF VISIT', 110, 655);
         ctx.fillText('TIME LOGGED', 400, 655);
         ctx.fillText('GROUP / ORGANIZATION', 110, 715);
         ctx.fillText('ACCESS LEVEL', 400, 715);
 
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = '#0f172a';
         ctx.font = 'bold 16px -apple-system, sans-serif';
         ctx.fillText(currentPassData.visitDate || '--', 110, 680);
         ctx.fillText(currentPassData.visitTime || '--', 400, 680);
         ctx.fillText(currentPassData.groupName || 'Individual', 110, 740);
-        ctx.fillStyle = '#38bdf8';
+        ctx.fillStyle = '#0284c7';
         ctx.fillText('Full Museum Access', 400, 740);
 
         // Footer note
         ctx.textAlign = 'center';
-        ctx.fillStyle = '#fbbf24';
+        ctx.fillStyle = '#0369a1';
         ctx.font = 'bold 13px -apple-system, sans-serif';
         ctx.fillText('💡 Keep this pass on your phone! No need to fill out forms on your next visit.', 375, 810);
 
-        ctx.fillStyle = '#94a3b8';
+        ctx.fillStyle = '#075985';
         ctx.font = '12px -apple-system, sans-serif';
         ctx.fillText('Sagay Marine Reserve • www.museosangbata.org • Tel: +63 917 798 7420', 375, 870);
 
