@@ -2518,20 +2518,7 @@
               <h2
                 style="font-family:'Nunito',sans-serif; font-weight:800; font-size:21px; color:var(--text-black); margin:0 0 4px;">
                 Express Re-Check In</h2>
-              <p style="margin:0; font-size:13px; color:var(--text-muted);">Already visited before? Use your saved pass, code, or scan your QR to enter instantly without filling out forms!</p>
-            </div>
-
-            <!-- Saved Pass on this Device Box -->
-            <div id="savedPassPromptBox" style="display:none; background:linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border:1.5px solid #93c5fd; border-radius:14px; padding:16px; margin-bottom:20px; box-shadow:0 4px 12px rgba(13, 89, 137, 0.08);">
-              <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;">
-                <span style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; background:var(--blue-primary); color:#ffffff; padding:3px 8px; border-radius:6px;">Found Saved Pass</span>
-                <span id="savedPassCodeBadge" style="font-family:monospace; font-weight:800; font-size:13px; color:var(--blue-dark);">MSBN-XXXXXX</span>
-              </div>
-              <div style="font-size:16px; font-weight:800; color:var(--text-black); margin-bottom:4px;" id="savedPassNameDisplay">Visitor Name</div>
-              <div style="font-size:12px; color:var(--text-dark); margin-bottom:14px;">Your details are already saved on this device. Click below to check in instantly!</div>
-              <button type="button" class="btn-submit" id="btnSavedPassOneClick" style="margin:0; background:linear-gradient(135deg, #0d5989, #053b5e); font-size:14px; padding:12px 18px;">
-                <span>⚡ 1-Click Fast Check-in</span> <span>&rarr;</span>
-              </button>
+              <p style="margin:0; font-size:13px; color:var(--text-muted);">Already visited before? Enter your Visitor Pass Code or scan your QR code to check in instantly!</p>
             </div>
 
             <div class="error-message" id="returningErrorMessage"></div>
@@ -3098,25 +3085,6 @@
     window.stopQrScanner = stopQrScanner;
 
     // Portal Tabs Navigation
-    function checkSavedPassOnDevice() {
-      try {
-        const savedRaw = localStorage.getItem('museum_visitor_pass');
-        if (savedRaw) {
-          const pass = JSON.parse(savedRaw);
-          if (pass && pass.visitorCode) {
-            const box = document.getElementById('savedPassPromptBox');
-            const nameEl = document.getElementById('savedPassNameDisplay');
-            const codeEl = document.getElementById('savedPassCodeBadge');
-            if (box && nameEl && codeEl) {
-              nameEl.textContent = pass.visitorName || 'Returning Visitor';
-              codeEl.textContent = pass.visitorCode;
-              box.style.display = 'block';
-            }
-          }
-        }
-      } catch (e) {}
-    }
-
     function switchTab(tab) {
       try {
         stopQrScanner();
@@ -3162,12 +3130,10 @@
         if (rContent) rContent.style.display = 'block';
 
         try {
-          checkSavedPassOnDevice();
-        } catch (e) {}
-
-        try {
           const cInput = document.getElementById('visitorPassCodeInput');
-          if (cInput) cInput.focus();
+          if (cInput) {
+            cInput.focus();
+          }
         } catch (e) {}
       } else {
         // default: first-time visitor
@@ -3428,25 +3394,6 @@
         }
       }
     }
-
-    // 1-Click Saved Pass button
-    const btnSavedPassOneClick = document.getElementById('btnSavedPassOneClick');
-    btnSavedPassOneClick?.addEventListener('click', () => {
-      try {
-        const pass = JSON.parse(localStorage.getItem('museum_visitor_pass') || '{}');
-        if (pass.visitorCode) {
-          executeQuickCheckin(pass.visitorCode, btnSavedPassOneClick);
-        } else {
-          throw new Error('No saved pass found on this device.');
-        }
-      } catch (e) {
-        const errorEl = document.getElementById('returningErrorMessage');
-        if (errorEl) {
-          errorEl.textContent = e.message;
-          errorEl.classList.add('visible');
-        }
-      }
-    });
 
     // Fast Pass Code Input Form
     const fastPassForm = document.getElementById('fastPassForm');
