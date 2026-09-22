@@ -1254,54 +1254,49 @@
     .success-message p strong {
       color: var(--blue-primary);
     }
+    .portal-container.has-success {
+      max-width: 760px;
+      transition: max-width 0.35s ease;
+    }
 
-    /* ── Digital Visitor Pass Card Styles (Baby Blue Aesthetic) ──────── */
+    /* ── Digital Visitor Pass Card Styles (Baby Blue Aesthetic - Horizontal Badge) ── */
     .visitor-pass-card {
-      background-color: #e0f2fe;
-      background-image: 
-        radial-gradient(circle at 10% 12%, rgba(255, 255, 255, 0.95) 0%, transparent 45%),
-        radial-gradient(circle at 90% 88%, rgba(56, 189, 248, 0.28) 0%, transparent 55%),
-        linear-gradient(145deg, #f0f9ff 0%, #e0f2fe 45%, #bae6fd 100%);
+      background: linear-gradient(145deg, #f0f9ff 0%, #e0f2fe 45%, #bae6fd 100%);
       border: 2px solid #7dd3fc;
       box-shadow: 0 16px 44px rgba(2, 132, 199, 0.18), 0 4px 14px rgba(14, 165, 233, 0.12);
       border-radius: 24px;
-      padding: 26px 22px;
+      padding: 24px 26px;
       color: #0c4a6e;
       text-align: left;
       position: relative;
       overflow: hidden;
       margin: 18px 0 20px;
+      animation: fadeInPass 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes fadeInPass {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .visitor-pass-card::before {
       content: '';
       position: absolute;
-      top: -35px;
-      right: -35px;
-      width: 190px;
-      height: 190px;
-      background: radial-gradient(circle, rgba(56, 189, 248, 0.3) 0%, transparent 70%);
+      top: -40px;
+      right: -40px;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.28) 0%, transparent 70%);
       border-radius: 50%;
       pointer-events: none;
-    }
-
-    .visitor-pass-card::after {
-      content: '🏛️';
-      position: absolute;
-      right: 14px;
-      bottom: 18px;
-      font-size: 130px;
-      opacity: 0.06;
-      pointer-events: none;
-      user-select: none;
-      line-height: 1;
     }
 
     .pass-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 2px solid rgba(2, 132, 199, 0.2);
+      flex-wrap: wrap;
+      gap: 12px;
+      border-bottom: 1.5px solid rgba(2, 132, 199, 0.22);
       padding-bottom: 14px;
       margin-bottom: 16px;
       position: relative;
@@ -1316,15 +1311,15 @@
     }
 
     .pass-brand-icon {
-      width: 44px;
-      height: 44px;
+      width: 42px;
+      height: 42px;
       border-radius: 12px;
       background: linear-gradient(135deg, #0284c7, #0369a1);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
-      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
       flex-shrink: 0;
       color: #ffffff;
     }
@@ -1333,18 +1328,16 @@
       font-size: 16px;
       font-weight: 900;
       color: #0c4a6e !important;
-      line-height: 1.25;
+      line-height: 1.2;
       font-family: 'Nunito', sans-serif;
-      margin: 0 0 2px;
+      margin: 0;
     }
 
     .pass-brand-sub {
-      font-size: 11px;
+      font-size: 11.5px;
       color: #0369a1 !important;
       font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin: 0;
+      margin-top: 2px;
     }
 
     .pass-status-pill {
@@ -1362,224 +1355,208 @@
       flex-shrink: 0;
     }
 
+    /* 2-Column Grid Layout: Main info (left) & QR thumbnail (right) */
+    .dash-pass-grid {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 22px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+    @media (max-width: 680px) {
+      .dash-pass-grid {
+        grid-template-columns: 1fr !important;
+        text-align: center;
+      }
+      .dash-pass-col-main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .dash-pass-col-qr {
+        margin: 0 auto 10px;
+        order: -1;
+      }
+      .pass-actions-row {
+        justify-content: center;
+      }
+      .pass-meta-inline {
+        justify-content: center;
+      }
+    }
+
+    .dash-pass-col-main {
+      min-width: 0;
+    }
+
     .pass-visitor-name {
       font-family: 'Nunito', sans-serif;
       font-weight: 900;
-      font-size: 27px;
+      font-size: 24px;
       color: #082f49 !important;
-      margin: 12px 0 3px;
-      letter-spacing: -0.4px;
+      margin: 0 0 2px;
       line-height: 1.2;
-      position: relative;
-      z-index: 1;
-      text-shadow: none;
     }
 
     .pass-visitor-subinfo {
       font-size: 13px;
       font-weight: 700;
       color: #0284c7 !important;
-      margin-bottom: 16px;
-      position: relative;
-      z-index: 1;
+      margin-bottom: 14px;
     }
 
-    .pass-code-container {
-      display: flex;
+    .pass-code-pill-box {
+      display: inline-flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
       background: #ffffff;
-      border: 2px dashed #0284c7;
-      padding: 12px 18px;
-      border-radius: 14px;
-      margin-bottom: 18px;
-      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.08);
-      position: relative;
-      z-index: 1;
+      border: 1.5px solid #0284c7;
+      border-radius: 12px;
+      padding: 8px 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.1);
     }
 
-    .pass-code-label {
+    .pass-code-pill-label {
       font-size: 11px;
       font-weight: 800;
       color: #0284c7 !important;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
-      display: block;
-      margin-bottom: 3px;
+      letter-spacing: 0.5px;
     }
 
-    .pass-code-text {
-      font-family: 'IBM Plex Mono', monospace;
+    .pass-code-pill-val {
+      font-family: monospace;
+      font-size: 18px;
       font-weight: 900;
-      font-size: 23px;
       color: #0c4a6e !important;
-      letter-spacing: 2px;
-      display: block;
+      letter-spacing: 1.5px;
     }
 
     .pass-copy-btn {
-      background: linear-gradient(135deg, #0284c7, #0369a1);
+      background: #0284c7;
       border: none;
       color: #ffffff !important;
-      border-radius: 8px;
-      padding: 8px 16px;
-      font-size: 12.5px;
-      font-weight: 800;
-      cursor: pointer;
-      box-shadow: 0 3px 10px rgba(2, 132, 199, 0.25);
-      transition: all 0.15s ease;
-      white-space: nowrap;
-      flex-shrink: 0;
-      font-family: 'Nunito', sans-serif;
-    }
-
-    .pass-copy-btn:hover {
-      background: linear-gradient(135deg, #0369a1, #075985);
-      transform: translateY(-1px);
-      box-shadow: 0 5px 14px rgba(2, 132, 199, 0.35);
-    }
-
-    .pass-qr-showcase {
-      background: #ffffff;
-      border: 2px solid #bae6fd;
-      border-radius: 18px;
-      padding: 18px 20px;
-      box-shadow: 0 8px 24px rgba(2, 132, 199, 0.12);
-      margin: 0 auto 18px;
-      text-align: center;
-      max-width: 290px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .pass-qr-frame {
-      width: 175px;
-      height: 175px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 10px;
-      overflow: hidden;
-      background: #ffffff;
-    }
-
-    .pass-qr-frame img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-    }
-
-    .pass-qr-hint {
-      margin-top: 12px;
-      font-size: 12px;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 11px;
       font-weight: 700;
-      color: #0369a1 !important;
-      text-align: center;
-      line-height: 1.4;
-    }
-
-    .pass-meta-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      background: rgba(255, 255, 255, 0.9);
-      border: 1.5px solid #bae6fd;
-      border-radius: 14px;
-      padding: 14px 16px;
-      margin-bottom: 16px;
-      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.06);
-      position: relative;
-      z-index: 1;
-    }
-
-    .pass-meta-item .pass-meta-label {
-      color: #0284c7 !important;
-      display: block;
-      font-size: 10.5px;
-      text-transform: uppercase;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      margin-bottom: 3px;
-    }
-
-    .pass-meta-item .pass-meta-val {
-      font-weight: 800;
-      color: #0f172a !important;
-      font-size: 13.5px;
+      cursor: pointer;
+      transition: all 0.15s ease;
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: block;
+    }
+    .pass-copy-btn:hover {
+      background: #0369a1;
     }
 
-    .pass-tip {
-      font-size: 12.5px;
-      color: #075985 !important;
-      line-height: 1.5;
-      background: #f0f9ff;
-      border: 1.5px solid #93c5fd;
-      padding: 12px 16px;
-      border-radius: 12px;
-      margin-bottom: 18px;
+    .pass-meta-inline {
       display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      text-align: left;
-      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.06);
-      position: relative;
-      z-index: 1;
+      gap: 14px;
+      font-size: 12px;
+      color: #0369a1 !important;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .pass-meta-inline strong {
+      color: #0284c7;
     }
 
-    .btn-pass-download {
-      background: linear-gradient(135deg, #0284c7, #0369a1);
+    .pass-actions-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-action-primary {
+      background: #0284c7;
       color: #ffffff !important;
-      font-weight: 900;
-      font-size: 14px;
-      padding: 12px 18px;
-      border-radius: 12px;
       border: none;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      box-shadow: 0 4px 16px rgba(2, 132, 199, 0.28);
-      transition: all 0.15s ease;
-      font-family: 'Nunito', sans-serif;
-    }
-
-    .btn-pass-download:hover {
-      background: linear-gradient(135deg, #0369a1, #075985);
-      transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.38);
-    }
-
-    .btn-pass-print {
-      background: #ffffff;
-      border: 2px solid #0284c7;
-      color: #0284c7 !important;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 12.5px;
       font-weight: 800;
-      font-size: 14px;
-      padding: 12px 18px;
-      border-radius: 12px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      gap: 8px;
-      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.08);
+      gap: 6px;
+      box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
       transition: all 0.15s ease;
       font-family: 'Nunito', sans-serif;
     }
+    .btn-action-primary:hover {
+      background: #0369a1;
+      transform: translateY(-1px);
+    }
 
-    .btn-pass-print:hover {
+    .btn-action-secondary {
+      background: #ffffff;
+      color: #0284c7 !important;
+      border: 1.5px solid #0284c7;
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+      font-family: 'Nunito', sans-serif;
+    }
+    .btn-action-secondary:hover {
       background: #f0f9ff;
       border-color: #0369a1;
       color: #0369a1 !important;
-      transform: translateY(-1px);
+    }
+
+    /* Right column: QR code thumb preview */
+    .dash-pass-col-qr {
+      text-align: center;
+      background: #ffffff;
+      border: 2px solid #7dd3fc;
+      border-radius: 14px;
+      padding: 10px;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.12);
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      flex-shrink: 0;
+    }
+    .dash-pass-col-qr:hover {
+      transform: scale(1.03);
+      box-shadow: 0 6px 18px rgba(2, 132, 199, 0.22);
+    }
+
+    .dash-pass-col-qr img {
+      width: 120px;
+      height: 120px;
+      display: block;
+      object-fit: contain;
+      border-radius: 6px;
+    }
+
+    .pass-qr-thumb-label {
+      font-size: 10.5px;
+      font-weight: 800;
+      color: #0369a1 !important;
+      margin-top: 5px;
+      display: block;
+    }
+
+    .pass-tip-compact {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px dashed #7dd3fc;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-top: 16px;
+      font-size: 11.5px;
+      color: #0369a1 !important;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.45;
+      position: relative;
+      z-index: 1;
     }
 
     /* ── Returning Visitor & QR Scanner Styles ─────────────────────── */
@@ -2632,78 +2609,71 @@
           <h2 style="margin-bottom:4px;">Check-in Verified!</h2>
           <p id="successDetails" style="margin-bottom:20px;">Thank you for visiting Museo Sang Bata sa Negros. Your visit has been logged.</p>
 
-          <!-- Digital Visitor Pass Card -->
-          <!-- Digital Visitor Pass Card (Baby Blue Aesthetic) -->
+          <!-- Digital Visitor Pass Card (Baby Blue Aesthetic - Horizontal Badge Layout) -->
           <div class="visitor-pass-card" id="digitalPassCard" style="display:none;">
+            <!-- Card Header -->
             <div class="pass-header">
               <div class="pass-brand">
                 <div class="pass-brand-icon">🏛️</div>
-                <div class="pass-brand-text">
+                <div>
                   <div class="pass-brand-title">Museo Sang Bata sa Negros</div>
-                  <div class="pass-brand-sub">Sagay City, Negros Occidental • Official Digital Pass</div>
+                  <div class="pass-brand-sub">Official Digital Visitor Pass Card • Sagay City</div>
                 </div>
               </div>
               <span class="pass-status-pill">
-                <span style="display:inline-block; width:7px; height:7px; background:#16a34a; border-radius:50%;"></span> Active Visit
+                <span style="display:inline-block; width:7px; height:7px; background:#16a34a; border-radius:50%;"></span> Active Verified Visit
               </span>
             </div>
 
-            <div class="pass-visitor-name" id="passVisitorName">Visitor Name</div>
-            <div class="pass-visitor-subinfo" id="passVisitorSubinfo">Sagay City, Negros Occidental</div>
+            <!-- Card Body (2 Columns: Main Info + QR Thumbnail) -->
+            <div class="dash-pass-grid">
+              <div class="dash-pass-col-main">
+                <div class="pass-visitor-name" id="passVisitorName">Visitor Name</div>
+                <div class="pass-visitor-subinfo" id="passVisitorSubinfo">Sagay City, Negros Occidental</div>
 
-            <!-- Pass Code Container -->
-            <div class="pass-code-container">
+                <!-- Pass Code Pill Container -->
+                <div class="pass-code-pill-box">
+                  <span class="pass-code-pill-label">Pass Code:</span>
+                  <span class="pass-code-pill-val" id="passCodeDisplay">MSBN-XXXXXX</span>
+                  <button type="button" class="pass-copy-btn" id="btnCopyPassCode" title="Copy pass code">
+                    📋 Copy
+                  </button>
+                </div>
+
+                <!-- Inline Metadata Row -->
+                <div class="pass-meta-inline">
+                  <span>📅 <strong>Date:</strong> <span id="passVisitDate">--</span></span>
+                  <span>⏰ <strong>Time:</strong> <span id="passVisitTime">--</span></span>
+                  <span>🏛️ <strong>Access:</strong> Full Museum Exhibits</span>
+                </div>
+
+                <!-- Pass Card Action Buttons -->
+                <div class="pass-actions-row">
+                  <button type="button" class="btn-action-primary" id="btnViewFullQr">
+                    <span>🔍</span> View Full QR Card
+                  </button>
+                  <button type="button" class="btn-action-secondary" id="btnDownloadPassCard">
+                    <span>💾</span> Download Card (PNG)
+                  </button>
+                  <button type="button" class="btn-action-secondary" id="btnPrintPassCard">
+                    <span>🖨️</span> Print Pass
+                  </button>
+                </div>
+              </div>
+
+              <!-- Right Column: QR Code Frame -->
+              <div class="dash-pass-col-qr" id="passQrThumbBox" title="Tap to view full-size QR Pass">
+                <img id="passQrImage" src="" alt="Visitor QR Pass">
+                <span class="pass-qr-thumb-label">🔍 Tap for Big QR</span>
+              </div>
+            </div>
+
+            <!-- Next Visit Tip -->
+            <div class="pass-tip-compact">
+              <span style="font-size:16px; flex-shrink:0;">💡</span>
               <div>
-                <span class="pass-code-label">Permanent Visitor Pass Code</span>
-                <span class="pass-code-text" id="passCodeDisplay">MSBN-XXXXXX</span>
+                <strong>Next Visit Tip:</strong> Keep this pass code or save this card! Next time you visit, simply enter this code or scan your QR code to check in in 1 second without filling out forms again.
               </div>
-              <button type="button" class="pass-copy-btn" id="btnCopyPassCode" title="Copy code to clipboard">
-                📋 Copy Code
-              </button>
-            </div>
-
-            <!-- QR Showcase Container -->
-            <div class="pass-qr-showcase">
-              <div class="pass-qr-frame">
-                <img id="passQrImage" src="" alt="Visitor Pass QR Code">
-              </div>
-              <div class="pass-qr-hint">Scan this QR pass at any entrance terminal to re-enter instantly</div>
-            </div>
-
-            <div class="pass-meta-grid">
-              <div class="pass-meta-item">
-                <span class="pass-meta-label">Date of Visit</span>
-                <span class="pass-meta-val" id="passVisitDate">--</span>
-              </div>
-              <div class="pass-meta-item">
-                <span class="pass-meta-label">Time Logged</span>
-                <span class="pass-meta-val" id="passVisitTime">--</span>
-              </div>
-              <div class="pass-meta-item">
-                <span class="pass-meta-label">Group / School</span>
-                <span class="pass-meta-val" id="passGroupName">Individual</span>
-              </div>
-              <div class="pass-meta-item">
-                <span class="pass-meta-label">Access Level</span>
-                <span class="pass-meta-val" style="color:#0284c7; font-weight:800;">Full Museum Access</span>
-              </div>
-            </div>
-
-            <div class="pass-tip">
-              <span style="font-size:18px; flex-shrink:0;">💡</span>
-              <div>
-                <strong style="color:#0369a1;">Next Visit Tip:</strong> Keep this card or take a screenshot! Next time you visit, simply enter this code or scan the QR code to check in in 1 second without filling out forms again.
-              </div>
-            </div>
-
-            <!-- Pass Card Actions -->
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:18px;">
-              <button type="button" class="btn-pass-download" id="btnDownloadPassCard">
-                <span>💾</span> Download Card (PNG)
-              </button>
-              <button type="button" class="btn-pass-print" id="btnPrintPassCard">
-                <span>🖨️</span> Print Pass Card
-              </button>
             </div>
           </div>
 
@@ -2731,6 +2701,53 @@
 
       </div>
     </section>
+
+  <!-- High-Definition QR Pass Modal -->
+  <div id="visitorPassQrModal" style="display:none; position:fixed; inset:0; background:rgba(15, 23, 42, 0.65); backdrop-filter:blur(6px); z-index:99999; align-items:center; justify-content:center; padding:16px;">
+    <div id="visitorPassQrModalContent" style="background:#ffffff; border:2px solid #7dd3fc; border-radius:24px; max-width:440px; width:100%; box-shadow:0 24px 60px rgba(2, 132, 199, 0.25); overflow:hidden; text-align:center; animation:fadeInPass 0.25s ease;">
+      <!-- Modal Header -->
+      <div style="background:linear-gradient(135deg, #0284c7, #0369a1); color:#ffffff; padding:16px 20px; display:flex; align-items:center; justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:22px;">🏛️</span>
+          <div style="text-align:left;">
+            <div style="font-family:'Nunito',sans-serif; font-size:15px; font-weight:900; line-height:1.2;">Official Digital Pass QR</div>
+            <div style="font-size:11px; color:#e0f2fe;">Museo Sang Bata sa Negros</div>
+          </div>
+        </div>
+        <button type="button" id="btnCloseQrModal" style="background:rgba(255,255,255,0.2); border:none; color:#ffffff; font-size:18px; width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1;">✕</button>
+      </div>
+
+      <!-- Modal Body -->
+      <div style="padding:24px 20px; background:linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%);">
+        <div style="font-family:'Nunito',sans-serif; font-size:22px; font-weight:900; color:#082f49;" id="modalVisitorName">Visitor Name</div>
+        <div style="font-size:12.5px; color:#0284c7; font-weight:700; margin-bottom:16px;" id="modalVisitorSubinfo">Sagay City, Negros Occidental</div>
+
+        <div style="background:#ffffff; border:2.5px solid #38bdf8; border-radius:18px; padding:14px; display:inline-block; box-shadow:0 8px 24px rgba(2, 132, 199, 0.12); margin-bottom:14px;">
+          <img id="modalQrImage" src="" alt="Full QR Code" style="width:220px; height:220px; display:block; object-fit:contain;">
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <div style="display:inline-flex; align-items:center; gap:8px; background:#ffffff; border:1.5px solid #0284c7; border-radius:10px; padding:8px 14px;">
+            <span style="font-size:11px; font-weight:800; color:#0284c7; text-transform:uppercase;">Pass Code:</span>
+            <span id="modalCodeDisplay" style="font-family:monospace; font-size:18px; font-weight:900; color:#0c4a6e; letter-spacing:1px;">MSBN-XXXXXX</span>
+          </div>
+        </div>
+
+        <div style="font-size:11.5px; color:#0369a1; line-height:1.45; margin-bottom:18px; padding:0 10px;">
+          Scan this QR code at any museum terminal for instant re-entry on your next visit.
+        </div>
+
+        <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+          <button type="button" class="btn-action-primary" id="btnModalDownload">
+            <span>💾</span> Download Card (PNG)
+          </button>
+          <button type="button" class="btn-action-secondary" id="btnModalPrint">
+            <span>🖨️</span> Print Pass
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   </main>
 
@@ -3225,9 +3242,12 @@
     }
 
     function showCheckinSuccess(v, visitorCode, qrCodeDataUrl, visitorName, isReturning, finalDestination) {
-      // 1. Hide the input form portal card
+      // 1. Hide the input form portal card and expand container to horizontal badge width
       const portalCard = document.querySelector('.portal-card');
       if (portalCard) portalCard.style.display = 'none';
+
+      const portalContainer = document.querySelector('.portal-container');
+      if (portalContainer) portalContainer.classList.add('has-success');
 
       const directNoticeEl = document.getElementById('directUnlockNotice');
       if (directNoticeEl) directNoticeEl.style.display = 'none';
@@ -3515,7 +3535,7 @@
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(code).then(() => {
           btnCopyPassCode.textContent = '✓ Copied!';
-          setTimeout(() => { btnCopyPassCode.textContent = '📋 Copy Code'; }, 2000);
+          setTimeout(() => { btnCopyPassCode.textContent = '📋 Copy'; }, 2000);
         }).catch(() => fallbackCopy(code));
       } else {
         fallbackCopy(code);
@@ -3533,11 +3553,67 @@
         document.execCommand('copy');
         if (btnCopyPassCode) {
           btnCopyPassCode.textContent = '✓ Copied!';
-          setTimeout(() => { btnCopyPassCode.textContent = '📋 Copy Code'; }, 2000);
+          setTimeout(() => { btnCopyPassCode.textContent = '📋 Copy'; }, 2000);
         }
       } catch (e) {}
       document.body.removeChild(ta);
     }
+
+    // High-Definition QR Pass Modal Logic
+    function openQrModal() {
+      pausePassCountdown('Auto-navigation paused while viewing full QR card.');
+      const modal = document.getElementById('visitorPassQrModal');
+      const modalName = document.getElementById('modalVisitorName');
+      const modalSubinfo = document.getElementById('modalVisitorSubinfo');
+      const modalQr = document.getElementById('modalQrImage');
+      const modalCode = document.getElementById('modalCodeDisplay');
+
+      if (!modal || !currentPassData) return;
+      if (modalName) modalName.textContent = currentPassData.visitorName || 'Valued Visitor';
+      if (modalSubinfo) {
+        const parts = [];
+        if (currentPassData.age) parts.push(`Age ${currentPassData.age}`);
+        if (currentPassData.sex) parts.push(currentPassData.sex);
+        if (currentPassData.address) parts.push(currentPassData.address);
+        modalSubinfo.textContent = parts.join(' • ') || 'Sagay City, Negros Occidental';
+      }
+      if (modalQr && currentPassData.qrCodeDataUrl) {
+        modalQr.src = currentPassData.qrCodeDataUrl;
+      }
+      if (modalCode) modalCode.textContent = currentPassData.visitorCode || 'MSBN-PASS';
+
+      modal.style.display = 'flex';
+    }
+
+    function closeQrModal() {
+      const modal = document.getElementById('visitorPassQrModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    document.getElementById('btnViewFullQr')?.addEventListener('click', openQrModal);
+    document.getElementById('passQrThumbBox')?.addEventListener('click', openQrModal);
+    document.getElementById('btnCloseQrModal')?.addEventListener('click', closeQrModal);
+
+    const visitorPassQrModalEl = document.getElementById('visitorPassQrModal');
+    if (visitorPassQrModalEl) {
+      visitorPassQrModalEl.addEventListener('click', (e) => {
+        if (e.target === visitorPassQrModalEl) closeQrModal();
+      });
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeQrModal();
+    });
+
+    document.getElementById('btnModalDownload')?.addEventListener('click', () => {
+      const dlBtn = document.getElementById('btnDownloadPassCard');
+      if (dlBtn) dlBtn.click();
+    });
+
+    document.getElementById('btnModalPrint')?.addEventListener('click', () => {
+      const prBtn = document.getElementById('btnPrintPassCard');
+      if (prBtn) prBtn.click();
+    });
 
     // Print Pass Card
     const btnPrintPassCard = document.getElementById('btnPrintPassCard');
@@ -3868,6 +3944,9 @@
 
       const digitalPassCard = document.getElementById('digitalPassCard');
       if (digitalPassCard) digitalPassCard.style.display = 'none';
+
+      const portalContainer = document.querySelector('.portal-container');
+      if (portalContainer) portalContainer.classList.remove('has-success');
 
       successMessage.classList.remove('visible');
       document.querySelector('.portal-card').style.display = 'block';
