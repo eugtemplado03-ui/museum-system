@@ -79,14 +79,139 @@ router.post('/checkin', checkinLimiter, async (req, res) => {
   
   try {
     const visitor = await visitors.create(payload);
-    res.status(201).json({ visitor });
+    const visitorCode = visitor.visitorCode || visitor.id;
+    let qrCodeDataUrl = '';
+    try {
+      const qrPayload = JSON.stringify({ pass: visitorCode, name: visitor.visitorName, id: visitor.id });
+      qrCodeDataUrl = await QRCode.toDataURL(qrPayload, {
+        width: 320,
+        margin: 1,
+        color: { dark: '#02131C', light: '#FFFFFF' }
+      });
+    } catch (qrErr) {
+      console.warn('Could not generate pass QR data URL:', qrErr);
+    }
+
+    res.status(201).json({
+      success: true,
+      visitor,
+      visitorCode,
+      qrCodeDataUrl
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to process check-in.' });
+    res.status(500).json({ success: false, error: 'Failed to process check-in.' });
   }
 });
 
-// Public QR code for visitor check-in
+// Quick check-in for returning visitors using their Visitor Pass Code or Scanned QR
+router.post('/quick-checkin', checkinLimiter, async (req, res) => {
+  const code = (req.body && (req.body.visitorCode || req.body.code || req.body.pass)) || '';
+  if (!code || typeof code !== 'string' || !code.trim()) {
+    return res.status(400).json({ success: false, error: 'Visitor pass code or QR code data is required.' });
+  }
+
+  let targetCode = code.trim();
+  // Handle QR payload encoded as JSON: e.g. {"pass":"MSBN-XXXXXX"}
+  if (targetCode.startsWith('{') && targetCode.endsWith('}')) {
+    try {
+      const parsed = JSON.parse(targetCode);
+      if (parsed.pass) targetCode = parsed.pass;
+      else if (parsed.code) targetCode = parsed.code;
+      else if (parsed.id) targetCode = parsed.id;
+    } catch (e) {}
+  }
+
+  try {
+    const visitor = await visitors.quickCheckin(targetCode);
+    if (!visitor) {
+      return res.status(404).json({ success: false, error: 'Visitor pass code not found. Please check the code or check in as a new visitor.' });
+    }
+
+    const visitorCode = visitor.visitorCode || visitor.id;
+    let qrCodeDataUrl = '';
+    try {
+      const qrPayload = JSON.stringify({ pass: visitorCode, name: visitor.visitorName, id: visitor.id });
+      qrCodeDataUrl = await QRCode.toDataURL(qrPayload, {
+        width: 320,
+        margin: 1,
+        color: { dark: '#02131C', light: '#FFFFFF' }
+      });
+    } catch (qrErr) {}
+
+    res.json({
+      success: true,
+      visitor,
+      visitorCode,
+      qrCodeDataUrl,
+      message: `Welcome back, ${visitor.visitorName}! Your visit for today has been logged.`
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to process quick check-in.' });
+  }
+});
+
+// Get Visitor Pass Card data by pass code
+router.get('/pass/:code', async (req, res) => {
+  try {
+    const visitor = await visitors.findByCode(req.params.code);
+    if (!visitor) return res.status(404).json({ error: 'Visitor pass not found.' });
+
+    const visitorCode = visitor.visitorCode || visitor.id;
+    let qrCodeDataUrl = '';
+    try {
+      const qrPayload = JSON.stringify({ pass: visitorCode, name: visitor.visitorName, id: visitor.id });
+      qrCodeDataUrl = await QRCode.toDataURL(qrPayload, {
+        width: 320,
+        margin: 1,
+        color: { dark: '#02131C', light: '#FFFFFF' }
+      });
+    } catch (e) {}
+
+    res.json({
+      success: true,
+      pass: {
+        visitor,
+        visitorCode,
+        visitorName: visitor.visitorName,
+        address: visitor.address,
+        visitDate: visitor.visitDate,
+        visitTime: visitor.visitTime,
+        groupName: visitor.groupName
+      },
+      visitor,
+      visitorCode,
+      qrCodeDataUrl
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to fetch visitor pass.' });
+  }
+});
+
+// Download/Stream Visitor Pass QR Code Image
+router.get('/pass/:code/qr', async (req, res) => {
+  try {
+    const visitor = await visitors.findByCode(req.params.code);
+    if (!visitor) return res.status(404).json({ error: 'Visitor pass not found.' });
+
+    const visitorCode = visitor.visitorCode || visitor.id;
+    const qrPayload = JSON.stringify({ pass: visitorCode, name: visitor.visitorName, id: visitor.id });
+    const png = await QRCode.toBuffer(qrPayload, {
+      width: 380,
+      margin: 1,
+      color: { dark: '#02131C', light: '#FFFFFF' }
+    });
+
+    res.set('Content-Type', 'image/png');
+    res.set('Content-Disposition', `inline; filename="visitor-pass-${visitorCode}.png"`);
+    res.send(png);
+  } catch (err) {
+    res.status(500).json({ error: 'Could not generate pass QR code.' });
+  }
+});
+
+// Public QR code for visitor check-in tag
 router.get('/checkin/qr', async (req, res) => {
   try {
     const rawProto = req.headers['x-forwarded-proto'] || req.protocol;

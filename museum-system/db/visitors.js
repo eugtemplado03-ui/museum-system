@@ -1,8 +1,18 @@
 const mongoose = require('mongoose');
 const { nanoid } = require('nanoid');
 
+function generateVisitorCode() {
+  const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return `MSBN-${code}`;
+}
+
 const visitorSchema = new mongoose.Schema({
   id: { type: String, default: () => nanoid(10), unique: true },
+  visitorCode: { type: String, default: generateVisitorCode, index: true },
   visitorName: { type: String, default: '' },
   groupName: { type: String, default: '' },
   groupType: { type: String, default: 'Walk-in / Individual' },
@@ -84,7 +94,10 @@ async function create(payload) {
   const defaultDate = ph.date;
   const defaultTime = ph.time;
 
+  const code = (payload.visitorCode && payload.visitorCode.trim()) ? payload.visitorCode.trim().toUpperCase() : generateVisitorCode();
+
   const visitor = new Visitor({
+    visitorCode: code,
     visitorName: (payload.visitorName || '').trim(),
     groupName: (payload.groupName || '').trim(),
     groupType: payload.groupType || 'Walk-in / Individual',
@@ -100,6 +113,52 @@ async function create(payload) {
     tourGuide: (payload.tourGuide || '').trim(),
     status: payload.status || 'Checked-in',
     notes: (payload.notes || '').trim()
+  });
+
+  await visitor.save();
+  return visitor.toObject();
+}
+
+async function findByCode(code) {
+  if (!code || typeof code !== 'string') return null;
+  const clean = code.trim().toUpperCase();
+  const raw = code.trim();
+  return await Visitor.findOne({
+    $or: [
+      { visitorCode: clean },
+      { visitorCode: raw },
+      { id: raw }
+    ]
+  }).sort({ createdAt: -1 }).lean();
+}
+
+async function quickCheckin(code) {
+  const existing = await findByCode(code);
+  if (!existing) return null;
+
+  const ph = getPhilippineDateTime();
+  const defaultDate = ph.date;
+  const defaultTime = ph.time;
+
+  const assignedCode = existing.visitorCode || `MSBN-${(existing.id || '').toUpperCase().slice(0, 6)}`;
+
+  const visitor = new Visitor({
+    visitorCode: assignedCode,
+    visitorName: existing.visitorName,
+    groupName: existing.groupName || '',
+    groupType: existing.groupType || 'Walk-in / Individual',
+    pax: 1,
+    contactNumber: existing.contactNumber || '',
+    email: existing.email || '',
+    address: existing.address || '',
+    sex: existing.sex || '',
+    age: existing.age,
+    visitDate: defaultDate,
+    visitTime: defaultTime,
+    purpose: 'General Visit (Returning Visitor)',
+    tourGuide: existing.tourGuide || '',
+    status: 'Checked-in',
+    notes: 'Quick check-in via Visitor Pass'
   });
 
   await visitor.save();
@@ -189,4 +248,4 @@ async function stats() {
   };
 }
 
-module.exports = { all, findById, create, update, remove, stats, Visitor };
+module.exports = { all, findById, findByCode, create, update, remove, stats, quickCheckin, generateVisitorCode, Visitor };

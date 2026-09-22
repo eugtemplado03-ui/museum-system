@@ -416,6 +416,8 @@
     const history = JSON.parse(localStorage.getItem('museum_visitor_history') || '[]');
     const currentName = localStorage.getItem('museum_visitor_name') || 'Visitor';
     const lastVisit = JSON.parse(localStorage.getItem('museum_last_visit') || '{}');
+    const visitorPass = JSON.parse(localStorage.getItem('museum_visitor_pass') || '{}');
+    const passCode = visitorPass.visitorCode || lastVisit.code || '';
 
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
@@ -427,7 +429,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
           <div style="display:flex; align-items:center; gap:8px;">
             <span style="font-size:22px;">📋</span>
-            <h2 style="margin:0; font-size:20px; color:#ffffff;">My Visit History</h2>
+            <h2 style="margin:0; font-size:20px; color:#ffffff;">My Visit History &amp; Pass</h2>
           </div>
           <button type="button" class="modal-close-btn" onclick="document.getElementById('visitorHistoryOverlay').remove()" style="width:32px; height:32px; border-radius:50%; border:1.5px solid rgba(255,255,255,0.3); background:rgba(0,0,0,0.4); color:#fff; font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
         </div>
@@ -441,11 +443,31 @@
             </div>
             <span class="status-badge checked-in" style="font-size:11px; padding:3px 9px;">Active</span>
           </div>
+
+          ${passCode ? `
+            <div style="margin-top:12px; padding:8px 12px; background:rgba(15,23,42,0.65); border:1px dashed #38bdf8; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <span style="font-size:10px; font-weight:800; color:#38bdf8; text-transform:uppercase; letter-spacing:0.5px;">Pass Code:</span>
+                <span style="font-family:monospace; font-weight:800; font-size:15px; color:#ffffff; margin-left:6px;">${passCode}</span>
+              </div>
+              <button type="button" id="btnModalCopyPass" onclick="navigator.clipboard.writeText('${passCode}').then(()=>{ this.textContent='✓ Copied'; setTimeout(()=>{ this.textContent='📋 Copy'; }, 2000); })" style="background:#0284c7; color:#fff; border:none; border-radius:6px; padding:4px 10px; font-size:11px; font-weight:700; cursor:pointer;">
+                📋 Copy
+              </button>
+            </div>
+          ` : ''}
+
           <div style="margin-top:10px; font-size:12px; color:#cbd5e1; display:flex; gap:12px; flex-wrap:wrap;">
             <span>📅 ${lastVisit.date || 'Today'}</span>
             <span>⏰ ${lastVisit.time || 'Checked In'}</span>
             <span>🏛️ Museo Sang Bata sa Negros</span>
           </div>
+
+          ${visitorPass.qrCodeDataUrl ? `
+            <div style="margin-top:12px; text-align:center; background:#ffffff; padding:10px; border-radius:10px;">
+              <img src="${visitorPass.qrCodeDataUrl}" alt="Visitor QR Code" style="width:120px; height:120px; display:block; margin:0 auto;">
+              <span style="font-size:11px; color:#334155; font-weight:700;">Your Fast-Pass QR Code</span>
+            </div>
+          ` : ''}
         </div>
 
         <h3 style="font-size:14px; font-weight:700; color:#cbd5e1; text-transform:uppercase; letter-spacing:0.05em; margin:0 0 10px;">Past Check-ins on this device</h3>
@@ -455,7 +477,9 @@
             <div style="background:rgba(0,42,54,0.75); border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center;">
               <div>
                 <div style="font-weight:700; font-size:13.5px; color:#ffffff;">${(h.visitorName || 'Visitor').replace(/[&<>"']/g, '')}</div>
-                <div style="font-size:11.5px; color:#94a3b8; margin-top:2px;">${h.visitDate || ''} at ${h.visitTime || ''} ${h.groupName ? '· ' + h.groupName.replace(/[&<>"']/g, '') : ''}</div>
+                <div style="font-size:11.5px; color:#94a3b8; margin-top:2px;">
+                  ${h.visitDate || ''} at ${h.visitTime || ''} ${h.visitorCode ? '· <span style="font-family:monospace; color:#38bdf8;">' + h.visitorCode + '</span>' : ''} ${h.groupName ? '· ' + h.groupName.replace(/[&<>"']/g, '') : ''}
+                </div>
               </div>
               <span style="font-size:11px; color:#5eead4; background:rgba(0,174,189,0.18); padding:2px 8px; border-radius:999px; font-weight:600;">Visit #${history.length - i}</span>
             </div>
@@ -467,7 +491,7 @@
         </div>
 
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; border-top:1px solid rgba(255,255,255,0.12); padding-top:14px;">
-          <a href="/checkin.html" class="btn btn-ghost dark btn-small" style="font-size:12px;">+ Check In Again</a>
+          <a href="/checkin.html?tab=returning" class="btn btn-ghost dark btn-small" style="font-size:12px;">⚡ Express Check In</a>
           <button type="button" class="btn btn-primary btn-small" onclick="document.getElementById('visitorHistoryOverlay').remove()">Done</button>
         </div>
       </div>

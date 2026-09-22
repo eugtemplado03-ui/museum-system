@@ -10,6 +10,7 @@
     href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css?v=50">
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
     :root {
       --navy: #0f172a;
@@ -1254,6 +1255,268 @@
       color: var(--blue-primary);
     }
 
+    /* ── Digital Visitor Pass Card Styles (Usercard) ───────────────── */
+    .visitor-pass-card {
+      background: linear-gradient(145deg, #021b29 0%, #032c42 50%, #01131c 100%);
+      border: 2px solid #00f0ff;
+      box-shadow: 0 12px 40px rgba(0, 240, 255, 0.22), 0 4px 16px rgba(0, 0, 0, 0.6);
+      border-radius: 20px;
+      padding: 24px 20px;
+      color: #ffffff;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      margin: 18px 0 20px;
+    }
+
+    .visitor-pass-card::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      left: -40%;
+      width: 180%;
+      height: 180%;
+      background: radial-gradient(circle at center, rgba(0, 240, 255, 0.07) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .pass-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.25);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    .pass-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-align: left;
+    }
+
+    .pass-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #00f0ff, #0284c7);
+      color: #02131c;
+      font-weight: 900;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .pass-brand-title {
+      font-size: 13px;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.2;
+      font-family: 'Nunito', sans-serif;
+    }
+
+    .pass-brand-sub {
+      font-size: 10px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .pass-status-pill {
+      background: rgba(34, 197, 94, 0.2);
+      border: 1px solid #22c55e;
+      color: #4ade80;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .pass-visitor-name {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 900;
+      font-size: 24px;
+      color: #ffffff;
+      margin: 10px 0 6px;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .pass-code-container {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1.5px dashed rgba(0, 240, 255, 0.6);
+      padding: 6px 14px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+
+    .pass-code-text {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 800;
+      font-size: 18px;
+      color: #00f0ff;
+      letter-spacing: 2px;
+    }
+
+    .pass-copy-btn {
+      background: rgba(0, 240, 255, 0.2);
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      color: #ffffff;
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .pass-copy-btn:hover {
+      background: #00f0ff;
+      color: #02131c;
+    }
+
+    .pass-qr-box {
+      width: 170px;
+      height: 170px;
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 8px;
+      margin: 0 auto 16px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pass-qr-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .pass-meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 10px;
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 12px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .pass-meta-label {
+      color: #94a3b8;
+      display: block;
+      font-size: 10px;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .pass-meta-val {
+      font-weight: 700;
+      color: #f1f5f9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+    }
+
+    .pass-tip {
+      font-size: 12px;
+      color: #bae6fd;
+      line-height: 1.5;
+      background: rgba(2, 132, 199, 0.2);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 10px 14px;
+      border-radius: 10px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      text-align: left;
+    }
+
+    .btn-pass-download {
+      background: linear-gradient(135deg, #00f0ff, #0284c7);
+      color: #02131c;
+      font-weight: 900;
+      font-size: 13.5px;
+      padding: 11px 18px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(0, 240, 255, 0.3);
+      transition: all 0.15s ease;
+      font-family: 'Nunito', sans-serif;
+    }
+
+    .btn-pass-download:hover {
+      background: linear-gradient(135deg, #5eead4, #38bdf8);
+      transform: translateY(-1px);
+    }
+
+    .btn-pass-print {
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 13.5px;
+      padding: 11px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+      font-family: 'Nunito', sans-serif;
+    }
+
+    .btn-pass-print:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-1px);
+    }
+
+    /* ── Returning Visitor & QR Scanner Styles ─────────────────────── */
+    .btn-scanner-option {
+      background: #ffffff;
+      border: 1.5px solid var(--blue-box-border-strong);
+      color: var(--text-black);
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 13.5px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+
+    .btn-scanner-option:hover {
+      background: var(--blue-light);
+      border-color: var(--blue-primary);
+      color: var(--blue-primary);
+      transform: translateY(-1px);
+    }
+
     /* ── Footer (Compact Navy Background, All Pure White Text) ─────── */
     #siteFooter,
     #siteFooter *,
@@ -2093,23 +2356,25 @@
           <!-- Portal Tabs -->
           <div class="portal-tabs" role="tablist">
             <button type="button" class="portal-tab-btn active" id="tabVisitorBtn" role="tab" aria-selected="true">
-              <span>🎫</span> Visitor Access
+              <span>📝</span> First-Time Visitor
+            </button>
+            <button type="button" class="portal-tab-btn" id="tabReturningBtn" role="tab" aria-selected="false">
+              <span>⚡</span> Returning / QR Fast Pass
             </button>
             <button type="button" class="portal-tab-btn" id="tabAdminBtn" role="tab" aria-selected="false">
               <span>🔐</span> Staff Sign-In
             </button>
           </div>
 
-          <!-- 1. Visitor Check-in Form Tab -->
+          <!-- 1. First-Time Visitor Check-in Form Tab -->
           <div class="portal-tab-body" id="visitorTabContent">
             <div
               style="text-align:center; margin-bottom:20px; padding-bottom:12px; border-bottom:1.5px solid var(--blue-box-border);">
               <div style="font-size:32px; margin-bottom:4px;">🏛️</div>
               <h2
                 style="font-family:'Nunito',sans-serif; font-weight:800; font-size:21px; color:var(--text-black); margin:0 0 4px;">
-                Visitor Check-in</h2>
-              <p style="margin:0; font-size:13px; color:var(--text-muted);">Please log your visit to unlock full museum
-                access and interactive exhibits</p>
+                First-Time Visitor Check-in</h2>
+              <p style="margin:0; font-size:13px; color:var(--text-muted);">Please log your visit to receive your permanent Visitor Pass Card &amp; QR Code</p>
             </div>
 
             <form id="checkinForm" novalidate>
@@ -2165,12 +2430,79 @@
               </div>
 
               <button type="submit" class="btn-submit" id="submitBtn">
-                <span>Check In &amp; Enter Museum</span> <span>&rarr;</span>
+                <span>Check In &amp; Get Visitor Pass Card</span> <span>&rarr;</span>
               </button>
             </form>
           </div>
 
-          <!-- 2. Staff Admin Sign-In Tab -->
+          <!-- 2. Returning Visitor / Fast Pass Tab -->
+          <div class="portal-tab-body" id="returningTabContent" style="display:none;">
+            <div
+              style="text-align:center; margin-bottom:20px; padding-bottom:12px; border-bottom:1.5px solid var(--blue-box-border);">
+              <div style="font-size:32px; margin-bottom:4px;">⚡</div>
+              <h2
+                style="font-family:'Nunito',sans-serif; font-weight:800; font-size:21px; color:var(--text-black); margin:0 0 4px;">
+                Express Re-Check In</h2>
+              <p style="margin:0; font-size:13px; color:var(--text-muted);">Already visited before? Use your saved pass, code, or scan your QR to enter instantly without filling out forms!</p>
+            </div>
+
+            <!-- Saved Pass on this Device Box -->
+            <div id="savedPassPromptBox" style="display:none; background:linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border:1.5px solid #93c5fd; border-radius:14px; padding:16px; margin-bottom:20px; box-shadow:0 4px 12px rgba(13, 89, 137, 0.08);">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;">
+                <span style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; background:var(--blue-primary); color:#ffffff; padding:3px 8px; border-radius:6px;">Found Saved Pass</span>
+                <span id="savedPassCodeBadge" style="font-family:monospace; font-weight:800; font-size:13px; color:var(--blue-dark);">MSBN-XXXXXX</span>
+              </div>
+              <div style="font-size:16px; font-weight:800; color:var(--text-black); margin-bottom:4px;" id="savedPassNameDisplay">Visitor Name</div>
+              <div style="font-size:12px; color:var(--text-dark); margin-bottom:14px;">Your details are already saved on this device. Click below to check in instantly!</div>
+              <button type="button" class="btn-submit" id="btnSavedPassOneClick" style="margin:0; background:linear-gradient(135deg, #0d5989, #053b5e); font-size:14px; padding:12px 18px;">
+                <span>⚡ 1-Click Fast Check-in</span> <span>&rarr;</span>
+              </button>
+            </div>
+
+            <div class="error-message" id="returningErrorMessage"></div>
+
+            <!-- Option A: Enter Visitor Pass Code -->
+            <form id="fastPassForm" novalidate style="margin-bottom:20px;">
+              <div class="form-group" style="margin-bottom:12px;">
+                <label for="visitorPassCodeInput" style="font-weight:700;">Enter Visitor Pass Code</label>
+                <div style="display:flex; gap:8px;">
+                  <input type="text" id="visitorPassCodeInput" name="visitorPassCode" placeholder="e.g. MSBN-8K2P9Q" style="text-transform:uppercase; font-family:monospace; font-size:15px; font-weight:700; letter-spacing:1px;" autocomplete="off" required>
+                  <button type="submit" class="btn-submit" id="btnFastPassSubmit" style="width:auto; padding:0 18px; flex-shrink:0;">
+                    <span>Verify &rarr;</span>
+                  </button>
+                </div>
+                <div style="font-size:11.5px; color:var(--text-muted); margin-top:4px;">Check your printed or downloaded Digital Pass Card for this 6-character code.</div>
+              </div>
+            </form>
+
+            <div style="position:relative; text-align:center; margin:20px 0; border-top:1px dashed #cbd5e1;">
+              <span style="position:relative; top:-10px; background:#ffffff; padding:0 12px; font-size:12px; font-weight:700; color:#64748b; text-transform:uppercase;">or scan your QR pass</span>
+            </div>
+
+            <!-- Option B: QR Code Scanner -->
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <button type="button" class="btn-scanner-option" id="btnStartQrCamera">
+                  <span style="font-size:18px;">📷</span> Scan with Camera
+                </button>
+                <button type="button" class="btn-scanner-option" id="btnUploadQrImage" onclick="document.getElementById('qrFileInput').click()">
+                  <span style="font-size:18px;">🖼️</span> Upload QR Image
+                </button>
+              </div>
+              <input type="file" id="qrFileInput" accept="image/*" style="display:none;">
+
+              <!-- Camera QR Scanner Container -->
+              <div id="qrReaderContainer" style="display:none; margin-top:10px; border-radius:12px; overflow:hidden; border:2px solid var(--blue-primary); background:#000000; position:relative;">
+                <div id="qrReader" style="width:100%;"></div>
+                <div style="padding:8px 12px; background:#0f172a; display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:12px; color:#ffffff;">Point camera at your Museum Pass QR</span>
+                  <button type="button" id="btnStopQrCamera" style="background:#ef4444; color:#ffffff; border:none; border-radius:6px; padding:4px 10px; font-size:12px; font-weight:700; cursor:pointer;">Stop Camera</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Staff Admin Sign-In Tab -->
           <div class="portal-tab-body" id="adminTabContent" style="display:none;">
             <div
               style="text-align:center; margin-bottom:20px; padding-bottom:12px; border-bottom:1.5px solid var(--blue-box-border);">
@@ -2206,9 +2538,77 @@
 
         <!-- Success Card (Hidden by default, displayed after successful check-in) -->
         <div class="success-message" id="successMessage" style="margin-top:20px;">
-          <div class="icon">✅</div>
-          <h2>Check-in Verified!</h2>
-          <p id="successDetails">Thank you for visiting Museo Sang Bata sa Negros. Your visit has been logged.</p>
+          <div class="icon" style="margin-bottom:8px;">✅</div>
+          <h2 style="margin-bottom:4px;">Check-in Verified!</h2>
+          <p id="successDetails" style="margin-bottom:20px;">Thank you for visiting Museo Sang Bata sa Negros. Your visit has been logged.</p>
+
+          <!-- Digital Visitor Pass Card -->
+          <div class="visitor-pass-card" id="digitalPassCard" style="display:none; text-align:left;">
+            <div class="pass-header">
+              <div class="pass-brand">
+                <div class="pass-brand-icon">🏛️</div>
+                <div class="pass-brand-text">
+                  <h3>Museo Sang Bata sa Negros</h3>
+                  <p>Sagay City, Negros Occidental • Official Digital Pass</p>
+                </div>
+              </div>
+              <span class="pass-status-pill">Active Visit</span>
+            </div>
+
+            <div class="pass-visitor-name" id="passVisitorName">Visitor Name</div>
+            <div style="font-size:12.5px; color:#64748b; margin-top:-6px; margin-bottom:14px;" id="passVisitorSubinfo">Sagay City, Negros Occidental</div>
+
+            <!-- Pass Code Display -->
+            <div class="pass-code-container">
+              <div>
+                <span class="pass-code-label">Permanent Visitor Pass Code</span>
+                <span class="pass-code-text" id="passCodeDisplay">MSBN-XXXXXX</span>
+              </div>
+              <button type="button" class="pass-copy-btn" id="btnCopyPassCode" title="Copy code to clipboard">
+                📋 Copy Code
+              </button>
+            </div>
+
+            <!-- QR Box -->
+            <div class="pass-qr-box">
+              <img id="passQrImage" src="" alt="Visitor Pass QR Code" style="width:160px; height:160px; border-radius:8px; display:block; margin:0 auto; background:#ffffff;">
+              <div style="font-size:11.5px; color:#475569; margin-top:8px; font-weight:600; text-align:center;">Scan this QR pass at any entrance terminal to re-enter instantly</div>
+            </div>
+
+            <div class="pass-meta-grid">
+              <div class="pass-meta-item">
+                <span class="label">Date of Visit</span>
+                <span class="val" id="passVisitDate">--</span>
+              </div>
+              <div class="pass-meta-item">
+                <span class="label">Time Logged</span>
+                <span class="val" id="passVisitTime">--</span>
+              </div>
+              <div class="pass-meta-item">
+                <span class="label">Group / School</span>
+                <span class="val" id="passGroupName">Individual</span>
+              </div>
+              <div class="pass-meta-item">
+                <span class="label">Access Level</span>
+                <span class="val" style="color:var(--blue-primary); font-weight:700;">Full Museum</span>
+              </div>
+            </div>
+
+            <div class="pass-tip">
+              💡 <strong>Next Visit Tip:</strong> Keep this card or take a screenshot! Next time you visit, simply enter this code or scan the QR code to check in in 1 second without filling out forms again.
+            </div>
+
+            <!-- Pass Card Actions -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px;">
+              <button type="button" class="btn-pass-download" id="btnDownloadPassCard">
+                💾 Download Card (PNG)
+              </button>
+              <button type="button" class="btn-pass-print" id="btnPrintPassCard">
+                🖨️ Print Pass Card
+              </button>
+            </div>
+          </div>
+
           <div style="display:flex; flex-direction:column; gap:12px; width:100%; margin-top:24px;">
             <a class="btn-submit" id="continueToDestBtn" href="/dashboard.html" style="text-decoration:none;">
               <span>Explore Museum Exhibits &amp; Floor Map</span> <span>&rarr;</span>
@@ -2542,26 +2942,71 @@
 
     // Portal Tabs
     const tabVisitorBtn = document.getElementById('tabVisitorBtn');
+    const tabReturningBtn = document.getElementById('tabReturningBtn');
     const tabAdminBtn = document.getElementById('tabAdminBtn');
     const visitorTabContent = document.getElementById('visitorTabContent');
+    const returningTabContent = document.getElementById('returningTabContent');
     const adminTabContent = document.getElementById('adminTabContent');
 
+    function checkSavedPassOnDevice() {
+      try {
+        const savedRaw = localStorage.getItem('museum_visitor_pass');
+        if (savedRaw) {
+          const pass = JSON.parse(savedRaw);
+          if (pass && pass.visitorCode) {
+            const box = document.getElementById('savedPassPromptBox');
+            const nameEl = document.getElementById('savedPassNameDisplay');
+            const codeEl = document.getElementById('savedPassCodeBadge');
+            if (box && nameEl && codeEl) {
+              nameEl.textContent = pass.visitorName || 'Returning Visitor';
+              codeEl.textContent = pass.visitorCode;
+              box.style.display = 'block';
+            }
+          }
+        }
+      } catch (e) {}
+    }
+
     function switchTab(tab) {
+      stopQrScanner();
+
       if (tab === 'admin') {
         tabAdminBtn.classList.add('active');
         tabAdminBtn.setAttribute('aria-selected', 'true');
         tabVisitorBtn.classList.remove('active');
         tabVisitorBtn.setAttribute('aria-selected', 'false');
+        tabReturningBtn.classList.remove('active');
+        tabReturningBtn.setAttribute('aria-selected', 'false');
+
         visitorTabContent.style.display = 'none';
+        returningTabContent.style.display = 'none';
         adminTabContent.style.display = 'block';
         const uInput = document.getElementById('adminUsername');
         if (uInput) uInput.focus();
+      } else if (tab === 'returning') {
+        tabReturningBtn.classList.add('active');
+        tabReturningBtn.setAttribute('aria-selected', 'true');
+        tabVisitorBtn.classList.remove('active');
+        tabVisitorBtn.setAttribute('aria-selected', 'false');
+        tabAdminBtn.classList.remove('active');
+        tabAdminBtn.setAttribute('aria-selected', 'false');
+
+        visitorTabContent.style.display = 'none';
+        adminTabContent.style.display = 'none';
+        returningTabContent.style.display = 'block';
+        checkSavedPassOnDevice();
+        const cInput = document.getElementById('visitorPassCodeInput');
+        if (cInput) cInput.focus();
       } else {
         tabVisitorBtn.classList.add('active');
         tabVisitorBtn.setAttribute('aria-selected', 'true');
+        tabReturningBtn.classList.remove('active');
+        tabReturningBtn.setAttribute('aria-selected', 'false');
         tabAdminBtn.classList.remove('active');
         tabAdminBtn.setAttribute('aria-selected', 'false');
+
         adminTabContent.style.display = 'none';
+        returningTabContent.style.display = 'none';
         visitorTabContent.style.display = 'block';
         const vInput = document.getElementById('visitorName');
         if (vInput) vInput.focus();
@@ -2569,6 +3014,7 @@
     }
 
     tabVisitorBtn.addEventListener('click', () => switchTab('visitor'));
+    tabReturningBtn.addEventListener('click', () => switchTab('returning'));
     tabAdminBtn.addEventListener('click', () => switchTab('admin'));
 
     if (urlParams.get('action') === 'signup' || urlParams.get('signup') === '1') {
@@ -2584,9 +3030,534 @@
       }
     } else if (initialTab === 'admin') {
       switchTab('admin');
+    } else if (initialTab === 'returning') {
+      switchTab('returning');
     }
 
-    // 1. Visitor Check-in Submission
+    // ── Digital Pass State & Local Storage ──────────────────────────
+    let currentPassData = null;
+
+    function saveVisitorPassLocally(visitor, visitorCode, qrCodeDataUrl) {
+      try {
+        const pass = {
+          visitorCode: visitorCode || visitor.visitorCode,
+          visitorName: visitor.visitorName,
+          address: visitor.address,
+          sex: visitor.sex,
+          age: visitor.age,
+          contactNumber: visitor.contactNumber,
+          email: visitor.email,
+          groupName: visitor.groupName,
+          qrCodeDataUrl: qrCodeDataUrl || visitor.qrCodeDataUrl,
+          lastVisitDate: visitor.visitDate,
+          lastVisitTime: visitor.visitTime
+        };
+        localStorage.setItem('museum_visitor_pass', JSON.stringify(pass));
+      } catch (e) {}
+    }
+
+    function renderDigitalVisitorPass(v, visitorCode, qrCodeDataUrl) {
+      currentPassData = {
+        visitorCode: visitorCode || v.visitorCode,
+        visitorName: v.visitorName,
+        address: v.address,
+        visitDate: v.visitDate,
+        visitTime: v.visitTime,
+        groupName: v.groupName,
+        sex: v.sex,
+        age: v.age,
+        qrCodeDataUrl: qrCodeDataUrl || v.qrCodeDataUrl
+      };
+
+      const digitalPassCard = document.getElementById('digitalPassCard');
+      const passVisitorName = document.getElementById('passVisitorName');
+      const passVisitorSubinfo = document.getElementById('passVisitorSubinfo');
+      const passCodeDisplay = document.getElementById('passCodeDisplay');
+      const passQrImage = document.getElementById('passQrImage');
+      const passVisitDate = document.getElementById('passVisitDate');
+      const passVisitTime = document.getElementById('passVisitTime');
+      const passGroupName = document.getElementById('passGroupName');
+
+      if (passVisitorName) passVisitorName.textContent = currentPassData.visitorName || 'Valued Visitor';
+      if (passVisitorSubinfo) {
+        const parts = [];
+        if (currentPassData.age) parts.push(`Age ${currentPassData.age}`);
+        if (currentPassData.sex) parts.push(currentPassData.sex);
+        if (currentPassData.address) parts.push(currentPassData.address);
+        passVisitorSubinfo.textContent = parts.join(' • ') || 'Sagay City, Negros Occidental';
+      }
+      if (passCodeDisplay) passCodeDisplay.textContent = currentPassData.visitorCode || 'MSBN-PASS';
+      if (passVisitDate) passVisitDate.textContent = currentPassData.visitDate || new Date().toISOString().slice(0, 10);
+      if (passVisitTime) passVisitTime.textContent = currentPassData.visitTime || new Date().toTimeString().slice(0, 5);
+      if (passGroupName) passGroupName.textContent = currentPassData.groupName || 'Individual';
+
+      if (passQrImage && currentPassData.qrCodeDataUrl) {
+        passQrImage.src = currentPassData.qrCodeDataUrl;
+      }
+
+      if (digitalPassCard) {
+        digitalPassCard.style.display = 'block';
+      }
+    }
+
+    // ── Quick Re-Checkin Handler ──────────────────────────────────
+    async function executeQuickCheckin(codeOrData, triggerBtn) {
+      const errorEl = document.getElementById('returningErrorMessage');
+      if (errorEl) errorEl.classList.remove('visible');
+
+      const originalBtnHtml = triggerBtn ? triggerBtn.innerHTML : '';
+      if (triggerBtn) {
+        triggerBtn.disabled = true;
+        triggerBtn.innerHTML = '<span>Verifying Pass...</span>';
+      }
+
+      try {
+        const res = await fetch('/api/visitors/quick-checkin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ visitorCode: codeOrData })
+        });
+
+        let data = null;
+        try {
+          data = await res.json();
+        } catch (pe) {
+          throw new Error('Server connection error. Please try again in a moment.');
+        }
+
+        if (!res.ok) {
+          throw new Error((data && data.error) || 'Invalid visitor pass code or QR code.');
+        }
+
+        const v = (data && data.visitor) || {};
+        const visitorCode = data.visitorCode || v.visitorCode || codeOrData;
+        const qrCodeDataUrl = data.qrCodeDataUrl || v.qrCodeDataUrl;
+        const visitorName = v.visitorName || 'Valued Visitor';
+
+        Gate.setVisitorCheckedIn(visitorName);
+        saveVisitorPassLocally(v, visitorCode, qrCodeDataUrl);
+
+        // Store in personal visitor check-in history
+        try {
+          const hist = JSON.parse(localStorage.getItem('museum_visitor_history') || '[]');
+          hist.unshift({
+            id: v.id || ('v-' + Date.now()),
+            visitorName: visitorName,
+            visitorCode: visitorCode,
+            visitDate: v.visitDate || new Date().toISOString().slice(0, 10),
+            visitTime: v.visitTime || new Date().toTimeString().slice(0, 5),
+            address: v.address,
+            groupName: v.groupName,
+            status: v.status || 'Checked-in'
+          });
+          localStorage.setItem('museum_visitor_history', JSON.stringify(hist.slice(0, 20)));
+          localStorage.setItem('museum_last_visit', JSON.stringify({
+            id: v.id,
+            name: visitorName,
+            code: visitorCode,
+            date: v.visitDate,
+            time: v.visitTime
+          }));
+        } catch (e) {}
+
+        const finalDestination = directTargetUrl || redirectUrl;
+        if (finalDestination && (typeof Gate === 'undefined' || !Gate.isGatePage(finalDestination))) {
+          if (triggerBtn) triggerBtn.innerHTML = '<span>Verified! Opening exhibit...</span>';
+          setTimeout(() => {
+            window.location.replace(finalDestination);
+          }, 350);
+          return;
+        }
+
+        document.querySelector('.portal-card').style.display = 'none';
+        const directNoticeEl = document.getElementById('directUnlockNotice');
+        if (directNoticeEl) directNoticeEl.style.display = 'none';
+
+        successDetails.innerHTML = `Welcome back, <strong>${escapeHtml(visitorName)}</strong>! Your return visit on <strong>${escapeHtml(v.visitDate || '')} at ${escapeHtml(v.visitTime || '')}</strong> has been logged. Your saved information was used automatically.`;
+        if (continueToDestBtn) {
+          continueToDestBtn.href = '/dashboard.html';
+          continueToDestBtn.innerHTML = '<span>Explore Museum Exhibits &rarr;</span>';
+        }
+
+        renderDigitalVisitorPass(v, visitorCode, qrCodeDataUrl);
+        successMessage.classList.add('visible');
+
+      } catch (err) {
+        if (errorEl) {
+          errorEl.textContent = err.message;
+          errorEl.classList.add('visible');
+        } else {
+          alert(err.message);
+        }
+      } finally {
+        if (triggerBtn) {
+          triggerBtn.disabled = false;
+          triggerBtn.innerHTML = originalBtnHtml;
+        }
+      }
+    }
+
+    // 1-Click Saved Pass button
+    const btnSavedPassOneClick = document.getElementById('btnSavedPassOneClick');
+    btnSavedPassOneClick?.addEventListener('click', () => {
+      try {
+        const pass = JSON.parse(localStorage.getItem('museum_visitor_pass') || '{}');
+        if (pass.visitorCode) {
+          executeQuickCheckin(pass.visitorCode, btnSavedPassOneClick);
+        } else {
+          throw new Error('No saved pass found on this device.');
+        }
+      } catch (e) {
+        const errorEl = document.getElementById('returningErrorMessage');
+        if (errorEl) {
+          errorEl.textContent = e.message;
+          errorEl.classList.add('visible');
+        }
+      }
+    });
+
+    // Fast Pass Code Input Form
+    const fastPassForm = document.getElementById('fastPassForm');
+    const visitorPassCodeInput = document.getElementById('visitorPassCodeInput');
+    const btnFastPassSubmit = document.getElementById('btnFastPassSubmit');
+
+    fastPassForm?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const code = (visitorPassCodeInput ? visitorPassCodeInput.value : '').trim().toUpperCase();
+      if (!code) {
+        const errorEl = document.getElementById('returningErrorMessage');
+        if (errorEl) {
+          errorEl.textContent = 'Please enter your 6-character Visitor Pass Code (e.g. MSBN-8K2P9Q).';
+          errorEl.classList.add('visible');
+        }
+        return;
+      }
+      executeQuickCheckin(code, btnFastPassSubmit);
+    });
+
+    // QR Code Scanner Logic
+    let html5QrCodeScanner = null;
+    const btnStartQrCamera = document.getElementById('btnStartQrCamera');
+    const btnStopQrCamera = document.getElementById('btnStopQrCamera');
+    const qrReaderContainer = document.getElementById('qrReaderContainer');
+    const qrFileInput = document.getElementById('qrFileInput');
+
+    function stopQrScanner() {
+      if (html5QrCodeScanner) {
+        html5QrCodeScanner.stop().catch(() => {}).finally(() => {
+          html5QrCodeScanner = null;
+          if (qrReaderContainer) qrReaderContainer.style.display = 'none';
+        });
+      } else if (qrReaderContainer) {
+        qrReaderContainer.style.display = 'none';
+      }
+    }
+
+    btnStopQrCamera?.addEventListener('click', stopQrScanner);
+
+    btnStartQrCamera?.addEventListener('click', async () => {
+      if (typeof Html5Qrcode === 'undefined') {
+        alert('QR code scanner library is loading. Please check your network connection or enter your code manually.');
+        return;
+      }
+
+      const errorEl = document.getElementById('returningErrorMessage');
+      if (errorEl) errorEl.classList.remove('visible');
+
+      if (qrReaderContainer) qrReaderContainer.style.display = 'block';
+
+      try {
+        if (!html5QrCodeScanner) {
+          html5QrCodeScanner = new Html5Qrcode("qrReader");
+        }
+        await html5QrCodeScanner.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: { width: 250, height: 250 } },
+          (decodedText) => {
+            stopQrScanner();
+            executeQuickCheckin(decodedText, btnStartQrCamera);
+          },
+          () => {}
+        );
+      } catch (err) {
+        if (qrReaderContainer) qrReaderContainer.style.display = 'none';
+        if (errorEl) {
+          errorEl.textContent = 'Unable to access camera: ' + (err.message || err) + '. Please check browser camera permissions or upload an image file of your QR pass.';
+          errorEl.classList.add('visible');
+        }
+      }
+    });
+
+    qrFileInput?.addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const errorEl = document.getElementById('returningErrorMessage');
+      if (errorEl) errorEl.classList.remove('visible');
+
+      if (typeof Html5Qrcode === 'undefined') {
+        alert('QR scanner library is loading. Please try again.');
+        return;
+      }
+
+      try {
+        const html5QrCode = new Html5Qrcode("qrReader");
+        const decodedText = await html5QrCode.scanFile(file, true);
+        executeQuickCheckin(decodedText, null);
+      } catch (err) {
+        if (errorEl) {
+          errorEl.textContent = 'Could not detect a valid museum QR code in the uploaded image. Please ensure the QR is clear and well-lit, or enter your visitor pass code manually.';
+          errorEl.classList.add('visible');
+        }
+      } finally {
+        qrFileInput.value = '';
+      }
+    });
+
+    // Copy Pass Code button
+    const btnCopyPassCode = document.getElementById('btnCopyPassCode');
+    btnCopyPassCode?.addEventListener('click', () => {
+      const code = currentPassData && currentPassData.visitorCode;
+      if (!code) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(() => {
+          btnCopyPassCode.textContent = '✓ Copied!';
+          setTimeout(() => { btnCopyPassCode.textContent = '📋 Copy Code'; }, 2000);
+        }).catch(() => fallbackCopy(code));
+      } else {
+        fallbackCopy(code);
+      }
+    });
+
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        if (btnCopyPassCode) {
+          btnCopyPassCode.textContent = '✓ Copied!';
+          setTimeout(() => { btnCopyPassCode.textContent = '📋 Copy Code'; }, 2000);
+        }
+      } catch (e) {}
+      document.body.removeChild(ta);
+    }
+
+    // Print Pass Card
+    const btnPrintPassCard = document.getElementById('btnPrintPassCard');
+    btnPrintPassCard?.addEventListener('click', () => {
+      if (!currentPassData) return;
+      const win = window.open('', '_blank', 'width=620,height=760');
+      if (!win) {
+        window.print();
+        return;
+      }
+      win.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Museum Visitor Pass - ${escapeHtml(currentPassData.visitorCode || '')}</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 20px; background: #ffffff; color: #0f172a; text-align: center; }
+            .card { max-width: 480px; margin: 0 auto; border: 2px solid #0d5989; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+            .brand { font-size: 20px; font-weight: 800; color: #0d5989; margin-bottom: 2px; }
+            .sub { font-size: 11px; color: #64748b; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; }
+            .name { font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+            .addr { font-size: 13px; color: #475569; margin-bottom: 14px; }
+            .code-box { background: #f0f9ff; border: 1.5px dashed #0284c7; border-radius: 10px; padding: 12px; margin: 16px 0; }
+            .code-label { font-size: 11px; font-weight: 700; color: #0369a1; text-transform: uppercase; letter-spacing: 0.5px; }
+            .code-val { font-family: monospace; font-size: 26px; font-weight: 900; color: #0c4a6e; letter-spacing: 2px; display: block; margin-top: 4px; }
+            .qr-img { width: 180px; height: 180px; margin: 12px auto; display: block; border: 1px solid #e2e8f0; border-radius: 8px; }
+            .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: left; background: #f8fafc; padding: 12px; border-radius: 8px; font-size: 12px; margin-top: 14px; }
+            .meta div strong { color: #334155; }
+            .tip { font-size: 11.5px; color: #64748b; margin-top: 14px; line-height: 1.4; border-top: 1px solid #e2e8f0; padding-top: 10px; }
+            @media print { body { margin: 0; } .card { border: 2px solid #000; box-shadow: none; } }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <div class="brand">🏛️ Museo Sang Bata sa Negros</div>
+            <div class="sub">Sagay City, Negros Occidental • Official Digital Visitor Pass</div>
+            <div class="name">${escapeHtml(currentPassData.visitorName || 'Valued Visitor')}</div>
+            <div class="addr">${escapeHtml(currentPassData.address || '')}</div>
+            <div class="code-box">
+              <div class="code-label">Permanent Visitor Pass Code</div>
+              <span class="code-val">${escapeHtml(currentPassData.visitorCode || '')}</span>
+            </div>
+            ${currentPassData.qrCodeDataUrl ? `<img src="${currentPassData.qrCodeDataUrl}" class="qr-img" alt="QR Pass">` : ''}
+            <div class="meta">
+              <div><strong>Visit Date:</strong> ${escapeHtml(currentPassData.visitDate || '')}</div>
+              <div><strong>Time:</strong> ${escapeHtml(currentPassData.visitTime || '')}</div>
+              <div><strong>Group / Org:</strong> ${escapeHtml(currentPassData.groupName || 'Individual')}</div>
+              <div><strong>Access:</strong> Full Museum</div>
+            </div>
+            <div class="tip">Show this card or QR code on your next visit to Museo Sang Bata sa Negros to check in instantly without filling out forms again.</div>
+          </div>
+          <script>
+            window.onload = function() { setTimeout(function() { window.print(); }, 250); };
+          <\/script>
+        </body>
+        </html>
+      `);
+      win.document.close();
+    });
+
+    // Download Pass Card as High-Res PNG
+    const btnDownloadPassCard = document.getElementById('btnDownloadPassCard');
+    btnDownloadPassCard?.addEventListener('click', () => {
+      if (!currentPassData) return;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 750;
+      canvas.height = 920;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      // Card Background Gradient
+      const grad = ctx.createLinearGradient(0, 0, 0, 920);
+      grad.addColorStop(0, '#0d5989');
+      grad.addColorStop(1, '#052a44');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(0, 0, 750, 920, 24);
+      } else {
+        ctx.rect(0, 0, 750, 920);
+      }
+      ctx.fill();
+
+      // Top Accent Header
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.fillRect(0, 0, 750, 110);
+
+      // Gold Brand Line
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(0, 110, 750, 4);
+
+      // Header Brand text
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 26px -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('🏛️ MUSEO SANG BATA SA NEGROS', 375, 55);
+
+      ctx.fillStyle = '#bae6fd';
+      ctx.font = '600 13px -apple-system, sans-serif';
+      ctx.fillText('SAGAY CITY, NEGROS OCCIDENTAL • OFFICIAL VISITOR PASS', 375, 85);
+
+      // Visitor Name
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 34px -apple-system, sans-serif';
+      ctx.fillText(currentPassData.visitorName || 'Valued Visitor', 375, 175);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '15px -apple-system, sans-serif';
+      const subParts = [];
+      if (currentPassData.age) subParts.push(`Age ${currentPassData.age}`);
+      if (currentPassData.sex) subParts.push(currentPassData.sex);
+      if (currentPassData.address) subParts.push(currentPassData.address);
+      ctx.fillText(subParts.join(' • ') || 'Negros Occidental, Philippines', 375, 205);
+
+      // Code Box
+      ctx.fillStyle = '#0f172a';
+      if (ctx.roundRect) {
+        ctx.beginPath();
+        ctx.roundRect(75, 235, 600, 85, 14);
+        ctx.fill();
+      } else {
+        ctx.fillRect(75, 235, 600, 85);
+      }
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 12px -apple-system, sans-serif';
+      ctx.fillText('PERMANENT VISITOR PASS CODE', 375, 262);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 36px monospace';
+      ctx.fillText(currentPassData.visitorCode || 'MSBN-PASS', 375, 302);
+
+      function finishCanvasDownload() {
+        const a = document.createElement('a');
+        a.download = `MSBN-Visitor-Pass-${currentPassData.visitorCode || 'Pass'}.png`;
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+      }
+
+      function drawMetaAndFooter() {
+        // QR Subtext
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '13px -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Scan this QR code at any museum terminal for instant re-entry', 375, 595);
+
+        // Meta Grid Box
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.07)';
+        if (ctx.roundRect) {
+          ctx.beginPath();
+          ctx.roundRect(75, 620, 600, 150, 14);
+          ctx.fill();
+        } else {
+          ctx.fillRect(75, 620, 600, 150);
+        }
+
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '12px -apple-system, sans-serif';
+        ctx.fillText('DATE OF VISIT', 110, 655);
+        ctx.fillText('TIME LOGGED', 400, 655);
+        ctx.fillText('GROUP / ORGANIZATION', 110, 715);
+        ctx.fillText('ACCESS LEVEL', 400, 715);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 16px -apple-system, sans-serif';
+        ctx.fillText(currentPassData.visitDate || '--', 110, 680);
+        ctx.fillText(currentPassData.visitTime || '--', 400, 680);
+        ctx.fillText(currentPassData.groupName || 'Individual', 110, 740);
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillText('Full Museum Access', 400, 740);
+
+        // Footer note
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = 'bold 13px -apple-system, sans-serif';
+        ctx.fillText('💡 Keep this pass on your phone! No need to fill out forms on your next visit.', 375, 810);
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '12px -apple-system, sans-serif';
+        ctx.fillText('Sagay Marine Reserve • www.museosangbata.org • Tel: +63 917 798 7420', 375, 870);
+
+        finishCanvasDownload();
+      }
+
+      if (currentPassData.qrCodeDataUrl) {
+        const qrImg = new Image();
+        qrImg.onload = () => {
+          ctx.fillStyle = '#ffffff';
+          if (ctx.roundRect) {
+            ctx.beginPath();
+            ctx.roundRect(265, 345, 220, 220, 16);
+            ctx.fill();
+          } else {
+            ctx.fillRect(265, 345, 220, 220);
+          }
+          ctx.drawImage(qrImg, 275, 355, 200, 200);
+          drawMetaAndFooter();
+        };
+        qrImg.onerror = () => {
+          drawMetaAndFooter();
+        };
+        qrImg.src = currentPassData.qrCodeDataUrl;
+      } else {
+        drawMetaAndFooter();
+      }
+    });
+
+    // ── 1. First-Time Visitor Check-in Submission ─────────────────
     const form = document.getElementById('checkinForm');
     const submitBtn = document.getElementById('submitBtn');
     const errorMessage = document.getElementById('errorMessage');
@@ -2599,7 +3570,7 @@
       e.preventDefault();
       errorMessage.classList.remove('visible');
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span>Verifying &amp; Logging Visit...</span>';
+      submitBtn.innerHTML = '<span>Verifying &amp; Generating Pass...</span>';
 
       const payload = {
         visitorName: document.getElementById('visitorName').value,
@@ -2631,8 +3602,12 @@
         }
 
         const v = (data && data.visitor) || {};
+        const visitorCode = data.visitorCode || v.visitorCode;
+        const qrCodeDataUrl = data.qrCodeDataUrl || v.qrCodeDataUrl;
         const visitorName = v.visitorName || payload.visitorName;
+
         Gate.setVisitorCheckedIn(visitorName);
+        saveVisitorPassLocally(v, visitorCode, qrCodeDataUrl);
 
         // Store in personal visitor check-in history
         try {
@@ -2640,6 +3615,7 @@
           hist.unshift({
             id: v.id || ('v-' + Date.now()),
             visitorName: visitorName,
+            visitorCode: visitorCode,
             visitDate: v.visitDate || new Date().toISOString().slice(0, 10),
             visitTime: v.visitTime || new Date().toTimeString().slice(0, 5),
             address: payload.address,
@@ -2650,6 +3626,7 @@
           localStorage.setItem('museum_last_visit', JSON.stringify({
             id: v.id,
             name: visitorName,
+            code: visitorCode,
             date: v.visitDate,
             time: v.visitTime
           }));
@@ -2657,7 +3634,6 @@
 
         const finalDestination = directTargetUrl || redirectUrl;
 
-        // If user clicked an exhibit / program / or scanned an exhibit tag
         if (finalDestination && (typeof Gate === 'undefined' || !Gate.isGatePage(finalDestination))) {
           submitBtn.innerHTML = '<span>Check-in Verified! Opening exhibit...</span>';
           setTimeout(() => {
@@ -2670,32 +3646,43 @@
         const directNoticeEl = document.getElementById('directUnlockNotice');
         if (directNoticeEl) directNoticeEl.style.display = 'none';
 
-        successDetails.innerHTML = `Welcome, <strong>${escapeHtml(visitorName)}</strong>! Your visit on <strong>${escapeHtml(v.visitDate || '')} at ${escapeHtml(v.visitTime || '')}</strong> has been verified. You now have full access to all museum exhibits, programs, audio tours, and floor maps.`;
+        successDetails.innerHTML = `Welcome, <strong>${escapeHtml(visitorName)}</strong>! Your visit on <strong>${escapeHtml(v.visitDate || '')} at ${escapeHtml(v.visitTime || '')}</strong> has been verified. Here is your official Digital Visitor Pass Card.`;
         if (continueToDestBtn) {
           continueToDestBtn.href = '/dashboard.html';
           continueToDestBtn.innerHTML = '<span>Explore Museum Exhibits &rarr;</span>';
         }
+
+        renderDigitalVisitorPass(v, visitorCode, qrCodeDataUrl);
         successMessage.classList.add('visible');
 
       } catch (err) {
         errorMessage.textContent = err.message;
         errorMessage.classList.add('visible');
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span>Check In &amp; Enter Museum</span> <span>&rarr;</span>';
+        submitBtn.innerHTML = '<span>Check In &amp; Get Visitor Pass Card</span> <span>&rarr;</span>';
       }
     });
 
     checkinAnotherBtn?.addEventListener('click', () => {
       form.reset();
+      const fpForm = document.getElementById('fastPassForm');
+      if (fpForm) fpForm.reset();
+      stopQrScanner();
+
       submitBtn.disabled = false;
-      submitBtn.innerHTML = '<span>Check In &amp; Enter Museum</span> <span>&rarr;</span>';
+      submitBtn.innerHTML = '<span>Check In &amp; Get Visitor Pass Card</span> <span>&rarr;</span>';
+
+      const digitalPassCard = document.getElementById('digitalPassCard');
+      if (digitalPassCard) digitalPassCard.style.display = 'none';
+
       successMessage.classList.remove('visible');
       document.querySelector('.portal-card').style.display = 'block';
+      switchTab('visitor');
       const vInput = document.getElementById('visitorName');
       if (vInput) vInput.focus();
     });
 
-    // 2. Staff Admin Sign-In Submission
+    // ── 2. Staff Admin Sign-In Submission ─────────────────────────
     const adminForm = document.getElementById('adminLoginForm');
     const adminSubmitBtn = document.getElementById('adminSubmitBtn');
     const adminErrorMessage = document.getElementById('adminErrorMessage');
