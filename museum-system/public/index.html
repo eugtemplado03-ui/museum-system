@@ -1093,6 +1093,14 @@
       gap: 8px;
       transition: all 0.15s ease;
       border-bottom: 3px solid transparent;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .portal-tab-btn * {
+      pointer-events: none;
     }
 
     .portal-tab-btn:hover {
@@ -2422,13 +2430,13 @@
 
           <!-- Portal Tabs -->
           <div class="portal-tabs" role="tablist">
-            <button type="button" class="portal-tab-btn active" id="tabVisitorBtn" role="tab" aria-selected="true">
+            <button type="button" class="portal-tab-btn active" id="tabVisitorBtn" role="tab" aria-selected="true" data-tab="visitor" onclick="switchTab('visitor')">
               <span>📝</span> First-Time Visitor
             </button>
-            <button type="button" class="portal-tab-btn" id="tabReturningBtn" role="tab" aria-selected="false">
+            <button type="button" class="portal-tab-btn" id="tabReturningBtn" role="tab" aria-selected="false" data-tab="returning" onclick="switchTab('returning')">
               <span>⚡</span> Returning / QR Fast Pass
             </button>
-            <button type="button" class="portal-tab-btn" id="tabAdminBtn" role="tab" aria-selected="false">
+            <button type="button" class="portal-tab-btn" id="tabAdminBtn" role="tab" aria-selected="false" data-tab="admin" onclick="switchTab('admin')">
               <span>🔐</span> Staff Sign-In
             </button>
           </div>
@@ -3056,14 +3064,40 @@
       }
     }
 
-    // Portal Tabs
-    const tabVisitorBtn = document.getElementById('tabVisitorBtn');
-    const tabReturningBtn = document.getElementById('tabReturningBtn');
-    const tabAdminBtn = document.getElementById('tabAdminBtn');
-    const visitorTabContent = document.getElementById('visitorTabContent');
-    const returningTabContent = document.getElementById('returningTabContent');
-    const adminTabContent = document.getElementById('adminTabContent');
+    // QR Code Scanner State & Utilities (declared early to prevent TDZ ReferenceError)
+    let html5QrCodeScanner = null;
 
+    function stopQrScanner() {
+      try {
+        if (typeof html5QrCodeScanner !== 'undefined' && html5QrCodeScanner) {
+          const scannerInstance = html5QrCodeScanner;
+          html5QrCodeScanner = null;
+          try {
+            if (typeof scannerInstance.isScanning === 'boolean') {
+              if (scannerInstance.isScanning) {
+                scannerInstance.stop().catch(() => {}).finally(() => {
+                  try { scannerInstance.clear(); } catch (e) {}
+                });
+              } else {
+                try { scannerInstance.clear(); } catch (e) {}
+              }
+            } else if (typeof scannerInstance.stop === 'function') {
+              scannerInstance.stop().catch(() => {});
+            }
+          } catch (stopErr) {
+            console.warn('QR scanner stop error caught:', stopErr);
+          }
+        }
+      } catch (e) {}
+
+      try {
+        const qrBox = document.getElementById('qrReaderContainer');
+        if (qrBox) qrBox.style.display = 'none';
+      } catch (e) {}
+    }
+    window.stopQrScanner = stopQrScanner;
+
+    // Portal Tabs Navigation
     function checkSavedPassOnDevice() {
       try {
         const savedRaw = localStorage.getItem('museum_visitor_pass');
@@ -3084,54 +3118,95 @@
     }
 
     function switchTab(tab) {
-      stopQrScanner();
+      try {
+        stopQrScanner();
+      } catch (e) {
+        console.warn('Error in stopQrScanner during switchTab:', e);
+      }
+
+      const vBtn = document.getElementById('tabVisitorBtn');
+      const rBtn = document.getElementById('tabReturningBtn');
+      const aBtn = document.getElementById('tabAdminBtn');
+      const vContent = document.getElementById('visitorTabContent');
+      const rContent = document.getElementById('returningTabContent');
+      const aContent = document.getElementById('adminTabContent');
+
+      // Clear any prior portal error alerts when switching tabs
+      try {
+        ['errorMessage', 'returningErrorMessage', 'adminErrorMessage'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.classList.remove('visible');
+        });
+      } catch (e) {}
 
       if (tab === 'admin') {
-        tabAdminBtn.classList.add('active');
-        tabAdminBtn.setAttribute('aria-selected', 'true');
-        tabVisitorBtn.classList.remove('active');
-        tabVisitorBtn.setAttribute('aria-selected', 'false');
-        tabReturningBtn.classList.remove('active');
-        tabReturningBtn.setAttribute('aria-selected', 'false');
+        if (aBtn) { aBtn.classList.add('active'); aBtn.setAttribute('aria-selected', 'true'); }
+        if (vBtn) { vBtn.classList.remove('active'); vBtn.setAttribute('aria-selected', 'false'); }
+        if (rBtn) { rBtn.classList.remove('active'); rBtn.setAttribute('aria-selected', 'false'); }
 
-        visitorTabContent.style.display = 'none';
-        returningTabContent.style.display = 'none';
-        adminTabContent.style.display = 'block';
-        const uInput = document.getElementById('adminUsername');
-        if (uInput) uInput.focus();
+        if (vContent) vContent.style.display = 'none';
+        if (rContent) rContent.style.display = 'none';
+        if (aContent) aContent.style.display = 'block';
+
+        try {
+          const uInput = document.getElementById('adminUsername');
+          if (uInput) uInput.focus();
+        } catch (e) {}
       } else if (tab === 'returning') {
-        tabReturningBtn.classList.add('active');
-        tabReturningBtn.setAttribute('aria-selected', 'true');
-        tabVisitorBtn.classList.remove('active');
-        tabVisitorBtn.setAttribute('aria-selected', 'false');
-        tabAdminBtn.classList.remove('active');
-        tabAdminBtn.setAttribute('aria-selected', 'false');
+        if (rBtn) { rBtn.classList.add('active'); rBtn.setAttribute('aria-selected', 'true'); }
+        if (vBtn) { vBtn.classList.remove('active'); vBtn.setAttribute('aria-selected', 'false'); }
+        if (aBtn) { aBtn.classList.remove('active'); aBtn.setAttribute('aria-selected', 'false'); }
 
-        visitorTabContent.style.display = 'none';
-        adminTabContent.style.display = 'none';
-        returningTabContent.style.display = 'block';
-        checkSavedPassOnDevice();
-        const cInput = document.getElementById('visitorPassCodeInput');
-        if (cInput) cInput.focus();
+        if (vContent) vContent.style.display = 'none';
+        if (aContent) aContent.style.display = 'none';
+        if (rContent) rContent.style.display = 'block';
+
+        try {
+          checkSavedPassOnDevice();
+        } catch (e) {}
+
+        try {
+          const cInput = document.getElementById('visitorPassCodeInput');
+          if (cInput) cInput.focus();
+        } catch (e) {}
       } else {
-        tabVisitorBtn.classList.add('active');
-        tabVisitorBtn.setAttribute('aria-selected', 'true');
-        tabReturningBtn.classList.remove('active');
-        tabReturningBtn.setAttribute('aria-selected', 'false');
-        tabAdminBtn.classList.remove('active');
-        tabAdminBtn.setAttribute('aria-selected', 'false');
+        // default: first-time visitor
+        if (vBtn) { vBtn.classList.add('active'); vBtn.setAttribute('aria-selected', 'true'); }
+        if (rBtn) { rBtn.classList.remove('active'); rBtn.setAttribute('aria-selected', 'false'); }
+        if (aBtn) { aBtn.classList.remove('active'); aBtn.setAttribute('aria-selected', 'false'); }
 
-        adminTabContent.style.display = 'none';
-        returningTabContent.style.display = 'none';
-        visitorTabContent.style.display = 'block';
-        const vInput = document.getElementById('visitorName');
-        if (vInput) vInput.focus();
+        if (aContent) aContent.style.display = 'none';
+        if (rContent) rContent.style.display = 'none';
+        if (vContent) vContent.style.display = 'block';
+
+        try {
+          const vInput = document.getElementById('visitorName');
+          if (vInput) vInput.focus();
+        } catch (e) {}
       }
     }
+    window.switchTab = switchTab;
 
-    tabVisitorBtn.addEventListener('click', () => switchTab('visitor'));
-    tabReturningBtn.addEventListener('click', () => switchTab('returning'));
-    tabAdminBtn.addEventListener('click', () => switchTab('admin'));
+    // Attach robust direct listeners to tab buttons
+    document.getElementById('tabVisitorBtn')?.addEventListener('click', () => switchTab('visitor'));
+    document.getElementById('tabReturningBtn')?.addEventListener('click', () => switchTab('returning'));
+    document.getElementById('tabAdminBtn')?.addEventListener('click', () => switchTab('admin'));
+
+    // Delegated container listener for portal tabs
+    document.querySelector('.portal-tabs')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('.portal-tab-btn');
+      if (!btn) return;
+      const targetTab = btn.getAttribute('data-tab');
+      if (targetTab) {
+        switchTab(targetTab);
+      } else if (btn.id === 'tabVisitorBtn') {
+        switchTab('visitor');
+      } else if (btn.id === 'tabReturningBtn') {
+        switchTab('returning');
+      } else if (btn.id === 'tabAdminBtn') {
+        switchTab('admin');
+      }
+    });
 
     if (urlParams.get('action') === 'signup' || urlParams.get('signup') === '1') {
       if (typeof Gate !== 'undefined') Gate.clearAllSessions();
@@ -3381,23 +3456,11 @@
       executeQuickCheckin(code, btnFastPassSubmit);
     });
 
-    // QR Code Scanner Logic
-    let html5QrCodeScanner = null;
+    // QR Code Scanner Controls & Camera Handlers
     const btnStartQrCamera = document.getElementById('btnStartQrCamera');
     const btnStopQrCamera = document.getElementById('btnStopQrCamera');
     const qrReaderContainer = document.getElementById('qrReaderContainer');
     const qrFileInput = document.getElementById('qrFileInput');
-
-    function stopQrScanner() {
-      if (html5QrCodeScanner) {
-        html5QrCodeScanner.stop().catch(() => {}).finally(() => {
-          html5QrCodeScanner = null;
-          if (qrReaderContainer) qrReaderContainer.style.display = 'none';
-        });
-      } else if (qrReaderContainer) {
-        qrReaderContainer.style.display = 'none';
-      }
-    }
 
     btnStopQrCamera?.addEventListener('click', stopQrScanner);
 
