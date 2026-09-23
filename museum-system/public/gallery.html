@@ -221,18 +221,11 @@
     font-weight: 800 !important;
   }
 
-  /* ── 3. Gallery Grid & Professional Exhibition Cards ── */
+  /* ── 3. Gallery Exhibition Photo Wall (Exclusively Walls with White Text) ── */
   .gallery-grid {
     display: grid !important;
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 26px !important;
-  }
-
-  @media (max-width: 992px) {
-    .gallery-grid {
-      grid-template-columns: repeat(2, 1fr) !important;
-      gap: 20px !important;
-    }
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)) !important;
+    gap: 24px !important;
   }
 
   @media (max-width: 640px) {
@@ -243,30 +236,35 @@
   }
 
   .gallery-content-card {
-    background: #ffffff !important;
-    border: 1.5px solid #bae6fd !important;
+    position: relative !important;
+    height: 380px !important;
+    background: #0c2340 !important;
+    border: 2px solid #bae6fd !important;
     border-radius: 20px !important;
     overflow: hidden !important;
-    box-shadow: 0 6px 20px rgba(91, 164, 230, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+    box-shadow: 0 8px 24px rgba(91, 164, 230, 0.15), 0 2px 6px rgba(0, 0, 0, 0.08) !important;
     display: flex !important;
     flex-direction: column !important;
     transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
                 box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
                 border-color 0.35s ease !important;
+    cursor: pointer !important;
   }
 
   .gallery-content-card:hover {
     transform: translateY(-6px) !important;
     border-color: #5ba4e6 !important;
-    box-shadow: 0 18px 42px rgba(91, 164, 230, 0.28), 0 4px 12px rgba(91, 164, 230, 0.15) !important;
+    box-shadow: 0 20px 48px rgba(91, 164, 230, 0.4), 0 6px 16px rgba(0, 0, 0, 0.15) !important;
   }
 
   .gallery-content-card .media {
-    position: relative !important;
-    height: 240px !important;
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
     overflow: hidden !important;
-    background: #f0f7fe !important;
-    border-bottom: 1.5px solid #edf4fc !important;
+    background: #0c2340 !important;
+    border-bottom: none !important;
   }
 
   .gallery-content-card .media img {
@@ -277,120 +275,180 @@
   }
 
   .gallery-content-card:hover .media img {
-    transform: scale(1.06) !important;
+    transform: scale(1.08) !important;
   }
 
-  /* Baby Blue Tag / Badge floating over media */
+  /* Protective exhibition gradient scrim ensuring text is 100% legible and vibrant */
+  .gallery-content-card::after {
+    content: '' !important;
+    position: absolute !important;
+    inset: 0 !important;
+    background: linear-gradient(180deg, rgba(12, 35, 64, 0.25) 0%, transparent 35%, rgba(12, 35, 64, 0.82) 65%, rgba(12, 35, 64, 0.98) 100%) !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
+  }
+
+  /* Corner badge floating over photo wall */
   .gallery-badge-pill {
-    position: absolute;
-    top: 14px;
-    left: 14px;
-    z-index: 5;
-    background: #5ba4e6;
-    background-image: linear-gradient(135deg, #5ba4e6 0%, #3b93dc 100%);
-    color: #ffffff;
-    font-size: 11.5px;
-    font-weight: 800;
-    padding: 5px 12px;
-    border-radius: 999px;
-    border: 1.5px solid rgba(255, 255, 255, 0.85);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    letter-spacing: 0.3px;
+    position: absolute !important;
+    top: 14px !important;
+    left: 14px !important;
+    z-index: 5 !important;
+    background: #5ba4e6 !important;
+    background-image: linear-gradient(135deg, #5ba4e6 0%, #3b93dc 100%) !important;
+    color: #ffffff !important;
+    font-size: 11.5px !important;
+    font-weight: 800 !important;
+    padding: 5px 12px !important;
+    border-radius: 999px !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.9) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    letter-spacing: 0.3px !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
   }
 
+  /* Photo count pill floating top right */
+  .gallery-photo-count-pill {
+    position: absolute !important;
+    top: 14px !important;
+    right: 14px !important;
+    background: rgba(12, 35, 64, 0.78) !important;
+    backdrop-filter: blur(8px) !important;
+    color: #ffffff !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    padding: 5px 11px !important;
+    border-radius: 999px !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.7) !important;
+    z-index: 5 !important;
+    pointer-events: none !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  /* ── In Walls Make The Text White ── */
   .gallery-content-card .body {
-    padding: 22px 22px 24px !important;
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 5 !important;
+    padding: 22px !important;
     display: flex !important;
     flex-direction: column !important;
-    flex: 1 !important;
-    background: #ffffff !important;
+    background: transparent !important;
+    color: #ffffff !important;
   }
 
   .gallery-curator-label {
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: #5ba4e6;
-    margin-bottom: 6px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1.2px !important;
+    color: #ffffff !important;
+    margin-bottom: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8) !important;
   }
 
   .gallery-curator-label::before {
-    content: '';
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #5ba4e6;
+    content: '' !important;
+    display: inline-block !important;
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 50% !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.9) !important;
   }
 
   .gallery-content-card h3 {
     font-family: 'Nunito', sans-serif !important;
     font-size: 18.5px !important;
     font-weight: 800 !important;
-    color: #0c2340 !important;
+    color: #ffffff !important;
     margin: 0 0 8px 0 !important;
     line-height: 1.35 !important;
-    transition: color 0.2s ease !important;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9) !important;
+  }
+
+  .gallery-content-card h3 a {
+    color: #ffffff !important;
+    text-decoration: none !important;
+    transition: opacity 0.2s ease !important;
   }
 
   .gallery-content-card:hover h3 a {
-    color: #3b93dc !important;
+    color: #ffffff !important;
+    opacity: 0.92 !important;
   }
 
   .gallery-content-card p.desc {
     font-size: 13.5px !important;
-    color: #527191 !important;
-    line-height: 1.6 !important;
-    margin: 0 0 18px 0 !important;
+    color: #ffffff !important;
+    line-height: 1.55 !important;
+    margin: 0 0 16px 0 !important;
     display: -webkit-box !important;
     -webkit-line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
+    opacity: 0.95 !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8) !important;
   }
 
   .gallery-card-footer {
-    margin-top: auto;
-    padding-top: 16px;
-    border-top: 1.5px solid #edf4fc;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+    margin-top: auto !important;
+    padding-top: 14px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.28) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
   }
 
   .gallery-view-btn {
     background: #5ba4e6 !important;
     background-image: linear-gradient(135deg, #5ba4e6 0%, #3b93dc 100%) !important;
     color: #ffffff !important;
-    border: 1.5px solid rgba(255, 255, 255, 0.7) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.85) !important;
     border-radius: 12px !important;
-    padding: 10px 20px !important;
+    padding: 9px 18px !important;
     font-family: 'Nunito', sans-serif !important;
-    font-size: 13.5px !important;
+    font-size: 13px !important;
     font-weight: 800 !important;
     text-decoration: none !important;
     display: inline-flex !important;
     align-items: center !important;
     gap: 8px !important;
-    box-shadow: 0 4px 14px rgba(91, 164, 230, 0.35) !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
     transition: all 0.25s ease !important;
     cursor: pointer !important;
-    width: 100%;
-    justify-content: center;
+    width: 100% !important;
+    justify-content: center !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
   }
 
   .gallery-view-btn:hover {
     background: #3b93dc !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 8px 22px rgba(91, 164, 230, 0.5) !important;
     color: #ffffff !important;
+    border-color: #ffffff !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(91, 164, 230, 0.6) !important;
+  }
+
+  .gallery-view-btn span:last-child {
+    transition: transform 0.25s ease !important;
+  }
+
+  .gallery-content-card:hover .gallery-view-btn span:last-child {
+    transform: translateX(4px) !important;
   }
 
   /* Carousel Controls styled in Baby Blue & White */
@@ -408,6 +466,7 @@
     align-items: center !important;
     justify-content: center !important;
     font-size: 14px !important;
+    z-index: 6 !important;
   }
 
   .photo-carousel .carousel-arrow:hover,
@@ -424,6 +483,7 @@
     border-radius: 999px !important;
     font-weight: 800 !important;
     font-size: 11px !important;
+    z-index: 6 !important;
   }
 
   .carousel-dot {
@@ -435,233 +495,6 @@
     background: #5ba4e6 !important;
     border-color: #ffffff !important;
     box-shadow: 0 0 6px rgba(91, 164, 230, 0.8) !important;
-  }
-
-  /* ── 4. Quick Action Overlay on Photo Hover ── */
-  .gallery-media-overlay-actions {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    z-index: 6;
-    display: flex;
-    gap: 8px;
-    opacity: 0;
-    transform: translateY(-4px);
-    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  .gallery-content-card:hover .gallery-media-overlay-actions {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .media-action-btn {
-    background: rgba(255, 255, 255, 0.94);
-    color: #3b93dc;
-    border: 1.5px solid #bae6fd;
-    border-radius: 10px;
-    padding: 6px 12px;
-    font-family: 'Nunito', sans-serif;
-    font-size: 12px;
-    font-weight: 800;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
-    backdrop-filter: blur(8px);
-    transition: all 0.2s ease;
-  }
-
-  .media-action-btn:hover {
-    background: #5ba4e6;
-    color: #ffffff;
-    border-color: #5ba4e6;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(91, 164, 230, 0.4);
-  }
-
-  /* ── 5. Multi-Photo Thumbnail Peek Strip ── */
-  .gallery-thumb-strip {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    background: #f0f7fe;
-    border-bottom: 1.5px solid #edf4fc;
-    overflow-x: auto;
-    scrollbar-width: thin;
-  }
-
-  .gallery-thumb-item {
-    width: 44px;
-    height: 38px;
-    border-radius: 8px;
-    overflow: hidden;
-    flex-shrink: 0;
-    border: 1.5px solid #bae6fd;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    background: #ffffff;
-  }
-
-  .gallery-thumb-item:hover {
-    border-color: #5ba4e6;
-    transform: scale(1.08);
-    box-shadow: 0 4px 12px rgba(91, 164, 230, 0.35);
-  }
-
-  .gallery-thumb-item.active {
-    border-color: #5ba4e6 !important;
-    box-shadow: 0 0 0 2px #5ba4e6, 0 4px 12px rgba(91, 164, 230, 0.45) !important;
-    transform: translateY(-2px) scale(1.08) !important;
-  }
-
-  .gallery-thumb-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .gallery-thumb-more {
-    font-size: 11px;
-    font-weight: 800;
-    color: #3b93dc;
-    background: #ffffff;
-    border: 1.5px solid #bae6fd;
-    border-radius: 8px;
-    padding: 8px 10px;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .gallery-thumb-more:hover {
-    background: #5ba4e6;
-    color: #ffffff;
-    border-color: #5ba4e6;
-  }
-
-  /* Photo Count Indicator Pill */
-  .gallery-photo-count-pill {
-    position: absolute;
-    bottom: 12px;
-    right: 14px;
-    background: rgba(12, 35, 64, 0.72);
-    backdrop-filter: blur(8px);
-    color: #ffffff;
-    font-size: 11px;
-    font-weight: 800;
-    padding: 4px 10px;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    z-index: 4;
-    pointer-events: none;
-    transition: all 0.25s ease;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
-  }
-
-  .gallery-content-card:hover .gallery-photo-count-pill {
-    background: rgba(91, 164, 230, 0.92);
-    border-color: #ffffff;
-    box-shadow: 0 4px 14px rgba(91, 164, 230, 0.45);
-  }
-
-  /* ── 6. View Mode Switcher (Cards vs Photo Wall) ── */
-  .gallery-view-mode-toggle {
-    display: flex;
-    background: #f0f7fe;
-    border: 1.5px solid #bae6fd;
-    border-radius: 12px;
-    padding: 3px;
-    gap: 4px;
-  }
-
-  .view-mode-btn {
-    background: transparent;
-    border: none;
-    color: #527191;
-    font-family: 'Nunito', sans-serif;
-    font-size: 13px;
-    font-weight: 800;
-    padding: 7px 14px;
-    border-radius: 9px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: all 0.2s ease;
-  }
-
-  .view-mode-btn:hover {
-    color: #3b93dc;
-  }
-
-  .view-mode-btn.active {
-    background: #ffffff;
-    color: #3b93dc;
-    box-shadow: 0 2px 8px rgba(91, 164, 230, 0.25);
-  }
-
-  /* Compact Photo Wall Mode */
-  .gallery-grid.mosaic-view {
-    display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
-    gap: 20px !important;
-  }
-
-  .gallery-grid.mosaic-view .gallery-content-card {
-    position: relative !important;
-    height: 330px !important;
-  }
-
-  .gallery-grid.mosaic-view .gallery-content-card .media {
-    height: 100% !important;
-    border-bottom: none !important;
-  }
-
-  .gallery-grid.mosaic-view .gallery-thumb-strip {
-    display: none !important;
-  }
-
-  .gallery-grid.mosaic-view .gallery-content-card .body {
-    position: absolute !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    background: linear-gradient(180deg, transparent 0%, rgba(12, 35, 64, 0.90) 45%, rgba(12, 35, 64, 0.98) 100%) !important;
-    padding: 24px 20px 20px !important;
-    transform: translateY(52px) !important;
-    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1) !important;
-  }
-
-  .gallery-grid.mosaic-view .gallery-content-card:hover .body {
-    transform: translateY(0) !important;
-  }
-
-  .gallery-grid.mosaic-view .gallery-curator-label {
-    color: #bae6fd !important;
-  }
-
-  .gallery-grid.mosaic-view .gallery-curator-label::before {
-    background: #bae6fd !important;
-  }
-
-  .gallery-grid.mosaic-view .gallery-content-card h3 a {
-    color: #ffffff !important;
-  }
-
-  .gallery-grid.mosaic-view .gallery-content-card p.desc {
-    color: rgba(255, 255, 255, 0.92) !important;
-  }
-
-  .gallery-grid.mosaic-view .gallery-card-footer {
-    border-top: 1px solid rgba(255, 255, 255, 0.25) !important;
-    padding-top: 12px !important;
   }
 
   /* ── 7. Gallery Toast Notification ── */
@@ -800,14 +633,6 @@
                   <option value="title-asc">Sort: Title (A–Z)</option>
                   <option value="photos-desc">Sort: Most Photos</option>
                 </select>
-                <div class="gallery-view-mode-toggle" id="galleryViewModeToggle">
-                  <button type="button" class="view-mode-btn active" id="btnViewGrid" title="Curated Exhibition Cards">
-                    <span>🖼️</span> Cards
-                  </button>
-                  <button type="button" class="view-mode-btn" id="btnViewMosaic" title="High-Impact Photo Wall">
-                    <span>🧱</span> Wall
-                  </button>
-                </div>
               </div>
             </div>
 
@@ -878,47 +703,17 @@
       const captionText = g.caption || g.description || '';
       const safeTitleAttr = escapeHtml(titleText).replace(/'/g, "&#39;");
 
-      // Multi-Photo Preview Thumbnail Strip
-      let thumbStripHtml = '';
-      if (images.length > 1) {
-        const thumbsToShow = images.slice(0, 5);
-        const remaining = images.length - 5;
-        thumbStripHtml = `
-          <div class="gallery-thumb-strip" aria-label="Photo album preview miniatures">
-            ${thumbsToShow.map((imgSrc, idx) => `
-              <div class="gallery-thumb-item ${idx === 0 ? 'active' : ''}" 
-                   data-thumb-idx="${idx}"
-                   onmouseenter="switchCardPhoto('${escapeHtml(g.id)}', ${idx});"
-                   onclick="event.stopPropagation(); openGalleryLightbox('${escapeHtml(g.id)}', ${idx});" 
-                   title="Photo ${idx + 1} of ${images.length} (Hover to preview, Click for Fullscreen)">
-                <img src="${escapeHtml(imgSrc)}" alt="Photo ${idx + 1}" loading="lazy">
-              </div>
-            `).join('')}
-            ${remaining > 0 ? `<div class="gallery-thumb-more" onclick="event.stopPropagation(); openGalleryLightbox('${escapeHtml(g.id)}', 5);" title="View all ${images.length} photos in full resolution">+${remaining} more</div>` : ''}
-          </div>
-        `;
-      }
-
       return `
-      <article class="content-card gallery-content-card" data-gallery-id="${escapeHtml(g.id)}">
+      <article class="content-card gallery-content-card" data-gallery-id="${escapeHtml(g.id)}" onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.location.href='${detailUrl}';">
         <div class="media">
           <div class="gallery-badge-pill">${badgeText}</div>
-          <div class="gallery-media-overlay-actions">
-            <button type="button" class="media-action-btn" onclick="event.stopPropagation(); openGalleryLightbox('${escapeHtml(g.id)}', 0);" title="Zoom Fullscreen">
-              <span>🔍</span> Fullscreen
-            </button>
-            <button type="button" class="media-action-btn" onclick="event.stopPropagation(); copyGalleryLink('${escapeHtml(g.id)}', '${safeTitleAttr}');" title="Copy Link to Artwork">
-              <span>🔗</span> Share
-            </button>
-          </div>
           ${images.length > 1 ? `<div class="gallery-photo-count-pill" id="cardCounter-${escapeHtml(g.id)}">📷 1 / ${images.length}</div>` : ''}
           ${renderMediaBox(images, g.videoUrl, titleText, '📷')}
         </div>
-        ${thumbStripHtml}
         <div class="body">
           <div class="gallery-curator-label">Museum Permanent Archive • Sagay Sanctuary</div>
           <h3><a href="${detailUrl}">${escapeHtml(titleText)}</a></h3>
-          ${captionText ? `<p class="desc">${escapeHtml(captionText)}</p>` : '<p class="desc" style="font-style:italic; opacity:0.75;">Official visual record of Museo Sang Bata sa Negros exhibitions and marine discoveries.</p>'}
+          ${captionText ? `<p class="desc">${escapeHtml(captionText)}</p>` : '<p class="desc">Official visual record of Museo Sang Bata sa Negros exhibitions and marine discoveries.</p>'}
           <div class="gallery-card-footer">
             <a class="gallery-view-btn" href="${detailUrl}">
               <span>Explore Artwork &amp; Details</span>
@@ -1140,40 +935,11 @@
       }, 2800);
     }
 
-    function initViewModeToggle() {
-      const btnViewGrid = document.getElementById('btnViewGrid');
-      const btnViewMosaic = document.getElementById('btnViewMosaic');
-      const galleryGrid = document.getElementById('galleryGrid');
-
-      if (btnViewGrid && btnViewMosaic && galleryGrid) {
-        btnViewGrid.addEventListener('click', () => {
-          btnViewGrid.classList.add('active');
-          btnViewMosaic.classList.remove('active');
-          galleryGrid.classList.remove('mosaic-view');
-          localStorage.setItem('gallery_view_mode', 'cards');
-        });
-
-        btnViewMosaic.addEventListener('click', () => {
-          btnViewMosaic.classList.add('active');
-          btnViewGrid.classList.remove('active');
-          galleryGrid.classList.add('mosaic-view');
-          localStorage.setItem('gallery_view_mode', 'mosaic');
-        });
-
-        const savedMode = localStorage.getItem('gallery_view_mode');
-        if (savedMode === 'mosaic') {
-          btnViewMosaic.click();
-        }
-      }
-    }
-
     function initGalleryToolbar(){
       const searchInput = document.getElementById('gallerySearchInput');
       const searchClear = document.getElementById('gallerySearchClear');
       const sortSelect = document.getElementById('gallerySortSelect');
       const resetBtn = document.getElementById('galleryResetFilters');
-
-      initViewModeToggle();
 
       if(searchInput){
         searchInput.addEventListener('input', (e)=>{
