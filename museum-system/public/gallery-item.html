@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -8,6 +8,273 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css?v=50">
 <script src="/js/gate.js"></script>
+<style>
+  /* ── Gallery Item Detail: Strictly Baby Blue & White ── */
+  :root {
+    --gallery-baby-blue: #5ba4e6;
+    --gallery-baby-blue-dark: #3b93dc;
+    --gallery-baby-blue-soft: #f0f7fe;
+    --gallery-baby-blue-border: #bae6fd;
+    --gallery-white: #ffffff;
+    --gallery-text-dark: #0c2340;
+    --gallery-text-muted: #527191;
+  }
+
+  body, .user-layout, .user-main {
+    background: #f4f9fd !important;
+  }
+
+  .detail-back {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    background: #ffffff !important;
+    color: #3b93dc !important;
+    border: 1.5px solid #bae6fd !important;
+    padding: 11px 24px !important;
+    border-radius: 14px !important;
+    font-family: 'Nunito', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    text-decoration: none !important;
+    box-shadow: 0 4px 14px rgba(91, 164, 230, 0.12) !important;
+    margin-bottom: 26px !important;
+    transition: all 0.25s ease !important;
+  }
+
+  .detail-back:hover {
+    background: #5ba4e6 !important;
+    color: #ffffff !important;
+    border-color: #5ba4e6 !important;
+    transform: translateX(-4px) !important;
+    box-shadow: 0 8px 24px rgba(91, 164, 230, 0.35) !important;
+  }
+
+  .plaque {
+    background: #ffffff !important;
+    background-image: none !important;
+    border: 1.5px solid #bae6fd !important;
+    border-radius: 24px !important;
+    box-shadow: 0 12px 36px rgba(91, 164, 230, 0.15), 0 2px 6px rgba(15, 23, 42, 0.04) !important;
+    overflow: hidden !important;
+    color: #0c2340 !important;
+  }
+
+  .plaque-body {
+    background: #ffffff !important;
+    background-image: none !important;
+    color: #0c2340 !important;
+    padding: clamp(24px, 3.5vw, 36px) !important;
+  }
+
+  .plaque-cat .tag,
+  .plaque-cat span.tag {
+    background: #5ba4e6 !important;
+    background-image: linear-gradient(135deg, #5ba4e6 0%, #3b93dc 100%) !important;
+    color: #ffffff !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.7) !important;
+    border-radius: 999px !important;
+    padding: 6px 16px !important;
+    font-weight: 800 !important;
+    font-size: 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    box-shadow: 0 4px 12px rgba(91, 164, 230, 0.3) !important;
+  }
+
+  .plaque-body h1 {
+    font-family: 'Nunito', sans-serif !important;
+    font-size: clamp(24px, 3.2vw, 34px) !important;
+    font-weight: 900 !important;
+    color: #0c2340 !important;
+    text-shadow: none !important;
+    margin: 12px 0 16px !important;
+    letter-spacing: -0.02em !important;
+  }
+
+  .plaque-meta-row {
+    background: #f0f7fe !important;
+    border: 1.5px solid #bae6fd !important;
+    border-radius: 16px !important;
+    padding: 16px 20px !important;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+    gap: 16px !important;
+    margin: 18px 0 22px !important;
+  }
+
+  .plaque-meta-row div span {
+    color: #527191 !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.8px !important;
+    display: block !important;
+    margin-bottom: 4px !important;
+  }
+
+  .plaque-meta-row div b {
+    color: #0c2340 !important;
+    font-size: 14.5px !important;
+    font-weight: 800 !important;
+  }
+
+  .plaque-desc {
+    background: #f8fbff !important;
+    border-left: 4px solid #5ba4e6 !important;
+    border-radius: 0 14px 14px 0 !important;
+    padding: 18px 22px !important;
+    color: #334155 !important;
+    font-size: 15.5px !important;
+    line-height: 1.7 !important;
+    margin: 20px 0 !important;
+  }
+
+  #langSelect {
+    background: #ffffff !important;
+    border: 1.5px solid #bae6fd !important;
+    border-radius: 10px !important;
+    color: #0c2340 !important;
+    font-weight: 700 !important;
+    padding: 7px 14px !important;
+    cursor: pointer !important;
+  }
+
+  #langSelect:focus {
+    border-color: #5ba4e6 !important;
+    box-shadow: 0 0 0 3px rgba(91, 164, 230, 0.2) !important;
+  }
+
+  .tts-controls {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin-top: 20px !important;
+  }
+
+  .tts-controls .btn {
+    border-radius: 12px !important;
+    font-weight: 800 !important;
+    padding: 10px 18px !important;
+    font-size: 13.5px !important;
+  }
+
+  #ttsPlayBtn {
+    background: #5ba4e6 !important;
+    background-image: linear-gradient(135deg, #5ba4e6 0%, #3b93dc 100%) !important;
+    color: #ffffff !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 4px 14px rgba(91, 164, 230, 0.35) !important;
+  }
+
+  #ttsPlayBtn:hover {
+    background: #3b93dc !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 18px rgba(91, 164, 230, 0.5) !important;
+  }
+
+  #ttsStopBtn {
+    background: #ffffff !important;
+    color: #3b93dc !important;
+    border: 1.5px solid #bae6fd !important;
+  }
+
+  #ttsStopBtn:hover {
+    background: #f0f7fe !important;
+    border-color: #5ba4e6 !important;
+  }
+
+  /* Carousel Controls */
+  .photo-carousel .carousel-arrow {
+    background: rgba(91, 164, 230, 0.88) !important;
+    color: #ffffff !important;
+    border: 1.5px solid #ffffff !important;
+    backdrop-filter: blur(8px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50% !important;
+  }
+
+  .photo-carousel .carousel-counter-badge {
+    background: rgba(91, 164, 230, 0.9) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.7) !important;
+    border-radius: 999px !important;
+    font-weight: 800 !important;
+    font-size: 12px !important;
+  }
+
+  /* Related Gallery Cards */
+  #relatedGallery h2 {
+    color: #0c2340 !important;
+    font-family: 'Nunito', sans-serif !important;
+    font-weight: 900 !important;
+    font-size: 22px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  #relatedGallery h2::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 22px;
+    background: #5ba4e6;
+    border-radius: 4px;
+  }
+
+  .gallery-content-card {
+    background: #ffffff !important;
+    border: 1.5px solid #bae6fd !important;
+    border-radius: 18px !important;
+    box-shadow: 0 6px 20px rgba(91, 164, 230, 0.08) !important;
+    transition: all 0.3s ease !important;
+  }
+
+  .gallery-content-card:hover {
+    border-color: #5ba4e6 !important;
+    transform: translateY(-5px) !important;
+    box-shadow: 0 16px 36px rgba(91, 164, 230, 0.25) !important;
+  }
+
+  .gallery-content-card h3 a {
+    color: #0c2340 !important;
+  }
+
+  .gallery-content-card:hover h3 a {
+    color: #3b93dc !important;
+  }
+
+  .gallery-content-card .gallery-view-btn {
+    background: #5ba4e6 !important;
+    background-image: linear-gradient(135deg, #5ba4e6 0%, #3b93dc 100%) !important;
+    color: #ffffff !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.6) !important;
+    border-radius: 12px !important;
+    padding: 10px 18px !important;
+    font-weight: 800 !important;
+    box-shadow: 0 4px 12px rgba(91, 164, 230, 0.3) !important;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    box-sizing: border-box;
+    text-decoration: none;
+    transition: all 0.25s ease;
+  }
+
+  .gallery-content-card .gallery-view-btn:hover {
+    background: #3b93dc !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 18px rgba(91, 164, 230, 0.45) !important;
+    color: #ffffff !important;
+  }
+</style>
 </head>
 <body>
   <!-- ── Top Navigation Bar ─────────────────────────────────────── -->
@@ -106,13 +373,13 @@
         
         let badge = '';
         if (hasVideo && hasPhotos) {
-          badge = `<span class="tag" style="background:rgba(217,79,61,0.2); color:#ff8585; border:1px solid rgba(217,79,61,0.35);">🎬 Video + 📷 ${images.length} Photos</span>`;
+          badge = `<span class="tag" style="background:#5ba4e6; color:#ffffff; border:1.5px solid rgba(255,255,255,0.7); box-shadow:0 2px 8px rgba(91,164,230,0.3); font-weight:800;">🎬 Video + 📷 ${images.length} Photos</span>`;
         } else if (hasVideo) {
-          badge = `<span class="tag" style="background:rgba(217,79,61,0.2); color:#ff8585; border:1px solid rgba(217,79,61,0.35);">▶ Video</span>`;
+          badge = `<span class="tag" style="background:#5ba4e6; color:#ffffff; border:1.5px solid rgba(255,255,255,0.7); box-shadow:0 2px 8px rgba(91,164,230,0.3); font-weight:800;">▶ Video Feature</span>`;
         } else if (images.length > 1) {
-          badge = `<span class="tag">📷 ${images.length} Photos</span>`;
+          badge = `<span class="tag" style="background:#5ba4e6; color:#ffffff; border:1.5px solid rgba(255,255,255,0.7); box-shadow:0 2px 8px rgba(91,164,230,0.3); font-weight:800;">📚 Album (${images.length} Photos)</span>`;
         } else {
-          badge = `<span class="tag">📷 Photo</span>`;
+          badge = `<span class="tag" style="background:#5ba4e6; color:#ffffff; border:1.5px solid rgba(255,255,255,0.7); box-shadow:0 2px 8px rgba(91,164,230,0.3); font-weight:800;">📷 High-Res Photograph</span>`;
         }
 
         const dateStr = formatDate(item.createdAt);
@@ -184,20 +451,27 @@
 
         const wrap = document.getElementById('relatedGallery');
         wrap.innerHTML = `
-          <h2 style="font-size: 20px; font-weight: 800; color: #000000; margin-bottom: 18px;">More from our Gallery</h2>
-          <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+          <h2 style="font-size: 21px; font-weight: 800; color: #0c2340; margin-bottom: 20px;">More from our Curated Gallery</h2>
+          <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 22px;">
             ${otherItems.map(g => {
               const imgs = getAllImages(g);
+              const gHasVideo = Boolean(g.videoUrl && String(g.videoUrl).trim());
+              const bText = gHasVideo ? (imgs.length > 0 ? `🎬 Video • 📷 ${imgs.length}` : `▶ Video`) : (imgs.length > 1 ? `📚 ${imgs.length} Photos` : `📷 Photo`);
+              const dUrl = `/gallery-item.html?id=${encodeURIComponent(g.id)}`;
               return `
-                <div class="content-card gallery-content-card" style="display:flex; flex-direction:column; background:#ffffff; border-radius:14px; overflow:hidden; border:1px solid #e2e8f0; box-shadow:0 4px 14px rgba(0,0,0,0.06);">
-                  <div class="media" style="height: 180px; position:relative; overflow:hidden;">
+                <div class="content-card gallery-content-card" style="display:flex; flex-direction:column; background:#ffffff; border-radius:18px; overflow:hidden; border:1.5px solid #bae6fd; box-shadow:0 6px 20px rgba(91,164,230,0.08);">
+                  <div class="media" style="height: 190px; position:relative; overflow:hidden; background:#f0f7fe;">
+                    <div style="position:absolute; top:12px; left:12px; z-index:5; background:#5ba4e6; color:#ffffff; font-size:11px; font-weight:800; padding:4px 10px; border-radius:999px; border:1.5px solid rgba(255,255,255,0.8);">${bText}</div>
                     ${renderMediaBox(imgs, g.videoUrl, g.title || g.caption || 'Gallery photo', '📷')}
                   </div>
-                  <div class="body" style="padding:16px; display:flex; flex-direction:column; flex:1;">
-                    <h3 style="margin:0 0 6px; font-size:16px;"><a href="/gallery-item.html?id=${encodeURIComponent(g.id)}" style="color:#0f172a; text-decoration:none;">${escapeHtml(g.title || g.caption || 'Gallery Photo')}</a></h3>
-                    <p class="desc" style="font-size:13px; color:#475569; margin:0 0 12px; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${escapeHtml(g.caption || '')}</p>
-                    <div style="margin-top:auto; padding-top:8px;">
-                      <a class="btn btn-ghost dark btn-small" href="/gallery-item.html?id=${encodeURIComponent(g.id)}" style="color:#000000 !important; font-weight:800; background:#ffffff !important;">View details &rarr;</a>
+                  <div class="body" style="padding:18px 20px; display:flex; flex-direction:column; flex:1;">
+                    <h3 style="margin:0 0 8px; font-size:16.5px; font-weight:800;"><a href="${dUrl}" style="color:#0c2340; text-decoration:none;">${escapeHtml(g.title || g.caption || 'Exhibition Photo')}</a></h3>
+                    <p class="desc" style="font-size:13px; color:#527191; margin:0 0 16px; line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${escapeHtml(g.caption || '')}</p>
+                    <div style="margin-top:auto; padding-top:12px; border-top:1px solid #edf4fc;">
+                      <a class="gallery-view-btn" href="${dUrl}">
+                        <span>View Details</span>
+                        <span>&rarr;</span>
+                      </a>
                     </div>
                   </div>
                 </div>
