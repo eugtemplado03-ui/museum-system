@@ -92,26 +92,37 @@
   }
 
   .gallery-stat-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: #ffffff;
-    color: #3b93dc;
-    border: 1.5px solid rgba(255, 255, 255, 0.9);
-    padding: 7px 16px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 800;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.9) !important;
+    padding: 7px 16px !important;
+    border-radius: 999px !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  .gallery-stat-pill,
+  .gallery-stat-pill *,
+  .gallery-stat-pill span,
+  .gallery-stat-pill span.label,
+  .gallery-stat-pill span:not(.num) {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    font-weight: 800 !important;
   }
 
   .gallery-stat-pill span.num {
-    background: #5ba4e6;
-    color: #ffffff;
-    padding: 2px 9px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 900;
+    background: #5ba4e6 !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    padding: 2px 9px !important;
+    border-radius: 999px !important;
+    font-size: 12px !important;
+    font-weight: 900 !important;
   }
 
   /* ── 2. Filter & Search Toolbar (Crisp White & Baby Blue) ── */
@@ -390,9 +401,14 @@
     opacity: 0.92 !important;
   }
 
-  .gallery-content-card p.desc {
+  .gallery-content-card p.desc,
+  .gallery-content-card .desc,
+  .gallery-wall-card p.desc,
+  .gallery-wall-card .desc,
+  .gallery-content-card .body p {
     font-size: 13.5px !important;
     color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
     line-height: 1.55 !important;
     margin: 0 0 16px 0 !important;
     display: -webkit-box !important;
@@ -413,10 +429,13 @@
     gap: 12px !important;
   }
 
-  .gallery-view-btn {
+  .gallery-view-btn,
+  .gallery-view-btn *,
+  .gallery-view-btn span {
     background: #5ba4e6 !important;
     background-image: linear-gradient(135deg, #5ba4e6 0%, #3b93dc 100%) !important;
     color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
     border: 1.5px solid rgba(255, 255, 255, 0.85) !important;
     border-radius: 12px !important;
     padding: 9px 18px !important;
@@ -435,9 +454,18 @@
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
   }
 
-  .gallery-view-btn:hover {
+  .gallery-view-btn span {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .gallery-view-btn:hover,
+  .gallery-view-btn:hover * {
     background: #3b93dc !important;
     color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
     border-color: #ffffff !important;
     transform: translateY(-2px) !important;
     box-shadow: 0 6px 20px rgba(91, 164, 230, 0.6) !important;
@@ -599,19 +627,19 @@
               
               <div class="gallery-hero-stats">
                 <div class="gallery-stat-pill">
-                  <span>🖼️ Total Works</span>
+                  <span class="label" style="color:#000000 !important; -webkit-text-fill-color:#000000 !important; font-weight:800 !important;">🖼️ Total Works</span>
                   <span class="num" id="statTotalCount">0</span>
                 </div>
                 <div class="gallery-stat-pill">
-                  <span>📷 Single Photos</span>
+                  <span class="label" style="color:#000000 !important; -webkit-text-fill-color:#000000 !important; font-weight:800 !important;">📷 Single Photos</span>
                   <span class="num" id="statPhotosCount">0</span>
                 </div>
                 <div class="gallery-stat-pill">
-                  <span>📚 Photo Albums</span>
+                  <span class="label" style="color:#000000 !important; -webkit-text-fill-color:#000000 !important; font-weight:800 !important;">📚 Photo Albums</span>
                   <span class="num" id="statAlbumsCount">0</span>
                 </div>
                 <div class="gallery-stat-pill">
-                  <span>🎬 Videos</span>
+                  <span class="label" style="color:#000000 !important; -webkit-text-fill-color:#000000 !important; font-weight:800 !important;">🎬 Videos</span>
                   <span class="num" id="statVideosCount">0</span>
                 </div>
               </div>
@@ -704,20 +732,20 @@
       const safeTitleAttr = escapeHtml(titleText).replace(/'/g, "&#39;");
 
       return `
-      <article class="content-card gallery-content-card" data-gallery-id="${escapeHtml(g.id)}" onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.location.href='${detailUrl}';">
+      <article class="gallery-content-card gallery-wall-card" data-gallery-id="${escapeHtml(g.id)}" onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.location.href='${detailUrl}';">
         <div class="media">
-          <div class="gallery-badge-pill">${badgeText}</div>
-          ${images.length > 1 ? `<div class="gallery-photo-count-pill" id="cardCounter-${escapeHtml(g.id)}">📷 1 / ${images.length}</div>` : ''}
+          <div class="gallery-badge-pill" style="color:#ffffff !important; -webkit-text-fill-color:#ffffff !important;">${badgeText}</div>
+          ${images.length > 1 ? `<div class="gallery-photo-count-pill" id="cardCounter-${escapeHtml(g.id)}" style="color:#ffffff !important; -webkit-text-fill-color:#ffffff !important;">📷 1 / ${images.length}</div>` : ''}
           ${renderMediaBox(images, g.videoUrl, titleText, '📷')}
         </div>
-        <div class="body">
-          <div class="gallery-curator-label">Museum Permanent Archive • Sagay Sanctuary</div>
-          <h3><a href="${detailUrl}">${escapeHtml(titleText)}</a></h3>
-          ${captionText ? `<p class="desc">${escapeHtml(captionText)}</p>` : '<p class="desc">Official visual record of Museo Sang Bata sa Negros exhibitions and marine discoveries.</p>'}
-          <div class="gallery-card-footer">
-            <a class="gallery-view-btn" href="${detailUrl}">
-              <span>Explore Artwork &amp; Details</span>
-              <span>&rarr;</span>
+        <div class="body" style="color:#ffffff !important; -webkit-text-fill-color:#ffffff !important;">
+          <div class="gallery-curator-label" style="color:#ffffff !important; -webkit-text-fill-color:#ffffff !important;">Museum Permanent Archive • Sagay Sanctuary</div>
+          <h3 style="color:#ffffff !important; -webkit-text-fill-color:#ffffff !important;"><a href="${detailUrl}" style="color:#ffffff !important; -webkit-text-fill-color:#ffffff !important;">${escapeHtml(titleText)}</a></h3>
+          ${captionText ? `<p class="desc" style="color:#ffffff !important; -webkit-text-fill-color:#ffffff !important; opacity:0.95;">${escapeHtml(captionText)}</p>` : '<p class="desc" style="color:#ffffff !important; -webkit-text-fill-color:#ffffff !important; opacity:0.95;">Official visual record of Museo Sang Bata sa Negros exhibitions and marine discoveries.</p>'}
+          <div class="gallery-card-footer" style="border-top:1px solid rgba(255,255,255,0.28) !important;">
+            <a class="gallery-view-btn" href="${detailUrl}" style="color:#ffffff !important; -webkit-text-fill-color:#ffffff !important;">
+              <span style="color:#ffffff !important; -webkit-text-fill-color:#ffffff !important;">Explore Artwork &amp; Details</span>
+              <span style="color:#ffffff !important; -webkit-text-fill-color:#ffffff !important;">&rarr;</span>
             </a>
           </div>
         </div>

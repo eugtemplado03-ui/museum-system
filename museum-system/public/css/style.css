@@ -7104,8 +7104,8 @@ span:not(.btn):not(.tag):not(.badge):not(.dash-action-btn):not(.btn-submit):not(
   font-weight: 800 !important;
 }
 
-.content-card p.desc,
-.content-card .meta,
+.content-card:not(.gallery-content-card):not(.gallery-wall-card) p.desc,
+.content-card:not(.gallery-content-card):not(.gallery-wall-card) .meta,
 .dash-hero-sub,
 .dash-kpi-sub,
 .dash-pie-sub,
