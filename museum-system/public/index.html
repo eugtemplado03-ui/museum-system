@@ -2496,18 +2496,13 @@
               </div>
 
               <div class="form-group">
-                <label for="email">Email Address <span class="required">*</span></label>
-                <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required>
-              </div>
-
-              <div class="form-group">
                 <label for="groupName">Group / Organization <span class="required">*</span></label>
                 <input type="text" id="groupName" name="groupName" placeholder="e.g. Individual, Carlos Family, School Name" required>
               </div>
 
               <div class="form-group">
-                <label for="notes">Notes / Purpose of Visit <span class="required">*</span></label>
-                <textarea id="notes" name="notes" placeholder="e.g. Educational tour, general viewing, or write None" required></textarea>
+                <label for="notes">Notes / Purpose of Visit <span style="font-size: 12px; font-weight: normal; color: var(--text-muted);">(Optional)</span></label>
+                <textarea id="notes" name="notes" placeholder="e.g. Educational tour, general viewing, etc. (optional)"></textarea>
               </div>
 
               <button type="submit" class="btn-submit" id="submitBtn">
@@ -3862,7 +3857,6 @@
       const sSex = (document.getElementById('sex')?.value || '').trim();
       const sAge = (document.getElementById('age')?.value || '').trim();
       const cNumber = (document.getElementById('contactNumber')?.value || '').trim().replace(/\D/g, '');
-      const sEmail = (document.getElementById('email')?.value || '').trim();
       const gName = (document.getElementById('groupName')?.value || '').trim();
       const sNotes = (document.getElementById('notes')?.value || '').trim();
 
@@ -3891,21 +3885,8 @@
         showValidationError('Contact number must be exactly 11 digits (e.g. 09123456789).', document.getElementById('contactNumber'));
         return;
       }
-      if (!sEmail) {
-        showValidationError('Please enter your email address.', document.getElementById('email'));
-        return;
-      }
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(sEmail)) {
-        showValidationError('Please enter a valid email address (e.g. you@example.com).', document.getElementById('email'));
-        return;
-      }
       if (!gName) {
         showValidationError('Please enter your group or organization (or write "Individual").', document.getElementById('groupName'));
-        return;
-      }
-      if (!sNotes) {
-        showValidationError('Please enter your notes or purpose of visit (or write "None").', document.getElementById('notes'));
         return;
       }
 
@@ -3918,7 +3899,7 @@
         sex: sSex,
         age: sAge,
         contactNumber: cNumber,
-        email: sEmail,
+        email: '',
         groupName: gName,
         notes: sNotes
       };
