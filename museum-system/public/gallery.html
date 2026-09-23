@@ -437,6 +437,263 @@
     box-shadow: 0 0 6px rgba(91, 164, 230, 0.8) !important;
   }
 
+  /* ── 4. Quick Action Overlay on Photo Hover ── */
+  .gallery-media-overlay-actions {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 6;
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .gallery-content-card:hover .gallery-media-overlay-actions {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .media-action-btn {
+    background: rgba(255, 255, 255, 0.94);
+    color: #3b93dc;
+    border: 1.5px solid #bae6fd;
+    border-radius: 10px;
+    padding: 6px 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(8px);
+    transition: all 0.2s ease;
+  }
+
+  .media-action-btn:hover {
+    background: #5ba4e6;
+    color: #ffffff;
+    border-color: #5ba4e6;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(91, 164, 230, 0.4);
+  }
+
+  /* ── 5. Multi-Photo Thumbnail Peek Strip ── */
+  .gallery-thumb-strip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #f0f7fe;
+    border-bottom: 1.5px solid #edf4fc;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .gallery-thumb-item {
+    width: 44px;
+    height: 38px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 1.5px solid #bae6fd;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #ffffff;
+  }
+
+  .gallery-thumb-item:hover {
+    border-color: #5ba4e6;
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(91, 164, 230, 0.35);
+  }
+
+  .gallery-thumb-item.active {
+    border-color: #5ba4e6 !important;
+    box-shadow: 0 0 0 2px #5ba4e6, 0 4px 12px rgba(91, 164, 230, 0.45) !important;
+    transform: translateY(-2px) scale(1.08) !important;
+  }
+
+  .gallery-thumb-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .gallery-thumb-more {
+    font-size: 11px;
+    font-weight: 800;
+    color: #3b93dc;
+    background: #ffffff;
+    border: 1.5px solid #bae6fd;
+    border-radius: 8px;
+    padding: 8px 10px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .gallery-thumb-more:hover {
+    background: #5ba4e6;
+    color: #ffffff;
+    border-color: #5ba4e6;
+  }
+
+  /* Photo Count Indicator Pill */
+  .gallery-photo-count-pill {
+    position: absolute;
+    bottom: 12px;
+    right: 14px;
+    background: rgba(12, 35, 64, 0.72);
+    backdrop-filter: blur(8px);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    z-index: 4;
+    pointer-events: none;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  }
+
+  .gallery-content-card:hover .gallery-photo-count-pill {
+    background: rgba(91, 164, 230, 0.92);
+    border-color: #ffffff;
+    box-shadow: 0 4px 14px rgba(91, 164, 230, 0.45);
+  }
+
+  /* ── 6. View Mode Switcher (Cards vs Photo Wall) ── */
+  .gallery-view-mode-toggle {
+    display: flex;
+    background: #f0f7fe;
+    border: 1.5px solid #bae6fd;
+    border-radius: 12px;
+    padding: 3px;
+    gap: 4px;
+  }
+
+  .view-mode-btn {
+    background: transparent;
+    border: none;
+    color: #527191;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    padding: 7px 14px;
+    border-radius: 9px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+  }
+
+  .view-mode-btn:hover {
+    color: #3b93dc;
+  }
+
+  .view-mode-btn.active {
+    background: #ffffff;
+    color: #3b93dc;
+    box-shadow: 0 2px 8px rgba(91, 164, 230, 0.25);
+  }
+
+  /* Compact Photo Wall Mode */
+  .gallery-grid.mosaic-view {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+    gap: 20px !important;
+  }
+
+  .gallery-grid.mosaic-view .gallery-content-card {
+    position: relative !important;
+    height: 330px !important;
+  }
+
+  .gallery-grid.mosaic-view .gallery-content-card .media {
+    height: 100% !important;
+    border-bottom: none !important;
+  }
+
+  .gallery-grid.mosaic-view .gallery-thumb-strip {
+    display: none !important;
+  }
+
+  .gallery-grid.mosaic-view .gallery-content-card .body {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: linear-gradient(180deg, transparent 0%, rgba(12, 35, 64, 0.90) 45%, rgba(12, 35, 64, 0.98) 100%) !important;
+    padding: 24px 20px 20px !important;
+    transform: translateY(52px) !important;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1) !important;
+  }
+
+  .gallery-grid.mosaic-view .gallery-content-card:hover .body {
+    transform: translateY(0) !important;
+  }
+
+  .gallery-grid.mosaic-view .gallery-curator-label {
+    color: #bae6fd !important;
+  }
+
+  .gallery-grid.mosaic-view .gallery-curator-label::before {
+    background: #bae6fd !important;
+  }
+
+  .gallery-grid.mosaic-view .gallery-content-card h3 a {
+    color: #ffffff !important;
+  }
+
+  .gallery-grid.mosaic-view .gallery-content-card p.desc {
+    color: rgba(255, 255, 255, 0.92) !important;
+  }
+
+  .gallery-grid.mosaic-view .gallery-card-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.25) !important;
+    padding-top: 12px !important;
+  }
+
+  /* ── 7. Gallery Toast Notification ── */
+  .gallery-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #5ba4e6;
+    background-image: linear-gradient(135deg, #5ba4e6 0%, #3b93dc 100%);
+    color: #ffffff;
+    padding: 12px 22px;
+    border-radius: 14px;
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 10px 30px rgba(91, 164, 230, 0.45);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 13.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 99999;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+  }
+
+  .gallery-toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
   /* Empty state */
   .empty-state {
     background: #ffffff !important;
@@ -543,6 +800,14 @@
                   <option value="title-asc">Sort: Title (A–Z)</option>
                   <option value="photos-desc">Sort: Most Photos</option>
                 </select>
+                <div class="gallery-view-mode-toggle" id="galleryViewModeToggle">
+                  <button type="button" class="view-mode-btn active" id="btnViewGrid" title="Curated Exhibition Cards">
+                    <span>🖼️</span> Cards
+                  </button>
+                  <button type="button" class="view-mode-btn" id="btnViewMosaic" title="High-Impact Photo Wall">
+                    <span>🧱</span> Wall
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -611,15 +876,47 @@
       const detailUrl = `/gallery-item.html?id=${encodeURIComponent(g.id)}`;
       const titleText = g.title || g.caption || 'Museum Exhibition Piece';
       const captionText = g.caption || g.description || '';
+      const safeTitleAttr = escapeHtml(titleText).replace(/'/g, "&#39;");
+
+      // Multi-Photo Preview Thumbnail Strip
+      let thumbStripHtml = '';
+      if (images.length > 1) {
+        const thumbsToShow = images.slice(0, 5);
+        const remaining = images.length - 5;
+        thumbStripHtml = `
+          <div class="gallery-thumb-strip" aria-label="Photo album preview miniatures">
+            ${thumbsToShow.map((imgSrc, idx) => `
+              <div class="gallery-thumb-item ${idx === 0 ? 'active' : ''}" 
+                   data-thumb-idx="${idx}"
+                   onmouseenter="switchCardPhoto('${escapeHtml(g.id)}', ${idx});"
+                   onclick="event.stopPropagation(); openGalleryLightbox('${escapeHtml(g.id)}', ${idx});" 
+                   title="Photo ${idx + 1} of ${images.length} (Hover to preview, Click for Fullscreen)">
+                <img src="${escapeHtml(imgSrc)}" alt="Photo ${idx + 1}" loading="lazy">
+              </div>
+            `).join('')}
+            ${remaining > 0 ? `<div class="gallery-thumb-more" onclick="event.stopPropagation(); openGalleryLightbox('${escapeHtml(g.id)}', 5);" title="View all ${images.length} photos in full resolution">+${remaining} more</div>` : ''}
+          </div>
+        `;
+      }
 
       return `
       <article class="content-card gallery-content-card" data-gallery-id="${escapeHtml(g.id)}">
         <div class="media">
           <div class="gallery-badge-pill">${badgeText}</div>
+          <div class="gallery-media-overlay-actions">
+            <button type="button" class="media-action-btn" onclick="event.stopPropagation(); openGalleryLightbox('${escapeHtml(g.id)}', 0);" title="Zoom Fullscreen">
+              <span>🔍</span> Fullscreen
+            </button>
+            <button type="button" class="media-action-btn" onclick="event.stopPropagation(); copyGalleryLink('${escapeHtml(g.id)}', '${safeTitleAttr}');" title="Copy Link to Artwork">
+              <span>🔗</span> Share
+            </button>
+          </div>
+          ${images.length > 1 ? `<div class="gallery-photo-count-pill" id="cardCounter-${escapeHtml(g.id)}">📷 1 / ${images.length}</div>` : ''}
           ${renderMediaBox(images, g.videoUrl, titleText, '📷')}
         </div>
+        ${thumbStripHtml}
         <div class="body">
-          <div class="gallery-curator-label">Museum Permanent Archive</div>
+          <div class="gallery-curator-label">Museum Permanent Archive • Sagay Sanctuary</div>
           <h3><a href="${detailUrl}">${escapeHtml(titleText)}</a></h3>
           ${captionText ? `<p class="desc">${escapeHtml(captionText)}</p>` : '<p class="desc" style="font-style:italic; opacity:0.75;">Official visual record of Museo Sang Bata sa Negros exhibitions and marine discoveries.</p>'}
           <div class="gallery-card-footer">
@@ -733,7 +1030,52 @@
         emptyState.style.display = 'none';
         grid.innerHTML = list.map(galleryItem).join('');
         initPhotoCarousels(grid);
+        syncCardThumbnails(grid);
       }
+    }
+
+    window.switchCardPhoto = function(cardId, idx) {
+      const card = document.querySelector(`.gallery-content-card[data-gallery-id="${cardId}"]`);
+      if (!card) return;
+      const dot = card.querySelector(`.carousel-dot[data-index="${idx}"]`);
+      if (dot) {
+        dot.click();
+      }
+      card.querySelectorAll('.gallery-thumb-item').forEach((item) => {
+        const thumbIdx = Number(item.dataset.thumbIdx);
+        item.classList.toggle('active', thumbIdx === idx);
+      });
+      const counter = document.getElementById(`cardCounter-${cardId}`);
+      if (counter) {
+        const totalMatch = counter.textContent.match(/\/ (\d+)/);
+        if (totalMatch) {
+          counter.textContent = `📷 ${idx + 1} / ${totalMatch[1]}`;
+        }
+      }
+    };
+
+    function syncCardThumbnails(grid) {
+      if (!grid) return;
+      grid.querySelectorAll('.gallery-content-card').forEach(card => {
+        const carousel = card.querySelector('.photo-carousel');
+        if (!carousel) return;
+        const cardId = card.dataset.galleryId;
+        const observer = new MutationObserver(() => {
+          const cur = parseInt(carousel.dataset.slide, 10) || 0;
+          card.querySelectorAll('.gallery-thumb-item').forEach((item) => {
+            const thumbIdx = Number(item.dataset.thumbIdx);
+            item.classList.toggle('active', thumbIdx === cur);
+          });
+          const counter = document.getElementById(`cardCounter-${cardId}`);
+          if (counter) {
+            const totalMatch = counter.textContent.match(/\/ (\d+)/);
+            if (totalMatch) {
+              counter.textContent = `📷 ${cur + 1} / ${totalMatch[1]}`;
+            }
+          }
+        });
+        observer.observe(carousel, { attributes: true, attributeFilter: ['data-slide'] });
+      });
     }
 
     function resetGalleryFilters(){
@@ -753,11 +1095,85 @@
       renderGallery();
     }
 
+    // ── Global Lightbox Zoom & Share Link Helpers ──
+    window.openGalleryLightbox = function(id, index = 0) {
+      const item = allGallery.find(g => g.id === id);
+      if (!item) return;
+      const imgs = getAllImages(item);
+      if (!imgs.length) return;
+      const items = imgs.map(src => ({
+        src: src,
+        alt: item.title || item.caption || 'Exhibition Artwork',
+        caption: item.title || item.caption || ''
+      }));
+      if (window.appLightbox) {
+        window.appLightbox.show(items, index);
+      }
+    };
+
+    window.copyGalleryLink = function(id, title) {
+      const url = window.location.origin + '/gallery-item.html?id=' + encodeURIComponent(id);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(() => {
+          showGalleryToast('Link to "' + (title || 'Artwork') + '" copied to clipboard!');
+        }).catch(() => {
+          showGalleryToast('Link: ' + url);
+        });
+      } else {
+        prompt('Copy link to artwork:', url);
+      }
+    };
+
+    function showGalleryToast(msg) {
+      let toast = document.getElementById('galleryToast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'galleryToast';
+        toast.className = 'gallery-toast';
+        document.body.appendChild(toast);
+      }
+      toast.innerHTML = `<span>💎</span> <span>${escapeHtml(msg)}</span>`;
+      toast.classList.add('show');
+      clearTimeout(toast._timer);
+      toast._timer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2800);
+    }
+
+    function initViewModeToggle() {
+      const btnViewGrid = document.getElementById('btnViewGrid');
+      const btnViewMosaic = document.getElementById('btnViewMosaic');
+      const galleryGrid = document.getElementById('galleryGrid');
+
+      if (btnViewGrid && btnViewMosaic && galleryGrid) {
+        btnViewGrid.addEventListener('click', () => {
+          btnViewGrid.classList.add('active');
+          btnViewMosaic.classList.remove('active');
+          galleryGrid.classList.remove('mosaic-view');
+          localStorage.setItem('gallery_view_mode', 'cards');
+        });
+
+        btnViewMosaic.addEventListener('click', () => {
+          btnViewMosaic.classList.add('active');
+          btnViewGrid.classList.remove('active');
+          galleryGrid.classList.add('mosaic-view');
+          localStorage.setItem('gallery_view_mode', 'mosaic');
+        });
+
+        const savedMode = localStorage.getItem('gallery_view_mode');
+        if (savedMode === 'mosaic') {
+          btnViewMosaic.click();
+        }
+      }
+    }
+
     function initGalleryToolbar(){
       const searchInput = document.getElementById('gallerySearchInput');
       const searchClear = document.getElementById('gallerySearchClear');
       const sortSelect = document.getElementById('gallerySortSelect');
       const resetBtn = document.getElementById('galleryResetFilters');
+
+      initViewModeToggle();
 
       if(searchInput){
         searchInput.addEventListener('input', (e)=>{

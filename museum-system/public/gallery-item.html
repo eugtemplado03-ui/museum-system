@@ -274,6 +274,48 @@
     box-shadow: 0 6px 18px rgba(91, 164, 230, 0.45) !important;
     color: #ffffff !important;
   }
+
+  /* Media Action Buttons */
+  .media-action-btn {
+    background: rgba(255, 255, 255, 0.94);
+    color: #3b93dc;
+    border: 1.5px solid #bae6fd;
+    border-radius: 10px;
+    padding: 7px 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 12.5px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(8px);
+    transition: all 0.2s ease;
+  }
+
+  .media-action-btn:hover {
+    background: #5ba4e6;
+    color: #ffffff;
+    border-color: #5ba4e6;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(91, 164, 230, 0.4);
+  }
+
+  /* Plaque Album Photo Grid */
+  .plaque-thumb-card:hover {
+    border-color: #5ba4e6 !important;
+    transform: translateY(-3px) scale(1.03) !important;
+    box-shadow: 0 8px 22px rgba(91, 164, 230, 0.35) !important;
+  }
+
+  .plaque-thumb-card:hover img {
+    transform: scale(1.08) !important;
+  }
+
+  .plaque-thumb-card:hover .plaque-thumb-overlay {
+    opacity: 1 !important;
+  }
 </style>
 </head>
 <body>
@@ -366,6 +408,8 @@
           return;
         }
 
+        currentItemForLightbox = item;
+
         document.title = (item.title || item.caption || 'Gallery') + ' — Gallery — Museo Sang Bata sa Negros';
         const images = getAllImages(item);
         const hasVideo = Boolean(item.videoUrl && String(item.videoUrl).trim());
@@ -387,7 +431,12 @@
 
         content.innerHTML = `
           <div class="plaque">
-            <div class="plaque-media gallery-detail-media-wrap">
+            <div class="plaque-media gallery-detail-media-wrap" style="position:relative;">
+              <div style="position:absolute; top:14px; right:14px; z-index:10;">
+                <button type="button" class="media-action-btn" onclick="openCurrentPlaqueLightbox(0);" title="Zoom Fullscreen">
+                  <span>🔍</span> Fullscreen Zoom
+                </button>
+              </div>
               ${renderMediaBox(images, item.videoUrl, item.title || item.caption || 'Gallery photo', '📷')}
             </div>
             <div class="plaque-body">
@@ -420,6 +469,27 @@
                 <button class="btn btn-secondary btn-small" id="ttsStopBtn">■ Stop</button>
                 <div id="ttsStatus" style="font-size:12px; color:var(--grey-400);"></div>
               </div>
+
+              ${images.length > 1 ? `
+                <div class="plaque-album-section" style="margin-top:26px; padding-top:22px; border-top:1.5px solid #edf4fc;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                    <div style="font-size:15px; font-weight:800; color:#0c2340; display:flex; align-items:center; gap:8px;">
+                      <span>📷</span> Exhibition Photographs (${images.length})
+                    </div>
+                    <span style="font-size:12px; font-weight:800; color:#3b93dc;">Click any photo to zoom</span>
+                  </div>
+                  <div class="plaque-thumb-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(92px, 1fr)); gap:12px;">
+                    ${images.map((src, idx) => `
+                      <div class="plaque-thumb-card" onclick="openCurrentPlaqueLightbox(${idx});" title="Zoom photo ${idx + 1} of ${images.length} in full resolution" style="aspect-ratio:1; border-radius:12px; overflow:hidden; border:2px solid #bae6fd; cursor:pointer; position:relative; background:#f0f7fe; transition:all 0.25s ease; box-shadow:0 3px 10px rgba(91,164,230,0.12);">
+                        <img src="${escapeHtml(src)}" alt="Exhibition photo ${idx + 1}" style="width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.3s ease;">
+                        <div class="plaque-thumb-overlay" style="position:absolute; inset:0; background:rgba(91,164,230,0.3); opacity:0; transition:opacity 0.2s ease; display:flex; align-items:center; justify-content:center;">
+                          <span style="background:#5ba4e6; color:#ffffff; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; box-shadow:0 4px 10px rgba(0,0,0,0.25); font-weight:800;">🔍</span>
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              ` : ''}
             </div>
           </div>`;
 
@@ -484,6 +554,21 @@
         /* ignore related errors */
       }
     }
+
+    let currentItemForLightbox = null;
+    window.openCurrentPlaqueLightbox = function(index = 0) {
+      if (!currentItemForLightbox) return;
+      const imgs = getAllImages(currentItemForLightbox);
+      if (!imgs.length) return;
+      const items = imgs.map(src => ({
+        src: src,
+        alt: currentItemForLightbox.title || currentItemForLightbox.caption || 'Artwork photo',
+        caption: currentItemForLightbox.title || currentItemForLightbox.caption || ''
+      }));
+      if (window.appLightbox) {
+        window.appLightbox.show(items, index);
+      }
+    };
 
     function wireTranslationAndTTS(item){
       const playBtn    = document.getElementById('ttsPlayBtn');
