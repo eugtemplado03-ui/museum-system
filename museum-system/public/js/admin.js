@@ -1223,50 +1223,7 @@ function confirmDelete(id){
 }
 
 // ─── Exhibit QR Tag Modal (Admin Only) ───
-function renderTagPhotosHtml(photoList, title) {
-  if (!photoList || !photoList.length) return '';
-  if (photoList.length === 1) {
-    return `
-      <div style="margin-bottom: 14px; border-radius: 12px; overflow: hidden; border: 1.5px solid #e2e8f0; background: #0c2340; max-height: 190px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
-        <img src="${escapeHtml(photoList[0])}" alt="${escapeHtml(title)}" style="width: 100%; height: 190px; object-fit: cover; display: block;">
-      </div>
-    `;
-  }
-  if (photoList.length === 2) {
-    return `
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px;">
-        ${photoList.map((p, idx) => `
-          <div style="border-radius: 10px; overflow: hidden; border: 1.5px solid #e2e8f0; height: 125px; background: #0c2340;">
-            <img src="${escapeHtml(p)}" alt="${escapeHtml(title)} photo ${idx+1}" style="width: 100%; height: 100%; object-fit: cover; display: block;">
-          </div>
-        `).join('')}
-      </div>
-    `;
-  }
-  if (photoList.length === 3) {
-    return `
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 14px;">
-        ${photoList.map((p, idx) => `
-          <div style="border-radius: 8px; overflow: hidden; border: 1.5px solid #e2e8f0; height: 95px; background: #0c2340;">
-            <img src="${escapeHtml(p)}" alt="${escapeHtml(title)} photo ${idx+1}" style="width: 100%; height: 100%; object-fit: cover; display: block;">
-          </div>
-        `).join('')}
-      </div>
-    `;
-  }
-  // 4 or more photos
-  return `
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 6px; margin-bottom: 14px;">
-      ${photoList.map((p, idx) => `
-        <div style="border-radius: 8px; overflow: hidden; border: 1.5px solid #e2e8f0; height: 80px; background: #0c2340;">
-          <img src="${escapeHtml(p)}" alt="${escapeHtml(title)} photo ${idx+1}" style="width: 100%; height: 100%; object-fit: cover; display: block;">
-        </div>
-      `).join('')}
-    </div>
-  `;
-}
-
-async function downloadPlacardCanvas(ex, photos, qrUrl) {
+async function downloadPlacardCanvas(ex, qrUrl) {
   const btn = document.getElementById('downloadTagBtn');
   const originalText = btn ? btn.innerHTML : '';
   if (btn) {
@@ -1276,20 +1233,8 @@ async function downloadPlacardCanvas(ex, photos, qrUrl) {
 
   try {
     const scale = 2; // high-DPI output (300dpi crisp quality)
-    const cardW = 560;
-    
-    // Calculate heights
-    const padX = 26;
-    const padTop = 32;
-    const headerH = 75; // Museum header + title + category
-    let photosH = 0;
-    if (photos.length === 1) photosH = 200 + 16;
-    else if (photos.length === 2) photosH = 145 + 16;
-    else if (photos.length >= 3) photosH = 115 + 16;
-
-    const qrH = 210 + 26; // QR box + subtext
-    const footerH = 48 + 28; // footer bar + bottom padding
-    const cardH = padTop + headerH + photosH + qrH + footerH;
+    const cardW = 500;
+    const cardH = 540;
 
     const canvas = document.createElement('canvas');
     canvas.width = cardW * scale;
@@ -1316,147 +1261,71 @@ async function downloadPlacardCanvas(ex, photos, qrUrl) {
       if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = strokeW; ctx.stroke(); }
     }
 
-    function drawCover(img, x, y, w, h, r) {
-      ctx.save();
-      ctx.beginPath();
-      if (ctx.roundRect) ctx.roundRect(x, y, w, h, r);
-      else ctx.rect(x, y, w, h);
-      ctx.clip();
-      const imgRatio = img.width / img.height;
-      const targetRatio = w / h;
-      let sw = img.width, sh = img.height, sx = 0, sy = 0;
-      if (imgRatio > targetRatio) {
-        sw = img.height * targetRatio;
-        sx = (img.width - sw) / 2;
-      } else {
-        sh = img.width / targetRatio;
-        sy = (img.height - sh) / 2;
-      }
-      ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
-      ctx.restore();
-      ctx.strokeStyle = '#e2e8f0';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      if (ctx.roundRect) ctx.roundRect(x, y, w, h, r);
-      ctx.stroke();
-    }
-
     function loadImgSafe(url) {
       return new Promise((resolve) => {
         if (!url) return resolve(null);
         const img = new Image();
         img.crossOrigin = 'anonymous';
-        let src = url;
-        if (url.startsWith('http://') || url.startsWith('https://')) {
-          if (!url.startsWith(window.location.origin)) {
-            src = `/api/exhibits/proxy-image?url=${encodeURIComponent(url)}`;
-          }
-        }
-        const timer = setTimeout(() => resolve(null), 3500);
-        img.onload = () => { clearTimeout(timer); resolve(img); };
-        img.onerror = () => {
-          clearTimeout(timer);
-          if (src !== url) {
-            const fallback = new Image();
-            fallback.onload = () => resolve(fallback);
-            fallback.onerror = () => resolve(null);
-            fallback.src = url;
-          } else {
-            resolve(null);
-          }
-        };
-        img.src = src;
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = url;
       });
     }
 
-    // Preload QR and photos in parallel
-    const [qrImg, ...loadedPhotos] = await Promise.all([
-      loadImgSafe(qrUrl),
-      ...photos.map(p => loadImgSafe(p))
-    ]);
+    const qrImg = await loadImgSafe(qrUrl);
 
     // Draw main background card
     drawRRect(0, 0, cardW, cardH, 20, '#ffffff', '#0f172a', 2.5);
 
-    let curY = padTop;
+    let curY = 36;
 
     // Museum Header
     ctx.fillStyle = '#007d8a';
-    ctx.font = '800 11px "Nunito", sans-serif';
+    ctx.font = '800 12px "Nunito", sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('MUSEO SANG BATA SA NEGROS', cardW / 2, curY);
-    curY += 24;
+    curY += 26;
 
     // Exhibit Title
     ctx.fillStyle = '#0f172a';
-    ctx.font = '900 22px "Nunito", sans-serif';
+    ctx.font = '900 24px "Nunito", sans-serif';
     ctx.fillText(ex.title || 'Exhibit', cardW / 2, curY);
-    curY += 20;
-
-    // Subtitle
-    ctx.fillStyle = '#64748b';
-    ctx.font = '700 12px "Nunito", sans-serif';
-    const subText = `${ex.category || 'Exhibit'}${ex.location ? ` • ${ex.location}` : ''}`;
-    ctx.fillText(subText, cardW / 2, curY);
-    curY += 18;
-
-    // Draw Photos if any
-    const validPhotos = loadedPhotos.filter(Boolean);
-    if (validPhotos.length === 1) {
-      drawCover(validPhotos[0], padX, curY, cardW - padX * 2, 200, 12);
-      curY += 216;
-    } else if (validPhotos.length === 2) {
-      const pw = (cardW - padX * 2 - 8) / 2;
-      drawCover(validPhotos[0], padX, curY, pw, 145, 10);
-      drawCover(validPhotos[1], padX + pw + 8, curY, pw, 145, 10);
-      curY += 161;
-    } else if (validPhotos.length >= 3) {
-      const count = Math.min(validPhotos.length, 4);
-      const gap = 6;
-      const pw = (cardW - padX * 2 - gap * (count - 1)) / count;
-      for (let i = 0; i < count; i++) {
-        drawCover(validPhotos[i], padX + i * (pw + gap), curY, pw, 115, 8);
-      }
-      curY += 131;
-    }
-
-    // QR Section
-    const qrBoxW = 200;
-    const qrBoxX = (cardW - qrBoxW) / 2;
-    drawRRect(qrBoxX, curY, qrBoxW, qrBoxW, 14, '#f8fafc', '#cbd5e1', 1.5);
-    if (qrImg) {
-      ctx.drawImage(qrImg, qrBoxX + 10, curY + 10, 180, 180);
-    }
-    curY += qrBoxW + 6;
-
-    ctx.fillStyle = '#64748b';
-    ctx.font = '700 11px "Nunito", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('Scan with phone camera for audio guide & details', cardW / 2, curY + 10);
     curY += 24;
 
+    // Big QR Code Section
+    const qrBoxSize = 310;
+    const qrBoxX = (cardW - qrBoxSize) / 2;
+    drawRRect(qrBoxX, curY, qrBoxSize, qrBoxSize, 18, '#f8fafc', '#cbd5e1', 1.5);
+    if (qrImg) {
+      const imgSize = 280;
+      const imgOffset = (qrBoxSize - imgSize) / 2;
+      ctx.drawImage(qrImg, qrBoxX + imgOffset, curY + imgOffset, imgSize, imgSize);
+    }
+    curY += qrBoxSize + 18;
+
     // Footer Bar
-    const fbH = 44;
+    const padX = 26;
+    const fbH = 46;
     drawRRect(padX, curY, cardW - padX * 2, fbH, 10, '#f1f5f9', '#e2e8f0', 1);
 
     ctx.fillStyle = '#475569';
-    ctx.font = '800 12.5px "Nunito", sans-serif';
+    ctx.font = '800 13px "Nunito", sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText('📷 Scan with camera', padX + 14, curY + 27);
+    ctx.fillText('📷 Scan with camera', padX + 14, curY + 28);
 
     // Code Pill
     const codeStr = String(ex.code || 'EXHIBIT');
-    ctx.font = '900 13px "IBM Plex Mono", monospace';
+    ctx.font = '900 13.5px "IBM Plex Mono", monospace';
     const cWidth = ctx.measureText(codeStr).width;
-    const pillW = cWidth + 16;
-    const pillH = 26;
+    const pillW = cWidth + 18;
+    const pillH = 28;
     const pillX = cardW - padX - 14 - pillW;
     const pillY = curY + (fbH - pillH) / 2;
     drawRRect(pillX, pillY, pillW, pillH, 6, '#ffffff', '#cbd5e1', 1);
 
     ctx.fillStyle = '#0f172a';
     ctx.textAlign = 'center';
-    ctx.fillText(codeStr, pillX + pillW / 2, pillY + 18);
+    ctx.fillText(codeStr, pillX + pillW / 2, pillY + 19);
 
     // Download blob
     canvas.toBlob((blob) => {
@@ -1496,19 +1365,8 @@ function openTagModal(code){
 
   const qrUrl = `/api/exhibits/${encodeURIComponent(ex.code)}/qr`;
 
-  // Collect all photos for this exhibit
-  const rawPhotos = [];
-  if (Array.isArray(ex.optimizedImagePaths) && ex.optimizedImagePaths.length) {
-    rawPhotos.push(...ex.optimizedImagePaths);
-  } else if (Array.isArray(ex.imagePaths) && ex.imagePaths.length) {
-    rawPhotos.push(...ex.imagePaths);
-  }
-  if (ex.optimizedImagePath && !rawPhotos.includes(ex.optimizedImagePath)) rawPhotos.unshift(ex.optimizedImagePath);
-  if (ex.imagePath && !rawPhotos.includes(ex.imagePath)) rawPhotos.unshift(ex.imagePath);
-  const photos = Array.from(new Set(rawPhotos.filter(p => typeof p === 'string' && p.trim().length > 0)));
-
   openModal(`
-    <div style="text-align: center; max-width: 500px; margin: 0 auto; position: relative;">
+    <div style="text-align: center; max-width: 480px; margin: 0 auto; position: relative;">
       <!-- Corner close button -->
       <button type="button" id="closeTagModalCornerBtn" aria-label="Close modal" style="position: absolute; top: -14px; right: -14px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: #fff; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer; transition: all 0.15s ease;">✕</button>
 
@@ -1520,24 +1378,19 @@ function openTagModal(code){
       <h2 style="font-size: 22px; margin: 0 0 4px; color: #fff;">${escapeHtml(ex.title)}</h2>
       <p style="font-size: 13px; color: #cbd5e1; margin: 0 0 16px;">${escapeHtml(ex.location || 'Museum floor')}</p>
 
-      <!-- Printable Tag Card (Displays ALL Photos + QR Code) -->
-      <div id="printableQrTag" style="background: #ffffff; color: #1e293b; padding: 22px 20px; border-radius: 16px; box-shadow: 0 12px 30px rgba(0,0,0,0.35); border: 2px solid #e2e8f0; margin-bottom: 18px; text-align: center;">
-        <div style="font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #007d8a; margin-bottom: 4px;">Museo Sang Bata sa Negros</div>
-        <div style="font-family: 'Nunito', sans-serif; font-size: 19px; font-weight: 900; color: #0f172a; margin-bottom: 4px; line-height: 1.25;">${escapeHtml(ex.title)}</div>
-        <div style="font-size: 11.5px; font-weight: 700; color: #64748b; margin-bottom: 14px;">${escapeHtml(ex.category || 'Exhibit')}${ex.location ? ` • ${escapeHtml(ex.location)}` : ''}</div>
+      <!-- Printable Tag Card (Big QR Code Placard) -->
+      <div id="printableQrTag" style="background: #ffffff; color: #1e293b; padding: 26px 22px; border-radius: 18px; box-shadow: 0 12px 30px rgba(0,0,0,0.35); border: 2px solid #e2e8f0; margin-bottom: 18px; text-align: center;">
+        <div style="font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: #007d8a; margin-bottom: 6px;">Museo Sang Bata sa Negros</div>
+        <div style="font-family: 'Nunito', sans-serif; font-size: 21px; font-weight: 900; color: #0f172a; margin-bottom: 16px; line-height: 1.25;">${escapeHtml(ex.title)}</div>
 
-        <!-- Exhibit Photos Showcase (Displays ALL Photos) -->
-        ${renderTagPhotosHtml(photos, ex.title)}
-
-        <!-- QR Code Frame -->
-        <div style="background: #f8fafc; padding: 12px; border-radius: 14px; display: inline-block; border: 1.5px solid #e2e8f0; margin-bottom: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-          <img src="${qrUrl}" alt="QR Tag for ${escapeHtml(ex.code)}" width="190" height="190" style="display: block; border-radius: 6px; margin: 0 auto;">
+        <!-- Big QR Code Frame -->
+        <div style="background: #f8fafc; padding: 14px; border-radius: 18px; display: inline-block; border: 2px solid #e2e8f0; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.05);">
+          <img src="${qrUrl}" alt="QR Tag for ${escapeHtml(ex.code)}" width="270" height="270" style="display: block; border-radius: 8px; margin: 0 auto;">
         </div>
-        <div style="font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 14px;">Scan with phone camera for audio guide &amp; details</div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 14px; background: #f1f5f9; border-radius: 10px; font-size: 12.5px; font-weight: 700; border: 1px solid #e2e8f0;">
-          <span style="color: #475569; display: flex; align-items: center; gap: 5px;">📷 Scan with camera</span>
-          <span class="mono" style="color: #0f172a; font-size: 13.5px; font-weight: 800; background: #ffffff; padding: 2px 8px; border-radius: 6px; border: 1px solid #cbd5e1;">${escapeHtml(ex.code)}</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: #f1f5f9; border-radius: 12px; font-size: 13px; font-weight: 700; border: 1px solid #e2e8f0;">
+          <span style="color: #475569; display: flex; align-items: center; gap: 6px;">📷 Scan with camera</span>
+          <span class="mono" style="color: #0f172a; font-size: 14px; font-weight: 900; background: #ffffff; padding: 2px 10px; border-radius: 6px; border: 1px solid #cbd5e1;">${escapeHtml(ex.code)}</span>
         </div>
       </div>
 
@@ -1575,12 +1428,12 @@ function openTagModal(code){
   // Download Placard Button
   document.getElementById('downloadTagBtn')?.addEventListener('click', (e) => {
     e.preventDefault();
-    downloadPlacardCanvas(ex, photos, qrUrl);
+    downloadPlacardCanvas(ex, qrUrl);
   });
 
   // Print Placard Button
   document.getElementById('printTagBtn')?.addEventListener('click', () => {
-    const win = window.open('', '_blank', 'width=700,height=850');
+    const win = window.open('', '_blank', 'width=700,height=800');
     if (!win) { toast('Popup blocked. Please allow popups to print.', true); return; }
     win.document.write(`
       <!DOCTYPE html>
@@ -1589,9 +1442,9 @@ function openTagModal(code){
         <title>Print QR Placard — ${escapeHtml(ex.code)}</title>
         <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=IBM+Plex+Mono:wght@600;700&display=swap" rel="stylesheet">
         <style>
-          @page { size: auto; margin: 12mm; }
+          @page { size: auto; margin: 15mm; }
           body { margin: 20px; font-family: 'Nunito', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 85vh; background: #f8fafc; color: #0f172a; }
-          .tag-box { border: 2.5px solid #0f172a; border-radius: 18px; padding: 26px 22px; text-align: center; max-width: 440px; width: 100%; box-sizing: border-box; background: #ffffff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+          .tag-box { border: 2.5px solid #0f172a; border-radius: 18px; padding: 28px 24px; text-align: center; max-width: 440px; width: 100%; box-sizing: border-box; background: #ffffff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
           .mono { font-family: 'IBM Plex Mono', monospace; }
           img { max-width: 100%; }
           @media print {
@@ -1602,23 +1455,18 @@ function openTagModal(code){
       </head>
       <body>
         <div class="tag-box">
-          <div style="font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: #007d8a; margin-bottom: 4px;">Museo Sang Bata sa Negros</div>
-          <div style="font-size: 21px; font-weight: 900; color: #0f172a; margin-bottom: 4px; line-height: 1.2;">${escapeHtml(ex.title)}</div>
-          <div style="font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 14px;">${escapeHtml(ex.category || 'Exhibit')}${ex.location ? ` • ${escapeHtml(ex.location)}` : ''}</div>
-          
-          <!-- All Exhibit Photos -->
-          ${renderTagPhotosHtml(photos, ex.title)}
+          <div style="font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: #007d8a; margin-bottom: 6px;">Museo Sang Bata sa Negros</div>
+          <div style="font-size: 23px; font-weight: 900; color: #0f172a; margin-bottom: 18px; line-height: 1.2;">${escapeHtml(ex.title)}</div>
 
-          <!-- QR Box -->
-          <div style="background: #f8fafc; padding: 12px; border-radius: 14px; display: inline-block; border: 1.5px solid #cbd5e1; margin-bottom: 6px;">
-            <img src="${qrUrl}" width="200" height="200" style="display: block; margin: 0 auto; border-radius: 6px;">
+          <!-- Big QR Box -->
+          <div style="background: #f8fafc; padding: 16px; border-radius: 18px; display: inline-block; border: 2px solid #cbd5e1; margin-bottom: 18px;">
+            <img src="${qrUrl}" width="280" height="280" style="display: block; margin: 0 auto; border-radius: 8px;">
           </div>
-          <div style="font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 14px;">Scan with phone camera for audio guide &amp; details</div>
 
           <!-- Bottom bar -->
-          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 800; border-top: 1.5px solid #e2e8f0; padding-top: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 800; border-top: 1.5px solid #e2e8f0; padding-top: 12px;">
             <span style="color: #475569;">📷 Scan with camera</span>
-            <span class="mono" style="color: #0f172a; font-size: 14px;">${escapeHtml(ex.code)}</span>
+            <span class="mono" style="color: #0f172a; font-size: 15px; font-weight: 900;">${escapeHtml(ex.code)}</span>
           </div>
         </div>
         <script>

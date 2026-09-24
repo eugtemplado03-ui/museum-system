@@ -116,7 +116,7 @@ router.get('/:code/qr', async (req, res) => {
     if (!ex) return res.status(404).json({ error: 'Exhibit not found.' });
     
     const url = publicUrlForExhibit(req, ex.code);
-    const png = await QRCode.toBuffer(url, { width: 320, margin: 1, color: { dark: '#2B271F', light: '#FFFFFF' } });
+    const png = await QRCode.toBuffer(url, { width: 600, margin: 1, color: { dark: '#2B271F', light: '#FFFFFF' } });
     res.set('Content-Type', 'image/png');
     res.set('Content-Disposition', `inline; filename="${ex.code}-tag.png"`);
     res.send(png);
