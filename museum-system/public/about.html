@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -10,14 +10,22 @@
 <script src="/js/gate.js"></script>
 </head>
 <body>
+  <!-- ── Top Navigation Bar ─────────────────────────────────────── -->
   <div class="topbar">
-    <a class="brand" href="/dashboard.html">
-      <div class="brand-mark">M</div>
-      <div class="brand-text">
-        <div class="name">Museo Sang Bata sa Negros</div>
-        <div class="tagline" style="font-size: 9px; max-width: 400px;">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
-      </div>
-    </a>
+    <div class="topbar-left">
+      <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle navigation sidebar" title="Open Menu">
+        <span class="toggle-bar"></span>
+        <span class="toggle-bar"></span>
+        <span class="toggle-bar"></span>
+      </button>
+      <a class="brand" href="/dashboard.html">
+        <div class="brand-mark">M</div>
+        <div class="brand-text">
+          <div class="name">Museo Sang Bata sa Negros</div>
+          <div class="tagline" style="font-size: 9px; max-width: 400px;">A Hands-on and Interactive Children's Museum. Member of the Intercontinental Museum Network, SAMP</div>
+        </div>
+      </a>
+    </div>
     <div class="nav-links">
       <a class="nav-btn" href="/dashboard.html">Home</a>
       <a class="nav-btn" href="/exhibits.html">Exhibits</a>
@@ -25,54 +33,67 @@
       <a class="nav-btn" href="/gallery.html">Gallery</a>
       <a class="nav-btn" href="/events.html">Events</a>
       <a class="nav-btn active" href="/about.html">About</a>
-      
     </div>
   </div>
 
-  <main><div class="wrap">
-    <div class="page-hero">
-      <h1>About Museo Sang Bata sa Negros</h1>
-      <p>A hands-on, interactive children's museum dedicated to marine education, creative learning, and community stewardship in northern Negros Occidental.</p>
-    </div>
+  <div class="user-layout">
+    <div class="user-main">
+      <!-- ── Top Banner with ex3.jpg Background ── -->
+      <section class="page-top-banner" id="aboutTopBanner">
+        <div class="page-top-inner">
+          <div class="page-hero about-hero" style="margin-bottom:0 !important;">
+            <div style="position:relative; z-index:1;">
+              <h1>About Museo Sang Bata sa Negros</h1>
+              <p>A hands-on, interactive children's museum dedicated to marine education, creative learning, and community stewardship in northern Negros Occidental.</p>
+            </div>
+            <div class="page-hero-icon" style="font-size:72px; flex-shrink:0; opacity:0.9;" aria-hidden="true">🏛️</div>
+          </div>
+        </div>
+      </section>
 
-    <div class="content-card" style="padding:28px; background:#fff; color:#1e241d; margin-bottom:24px;">
-      <h2>Who we are</h2>
-      <p>The Museo Sang Bata sa Negros Foundation is a non-stock, non-profit museum and learning center located on the shoreline of Barangay Old Sagay, beside the Sagay Marine Reserve. The museum provides children, families, and coastal communities with immersive exhibits and programs that build appreciation for the marine environment, local culture, and responsible stewardship.</p>
-    </div>
+      <main style="padding: clamp(24px, 3.5vw, 40px) 0; flex: 1;">
+        <div class="wrap" style="max-width: 1100px; margin: 0 auto; width: 92%; padding: 0 4px;">
+          <div class="content-card" style="padding:28px; background:#fff; color:#1e241d; margin-bottom:24px;">
+            <h2>Who we are</h2>
+            <p>The Museo Sang Bata sa Negros Foundation is a non-stock, non-profit museum and learning center located on the shoreline of Barangay Old Sagay, beside the Sagay Marine Reserve. The museum provides children, families, and coastal communities with immersive exhibits and programs that build appreciation for the marine environment, local culture, and responsible stewardship.</p>
+          </div>
 
-    <div class="content-card" style="padding:28px; background:#fff; color:#1e241d; margin-bottom:24px;">
-      <h2>Vision</h2>
-      <p>A premiere children’s hands-on museum that awakens and stimulates the creative and intellectual potential of children, allowing them to discover, understand, and appreciate themselves, others, their environment, their culture, and the rest of the world.</p>
-      <h2 style="margin-top:24px;">Mission</h2>
-      <p>To establish an alternative center of learning and discovery that enhances and stimulates children to reach their highest potential through marine conservation education and interactive play.</p>
-      <h2 style="margin-top:24px;">Objectives</h2>
-      <ul style="margin:0; padding-left:20px; color:#1e241d;">
-        <li>Provide children a place to actively make connections among ideas, people, and cultures through creative play.</li>
-        <li>Encourage children to define their roles in their local community and the global community.</li>
-        <li>Stimulate children’s creative minds and help them understand, appreciate, love, and be proud of their environment and culture.</li>
-        <li>Inculcate high moral values so children can make a stand in a rapidly changing world.</li>
-      </ul>
-    </div>
+          <div class="content-card" style="padding:28px; background:#fff; color:#1e241d; margin-bottom:24px;">
+            <h2>Vision</h2>
+            <p>A premiere children’s hands-on museum that awakens and stimulates the creative and intellectual potential of children, allowing them to discover, understand, and appreciate themselves, others, their environment, their culture, and the rest of the world.</p>
+            <h2 style="margin-top:24px;">Mission</h2>
+            <p>To establish an alternative center of learning and discovery that enhances and stimulates children to reach their highest potential through marine conservation education and interactive play.</p>
+            <h2 style="margin-top:24px;">Objectives</h2>
+            <ul style="margin:0; padding-left:20px; color:#1e241d;">
+              <li>Provide children a place to actively make connections among ideas, people, and cultures through creative play.</li>
+              <li>Encourage children to define their roles in their local community and the global community.</li>
+              <li>Stimulate children’s creative minds and help them understand, appreciate, love, and be proud of their environment and culture.</li>
+              <li>Inculcate high moral values so children can make a stand in a rapidly changing world.</li>
+            </ul>
+          </div>
 
-    <div class="content-card" style="padding:28px; background:#fff; color:#1e241d; margin-bottom:24px;">
-      <h2>What we do</h2>
-      <p>The museum serves as an alternative learning center for marine conservation education. Through its exhibits and outreach, MSBN is helping transform attitudes toward the environment in coastal communities. Its flagship program is the Marine Conservation Education Program, which trains public elementary science teachers and raises awareness of marine stewardship among children.</p>
-      <p>Another important initiative is the Museum Junior Guide Program, where children ages 8 to 12 act as museum guides for visitors. This gives young learners practical experience sharing museum stories while building confidence and leadership.</p>
-    </div>
+          <div class="content-card" style="padding:28px; background:#fff; color:#1e241d; margin-bottom:24px;">
+            <h2>What we do</h2>
+            <p>The museum serves as an alternative learning center for marine conservation education. Through its exhibits and outreach, MSBN is helping transform attitudes toward the environment in coastal communities. Its flagship program is the Marine Conservation Education Program, which trains public elementary science teachers and raises awareness of marine stewardship among children.</p>
+            <p>Another important initiative is the Museum Junior Guide Program, where children ages 8 to 12 act as museum guides for visitors. This gives young learners practical experience sharing museum stories while building confidence and leadership.</p>
+          </div>
 
-    <div class="content-card" style="padding:28px; background:#fff; color:#1e241d;">
-      <h2>Foundation profile</h2>
-      <p>Full name: Museo Sang Bata sa Negros Foundation, A Hands-on and Interactive Children’s Museum (Non-stock, non-profit foundation).</p>
-      <p>Established June 11, 2003. Registered with the Securities and Exchange Commission on November 5, 2002.</p>
-      <p>Memberships: West Visayan Association of Museums; SAMP Intercontinental Network of Museums (supported by SIDA).</p>
+          <div class="content-card" style="padding:28px; background:#fff; color:#1e241d;">
+            <h2>Foundation profile</h2>
+            <p>Full name: Museo Sang Bata sa Negros Foundation, A Hands-on and Interactive Children’s Museum (Non-stock, non-profit foundation).</p>
+            <p>Established June 11, 2003. Registered with the Securities and Exchange Commission on November 5, 2002.</p>
+            <p>Memberships: West Visayan Association of Museums; SAMP Intercontinental Network of Museums (supported by SIDA).</p>
+          </div>
+        </div>
+      </main>
     </div>
-
-  </div></main>
+  </div>
 
   <footer id="siteFooter"></footer>
 
   <script src="/js/api.js"></script>
   <script src="/js/chatbot.js"></script>
+  <script src="/js/sidebar.js"></script>
   <script src="/js/footer.js"></script>
 </body>
 </html>

@@ -7908,7 +7908,7 @@ footer a:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
 }
 
-/* 17. Top Two-Section Banner with ex3.jpg Background across Exhibits, Programs, Gallery & Events */
+/* 17. Top Banner with ex3.jpg Background across Exhibits, Programs, Gallery, Events, About, Donate & Contact */
 .page-top-banner {
   position: relative !important;
   width: 100% !important;
@@ -7963,6 +7963,11 @@ footer a:hover {
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25) !important;
   color: #FFFFFF !important;
   margin-bottom: 22px !important;
+}
+
+.page-top-banner .page-hero:only-child,
+.page-top-banner .page-hero:last-child {
+  margin-bottom: 0 !important;
 }
 
 .page-top-banner .exhibits-hero *,
