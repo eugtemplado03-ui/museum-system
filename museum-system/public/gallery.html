@@ -331,19 +331,21 @@
     transform: scale(1.08) !important;
   }
 
-  /* Protective exhibition gradient scrim ensuring text is 100% legible and vibrant */
+  /* Protective exhibition gradient scrim ensuring text is 100% legible - hidden until card hover */
   .gallery-content-card::after {
     content: '' !important;
     position: absolute !important;
     inset: 0 !important;
-    background: linear-gradient(180deg, rgba(12, 35, 64, 0.22) 0%, transparent 32%, rgba(12, 35, 64, 0.82) 65%, rgba(10, 28, 52, 0.98) 100%) !important;
+    background: linear-gradient(180deg, rgba(12, 35, 64, 0.12) 0%, transparent 28%, rgba(12, 35, 64, 0.85) 60%, rgba(8, 22, 42, 0.99) 100%) !important;
     pointer-events: none !important;
     z-index: 2 !important;
-    transition: background 0.4s ease, opacity 0.4s ease !important;
+    opacity: 0 !important;
+    transition: opacity 0.38s cubic-bezier(0.22, 1, 0.36, 1) !important;
   }
 
-  .gallery-content-card:hover::after {
-    background: linear-gradient(180deg, rgba(12, 35, 64, 0.15) 0%, transparent 26%, rgba(12, 35, 64, 0.88) 60%, rgba(8, 22, 42, 1) 100%) !important;
+  .gallery-content-card:hover::after,
+  .gallery-content-card:focus-within::after {
+    opacity: 1 !important;
   }
 
   /* Corner badge floating over photo wall */
@@ -390,7 +392,7 @@
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
   }
 
-  /* ── In Walls Make The Text White & Details Hover Animations ── */
+  /* ── In Walls Make The Text White & Hidden Until Hover ── */
   .gallery-content-card .body {
     position: absolute !important;
     bottom: 0 !important;
@@ -402,12 +404,22 @@
     flex-direction: column !important;
     background: transparent !important;
     color: #ffffff !important;
-    transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1) !important;
-    will-change: transform;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translateY(20px) !important;
+    pointer-events: none !important;
+    transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                visibility 0.35s !important;
+    will-change: transform, opacity;
   }
 
-  .gallery-content-card:hover .body {
-    transform: translateY(-5px) !important;
+  .gallery-content-card:hover .body,
+  .gallery-content-card:focus-within .body {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+    pointer-events: auto !important;
   }
 
   .gallery-curator-label {
@@ -594,11 +606,10 @@
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
   }
 
-  /* When card is hovered, subtle button elevation + arrow nudge */
+  /* When card is hovered, button glow & arrow nudge */
   .gallery-content-card:hover .gallery-view-btn {
     border-color: #ffffff !important;
     box-shadow: 0 6px 18px rgba(91, 164, 230, 0.55), 0 0 12px rgba(255, 255, 255, 0.25) !important;
-    transform: translateY(-2px) !important;
   }
 
   .gallery-content-card:hover .gallery-view-btn .gallery-btn-arrow,
