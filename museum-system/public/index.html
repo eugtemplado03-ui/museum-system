@@ -4004,9 +4004,13 @@
       const password = document.getElementById('adminPassword').value;
 
       try {
-        const { token } = await Api.login(username, password);
+        const res = await Api.login(username, password);
+        const token = res.token || res;
         Api.setToken(token);
         if (typeof Gate !== 'undefined') Gate.clearVisitorCheckin();
+        const adminUser = (res && res.user && res.user.username) ? res.user.username : username;
+        localStorage.setItem('museum_admin_username', adminUser);
+        sessionStorage.setItem('museum_admin_username', adminUser);
 
         const target = (redirectUrl && (typeof Gate === 'undefined' || !Gate.isGatePage(redirectUrl)))
           ? redirectUrl

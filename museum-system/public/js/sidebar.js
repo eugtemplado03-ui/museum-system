@@ -33,6 +33,133 @@
     return document.querySelector('.admin-sidebar') || document.querySelector('.user-sidebar') || document.getElementById('userSidebar');
   }
 
+  function escapeHtml(str) {
+    return String(str || '').replace(/[&<>"']/g, (m) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[m]);
+  }
+
+  function getUserStatusInfo() {
+    const isAdmin = (typeof Gate !== 'undefined')
+      ? Gate.isAdminLoggedIn()
+      : (!!localStorage.getItem('museum_admin_token') || !!sessionStorage.getItem('museum_admin_token'));
+
+    if (isAdmin) {
+      let adminName = '';
+      if (typeof Gate !== 'undefined' && Gate.getAdminUsername) {
+        adminName = Gate.getAdminUsername();
+      }
+      if (!adminName) {
+        adminName = localStorage.getItem('museum_admin_username') || sessionStorage.getItem('museum_admin_username') || '';
+      }
+      if (!adminName) {
+        try {
+          const token = localStorage.getItem('museum_admin_token') || sessionStorage.getItem('museum_admin_token');
+          if (token) {
+            const parts = token.split('.');
+            if (parts.length === 3) {
+              const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+              if (payload && payload.username) adminName = payload.username;
+            }
+          }
+        } catch (e) {}
+      }
+      adminName = adminName ? adminName.trim() : '';
+      const displayLabel = adminName ? `🛡️ Admin: ${adminName}` : '🛡️ Admin';
+      return {
+        isAdmin: true,
+        text: displayLabel,
+        title: adminName ? `Staff Admin: ${adminName} — Click to open Admin Dashboard` : 'Staff Admin — Click to open Admin Dashboard',
+        href: '/admin.html',
+        onclick: "event.preventDefault(); window.location.href='/admin.html';",
+        color: '#00f0ff'
+      };
+    }
+
+    // Visitor
+    let visitorName = '';
+    try {
+      visitorName = localStorage.getItem('museum_visitor_name') || sessionStorage.getItem('museum_visitor_name') || '';
+      if (!visitorName) {
+        const lastVisit = JSON.parse(localStorage.getItem('museum_last_visit') || '{}');
+        visitorName = lastVisit.name || lastVisit.visitorName || '';
+      }
+      if (!visitorName) {
+        const pass = JSON.parse(localStorage.getItem('museum_visitor_pass') || '{}');
+        visitorName = pass.visitorName || '';
+      }
+      if (!visitorName) {
+        const history = JSON.parse(localStorage.getItem('museum_visitor_history') || '[]');
+        if (history.length && history[0].visitorName) {
+          visitorName = history[0].visitorName;
+        }
+      }
+    } catch (e) {}
+
+    visitorName = visitorName ? visitorName.trim() : '';
+    // Avoid showing "Visitor: Museum Admin" if stale admin flag was stored in visitor name
+    if (visitorName && visitorName.toLowerCase().includes('admin')) {
+      visitorName = '';
+    }
+
+    const displayLabel = (visitorName && visitorName.toLowerCase() !== 'visitor')
+      ? `👤 Visitor: ${visitorName}`
+      : '👤 Visitor';
+
+    return {
+      isAdmin: false,
+      text: displayLabel,
+      title: visitorName ? `Verified Visitor: ${visitorName} — Click to view Digital Pass & History` : 'Verified Visitor — Click to view Digital Pass & History',
+      href: '#',
+      onclick: "event.preventDefault(); if (window.openVisitorHistoryModal) window.openVisitorHistoryModal(); else window.location.href='/dashboard.html#history';",
+      color: '#5eead4'
+    };
+  }
+
+  function renderSidebarUserStatusHtml() {
+    const status = getUserStatusInfo();
+    return `
+      <div class="sidebar-user-status-box" id="sidebarUserStatusBox" style="font-size:11.5px; color:rgba(255,255,255,0.75); margin-bottom:8px; padding:6px 10px; background:rgba(0,0,0,0.32); border:1px solid rgba(255,255,255,0.08); border-radius:8px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
+        <a href="${status.href}" id="sidebarVisitorNameLink" onclick="${status.onclick}" style="color:${status.color}; text-decoration:none; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; min-width:0; display:inline-flex; align-items:center;" title="${escapeHtml(status.title)}">
+          ${escapeHtml(status.text)}
+        </a>
+        <a href="#" onclick="event.preventDefault(); if (typeof Gate !== 'undefined') Gate.clearAllSessions(); else { localStorage.clear(); sessionStorage.clear(); } window.location.href='/?action=signup';" style="color:#f87171; text-decoration:none; font-weight:700; font-size:11px; flex-shrink:0;" title="Sign out / Switch user">Switch</a>
+      </div>
+    `;
+  }
+
+  function updateSidebarUserStatus(sidebar) {
+    if (!sidebar) sidebar = getActiveSidebarElement();
+    if (!sidebar) return;
+    const footer = sidebar.querySelector('.user-sidebar-footer');
+    if (!footer) return;
+
+    const status = getUserStatusInfo();
+    const existingBox = footer.querySelector('.sidebar-user-status-box, #sidebarUserStatusBox, #sidebarVisitorStatusBox')
+      || footer.querySelector('div[style*="justify-content:space-between"]');
+
+    if (existingBox) {
+      existingBox.className = 'sidebar-user-status-box';
+      existingBox.id = 'sidebarUserStatusBox';
+      existingBox.innerHTML = `
+        <a href="${status.href}" id="sidebarVisitorNameLink" onclick="${status.onclick}" style="color:${status.color}; text-decoration:none; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; min-width:0; display:inline-flex; align-items:center;" title="${escapeHtml(status.title)}">
+          ${escapeHtml(status.text)}
+        </a>
+        <a href="#" onclick="event.preventDefault(); if (typeof Gate !== 'undefined') Gate.clearAllSessions(); else { localStorage.clear(); sessionStorage.clear(); } window.location.href='/?action=signup';" style="color:#f87171; text-decoration:none; font-weight:700; font-size:11px; flex-shrink:0;" title="Sign out / Switch user">Switch</a>
+      `;
+    } else {
+      const temp = document.createElement('div');
+      temp.innerHTML = renderSidebarUserStatusHtml();
+      if (temp.firstElementChild) {
+        footer.insertBefore(temp.firstElementChild, footer.firstChild);
+      }
+    }
+  }
+
   function initSidebar() {
     // 1. Place Navigation Button in the VERY LEFT CORNER of .topbar
     const topbar = document.querySelector('.topbar');
@@ -154,12 +281,7 @@
         </nav>
 
         <div class="user-sidebar-footer">
-          <div style="font-size:11.5px; color:rgba(255,255,255,0.75); margin-bottom:8px; padding:6px 8px; background:rgba(0,0,0,0.25); border-radius:8px; display:flex; align-items:center; justify-content:space-between;">
-            <a href="#" onclick="event.preventDefault(); window.openVisitorHistoryModal();" style="color:#5eead4; text-decoration:none; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">
-              ${localStorage.getItem('museum_visitor_name') ? '👤 ' + String(localStorage.getItem('museum_visitor_name')).replace(/[&<>"']/g, '') : '🟢 Verified Visitor'}
-            </a>
-            <a href="#" onclick="event.preventDefault(); if (typeof Gate !== 'undefined') Gate.clearVisitorCheckin(); else { localStorage.clear(); sessionStorage.clear(); } window.location.href='/?action=signup';" style="color:#f87171; text-decoration:none; font-weight:700; font-size:11px; margin-left:6px;" title="Sign out / Switch visitor">Switch</a>
-          </div>
+          ${renderSidebarUserStatusHtml()}
           <a class="user-sidebar-sublink" href="/donate.html">
             <span>💖</span> Support Us
           </a>
@@ -202,6 +324,7 @@
           brand.appendChild(closeBtn);
         }
       }
+      updateSidebarUserStatus(sidebar);
     }
 
     // 4. Attach event handlers
@@ -267,6 +390,9 @@
     const backdrop = document.getElementById('sidebarBackdrop');
 
     if (!sidebar) return;
+
+    // Dynamically update user status box (Admin or Visitor with name)
+    updateSidebarUserStatus(sidebar);
 
     // Check if admin logged in and dynamically ensure admin return card exists in sidebar
     const isAdmin = (typeof Gate !== 'undefined') ? Gate.isAdminLoggedIn() : (!!localStorage.getItem('museum_admin_token') || !!sessionStorage.getItem('museum_admin_token'));

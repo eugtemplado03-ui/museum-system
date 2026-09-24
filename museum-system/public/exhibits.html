@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -282,11 +282,11 @@
       </nav>
 
       <div class="user-sidebar-footer">
-        <div id="sidebarVisitorStatusBox" style="font-size:11.5px; color:rgba(255,255,255,0.75); margin-bottom:8px; padding:6px 8px; background:rgba(0,0,0,0.25); border-radius:8px; display:flex; align-items:center; justify-content:space-between;">
-          <a href="#" id="sidebarVisitorNameLink" onclick="event.preventDefault(); if(window.openVisitorHistoryModal) window.openVisitorHistoryModal(); else window.location.href='/dashboard.html#history';" style="color:#5eead4; text-decoration:none; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">
-            👤 Verified Visitor
+        <div id="sidebarUserStatusBox" class="sidebar-user-status-box" style="font-size:11.5px; color:rgba(255,255,255,0.75); margin-bottom:8px; padding:6px 10px; background:rgba(0,0,0,0.32); border:1px solid rgba(255,255,255,0.08); border-radius:8px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
+          <a href="#" id="sidebarVisitorNameLink" onclick="event.preventDefault(); if(window.openVisitorHistoryModal) window.openVisitorHistoryModal(); else window.location.href='/dashboard.html#history';" style="color:#5eead4; text-decoration:none; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; min-width:0; display:inline-flex; align-items:center;" title="Verified Visitor">
+            👤 Visitor
           </a>
-          <a href="#" onclick="event.preventDefault(); if (typeof Gate !== 'undefined') Gate.clearVisitorCheckin(); else { localStorage.clear(); sessionStorage.clear(); } window.location.href='/?action=signup';" style="color:#f87171; text-decoration:none; font-weight:700; font-size:11px; margin-left:6px;" title="Sign out / Switch visitor">Switch</a>
+          <a href="#" onclick="event.preventDefault(); if (typeof Gate !== 'undefined') Gate.clearAllSessions(); else { localStorage.clear(); sessionStorage.clear(); } window.location.href='/?action=signup';" style="color:#f87171; text-decoration:none; font-weight:700; font-size:11px; flex-shrink:0;" title="Sign out / Switch account">Switch</a>
         </div>
         <a class="user-sidebar-sublink" href="/donate.html">
           <span>💖</span> Support Us
@@ -712,11 +712,28 @@
       });
     }
 
-    // Sync visitor name in sidebar footer
+    // Sync user role and name in sidebar footer
     try {
-      const vName = localStorage.getItem('museum_visitor_name');
       const vLink = document.getElementById('sidebarVisitorNameLink');
-      if (vLink && vName) vLink.textContent = '👤 ' + vName;
+      if (vLink) {
+        const isAdmin = (typeof Gate !== 'undefined') && Gate.isAdminLoggedIn();
+        if (isAdmin) {
+          const aName = (typeof Gate !== 'undefined' && Gate.getAdminUsername) ? Gate.getAdminUsername() : (localStorage.getItem('museum_admin_username') || '');
+          vLink.textContent = aName ? ('🛡️ Admin: ' + aName) : '🛡️ Admin';
+          vLink.style.color = '#00f0ff';
+        } else {
+          let vName = localStorage.getItem('museum_visitor_name') || '';
+          if (!vName) {
+            try {
+              const pass = JSON.parse(localStorage.getItem('museum_visitor_pass') || '{}');
+              vName = pass.visitorName || '';
+            } catch (e) {}
+          }
+          if (vName && vName.toLowerCase().includes('admin')) vName = '';
+          vLink.textContent = (vName && vName.toLowerCase() !== 'visitor') ? ('👤 Visitor: ' + vName) : '👤 Visitor';
+          vLink.style.color = '#5eead4';
+        }
+      }
     } catch (e) {}
   </script>
   <footer id="siteFooter"></footer>

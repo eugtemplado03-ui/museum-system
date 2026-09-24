@@ -4,6 +4,7 @@ const Gate = (() => {
   const VISITOR_NAME_KEY = 'museum_visitor_name';
   const CHECKIN_DATE_KEY = 'museum_visitor_date';
   const ADMIN_TOKEN_KEY = 'museum_admin_token';
+  const ADMIN_USERNAME_KEY = 'museum_admin_username';
 
   function isVisitorCheckedIn() {
     if (sessionStorage.getItem(CHECKIN_KEY) === 'true') return true;
@@ -29,6 +30,23 @@ const Gate = (() => {
 
   function getVisitorName() {
     return sessionStorage.getItem(VISITOR_NAME_KEY) || localStorage.getItem(VISITOR_NAME_KEY) || 'Visitor';
+  }
+
+  function getAdminUsername() {
+    let name = localStorage.getItem(ADMIN_USERNAME_KEY) || sessionStorage.getItem(ADMIN_USERNAME_KEY) || '';
+    if (!name) {
+      try {
+        const token = localStorage.getItem(ADMIN_TOKEN_KEY) || sessionStorage.getItem(ADMIN_TOKEN_KEY);
+        if (token) {
+          const parts = token.split('.');
+          if (parts.length === 3) {
+            const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+            if (payload && payload.username) name = payload.username;
+          }
+        }
+      } catch (e) {}
+    }
+    return name || '';
   }
 
   function setVisitorCheckedIn(name) {
@@ -61,6 +79,8 @@ const Gate = (() => {
     localStorage.removeItem(ADMIN_TOKEN_KEY);
     sessionStorage.removeItem(ADMIN_TOKEN_KEY);
     sessionStorage.removeItem('museum_in_admin');
+    localStorage.removeItem(ADMIN_USERNAME_KEY);
+    sessionStorage.removeItem(ADMIN_USERNAME_KEY);
   }
 
   function clearAllSessions() {
@@ -307,6 +327,7 @@ const Gate = (() => {
     isAdminLoggedIn,
     isAuthenticated,
     getVisitorName,
+    getAdminUsername,
     setVisitorCheckedIn,
     clearVisitorCheckin,
     clearAdminSession,
