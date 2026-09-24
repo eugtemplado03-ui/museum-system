@@ -40,6 +40,10 @@
     box-sizing: border-box !important;
   }
 
+  #galleryTopBanner .page-top-inner {
+    max-width: 1600px !important;
+  }
+
   #galleryTopBanner::before {
     content: '' !important;
     position: absolute !important;
@@ -249,26 +253,47 @@
     font-weight: 800 !important;
   }
 
-  /* ── 3. Gallery Exhibition Photo Wall (Exclusively Walls with White Text) ── */
+  /* ── 3. Gallery Exhibition Photo Wall (5 Cards / Boxes Display) ── */
   .gallery-grid {
     display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)) !important;
-    gap: 24px !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 16px !important;
   }
 
-  @media (max-width: 640px) {
+  @media (max-width: 1280px) {
+    .gallery-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      gap: 14px !important;
+    }
+  }
+
+  @media (max-width: 992px) {
+    .gallery-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 14px !important;
+    }
+  }
+
+  @media (max-width: 680px) {
+    .gallery-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 12px !important;
+    }
+  }
+
+  @media (max-width: 440px) {
     .gallery-grid {
       grid-template-columns: 1fr !important;
-      gap: 18px !important;
+      gap: 12px !important;
     }
   }
 
   .gallery-content-card {
     position: relative !important;
-    height: 380px !important;
+    height: 385px !important;
     background: #0c2340 !important;
     border: 2px solid #bae6fd !important;
-    border-radius: 20px !important;
+    border-radius: 18px !important;
     overflow: hidden !important;
     box-shadow: 0 8px 24px rgba(91, 164, 230, 0.15), 0 2px 6px rgba(0, 0, 0, 0.08) !important;
     display: flex !important;
@@ -319,36 +344,36 @@
   /* Corner badge floating over photo wall */
   .gallery-badge-pill {
     position: absolute !important;
-    top: 14px !important;
-    left: 14px !important;
+    top: 10px !important;
+    left: 10px !important;
     z-index: 5 !important;
     background: #5ba4e6 !important;
     background-image: linear-gradient(135deg, #5ba4e6 0%, #3b93dc 100%) !important;
     color: #ffffff !important;
-    font-size: 11.5px !important;
+    font-size: 10.5px !important;
     font-weight: 800 !important;
-    padding: 5px 12px !important;
+    padding: 4px 10px !important;
     border-radius: 999px !important;
     border: 1.5px solid rgba(255, 255, 255, 0.9) !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
     display: inline-flex !important;
     align-items: center !important;
-    gap: 6px !important;
-    letter-spacing: 0.3px !important;
+    gap: 5px !important;
+    letter-spacing: 0.2px !important;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
   }
 
   /* Photo count pill floating top right */
   .gallery-photo-count-pill {
     position: absolute !important;
-    top: 14px !important;
-    right: 14px !important;
+    top: 10px !important;
+    right: 10px !important;
     background: rgba(12, 35, 64, 0.78) !important;
     backdrop-filter: blur(8px) !important;
     color: #ffffff !important;
-    font-size: 11px !important;
+    font-size: 10px !important;
     font-weight: 800 !important;
-    padding: 5px 11px !important;
+    padding: 4px 8px !important;
     border-radius: 999px !important;
     border: 1.5px solid rgba(255, 255, 255, 0.7) !important;
     z-index: 5 !important;
@@ -367,7 +392,7 @@
     left: 0 !important;
     right: 0 !important;
     z-index: 5 !important;
-    padding: 22px !important;
+    padding: 16px !important;
     display: flex !important;
     flex-direction: column !important;
     background: transparent !important;
@@ -375,23 +400,23 @@
   }
 
   .gallery-curator-label {
-    font-size: 11px !important;
+    font-size: 9.5px !important;
     font-weight: 800 !important;
     text-transform: uppercase !important;
-    letter-spacing: 1.2px !important;
+    letter-spacing: 0.8px !important;
     color: #ffffff !important;
-    margin-bottom: 6px !important;
+    margin-bottom: 5px !important;
     display: flex !important;
     align-items: center !important;
-    gap: 6px !important;
+    gap: 5px !important;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8) !important;
   }
 
   .gallery-curator-label::before {
     content: '' !important;
     display: inline-block !important;
-    width: 6px !important;
-    height: 6px !important;
+    width: 5px !important;
+    height: 5px !important;
     border-radius: 50% !important;
     background: #ffffff !important;
     box-shadow: 0 0 6px rgba(255, 255, 255, 0.9) !important;
@@ -399,11 +424,11 @@
 
   .gallery-content-card h3 {
     font-family: 'Nunito', sans-serif !important;
-    font-size: 18.5px !important;
+    font-size: 16px !important;
     font-weight: 800 !important;
     color: #ffffff !important;
-    margin: 0 0 8px 0 !important;
-    line-height: 1.35 !important;
+    margin: 0 0 6px 0 !important;
+    line-height: 1.3 !important;
     text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9) !important;
   }
 
@@ -423,11 +448,11 @@
   .gallery-wall-card p.desc,
   .gallery-wall-card .desc,
   .gallery-content-card .body p {
-    font-size: 13.5px !important;
+    font-size: 12.5px !important;
     color: #ffffff !important;
     -webkit-text-fill-color: #ffffff !important;
-    line-height: 1.55 !important;
-    margin: 0 0 16px 0 !important;
+    line-height: 1.45 !important;
+    margin: 0 0 12px 0 !important;
     display: -webkit-box !important;
     -webkit-line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
@@ -438,12 +463,12 @@
 
   .gallery-card-footer {
     margin-top: auto !important;
-    padding-top: 14px !important;
+    padding-top: 10px !important;
     border-top: 1px solid rgba(255, 255, 255, 0.28) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    gap: 12px !important;
+    gap: 8px !important;
   }
 
   .gallery-view-btn,
@@ -454,21 +479,22 @@
     color: #ffffff !important;
     -webkit-text-fill-color: #ffffff !important;
     border: 1.5px solid rgba(255, 255, 255, 0.85) !important;
-    border-radius: 12px !important;
-    padding: 9px 18px !important;
+    border-radius: 10px !important;
+    padding: 8px 12px !important;
     font-family: 'Nunito', sans-serif !important;
-    font-size: 13px !important;
+    font-size: 12px !important;
     font-weight: 800 !important;
     text-decoration: none !important;
     display: inline-flex !important;
     align-items: center !important;
-    gap: 8px !important;
+    gap: 6px !important;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
     transition: all 0.25s ease !important;
     cursor: pointer !important;
     width: 100% !important;
     justify-content: center !important;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+    white-space: nowrap !important;
   }
 
   .gallery-view-btn span {
@@ -698,7 +724,7 @@
 
       <!-- ── Main Content Area: Gallery Grid ── -->
       <main style="padding: clamp(20px, 3vw, 36px); flex: 1;">
-        <div class="wrap" style="width: 92%; max-width: 1100px; margin: 0 auto; padding: 0 4px;">
+        <div class="wrap gallery-wrap" style="width: 96%; max-width: 1600px; margin: 0 auto; padding: 0 4px;">
           <div class="gallery-grid" id="galleryGrid"></div>
           <div id="emptyState" style="display:none;" class="empty-state">
             <h2>No photos or videos yet</h2>
