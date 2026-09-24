@@ -336,9 +336,14 @@
     content: '' !important;
     position: absolute !important;
     inset: 0 !important;
-    background: linear-gradient(180deg, rgba(12, 35, 64, 0.25) 0%, transparent 35%, rgba(12, 35, 64, 0.82) 65%, rgba(12, 35, 64, 0.98) 100%) !important;
+    background: linear-gradient(180deg, rgba(12, 35, 64, 0.22) 0%, transparent 32%, rgba(12, 35, 64, 0.82) 65%, rgba(10, 28, 52, 0.98) 100%) !important;
     pointer-events: none !important;
     z-index: 2 !important;
+    transition: background 0.4s ease, opacity 0.4s ease !important;
+  }
+
+  .gallery-content-card:hover::after {
+    background: linear-gradient(180deg, rgba(12, 35, 64, 0.15) 0%, transparent 26%, rgba(12, 35, 64, 0.88) 60%, rgba(8, 22, 42, 1) 100%) !important;
   }
 
   /* Corner badge floating over photo wall */
@@ -385,7 +390,7 @@
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
   }
 
-  /* ── In Walls Make The Text White ── */
+  /* ── In Walls Make The Text White & Details Hover Animations ── */
   .gallery-content-card .body {
     position: absolute !important;
     bottom: 0 !important;
@@ -397,6 +402,12 @@
     flex-direction: column !important;
     background: transparent !important;
     color: #ffffff !important;
+    transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1) !important;
+    will-change: transform;
+  }
+
+  .gallery-content-card:hover .body {
+    transform: translateY(-5px) !important;
   }
 
   .gallery-curator-label {
@@ -408,18 +419,38 @@
     margin-bottom: 5px !important;
     display: flex !important;
     align-items: center !important;
-    gap: 5px !important;
+    gap: 6px !important;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8) !important;
+    transition: color 0.3s ease, letter-spacing 0.3s cubic-bezier(0.22, 1, 0.36, 1), text-shadow 0.3s ease !important;
   }
 
   .gallery-curator-label::before {
     content: '' !important;
     display: inline-block !important;
-    width: 5px !important;
-    height: 5px !important;
+    width: 6px !important;
+    height: 6px !important;
     border-radius: 50% !important;
     background: #ffffff !important;
     box-shadow: 0 0 6px rgba(255, 255, 255, 0.9) !important;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease, background 0.35s ease !important;
+  }
+
+  .gallery-content-card:hover .gallery-curator-label {
+    color: #e0f2fe !important;
+    letter-spacing: 1.1px !important;
+    text-shadow: 0 0 10px rgba(91, 164, 230, 0.8), 0 1px 4px rgba(0, 0, 0, 0.9) !important;
+  }
+
+  .gallery-content-card:hover .gallery-curator-label::before {
+    transform: scale(1.4) !important;
+    background: #bae6fd !important;
+    box-shadow: 0 0 10px #38bdf8, 0 0 18px rgba(56, 189, 248, 0.8) !important;
+    animation: curatorDotPulse 1.6s infinite alternate ease-in-out !important;
+  }
+
+  @keyframes curatorDotPulse {
+    0% { transform: scale(1.2); box-shadow: 0 0 6px #5ba4e6; }
+    100% { transform: scale(1.55); box-shadow: 0 0 14px #ffffff, 0 0 20px #5ba4e6; }
   }
 
   .gallery-content-card h3 {
@@ -430,17 +461,23 @@
     margin: 0 0 6px 0 !important;
     line-height: 1.3 !important;
     text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9) !important;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), text-shadow 0.35s ease !important;
+  }
+
+  .gallery-content-card:hover h3 {
+    transform: translateX(3px) !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), 0 0 14px rgba(186, 230, 253, 0.7) !important;
   }
 
   .gallery-content-card h3 a {
     color: #ffffff !important;
     text-decoration: none !important;
-    transition: opacity 0.2s ease !important;
+    transition: color 0.25s ease, opacity 0.25s ease !important;
   }
 
   .gallery-content-card:hover h3 a {
     color: #ffffff !important;
-    opacity: 0.92 !important;
+    opacity: 1 !important;
   }
 
   .gallery-content-card p.desc,
@@ -457,8 +494,19 @@
     -webkit-line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
-    opacity: 0.95 !important;
+    opacity: 0.92 !important;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8) !important;
+    transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), color 0.35s ease !important;
+  }
+
+  .gallery-content-card:hover p.desc,
+  .gallery-content-card:hover .desc,
+  .gallery-content-card:hover .body p {
+    opacity: 1 !important;
+    color: #f8fafc !important;
+    -webkit-text-fill-color: #f8fafc !important;
+    transform: translateX(2px) !important;
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.95), 0 0 10px rgba(91, 164, 230, 0.45) !important;
   }
 
   .gallery-card-footer {
@@ -469,57 +517,125 @@
     align-items: center !important;
     justify-content: space-between !important;
     gap: 8px !important;
+    transition: border-color 0.35s ease, box-shadow 0.35s ease !important;
   }
 
-  .gallery-view-btn,
-  .gallery-view-btn *,
-  .gallery-view-btn span {
+  .gallery-content-card:hover .gallery-card-footer {
+    border-top: 1px solid rgba(186, 230, 253, 0.7) !important;
+    box-shadow: 0 -2px 12px rgba(91, 164, 230, 0.35) !important;
+  }
+
+  /* ── Gallery Action Button & Hover Micro-Interactions ── */
+  .gallery-view-btn {
+    position: relative !important;
+    overflow: hidden !important;
     background: #5ba4e6 !important;
     background-image: linear-gradient(135deg, #5ba4e6 0%, #3b93dc 100%) !important;
     color: #ffffff !important;
     -webkit-text-fill-color: #ffffff !important;
     border: 1.5px solid rgba(255, 255, 255, 0.85) !important;
     border-radius: 10px !important;
-    padding: 8px 12px !important;
+    padding: 8px 14px !important;
     font-family: 'Nunito', sans-serif !important;
     font-size: 12px !important;
     font-weight: 800 !important;
     text-decoration: none !important;
     display: inline-flex !important;
     align-items: center !important;
-    gap: 6px !important;
+    gap: 8px !important;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
-    transition: all 0.25s ease !important;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                background 0.3s ease,
+                border-color 0.3s ease,
+                letter-spacing 0.25s ease !important;
     cursor: pointer !important;
     width: 100% !important;
     justify-content: center !important;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
     white-space: nowrap !important;
+    z-index: 1 !important;
+  }
+
+  /* Shimmer light sweep across button */
+  .gallery-view-btn::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -120% !important;
+    width: 60% !important;
+    height: 100% !important;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.55) 50%, transparent 100%) !important;
+    transform: skewX(-25deg) !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
+    transition: none !important;
   }
 
   .gallery-view-btn span {
     background: transparent !important;
     border: none !important;
     padding: 0 !important;
+    margin: 0 !important;
     box-shadow: none !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    display: inline-block !important;
+    position: relative !important;
+    z-index: 3 !important;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), letter-spacing 0.25s ease !important;
   }
 
-  .gallery-view-btn:hover,
-  .gallery-view-btn:hover * {
-    background: #3b93dc !important;
+  .gallery-view-btn .gallery-btn-arrow,
+  .gallery-view-btn span:last-child {
+    font-size: 13.5px !important;
+    line-height: 1 !important;
+    display: inline-block !important;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  }
+
+  /* When card is hovered, subtle button elevation + arrow nudge */
+  .gallery-content-card:hover .gallery-view-btn {
+    border-color: #ffffff !important;
+    box-shadow: 0 6px 18px rgba(91, 164, 230, 0.55), 0 0 12px rgba(255, 255, 255, 0.25) !important;
+    transform: translateY(-2px) !important;
+  }
+
+  .gallery-content-card:hover .gallery-view-btn .gallery-btn-arrow,
+  .gallery-content-card:hover .gallery-view-btn span:last-child {
+    transform: translateX(4px) !important;
+  }
+
+  /* When button itself is directly hovered */
+  .gallery-view-btn:hover {
+    background: #2563eb !important;
+    background-image: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%) !important;
     color: #ffffff !important;
     -webkit-text-fill-color: #ffffff !important;
     border-color: #ffffff !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 6px 20px rgba(91, 164, 230, 0.6) !important;
+    transform: translateY(-4px) scale(1.02) !important;
+    box-shadow: 0 10px 24px rgba(37, 99, 235, 0.55), 0 0 18px rgba(56, 189, 248, 0.65), inset 0 1px 2px rgba(255, 255, 255, 0.6) !important;
+    letter-spacing: 0.3px !important;
   }
 
-  .gallery-view-btn span:last-child {
-    transition: transform 0.25s ease !important;
+  .gallery-view-btn:hover::before {
+    animation: btnShimmerSweep 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
   }
 
-  .gallery-content-card:hover .gallery-view-btn span:last-child {
-    transform: translateX(4px) !important;
+  .gallery-view-btn:hover .gallery-btn-arrow,
+  .gallery-view-btn:hover span:last-child {
+    transform: translateX(7px) scale(1.2) !important;
+  }
+
+  .gallery-view-btn:active {
+    transform: translateY(-1px) scale(0.99) !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4) !important;
+  }
+
+  @keyframes btnShimmerSweep {
+    0% { left: -100%; opacity: 0; }
+    20% { opacity: 1; }
+    100% { left: 140%; opacity: 0; }
   }
 
   /* Carousel Controls styled in Baby Blue & White */
@@ -787,8 +903,8 @@
           ${captionText ? `<p class="desc" style="color:#ffffff !important; -webkit-text-fill-color:#ffffff !important; opacity:0.95;">${escapeHtml(captionText)}</p>` : '<p class="desc" style="color:#ffffff !important; -webkit-text-fill-color:#ffffff !important; opacity:0.95;">Official visual record of Museo Sang Bata sa Negros exhibitions and marine discoveries.</p>'}
           <div class="gallery-card-footer" style="border-top:1px solid rgba(255,255,255,0.28) !important;">
             <a class="gallery-view-btn" href="${detailUrl}" style="color:#ffffff !important; -webkit-text-fill-color:#ffffff !important;">
-              <span style="color:#ffffff !important; -webkit-text-fill-color:#ffffff !important;">Explore Artwork &amp; Details</span>
-              <span style="color:#ffffff !important; -webkit-text-fill-color:#ffffff !important;">&rarr;</span>
+              <span class="gallery-btn-text" style="color:#ffffff !important; -webkit-text-fill-color:#ffffff !important;">Explore Artwork &amp; Details</span>
+              <span class="gallery-btn-arrow" style="color:#ffffff !important; -webkit-text-fill-color:#ffffff !important;">&rarr;</span>
             </a>
           </div>
         </div>
