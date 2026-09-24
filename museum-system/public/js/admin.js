@@ -1234,7 +1234,7 @@ async function downloadPlacardCanvas(ex, qrUrl) {
   try {
     const scale = 2; // high-DPI output (300dpi crisp quality)
     const cardW = 500;
-    const cardH = 540;
+    const cardH = 430;
 
     const canvas = document.createElement('canvas');
     canvas.width = cardW * scale;
@@ -1301,32 +1301,6 @@ async function downloadPlacardCanvas(ex, qrUrl) {
       const imgOffset = (qrBoxSize - imgSize) / 2;
       ctx.drawImage(qrImg, qrBoxX + imgOffset, curY + imgOffset, imgSize, imgSize);
     }
-    curY += qrBoxSize + 18;
-
-    // Footer Bar
-    const padX = 26;
-    const fbH = 46;
-    drawRRect(padX, curY, cardW - padX * 2, fbH, 10, '#f1f5f9', '#e2e8f0', 1);
-
-    ctx.fillStyle = '#475569';
-    ctx.font = '800 13px "Nunito", sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('📷 Scan with camera', padX + 14, curY + 28);
-
-    // Code Pill
-    const codeStr = String(ex.code || 'EXHIBIT');
-    ctx.font = '900 13.5px "IBM Plex Mono", monospace';
-    const cWidth = ctx.measureText(codeStr).width;
-    const pillW = cWidth + 18;
-    const pillH = 28;
-    const pillX = cardW - padX - 14 - pillW;
-    const pillY = curY + (fbH - pillH) / 2;
-    drawRRect(pillX, pillY, pillW, pillH, 6, '#ffffff', '#cbd5e1', 1);
-
-    ctx.fillStyle = '#0f172a';
-    ctx.textAlign = 'center';
-    ctx.fillText(codeStr, pillX + pillW / 2, pillY + 19);
-
     // Download blob
     canvas.toBlob((blob) => {
       if (!blob) {
@@ -1384,13 +1358,8 @@ function openTagModal(code){
         <div style="font-family: 'Nunito', sans-serif; font-size: 21px; font-weight: 900; color: #0f172a; margin-bottom: 16px; line-height: 1.25;">${escapeHtml(ex.title)}</div>
 
         <!-- Big QR Code Frame -->
-        <div style="background: #f8fafc; padding: 14px; border-radius: 18px; display: inline-block; border: 2px solid #e2e8f0; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.05);">
+        <div style="background: #f8fafc; padding: 14px; border-radius: 18px; display: inline-block; border: 2px solid #e2e8f0; box-shadow: 0 4px 16px rgba(0,0,0,0.05);">
           <img src="${qrUrl}" alt="QR Tag for ${escapeHtml(ex.code)}" width="270" height="270" style="display: block; border-radius: 8px; margin: 0 auto;">
-        </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: #f1f5f9; border-radius: 12px; font-size: 13px; font-weight: 700; border: 1px solid #e2e8f0;">
-          <span style="color: #475569; display: flex; align-items: center; gap: 6px;">📷 Scan with camera</span>
-          <span class="mono" style="color: #0f172a; font-size: 14px; font-weight: 900; background: #ffffff; padding: 2px 10px; border-radius: 6px; border: 1px solid #cbd5e1;">${escapeHtml(ex.code)}</span>
         </div>
       </div>
 
@@ -1459,14 +1428,8 @@ function openTagModal(code){
           <div style="font-size: 23px; font-weight: 900; color: #0f172a; margin-bottom: 18px; line-height: 1.2;">${escapeHtml(ex.title)}</div>
 
           <!-- Big QR Box -->
-          <div style="background: #f8fafc; padding: 16px; border-radius: 18px; display: inline-block; border: 2px solid #cbd5e1; margin-bottom: 18px;">
+          <div style="background: #f8fafc; padding: 16px; border-radius: 18px; display: inline-block; border: 2px solid #cbd5e1; margin-bottom: 0;">
             <img src="${qrUrl}" width="280" height="280" style="display: block; margin: 0 auto; border-radius: 8px;">
-          </div>
-
-          <!-- Bottom bar -->
-          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 800; border-top: 1.5px solid #e2e8f0; padding-top: 12px;">
-            <span style="color: #475569;">📷 Scan with camera</span>
-            <span class="mono" style="color: #0f172a; font-size: 15px; font-weight: 900;">${escapeHtml(ex.code)}</span>
           </div>
         </div>
         <script>
