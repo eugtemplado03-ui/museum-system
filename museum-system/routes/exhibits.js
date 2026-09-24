@@ -125,6 +125,27 @@ router.get('/:code/qr', async (req, res) => {
   }
 });
 
+router.get('/proxy-image', async (req, res) => {
+  const imageUrl = req.query.url;
+  if (!imageUrl) return res.status(400).send('URL required');
+  try {
+    const parsed = new URL(imageUrl);
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      return res.status(400).send('Invalid protocol');
+    }
+    const response = await fetch(imageUrl);
+    if (!response.ok) return res.status(response.status).send('Failed to fetch image');
+    const contentType = response.headers.get('content-type') || 'image/jpeg';
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    const buffer = Buffer.from(await response.arrayBuffer());
+    res.send(buffer);
+  } catch (err) {
+    res.status(500).send('Error proxying image');
+  }
+});
+
 router.get('/:code', async (req, res) => {
   try {
     const ex = await exhibits.findByCode(req.params.code);
