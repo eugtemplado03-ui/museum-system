@@ -23,8 +23,17 @@ const DEFAULT_INFO = {
   hours: 'Open Monday to Friday, 8:00 AM–5:00 PM. Saturday–Sunday open only for special booked tours.',
   about: "Located on the shoreline of Barangay Old Sagay beside the Sagay Marine Reserve, the museum aims to awaken children's creative and intellectual potential and help them understand and appreciate themselves, their environment, and their culture. Its flagship initiative is the Marine Conservation Education Program, which trains public elementary science teachers to raise awareness of the marine environment among children.",
   entranceFees: [
-    'Regular tour — Students w/ ID: PHP 20.00, Adults: PHP 50.00, Senior citizens: PHP 40.00',
-    'Special guided tour (with Jr. Guides): PHP 800/person (1 pax), PHP 450/person (2 pax), PHP 300/person (3–4 pax), PHP 200/person (5–7 pax), PHP 150/person (8–9 pax), PHP 130/person (10+ pax)'
+    'Regular Tour:',
+    'Students w/ ID — ₱20.00',
+    'Adults — ₱50.00',
+    'Senior Citizens — ₱40.00',
+    'Special Tour with Jr. Guides & Kassie Kasag:',
+    '1 Person — ₱800.00 / person',
+    '2 Persons — ₱450.00 / person',
+    '3–4 Persons — ₱300.00 / person',
+    '5–7 Persons — ₱200.00 / person',
+    '8–9 Persons — ₱150.00 / person',
+    '10+ Persons — ₱130.00 / person'
   ],
   footerLinks: [
     { label: '💖 Donate', href: '/donate.html' },
