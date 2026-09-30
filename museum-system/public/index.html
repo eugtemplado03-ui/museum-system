@@ -1169,6 +1169,77 @@
       resize: vertical;
     }
 
+    .password-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .password-input-wrapper input,
+    .password-input-wrapper input#adminPassword,
+    .password-input-wrapper input[type="password"],
+    .password-input-wrapper input[type="text"] {
+      width: 100%;
+      padding-right: 44px !important;
+    }
+
+    .btn-toggle-password {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: #64748b;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+      z-index: 2;
+    }
+
+    .btn-toggle-password:hover {
+      color: var(--blue-primary);
+      background: rgba(29, 78, 216, 0.08);
+    }
+
+    .btn-toggle-password:active {
+      transform: translateY(-50%) scale(0.95);
+    }
+
+    .btn-toggle-password:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 2px var(--blue-primary);
+    }
+
+    .btn-toggle-password svg {
+      display: block;
+      pointer-events: none;
+      stroke: currentColor;
+    }
+
+    .btn-toggle-password .eye-show {
+      display: block !important;
+    }
+
+    .btn-toggle-password .eye-hide {
+      display: none !important;
+    }
+
+    .btn-toggle-password.show-active .eye-show {
+      display: none !important;
+    }
+
+    .btn-toggle-password.show-active .eye-hide {
+      display: block !important;
+    }
+
     .form-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -2587,8 +2658,25 @@
 
               <div class="form-group">
                 <label for="adminPassword">Password <span class="required">*</span></label>
-                <input type="password" id="adminPassword" placeholder="Enter your password" required
-                  autocomplete="current-password">
+                <div class="password-input-wrapper">
+                  <input type="password" id="adminPassword" placeholder="Enter your password" required
+                    autocomplete="current-password">
+                  <button type="button" class="btn-toggle-password" id="toggleAdminPasswordBtn"
+                    aria-label="Show password" title="Show password">
+                    <svg class="eye-icon eye-show" xmlns="http://www.w3.org/2000/svg" width="19" height="19"
+                      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round" aria-hidden="true">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <svg class="eye-icon eye-hide" style="display:none;" xmlns="http://www.w3.org/2000/svg" width="19"
+                      height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                      <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                  </button>
+                </div>
               </div>
 
               <button type="submit" class="btn-submit" id="adminSubmitBtn">
@@ -3107,6 +3195,20 @@
           if (el) el.classList.remove('visible');
         });
       } catch (e) {}
+
+      // Reset password visibility when navigating away from admin
+      if (tab !== 'admin') {
+        const pInput = document.getElementById('adminPassword');
+        const pBtn = document.getElementById('toggleAdminPasswordBtn');
+        if (pInput && pInput.type === 'text') {
+          pInput.type = 'password';
+          if (pBtn) {
+            pBtn.classList.remove('show-active');
+            pBtn.setAttribute('aria-label', 'Show password');
+            pBtn.setAttribute('title', 'Show password');
+          }
+        }
+      }
 
       if (tab === 'admin') {
         if (aBtn) { aBtn.classList.add('active'); aBtn.setAttribute('aria-selected', 'true'); }
@@ -3988,6 +4090,31 @@
       const vInput = document.getElementById('visitorName');
       if (vInput) vInput.focus();
     });
+
+    // ── Toggle Password Visibility ─────────────────────────────────
+    const toggleAdminPasswordBtn = document.getElementById('toggleAdminPasswordBtn');
+    const adminPasswordInput = document.getElementById('adminPassword');
+
+    if (toggleAdminPasswordBtn && adminPasswordInput) {
+      toggleAdminPasswordBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const isPassword = adminPasswordInput.type === 'password';
+        adminPasswordInput.type = isPassword ? 'text' : 'password';
+
+        toggleAdminPasswordBtn.classList.toggle('show-active', isPassword);
+
+        const label = isPassword ? 'Hide password' : 'Show password';
+        toggleAdminPasswordBtn.setAttribute('aria-label', label);
+        toggleAdminPasswordBtn.setAttribute('title', label);
+
+        // Keep cursor at end of input when toggling
+        const len = adminPasswordInput.value.length;
+        adminPasswordInput.focus();
+        if (typeof adminPasswordInput.setSelectionRange === 'function') {
+          adminPasswordInput.setSelectionRange(len, len);
+        }
+      });
+    }
 
     // ── 2. Staff Admin Sign-In Submission ─────────────────────────
     const adminForm = document.getElementById('adminLoginForm');

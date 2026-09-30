@@ -8526,8 +8526,74 @@ footer a:hover {
   }
 }
 
+/* ── Password Input Show/Hide Eye Toggle ────────────────────────── */
+.password-input-wrapper {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+}
 
+.password-input-wrapper input,
+.password-input-wrapper input#adminPassword,
+.password-input-wrapper input[type="password"],
+.password-input-wrapper input[type="text"] {
+  width: 100% !important;
+  padding-right: 44px !important;
+}
 
+.btn-toggle-password {
+  position: absolute !important;
+  right: 8px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 32px !important;
+  height: 32px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 8px !important;
+  color: #64748b !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: color 0.15s ease, background 0.15s ease, transform 0.1s ease !important;
+  z-index: 2 !important;
+}
 
+.btn-toggle-password:hover {
+  color: var(--blue-primary, #1d4ed8) !important;
+  background: rgba(29, 78, 216, 0.08) !important;
+}
 
+.btn-toggle-password:active {
+  transform: translateY(-50%) scale(0.95) !important;
+}
 
+.btn-toggle-password:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 2px var(--blue-primary, #1d4ed8) !important;
+}
+
+.btn-toggle-password svg {
+  display: block;
+  pointer-events: none !important;
+  stroke: currentColor !important;
+}
+
+.btn-toggle-password .eye-show {
+  display: block !important;
+}
+
+.btn-toggle-password .eye-hide {
+  display: none !important;
+}
+
+.btn-toggle-password.show-active .eye-show {
+  display: none !important;
+}
+
+.btn-toggle-password.show-active .eye-hide {
+  display: block !important;
+}
