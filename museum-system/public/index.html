@@ -2582,6 +2582,19 @@
               </div>
 
               <div class="form-group">
+                <label for="tourGuideOption">Tour Guide / Guided Tour <span style="font-size: 12px; font-weight: normal; color: var(--text-muted);">(Optional)</span></label>
+                <select id="tourGuideOption" name="tourGuideOption">
+                  <option value="Self-guided / No tour guide">Self-guided / No tour guide</option>
+                  <option value="Regular guided tour — ₱800/person (1 pax)">Regular guided tour — ₱800/person (1 pax)</option>
+                  <option value="Special guided tour — ₱450/person (2 pax)">Special guided tour — ₱450/person (2 pax)</option>
+                  <option value="Special guided tour — ₱300/person (3–4 pax)">Special guided tour — ₱300/person (3–4 pax)</option>
+                  <option value="Special guided tour — ₱200/person (5–7 pax)">Special guided tour — ₱200/person (5–7 pax)</option>
+                  <option value="Special guided tour — ₱150/person (8–9 pax)">Special guided tour — ₱150/person (8–9 pax)</option>
+                  <option value="Special guided tour — ₱130/person (10+ pax)">Special guided tour — ₱130/person (10+ pax)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
                 <label for="notes">Notes / Purpose of Visit <span style="font-size: 12px; font-weight: normal; color: var(--text-muted);">(Optional)</span></label>
                 <textarea id="notes" name="notes" placeholder="e.g. Educational tour, general viewing, etc. (optional)"></textarea>
               </div>
@@ -3971,6 +3984,7 @@
       const sAge = (document.getElementById('age')?.value || '').trim();
       const cNumber = (document.getElementById('contactNumber')?.value || '').trim().replace(/\D/g, '');
       const gName = (document.getElementById('groupName')?.value || '').trim();
+      const tourGuideOption = (document.getElementById('tourGuideOption')?.value || 'Self-guided / No tour guide').trim();
       const sNotes = (document.getElementById('notes')?.value || '').trim();
 
       // Enforce all required fields
@@ -4009,6 +4023,7 @@
         contactNumber: cNumber,
         email: '',
         groupName: gName || 'Individual',
+        tourGuide: tourGuideOption,
         notes: sNotes
       };
 

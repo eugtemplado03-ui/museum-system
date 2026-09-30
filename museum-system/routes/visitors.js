@@ -51,6 +51,10 @@ function validateCheckin(body) {
     }
   }
 
+  if (body.tourGuide && body.tourGuide.trim().length > 200) {
+    errors.push('Tour guide selection cannot exceed 200 characters.');
+  }
+
   if (body.notes && body.notes.trim().length > 500) {
     errors.push('Notes cannot exceed 500 characters.');
   }
@@ -73,6 +77,7 @@ router.post('/checkin', checkinLimiter, async (req, res) => {
     groupType: 'Walk-in / Individual',
     pax: 1,
     purpose: 'General Visit',
+    tourGuide: (req.body.tourGuide || '').trim(),
     status: 'Checked-in',
     notes: (req.body.notes || '').trim()
   };
