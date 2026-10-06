@@ -104,6 +104,8 @@ router.post('/forgot-password', passwordResetRequestLimiter, async (req, res) =>
           details = [body.code, body.message].filter(Boolean).join(': ');
         } catch (err) {}
         console.error('Brevo password-reset email failed:', emailResponse.status, details);
+      } else {
+        console.info('Brevo accepted password-reset email:', emailResponse.status);
       }
     }
   } catch (err) {
