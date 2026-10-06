@@ -60,11 +60,18 @@ router.post('/login', loginLimiter, async (req, res) => {
 router.post('/forgot-password', passwordResetLimiter, async (req, res) => {
   res.json({ message: resetResponse });
   const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !process.env.BREVO_API_KEY || !process.env.BREVO_SENDER_EMAIL) return;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+  if (!process.env.BREVO_API_KEY || !process.env.BREVO_SENDER_EMAIL) {
+    console.error('Password reset email is not configured: BREVO_API_KEY or BREVO_SENDER_EMAIL is missing.');
+    return;
+  }
 
   try {
     const user = await users.findAdminByEmail(email);
-    if (!user) return;
+    if (!user) {
+      console.warn('Password reset not sent: no admin account matches the submitted recovery email.');
+      return;
+    }
 
     const rawToken = crypto.randomBytes(32).toString('hex');
     const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
