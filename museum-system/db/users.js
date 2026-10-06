@@ -48,8 +48,9 @@ async function storePasswordResetToken(id, tokenHash, expiresAt) {
   });
 }
 
-async function consumePasswordResetToken(tokenHash, passwordHash) {
+async function consumePasswordResetToken(id, tokenHash, passwordHash) {
   return await User.findOneAndUpdate({
+    id,
     role: 'admin',
     resetTokenHash: tokenHash,
     resetTokenExpiresAt: { $gt: new Date() }

@@ -73,7 +73,7 @@ describe('Admin Password Reset', () => {
     BREVO_SENDER_EMAIL: process.env.BREVO_SENDER_EMAIL,
     SITE_URL: process.env.SITE_URL
   };
-  let resetToken;
+  let resetCode;
 
   beforeAll(() => {
     process.env.BREVO_API_KEY = 'test-brevo-key';
@@ -94,32 +94,34 @@ describe('Admin Password Reset', () => {
     const emailWasSent = new Promise(resolve => { emailSent = resolve; });
     global.fetch = async (_url, options) => {
       const payload = JSON.parse(options.body);
-      const resetUrl = payload.textContent.match(/https:\/\/[^\s]+/)?.[0];
-      resetToken = new URL(resetUrl).searchParams.get('token');
+      resetCode = payload.textContent.match(/code is (\d{8})/)?.[1];
       emailSent();
       return { ok: true, status: 201 };
     };
 
     const known = await request(app).post('/api/auth/forgot-password').send({ email: 'admin@example.com' });
     expect(known.status).toBe(200);
-    expect(known.body.message).toBe('If an admin account matches that email, a password reset link will be sent.');
+    expect(known.body.message).toBe('If an admin account matches that email, a password reset code will be sent.');
     await emailWasSent;
+    expect(resetCode).toMatch(/^\d{8}$/);
 
     const unknown = await request(app).post('/api/auth/forgot-password').send({ email: 'missing@example.com' });
     expect(unknown.status).toBe(200);
     expect(unknown.body).toEqual(known.body);
   });
 
-  it('uses a reset token once and invalidates existing admin sessions', async () => {
+  it('uses a reset code once and invalidates existing admin sessions', async () => {
     const mismatch = await request(app).post('/api/auth/reset-password').send({
-      token: resetToken,
+      email: 'admin@example.com',
+      code: resetCode,
       password: 'new-admin-password-2026',
       confirmPassword: 'different-password-2026'
     });
     expect(mismatch.status).toBe(400);
 
     const reset = await request(app).post('/api/auth/reset-password').send({
-      token: resetToken,
+      email: 'admin@example.com',
+      code: resetCode,
       password: 'new-admin-password-2026',
       confirmPassword: 'new-admin-password-2026'
     });
@@ -129,7 +131,8 @@ describe('Admin Password Reset', () => {
     expect(oldSession.status).toBe(401);
 
     const reused = await request(app).post('/api/auth/reset-password').send({
-      token: resetToken,
+      email: 'admin@example.com',
+      code: resetCode,
       password: 'another-admin-password-2026',
       confirmPassword: 'another-admin-password-2026'
     });

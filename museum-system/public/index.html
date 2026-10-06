@@ -2713,7 +2713,7 @@
                 <label for="adminResetEmail">Admin account email</label>
                 <input type="email" id="adminResetEmail" autocomplete="email" required placeholder="Enter your admin email">
               </div>
-              <button type="submit" class="btn-submit" id="adminForgotPasswordSubmit">Send reset link</button>
+              <button type="submit" class="btn-submit" id="adminForgotPasswordSubmit">Send confirmation code</button>
               <p style="text-align:center; margin:12px 0 0;"><a href="#" id="backToAdminLoginLink">Back to sign in</a></p>
             </form>
           </div>
@@ -4208,8 +4208,10 @@
           body: JSON.stringify({ email: document.getElementById('adminResetEmail').value.trim() })
         });
         const data = await response.json();
-        forgotMessage.textContent = data.message || 'If an admin account matches that email, a password reset link will be sent.';
+        forgotMessage.textContent = data.message || 'If an admin account matches that email, a password reset code will be sent.';
         forgotMessage.classList.add('visible');
+        sessionStorage.setItem('museum_admin_reset_email', document.getElementById('adminResetEmail').value.trim());
+        window.location.href = '/reset-password.html';
       } catch (err) {
         forgotMessage.textContent = 'Could not submit the request. Please try again later.';
         forgotMessage.classList.add('visible');

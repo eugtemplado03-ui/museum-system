@@ -221,7 +221,7 @@ Configure `SEED_ADMIN_EMAIL` with the admin account's email, plus
 `BREVO_API_KEY` and a Brevo-verified `BREVO_SENDER_EMAIL` (optionally set
 `BREVO_SENDER_NAME`). Run `npm run seed` after setting the admin email so an
 existing seeded account is updated. Set `SITE_URL` to the public HTTPS URL;
-reset links expire after 30 minutes and are single-use. Keep all email/API
+confirmation codes expire after 10 minutes and are single-use. Keep all email/API
 credentials in the host's secret environment settings, never in Git.
 
 ## Security notes (read before going live)

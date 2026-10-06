@@ -18,15 +18,27 @@ const loginLimiter = rateLimit({
   legacyHeaders: false
 });
 
-const passwordResetLimiter = rateLimit({
+const passwordResetRequestLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
-  message: { message: 'If an admin account matches that email, a password reset link will be sent.' },
+  message: { message: 'If an admin account matches that email, a password reset code will be sent.' },
   standardHeaders: true,
   legacyHeaders: false
 });
 
-const resetResponse = 'If an admin account matches that email, a password reset link will be sent.';
+const passwordResetCodeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { error: 'Too many code attempts. Request a new reset code later.' },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+const resetResponse = 'If an admin account matches that email, a password reset code will be sent.';
+
+function hashResetCode(userId, code) {
+  return crypto.createHmac('sha256', JWT_SECRET).update(`${userId}:${code}`).digest('hex');
+}
 
 router.post('/login', loginLimiter, async (req, res) => {
   const { username, password } = req.body || {};
@@ -57,7 +69,7 @@ router.post('/login', loginLimiter, async (req, res) => {
   }
 });
 
-router.post('/forgot-password', passwordResetLimiter, async (req, res) => {
+router.post('/forgot-password', passwordResetRequestLimiter, async (req, res) => {
   res.json({ message: resetResponse });
   const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
@@ -73,14 +85,11 @@ router.post('/forgot-password', passwordResetLimiter, async (req, res) => {
       return;
     }
 
-    const rawToken = crypto.randomBytes(32).toString('hex');
-    const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
-    const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
-    await users.storePasswordResetToken(user.id, tokenHash, expiresAt);
+    const code = String(crypto.randomInt(0, 100000000)).padStart(8, '0');
+    const codeHash = hashResetCode(user.id, code);
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    await users.storePasswordResetToken(user.id, codeHash, expiresAt);
 
-    const siteUrl = process.env.SITE_URL || `${req.protocol}://${req.get('host')}`;
-    const resetUrl = new URL('/reset-password.html', siteUrl);
-    resetUrl.searchParams.set('token', rawToken);
     const emailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'api-key': process.env.BREVO_API_KEY },
@@ -88,7 +97,7 @@ router.post('/forgot-password', passwordResetLimiter, async (req, res) => {
         sender: { email: process.env.BREVO_SENDER_EMAIL, name: process.env.BREVO_SENDER_NAME || 'Museo Sang Bata sa Negros' },
         to: [{ email: user.email }],
         subject: 'Admin password reset',
-        textContent: `Use this link to reset your admin password. It expires in 30 minutes: ${resetUrl.toString()}`
+        textContent: `Your admin password reset confirmation code is ${code}. It expires in 10 minutes and can only be used once.`
       })
     });
     if (!emailResponse.ok) console.error('Brevo password-reset email failed:', emailResponse.status);
@@ -97,20 +106,23 @@ router.post('/forgot-password', passwordResetLimiter, async (req, res) => {
   }
 });
 
-router.post('/reset-password', passwordResetLimiter, async (req, res) => {
-  const { token, password, confirmPassword } = req.body || {};
-  if (typeof token !== 'string' || !token || typeof password !== 'string' || password.length < 12 || password.length > 128) {
-    return res.status(400).json({ error: 'The reset link is invalid or expired, or the password does not meet the requirements.' });
+router.post('/reset-password', passwordResetCodeLimiter, async (req, res) => {
+  const { email: submittedEmail, code, password, confirmPassword } = req.body || {};
+  const email = typeof submittedEmail === 'string' ? submittedEmail.trim().toLowerCase() : '';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || typeof code !== 'string' || !/^\d{8}$/.test(code) || typeof password !== 'string' || password.length < 12 || password.length > 128) {
+    return res.status(400).json({ error: 'The email or confirmation code is invalid or expired, or the password does not meet the requirements.' });
   }
   if (password !== confirmPassword) {
     return res.status(400).json({ error: 'Passwords do not match.' });
   }
 
   try {
-    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const admin = await users.findAdminByEmail(email);
+    if (!admin) return res.status(400).json({ error: 'The email or confirmation code is invalid or expired.' });
+    const codeHash = hashResetCode(admin.id, code);
     const passwordHash = await bcrypt.hash(password, 12);
-    const user = await users.consumePasswordResetToken(tokenHash, passwordHash);
-    if (!user) return res.status(400).json({ error: 'The reset link is invalid or expired, or the password does not meet the requirements.' });
+    const user = await users.consumePasswordResetToken(admin.id, codeHash, passwordHash);
+    if (!user) return res.status(400).json({ error: 'The email or confirmation code is invalid or expired.' });
     return res.json({ message: 'Password updated. Please sign in with your new password.' });
   } catch (err) {
     console.error('Password reset error:', err);
