@@ -70,40 +70,46 @@ router.post('/login', loginLimiter, async (req, res) => {
 });
 
 router.post('/forgot-password', passwordResetRequestLimiter, async (req, res) => {
-  res.json({ message: resetResponse });
   const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.json({ message: resetResponse });
   if (!process.env.BREVO_API_KEY || !process.env.BREVO_SENDER_EMAIL) {
     console.error('Password reset email is not configured: BREVO_API_KEY or BREVO_SENDER_EMAIL is missing.');
-    return;
+    return res.json({ message: resetResponse });
   }
 
   try {
     const user = await users.findAdminByEmail(email);
     if (!user) {
       console.warn('Password reset not sent: no admin account matches the submitted recovery email.');
-      return;
+    } else {
+      const code = String(crypto.randomInt(0, 100000000)).padStart(8, '0');
+      const codeHash = hashResetCode(user.id, code);
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+      await users.storePasswordResetToken(user.id, codeHash, expiresAt);
+
+      const emailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'api-key': process.env.BREVO_API_KEY },
+        body: JSON.stringify({
+          sender: { email: process.env.BREVO_SENDER_EMAIL, name: process.env.BREVO_SENDER_NAME || 'Museo Sang Bata sa Negros' },
+          to: [{ email: user.email }],
+          subject: 'Admin password reset',
+          textContent: `Your admin password reset confirmation code is ${code}. It expires in 10 minutes and can only be used once.`
+        })
+      });
+      if (!emailResponse.ok) {
+        let details = '';
+        try {
+          const body = await emailResponse.json();
+          details = [body.code, body.message].filter(Boolean).join(': ');
+        } catch (err) {}
+        console.error('Brevo password-reset email failed:', emailResponse.status, details);
+      }
     }
-
-    const code = String(crypto.randomInt(0, 100000000)).padStart(8, '0');
-    const codeHash = hashResetCode(user.id, code);
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-    await users.storePasswordResetToken(user.id, codeHash, expiresAt);
-
-    const emailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'api-key': process.env.BREVO_API_KEY },
-      body: JSON.stringify({
-        sender: { email: process.env.BREVO_SENDER_EMAIL, name: process.env.BREVO_SENDER_NAME || 'Museo Sang Bata sa Negros' },
-        to: [{ email: user.email }],
-        subject: 'Admin password reset',
-        textContent: `Your admin password reset confirmation code is ${code}. It expires in 10 minutes and can only be used once.`
-      })
-    });
-    if (!emailResponse.ok) console.error('Brevo password-reset email failed:', emailResponse.status);
   } catch (err) {
     console.error('Password reset request failed:', err.message);
   }
+  return res.json({ message: resetResponse });
 });
 
 router.post('/reset-password', passwordResetCodeLimiter, async (req, res) => {
