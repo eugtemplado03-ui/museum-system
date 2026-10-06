@@ -13,7 +13,7 @@ if (!JWT_SECRET || JWT_SECRET === 'change-this-secret-in-production') {
   }
 }
 
-function requireAuth(req, res, next) {
+async function requireAuth(req, res, next) {
   const header = req.headers.authorization || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
   if (!token) {
@@ -21,6 +21,13 @@ function requireAuth(req, res, next) {
   }
   try {
     const payload = jwt.verify(token, JWT_SECRET);
+    if (payload.role === 'admin') {
+      const users = require('../db/users');
+      const user = await users.findById(payload.sub);
+      if (!user || (user.sessionVersion || 0) !== (payload.ver || 0)) {
+        return res.status(401).json({ error: 'Session expired or invalid. Please sign in again.' });
+      }
+    }
     req.user = payload;
     next();
   } catch (e) {

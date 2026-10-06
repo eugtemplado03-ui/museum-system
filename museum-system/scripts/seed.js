@@ -18,14 +18,16 @@ const ratings = require('../db/ratings');
 
 const ADMIN_USERNAME = process.env.SEED_ADMIN_USER || 'admin';
 const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASS || 'museum-admin-2026';
+const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL || '';
 
 async function seedAdmin() {
   if (await users.count() > 0) {
     console.log('Users already exist — skipping admin creation.');
+    if (ADMIN_EMAIL) await users.setAdminEmail(ADMIN_USERNAME, ADMIN_EMAIL);
     return;
   }
   const passwordHash = bcrypt.hashSync(ADMIN_PASSWORD, 10);
-  await users.create({ username: ADMIN_USERNAME, passwordHash, role: 'admin' });
+  await users.create({ username: ADMIN_USERNAME, email: ADMIN_EMAIL, passwordHash, role: 'admin' });
   console.log(`Created admin user "${ADMIN_USERNAME}" with password "${ADMIN_PASSWORD}".`);
   console.log('IMPORTANT: sign in and change this password / rotate credentials before going live.');
 }

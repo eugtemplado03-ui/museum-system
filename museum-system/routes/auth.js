@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
+const crypto = require('crypto');
 
 const users = require('../db/users');
 const { JWT_SECRET, requireAuth } = require('../middleware/auth');
@@ -16,6 +17,16 @@ const loginLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false
 });
+
+const passwordResetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { message: 'If an admin account matches that email, a password reset link will be sent.' },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+const resetResponse = 'If an admin account matches that email, a password reset link will be sent.';
 
 router.post('/login', loginLimiter, async (req, res) => {
   const { username, password } = req.body || {};
@@ -35,7 +46,7 @@ router.post('/login', loginLimiter, async (req, res) => {
     }
 
     const token = jwt.sign(
-      { sub: user.id, username: user.username, role: user.role },
+      { sub: user.id, username: user.username, role: user.role, ver: user.sessionVersion || 0 },
       JWT_SECRET,
       { expiresIn: '12h' }
     );
@@ -43,6 +54,60 @@ router.post('/login', loginLimiter, async (req, res) => {
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/forgot-password', passwordResetLimiter, async (req, res) => {
+  res.json({ message: resetResponse });
+  const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !process.env.BREVO_API_KEY || !process.env.BREVO_SENDER_EMAIL) return;
+
+  try {
+    const user = await users.findAdminByEmail(email);
+    if (!user) return;
+
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+    await users.storePasswordResetToken(user.id, tokenHash, expiresAt);
+
+    const siteUrl = process.env.SITE_URL || `${req.protocol}://${req.get('host')}`;
+    const resetUrl = new URL('/reset-password.html', siteUrl);
+    resetUrl.searchParams.set('token', rawToken);
+    const emailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'api-key': process.env.BREVO_API_KEY },
+      body: JSON.stringify({
+        sender: { email: process.env.BREVO_SENDER_EMAIL, name: process.env.BREVO_SENDER_NAME || 'Museo Sang Bata sa Negros' },
+        to: [{ email: user.email }],
+        subject: 'Admin password reset',
+        textContent: `Use this link to reset your admin password. It expires in 30 minutes: ${resetUrl.toString()}`
+      })
+    });
+    if (!emailResponse.ok) console.error('Brevo password-reset email failed:', emailResponse.status);
+  } catch (err) {
+    console.error('Password reset request failed:', err.message);
+  }
+});
+
+router.post('/reset-password', passwordResetLimiter, async (req, res) => {
+  const { token, password, confirmPassword } = req.body || {};
+  if (typeof token !== 'string' || !token || typeof password !== 'string' || password.length < 12 || password.length > 128) {
+    return res.status(400).json({ error: 'The reset link is invalid or expired, or the password does not meet the requirements.' });
+  }
+  if (password !== confirmPassword) {
+    return res.status(400).json({ error: 'Passwords do not match.' });
+  }
+
+  try {
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const passwordHash = await bcrypt.hash(password, 12);
+    const user = await users.consumePasswordResetToken(tokenHash, passwordHash);
+    if (!user) return res.status(400).json({ error: 'The reset link is invalid or expired, or the password does not meet the requirements.' });
+    return res.json({ message: 'Password updated. Please sign in with your new password.' });
+  } catch (err) {
+    console.error('Password reset error:', err);
+    return res.status(500).json({ error: 'Could not update the password. Please try again.' });
   }
 });
 
