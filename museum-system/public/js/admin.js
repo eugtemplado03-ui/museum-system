@@ -268,12 +268,6 @@ async function renderDashboard(){
     topbarSignOutBtn.addEventListener('click', handleSignOut);
   }
 
-  const changePasswordBtn = document.getElementById('changeAdminPasswordBtn');
-  if (changePasswordBtn && !changePasswordBtn._wired) {
-    changePasswordBtn._wired = true;
-    changePasswordBtn.addEventListener('click', openAdminPasswordModal);
-  }
-
   // Wire Topbar Public View Button (Functional on Mobile & Desktop)
   const viewSiteBtn = document.getElementById('adminViewSiteBtn') || document.querySelector('.admin-view-site-link');
   if (viewSiteBtn && !viewSiteBtn._wired) {
@@ -323,6 +317,9 @@ async function renderDashboard(){
           `).join('')}
         </nav>
         <div class="admin-sidebar-footer" style="background:#0B1120 !important; padding:8px 10px !important;">
+          <button type="button" id="changeAdminPasswordBtn" style="width:100%; color:#ffffff !important; background:rgba(59,130,246,0.2) !important; border:1px solid rgba(59,130,246,0.45) !important; font-weight:700 !important; font-size:12px !important; padding:7px 10px !important; border-radius:7px !important; margin-bottom:6px !important; text-align:left; cursor:pointer;">
+            <span aria-hidden="true" style="margin-right:7px;">🔑</span> Change password
+          </button>
           <button class="admin-sidebar-signout" id="signOutBtn" style="color:#ffffff !important; font-weight:700 !important; font-size:12px !important; padding:6px 10px !important; border-radius:7px !important; border:1.5px solid rgba(255,255,255,0.2) !important; gap:7px !important;">
             <span style="color:#ffffff !important; font-size:13px !important;">⎋</span> <span style="color:#ffffff !important; font-size:12px !important;">Sign out</span>
           </button>
@@ -349,6 +346,8 @@ async function renderDashboard(){
 
   const signOutBtn = document.getElementById('signOutBtn');
   if (signOutBtn) signOutBtn.addEventListener('click', handleSignOut);
+  const changePasswordBtn = document.getElementById('changeAdminPasswordBtn');
+  if (changePasswordBtn) changePasswordBtn.addEventListener('click', openAdminPasswordModal);
 
   // Tab switching triggers
   app.querySelectorAll('[data-tab]').forEach(btn=>{
