@@ -6632,6 +6632,12 @@ main,
   color: #1D4ED8;
 }
 
+#programGrid > .content-card,
+#eventGrid > .content-card {
+  background: #EAF6FF !important;
+  background-image: none !important;
+}
+
 /* 5. KPI Metrics Card Elements */
 .dash-kpi-val,
 .stat-card .num,
