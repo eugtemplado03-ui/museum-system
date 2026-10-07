@@ -6634,8 +6634,115 @@ main,
 
 #programGrid > .content-card,
 #eventGrid > .content-card {
-  background: #EAF6FF !important;
-  background-image: none !important;
+  background: linear-gradient(135deg, #5BA4E6 0%, #4696DF 100%) !important;
+  background-image: linear-gradient(135deg, #5BA4E6 0%, #4696DF 100%) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.55) !important;
+  border-radius: 22px !important;
+  padding: 22px !important;
+  box-shadow: 0 8px 24px rgba(91, 164, 230, 0.3), 0 2px 6px rgba(0, 0, 0, 0.06) !important;
+  color: #FFFFFF !important;
+}
+#programGrid > .content-card:hover,
+#eventGrid > .content-card:hover {
+  background: linear-gradient(135deg, #4696DF 0%, #3685CE 100%) !important;
+  background-image: linear-gradient(135deg, #4696DF 0%, #3685CE 100%) !important;
+  border-color: #FFFFFF !important;
+  box-shadow: 0 12px 32px rgba(91, 164, 230, 0.45) !important;
+}
+#programGrid .content-card .media,
+#eventGrid .content-card .media {
+  height: 220px;
+  flex: 0 0 220px;
+  border-radius: 14px;
+  margin-bottom: 16px;
+  background: rgba(0, 20, 28, 0.25);
+}
+#programGrid .content-card .body,
+#eventGrid .content-card .body {
+  min-height: 255px;
+  padding: 0 !important;
+  gap: 9px;
+}
+#programGrid .listing-card-badges,
+#eventGrid .listing-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+#programGrid .listing-card-badge,
+#eventGrid .listing-card-badge {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 5px 12px;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #0F172A;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+#programGrid .content-card h3,
+#eventGrid .content-card h3 {
+  margin: 2px 0 0;
+  color: #0F172A !important;
+  font-size: 22px;
+  line-height: 1.3;
+}
+#programGrid .content-card h3 a,
+#eventGrid .content-card h3 a {
+  color: inherit !important;
+}
+#programGrid .content-card p.desc,
+#eventGrid .content-card p.desc {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  margin: 2px 0 0;
+  color: #FFFFFF !important;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.5;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+#programGrid .listing-card-footer,
+#eventGrid .listing-card-footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.45);
+  color: #0F172A;
+  font-size: 15px;
+  font-weight: 800;
+}
+#programGrid .listing-card-footer a,
+#eventGrid .listing-card-footer a {
+  flex: 0 0 auto;
+  color: #0F172A;
+  font-weight: 900;
+  text-align: right;
+  text-decoration: none;
+}
+@media (max-width: 600px) {
+  #programGrid > .content-card,
+  #eventGrid > .content-card {
+    padding: 16px !important;
+    border-radius: 18px !important;
+  }
+  #programGrid .content-card .media,
+  #eventGrid .content-card .media {
+    height: 190px;
+    flex-basis: 190px;
+  }
+  #programGrid .content-card .body,
+  #eventGrid .content-card .body {
+    min-height: 235px;
+  }
 }
 
 /* 5. KPI Metrics Card Elements */
