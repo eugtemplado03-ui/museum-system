@@ -26,6 +26,11 @@ async function findById(id) {
   return await User.findOne({ id }).lean();
 }
 
+async function updatePasswordHash(id, passwordHash) {
+  const result = await User.updateOne({ id, role: 'admin' }, { $set: { passwordHash } });
+  return result.modifiedCount === 1;
+}
+
 async function create({ username, passwordHash, role }) {
   const user = new User({ username, passwordHash, role: role || 'admin' });
   await user.save();
@@ -39,6 +44,7 @@ async function count() {
 module.exports = {
   findByUsername,
   findById,
+  updatePasswordHash,
   create,
   count,
   User

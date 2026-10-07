@@ -65,3 +65,32 @@ describe('Admin Routes', () => {
   });
 });
 
+describe('Admin Password Change', () => {
+  it('rejects a wrong current password and mismatched confirmation', async () => {
+    const wrongCurrent = await request(app)
+      .post('/api/auth/change-password')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ currentPassword: 'wrongpassword', newPassword: 'new-secure-password-123', confirmPassword: 'new-secure-password-123' });
+    expect(wrongCurrent.status).toBe(400);
+
+    const mismatch = await request(app)
+      .post('/api/auth/change-password')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ currentPassword: 'admin123', newPassword: 'new-secure-password-123', confirmPassword: 'different-password-123' });
+    expect(mismatch.status).toBe(400);
+  });
+
+  it('changes the password after verifying the current password', async () => {
+    const response = await request(app)
+      .post('/api/auth/change-password')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ currentPassword: 'admin123', newPassword: 'new-secure-password-123', confirmPassword: 'new-secure-password-123' });
+    expect(response.status).toBe(200);
+
+    const oldPasswordLogin = await request(app).post('/api/auth/login').send({ username: 'admin', password: 'admin123' });
+    expect(oldPasswordLogin.status).toBe(401);
+    const newPasswordLogin = await request(app).post('/api/auth/login').send({ username: 'admin', password: 'new-secure-password-123' });
+    expect(newPasswordLogin.status).toBe(200);
+  });
+});
+

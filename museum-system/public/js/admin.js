@@ -198,6 +198,57 @@ function handleSignOut() {
   renderLogin();
 }
 
+function openAdminPasswordModal() {
+  openModal(`
+    <h2>Change Admin Password</h2>
+    <p>Enter your current password, then choose a new password of at least 12 characters.</p>
+    <form id="changeAdminPasswordForm" novalidate>
+      <div class="form-grid">
+        <div class="form-field full">
+          <label for="currentAdminPassword">Current password</label>
+          <input id="currentAdminPassword" type="password" autocomplete="current-password" maxlength="128" required>
+        </div>
+        <div class="form-field full">
+          <label for="newAdminPassword">New password</label>
+          <input id="newAdminPassword" type="password" autocomplete="new-password" minlength="12" maxlength="128" required>
+        </div>
+        <div class="form-field full">
+          <label for="confirmAdminPassword">Confirm new password</label>
+          <input id="confirmAdminPassword" type="password" autocomplete="new-password" minlength="12" maxlength="128" required>
+        </div>
+        <div class="form-error" id="changeAdminPasswordError" role="alert"></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost dark" id="cancelAdminPasswordChange">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="saveAdminPasswordChange">Update password</button>
+      </div>
+    </form>
+  `);
+
+  document.getElementById('cancelAdminPasswordChange')?.addEventListener('click', closeModal);
+  document.getElementById('changeAdminPasswordForm')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const errorEl = document.getElementById('changeAdminPasswordError');
+    const submitButton = document.getElementById('saveAdminPasswordChange');
+    errorEl.textContent = '';
+    submitButton.disabled = true;
+
+    try {
+      const result = await Api.changeAdminPassword({
+        currentPassword: document.getElementById('currentAdminPassword').value,
+        newPassword: document.getElementById('newAdminPassword').value,
+        confirmPassword: document.getElementById('confirmAdminPassword').value
+      });
+      closeModal();
+      toast(result.message || 'Password changed successfully.');
+    } catch (err) {
+      errorEl.textContent = err.message || 'Could not change the password.';
+    } finally {
+      submitButton.disabled = false;
+    }
+  });
+}
+
 async function renderDashboard(){
   const toggleBtn = document.getElementById('sidebarToggleBtn');
   if (toggleBtn) toggleBtn.remove();
@@ -215,6 +266,12 @@ async function renderDashboard(){
   if (topbarSignOutBtn && !topbarSignOutBtn._wired) {
     topbarSignOutBtn._wired = true;
     topbarSignOutBtn.addEventListener('click', handleSignOut);
+  }
+
+  const changePasswordBtn = document.getElementById('changeAdminPasswordBtn');
+  if (changePasswordBtn && !changePasswordBtn._wired) {
+    changePasswordBtn._wired = true;
+    changePasswordBtn.addEventListener('click', openAdminPasswordModal);
   }
 
   // Wire Topbar Public View Button (Functional on Mobile & Desktop)

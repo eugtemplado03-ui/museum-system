@@ -118,6 +118,7 @@ const Api = (() => {
   return {
     getToken, setToken, clearToken, getVisitorId,
     login: (username, password) => request('/api/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
+    changeAdminPassword: (payload) => request('/api/auth/change-password', { method: 'POST', body: JSON.stringify(payload) }),
     me: () => request('/api/auth/me'),
     listExhibits: () => request('/api/exhibits'),
     listRecommendedExhibits: (limit = 6) => request('/api/exhibits/recommended?limit=' + limit),
