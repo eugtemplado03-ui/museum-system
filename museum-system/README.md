@@ -215,15 +215,6 @@ Railway, Fly.io, a VPS, etc.):
 4. Put it behind HTTPS (most hosts do this for you) — QR codes and login
    credentials should never travel over plain HTTP.
 
-### Admin password recovery
-
-Configure `SEED_ADMIN_EMAIL` with the admin account's email, plus
-`BREVO_API_KEY` and a Brevo-verified `BREVO_SENDER_EMAIL` (optionally set
-`BREVO_SENDER_NAME`). Run `npm run seed` after setting the admin email so an
-existing seeded account is updated. Set `SITE_URL` to the public HTTPS URL;
-confirmation codes expire after 10 minutes and are single-use. Keep all email/API
-credentials in the host's secret environment settings, never in Git.
-
 ## Security notes (read before going live)
 
 - Change `JWT_SECRET` and the seeded admin password — the defaults in this
