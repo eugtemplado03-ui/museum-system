@@ -149,7 +149,10 @@ ${programBlock || 'Marine education and storytelling programs.'}
 ${eventBlock || 'Regular interactive tours.'}
 
 ANSWERING INSTRUCTIONS:
-- Answer ALL user questions clearly and helpfully using the information above.
+- Answer museum-related questions clearly and helpfully using the information above.
+- Use only facts explicitly stated in this museum knowledge base for questions about the museum. Do not guess, invent, or fill gaps with plausible-sounding details.
+- If the requested museum information is not provided above, clearly say that the information is not available in the system and suggest contacting the museum at ${info.phone} or info@museosangbata.org. Do not give a speculative answer.
+- For questions unrelated to the museum, politely explain that you can help with museum information, exhibits, visits, programs, and events instead of answering from general knowledge.
 - Always reply ONLY in the language the user asked in (Tagalog -> only Tagalog; English -> only English; Bisaya -> only Bisaya).
 - Use clear markdown with bullet points or bold text where appropriate so the response is easy to read.`;
 }
@@ -390,11 +393,11 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
     }, activeLang);
   }
 
-  // Default Comprehensive Fallback
+  // Unknown questions should be acknowledged, not answered with invented details.
   return formatTrilingualReply({
-    en: `I'm happy to help you with anything regarding **Museo Sang Bata sa Negros**!\n\nHere are some popular topics:\n- 🎟️ **"How much are tickets and what are the hours?"**\n- 📍 **"Where is the Staff Office located?"**\n- 💦 **"Tell me about the Splash Zone Touch Pool"**\n- 🧸 **"What exhibits are on the Second Floor?"**\n- ♿ **"Is the museum wheelchair accessible?"**\n- 📸 **"Can I take photos inside?"**\n- 🚌 **"How do I commute from Bacolod City?"**`,
-    tl: `Ikinagagalak kong tulungan kayo patungkol sa **Museo Sang Bata sa Negros**!\n\nMaaari kayong magtanong sa akin ng sumusunod:\n- 🎟️ **"Magkano ang ticket at anong oras bukas?"**\n- 📍 **"Saan matatagpuan ang Staff Office?"**\n- 💦 **"Ikwento mo ang tungkol sa Touch Pool"**\n- 🧸 **"Ano ang mga exhibit sa Level 2?"**\n- ♿ **"May wheelchair ramp ba ang museo?"**\n- 📸 **"Pwede bang kumuha ng litrato at magdala ng pagkain?"**\n- 🚌 **"Paano pumunta galing Bacolod?"**`,
-    bis: `Malipayon kong motabang nimo bahin sa **Museo Sang Bata sa Negros**!\n\nPwede kang mangutana kanako sa mosunod:\n- 🎟️ **"Tagpila ang bayad sa ticket ug unsang orasa abli?"**\n- 📍 **"Asa dapit ang Staff Office?"**\n- 💦 **"Sultihi ko bahin sa Splash Zone Touch Pool"**\n- 🧸 **"Unsang mga exhibit ang naa sa Level 2?"**\n- ♿ **"Naa bay wheelchair ramp sa museo?"**\n- 📸 **"Pwede ba magkuha og litrato ug magdala og pagkaon?"**\n- 🚌 **"Unsaon pag-adto gikan sa Bacolod?"**`
+    en: `Sorry, I don't have that information in the museum system, and I don't want to guess. Please contact the museum at **${info.phone}** or **info@museosangbata.org** for help. I can answer questions about museum visits, exhibits, programs, and events.`,
+    tl: `Pasensya na, wala sa sistema ng museo ang impormasyong iyan kaya ayaw kong manghula. Makipag-ugnayan sa museo sa **${info.phone}** o **info@museosangbata.org** para matulungan kayo. Maaari akong sumagot tungkol sa pagbisita, mga exhibit, programa, at event ng museo.`,
+    bis: `Pasayloa ko, wala sa sistema sa museyo ang maong impormasyon, ug dili ko gusto manghula. Palihug kontaka ang museyo sa **${info.phone}** o **info@museosangbata.org** aron matabangan ka. Makasulti ko bahin sa pagbisita, mga exhibit, programa, ug kalihokan sa museyo.`
   }, activeLang);
 }
 
