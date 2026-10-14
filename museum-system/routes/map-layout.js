@@ -21,8 +21,8 @@ const ROOM_IDS = new Set([
   'reservoirs'
 ]);
 const MAX_OFFSET = 1300;
-const MIN_SCALE = 0.5;
-const MAX_SCALE = 2.5;
+const MIN_SCALE = 0.1;
+const MAX_SCALE = 10;
 
 router.get('/', async (req, res) => {
   try {

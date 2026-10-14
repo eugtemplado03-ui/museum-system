@@ -289,10 +289,19 @@
     }
 
     .map-layout-save-status {
-      color: #ffffff;
+      max-width: 230px;
+      padding: 4px 8px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      border-radius: 8px;
+      background: rgba(30, 41, 59, 0.9);
       font-size: 10px;
       font-weight: 700;
-      white-space: nowrap;
+      line-height: 1.25;
+      white-space: normal;
+    }
+
+    .map-layout-save-status:empty {
+      display: none;
     }
 
     body.map-layout-edit-mode .room-poly[data-cat-id] {
@@ -1751,6 +1760,11 @@
         gap: 3px;
       }
 
+      .map-layout-save-status {
+        max-width: 155px;
+        font-size: 9px;
+      }
+
       .map-header-title {
         display: none !important;
         /* Hide title on mobile to maximize map visibility */
@@ -2319,6 +2333,11 @@
         gap: 3px !important;
       }
 
+      .map-layout-save-status {
+        max-width: 110px;
+        padding: 3px 5px;
+      }
+
       .chip {
         padding: 1px 6px !important;
         font-size: 9.5px !important;
@@ -2423,7 +2442,8 @@
           <button class="chip" id="btnArrangeRooms" type="button" aria-pressed="false">✥ Arrange &amp; Resize Sections</button>
           <button class="chip" id="btnResetRoomLayout" type="button">Reset Layout</button>
           <a class="chip map-layout-sign-in" id="mapLayoutSignIn" href="/?tab=admin" hidden>Sign in again</a>
-          <span class="map-layout-save-status" id="mapLayoutSaveStatus" role="status" aria-live="polite"></span>
+          <span class="map-layout-save-status" id="mapLayoutSaveStatus" role="status" aria-live="polite"
+            style="color: #e2e8f0 !important; -webkit-text-fill-color: #e2e8f0 !important;"></span>
         </div>
       </div>
     </div>
@@ -2928,6 +2948,8 @@
       let selectedExhibit = null;
       let activeRouteKey = null;
       let roomOffsets = {};
+      const MIN_LAYOUT_SCALE = 0.1;
+      const MAX_LAYOUT_SCALE = 10;
       let roomLayoutEditMode = false;
       let activeRoomDrag = null;
       let activeRoomResize = null;
@@ -3056,6 +3078,27 @@
         };
       }
 
+      function keepLayoutTextProportional(zone, scaleX, scaleY) {
+        const uniformScale = Math.sqrt(scaleX * scaleY);
+        zone.querySelectorAll('text').forEach(text => {
+          if (text.dataset.layoutBaseTransform === undefined) {
+            text.dataset.layoutBaseTransform = text.getAttribute('transform') || '';
+          }
+          const baseTransform = text.dataset.layoutBaseTransform;
+          if (Math.abs(scaleX - scaleY) < 0.001) {
+            if (baseTransform) text.setAttribute('transform', baseTransform);
+            else text.removeAttribute('transform');
+            return;
+          }
+
+          const bounds = text.getBBox();
+          const centerX = bounds.x + bounds.width / 2;
+          const centerY = bounds.y + bounds.height / 2;
+          const textTransform = `translate(${centerX} ${centerY}) scale(${uniformScale / scaleX} ${uniformScale / scaleY}) translate(${-centerX} ${-centerY})`;
+          text.setAttribute('transform', [baseTransform, textTransform].filter(Boolean).join(' '));
+        });
+      }
+
       function getLayoutZone(roomId) {
         return Array.from(document.querySelectorAll('#museumSvg .room-poly'))
           .find(zone => (zone.dataset.catId || zone.id) === roomId);
@@ -3090,6 +3133,8 @@
           bottom,
           centerX: (left + right) / 2,
           centerY: (top + bottom) / 2,
+          width: right - left,
+          height: bottom - top,
           area: (right - left) * (bottom - top)
         };
       }
@@ -3098,10 +3143,24 @@
         return Array.from(document.querySelectorAll('#museumSvg .room-poly'))
           .filter(zone => zone !== drag.zone)
           .map(zone => ({ zone, bounds: getLayoutBounds(zone) }))
-          .filter(({ bounds }) => bounds &&
-            point.x >= bounds.left && point.x <= bounds.right &&
-            point.y >= bounds.top && point.y <= bounds.bottom)
-          .sort((a, b) => a.bounds.area - b.bounds.area)[0] || null;
+          .map(candidate => {
+            if (!candidate.bounds) return { ...candidate, pointerInside: false, overlapRatio: 0 };
+            const draggedBounds = getLayoutBounds(drag.zone);
+            const overlapWidth = Math.max(0, Math.min(draggedBounds.right, candidate.bounds.right) -
+              Math.max(draggedBounds.left, candidate.bounds.left));
+            const overlapHeight = Math.max(0, Math.min(draggedBounds.bottom, candidate.bounds.bottom) -
+              Math.max(draggedBounds.top, candidate.bounds.top));
+            return {
+              ...candidate,
+              pointerInside: point.x >= candidate.bounds.left && point.x <= candidate.bounds.right &&
+                point.y >= candidate.bounds.top && point.y <= candidate.bounds.bottom,
+              overlapRatio: Math.min(1, overlapWidth * overlapHeight /
+                Math.max(1, Math.min(draggedBounds.area, candidate.bounds.area)))
+            };
+          })
+          .filter(({ bounds, pointerInside, overlapRatio }) => bounds && (pointerInside || overlapRatio >= 0.35))
+          .sort((a, b) => Number(b.pointerInside) - Number(a.pointerInside) ||
+            (a.pointerInside ? a.bounds.area - b.bounds.area : b.overlapRatio - a.overlapRatio))[0] || null;
       }
 
       function swapLayoutSections(drag, targetZone, targetBounds) {
@@ -3110,19 +3169,35 @@
         const targetId = targetZone.dataset.catId || targetZone.id;
         const draggedOffset = getRoomOffset(drag.roomId);
         const targetOffset = getRoomOffset(targetId);
+        const draggedBaseBounds = drag.zone.getBBox();
+        const targetBaseBounds = targetZone.getBBox();
+        const clampScale = scale => Math.max(MIN_LAYOUT_SCALE, Math.min(MAX_LAYOUT_SCALE, scale));
         roomOffsets[drag.roomId] = {
           ...draggedOffset,
-          x: draggedOffset.x + targetBounds.centerX - draggedBounds.centerX,
-          y: draggedOffset.y + targetBounds.centerY - draggedBounds.centerY
+          x: targetBounds.centerX - (draggedBaseBounds.x + draggedBaseBounds.width / 2),
+          y: targetBounds.centerY - (draggedBaseBounds.y + draggedBaseBounds.height / 2),
+          scaleX: clampScale(targetBounds.width / draggedBaseBounds.width),
+          scaleY: clampScale(targetBounds.height / draggedBaseBounds.height)
         };
         roomOffsets[targetId] = {
           ...targetOffset,
-          x: targetOffset.x + drag.startCenter.centerX - targetBounds.centerX,
-          y: targetOffset.y + drag.startCenter.centerY - targetBounds.centerY
+          x: drag.startCenter.centerX - (targetBaseBounds.x + targetBaseBounds.width / 2),
+          y: drag.startCenter.centerY - (targetBaseBounds.y + targetBaseBounds.height / 2),
+          scaleX: clampScale(draggedBounds.width / targetBaseBounds.width),
+          scaleY: clampScale(draggedBounds.height / targetBaseBounds.height)
         };
         applyRoomLayout();
-        const status = document.getElementById('mapLayoutSaveStatus');
-        if (status) status.textContent = `Swapped ${drag.roomId.replaceAll('_', ' ')} with ${targetId.replaceAll('_', ' ')}.`;
+      }
+
+      function getLayoutSectionLabel(roomId) {
+        return CATEGORY_ROOMS[roomId]?.category ||
+          roomId.replace(/^(cat|zone)_/, '').replaceAll('_', ' ').replace(/\b\w/g, character => character.toUpperCase());
+      }
+
+      function bringLayoutZoneToFront(zone) {
+        const svg = document.getElementById('museumSvg');
+        const routeLayer = document.getElementById('routeLayer');
+        if (svg && zone.parentNode === svg && routeLayer) svg.insertBefore(zone, routeLayer);
       }
 
       function transformRoomPoint(roomId, x, y) {
@@ -3159,6 +3234,7 @@
           const centerY = bounds.y + bounds.height / 2;
           zone.setAttribute('transform',
             `translate(${offset.x + centerX * (1 - offset.scaleX)}, ${offset.y + centerY * (1 - offset.scaleY)}) scale(${offset.scaleX}, ${offset.scaleY})`);
+          keepLayoutTextProportional(zone, offset.scaleX, offset.scaleY);
         });
 
         Object.values(CATEGORY_ROOMS).forEach(room => {
@@ -3198,6 +3274,7 @@
         event.stopPropagation();
         selectedLayoutId = roomId;
         updateLayoutSelection();
+        bringLayoutZoneToFront(zone);
         const offset = getRoomOffset(roomId);
         activeRoomDrag = {
           roomId,
@@ -3251,8 +3328,13 @@
         if (drag.moved) {
           const point = svgPointFromEvent(event);
           const target = point && findLayoutDropTarget(drag, point);
-          if (target) swapLayoutSections(drag, target.zone, target.bounds);
-          await saveRoomLayout(drag.previousOffsets);
+          let successMessage;
+          if (target) {
+            const targetId = target.zone.dataset.catId || target.zone.id;
+            swapLayoutSections(drag, target.zone, target.bounds);
+            successMessage = `Swapped ${getLayoutSectionLabel(drag.roomId)} ↔ ${getLayoutSectionLabel(targetId)}; positions and sizes saved.`;
+          }
+          await saveRoomLayout(drag.previousOffsets, successMessage);
           if (CATEGORY_ROOMS[drag.roomId] && activeRouteKey) renderRoute(activeRouteKey);
         }
       }
@@ -3305,10 +3387,10 @@
         const resize = activeRoomResize;
         const nextScaleX = resize.axis === 'y' || resize.startDistanceX < 1
           ? resize.startScaleX
-          : Math.max(0.5, Math.min(2.5, resize.startScaleX * Math.abs(point.x - resize.centerX) / resize.startDistanceX));
+          : Math.max(MIN_LAYOUT_SCALE, Math.min(MAX_LAYOUT_SCALE, resize.startScaleX * Math.abs(point.x - resize.centerX) / resize.startDistanceX));
         const nextScaleY = resize.axis === 'x' || resize.startDistanceY < 1
           ? resize.startScaleY
-          : Math.max(0.5, Math.min(2.5, resize.startScaleY * Math.abs(point.y - resize.centerY) / resize.startDistanceY));
+          : Math.max(MIN_LAYOUT_SCALE, Math.min(MAX_LAYOUT_SCALE, resize.startScaleY * Math.abs(point.y - resize.centerY) / resize.startDistanceY));
         const offset = getRoomOffset(resize.roomId);
         if (Math.abs(nextScaleX - resize.startScaleX) > 0.005 || Math.abs(nextScaleY - resize.startScaleY) > 0.005) resize.moved = true;
         roomOffsets[resize.roomId] = { ...offset, scaleX: nextScaleX, scaleY: nextScaleY };
@@ -3365,7 +3447,7 @@
         cornerHandle.setAttribute('cy', bounds.bottom);
       }
 
-      async function saveRoomLayout(previousOffsets) {
+      async function saveRoomLayout(previousOffsets, successMessage) {
         const token = localStorage.getItem('museum_admin_token') || sessionStorage.getItem('museum_admin_token');
         const status = document.getElementById('mapLayoutSaveStatus');
         const signInLink = document.getElementById('mapLayoutSignIn');
@@ -3397,7 +3479,7 @@
           }
           roomOffsets = result.roomOffsets || {};
           applyRoomLayout();
-          if (status) status.textContent = 'Layout saved for everyone.';
+          if (status) status.textContent = successMessage || 'Layout saved for everyone.';
         } catch (error) {
           roomOffsets = previousOffsets;
           applyRoomLayout();
@@ -3417,7 +3499,7 @@
           button.textContent = enabled ? '✓ Done Arranging' : '✥ Arrange & Resize Sections';
         }
         if (!enabled) selectedLayoutId = null;
-        if (status) status.textContent = enabled ? 'Drop a section onto another to swap places; resize with the right, bottom, or corner handle.' : '';
+        if (status) status.textContent = enabled ? 'Drop a section onto another to swap places and sizes; resize with the right, bottom, or corner handle.' : '';
         updateLayoutSelection();
       }
 

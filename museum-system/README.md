@@ -103,8 +103,10 @@ header, and footer surfaces.
 
 Admins can also use **Arrange & Resize Sections** on the floor map to drag
 room and facility sections. Dropping one section onto another swaps their
-positions. The selected section has separate right-side and bottom resize
-handles for width and height, plus a corner handle to adjust both.
+positions and displayed sizes. The selected section has separate right-side
+and bottom resize handles for width and height, plus a corner handle to
+adjust both. Text inside resized or swapped sections scales uniformly to stay
+readable, and successful swaps report the section names.
 Category-room exhibit markers move and resize with their room. The shared map
 layout is saved for all visitors; use **Reset Layout** to restore the original
 positions and sizes.

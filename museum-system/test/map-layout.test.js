@@ -40,13 +40,13 @@ test('map layout is public to read and admin-only to update', async () => {
       .send({
         roomOffsets: {
           cat_marine_nature: { x: 20, y: -15 },
-          zone_aquarium: { x: 10, y: 25, scaleX: 1.4, scaleY: 0.8 }
+          zone_aquarium: { x: 10, y: 25, scaleX: 3.4, scaleY: 0.35 }
         }
       });
     assert.equal(saved.status, 200);
     assert.deepEqual(saved.body.roomOffsets, {
       cat_marine_nature: { x: 20, y: -15 },
-      zone_aquarium: { x: 10, y: 25, scaleX: 1.4, scaleY: 0.8 }
+      zone_aquarium: { x: 10, y: 25, scaleX: 3.4, scaleY: 0.35 }
     });
 
     const publicRead = await request(app).get('/api/map-layout');
@@ -62,7 +62,7 @@ test('map layout is public to read and admin-only to update', async () => {
     const invalidScale = await request(app)
       .put('/api/map-layout')
       .set('Authorization', `Bearer ${adminToken}`)
-      .send({ roomOffsets: { zone_aquarium: { x: 10, y: 10, scaleX: 3 } } });
+      .send({ roomOffsets: { zone_aquarium: { x: 10, y: 10, scaleX: 11 } } });
     assert.equal(invalidScale.status, 400);
   } finally {
     await mongoose.disconnect();
