@@ -452,7 +452,6 @@
     }
 
     .mobile-sidepanel-fab,
-    .mobile-sidepanel-hud-btn,
     .sidebar-mobile-close-btn,
     .map-sidebar-backdrop {
       display: none;
@@ -1972,16 +1971,6 @@
         pointer-events: auto !important;
       }
 
-      .mobile-sidepanel-hud-btn {
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-      }
-      .mobile-sidepanel-hud-btn.active {
-        background: #38bdf8 !important;
-        color: #0f172a !important;
-      }
-
       .sidebar-mobile-close-btn {
         display: inline-flex !important;
         background: rgba(255, 255, 255, 0.15) !important;
@@ -2540,9 +2529,8 @@
         </div>
       </div>
 
-      <!-- HUD Action Controls (Zoom & Fit Reset + Mobile Side Panel Button) -->
+      <!-- HUD Action Controls (Zoom & Fit Reset) -->
       <div class="map-hud-controls">
-        <button class="hud-btn mobile-sidepanel-hud-btn" id="btnMobileHudSidepanel" title="Rooms Directory Side Panel" aria-label="Toggle Side Panel" style="color: #000000 !important; background: #ffffff !important;"><span style="color: #000000 !important; font-size: 16px; font-weight: 900; line-height: 1;">🏛️</span></button>
         <button class="hud-btn" id="btnZoomIn" title="Zoom In (+)" aria-label="Zoom in" style="color: #000000 !important; background: #ffffff !important;"><span style="color: #000000 !important; font-size: 22px; font-weight: 900; line-height: 1;">+</span></button>
         <button class="hud-btn" id="btnZoomOut" title="Zoom Out (-)" aria-label="Zoom out" style="color: #000000 !important; background: #ffffff !important;"><span style="color: #000000 !important; font-size: 22px; font-weight: 900; line-height: 1;">−</span></button>
         <button class="hud-btn" id="btnZoomReset" title="Fit 100% of Entire Building on Screen"
@@ -5149,9 +5137,6 @@
           const fab = document.getElementById('mobileSidepanelFab');
           if (fab) fab.classList.toggle('active', willOpen);
 
-          const hudBtn = document.getElementById('btnMobileHudSidepanel');
-          if (hudBtn) hudBtn.classList.toggle('active', willOpen);
-
           setTimeout(() => fitToScreen(true), 320);
         }
         window.toggleSidePanel = toggleSidePanel;
@@ -5163,7 +5148,6 @@
           setSidebarSide(side);
         });
         document.getElementById('mobileSidepanelFab')?.addEventListener('click', () => toggleSidePanel());
-        document.getElementById('btnMobileHudSidepanel')?.addEventListener('click', () => toggleSidePanel());
         document.getElementById('sidebarMobileCloseBtn')?.addEventListener('click', () => toggleSidePanel(false));
         document.getElementById('mapSidebarBackdrop')?.addEventListener('click', () => toggleSidePanel(false));
 
