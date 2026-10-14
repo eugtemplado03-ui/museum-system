@@ -304,14 +304,38 @@
       filter: brightness(1.2) drop-shadow(0 0 10px rgba(56, 189, 248, 0.8));
     }
 
+    body.map-layout-edit-mode .room-poly {
+      cursor: grab;
+      touch-action: none;
+    }
+
+    body.map-layout-edit-mode .room-poly.room-layout-dragging {
+      cursor: grabbing;
+      filter: brightness(1.3) drop-shadow(0 0 16px rgba(56, 189, 248, 0.95));
+    }
+
     body.map-layout-edit-mode .category-room-pin,
     body.map-layout-edit-mode .individual-exhibit-pin {
       pointer-events: none;
     }
 
-    body.map-layout-edit-mode .room-poly[data-cat-id].room-layout-dragging {
-      cursor: grabbing;
-      filter: brightness(1.3) drop-shadow(0 0 16px rgba(56, 189, 248, 0.95));
+    .room-layout-selection {
+      fill: rgba(56, 189, 248, 0.08);
+      stroke: #0284c7;
+      stroke-width: 3;
+      stroke-dasharray: 10 6;
+      vector-effect: non-scaling-stroke;
+      pointer-events: none;
+    }
+
+    .room-layout-resize-handle {
+      fill: #ffffff;
+      stroke: #0284c7;
+      stroke-width: 4;
+      vector-effect: non-scaling-stroke;
+      cursor: nwse-resize;
+      pointer-events: all;
+      touch-action: none;
     }
 
     .chip {
@@ -2379,7 +2403,7 @@
           <button class="chip" data-cat="Carnival &amp; Discovery" style="color: #ffffff !important;">🎡 Carnival &amp; Discovery (1)</button>
         </div>
         <div class="map-layout-edit-controls" id="mapLayoutEditControls" hidden>
-          <button class="chip" id="btnArrangeRooms" type="button" aria-pressed="false">✥ Arrange Rooms</button>
+          <button class="chip" id="btnArrangeRooms" type="button" aria-pressed="false">✥ Arrange &amp; Resize Sections</button>
           <button class="chip" id="btnResetRoomLayout" type="button">Reset Layout</button>
           <span class="map-layout-save-status" id="mapLayoutSaveStatus" role="status" aria-live="polite"></span>
         </div>
@@ -2888,6 +2912,8 @@
       let roomOffsets = {};
       let roomLayoutEditMode = false;
       let activeRoomDrag = null;
+      let activeRoomResize = null;
+      let selectedLayoutId = null;
       let activeDirectionsSpeech = null;
       let speechUtterance = null;
       let isTtsPlaying = false;
@@ -3004,33 +3030,53 @@
         const offset = roomOffsets[roomId] || {};
         return {
           x: Number.isFinite(Number(offset.x)) ? Number(offset.x) : 0,
-          y: Number.isFinite(Number(offset.y)) ? Number(offset.y) : 0
+          y: Number.isFinite(Number(offset.y)) ? Number(offset.y) : 0,
+          scale: Number.isFinite(Number(offset.scale)) ? Number(offset.scale) : 1
+        };
+      }
+
+      function getLayoutZone(roomId) {
+        return Array.from(document.querySelectorAll('#museumSvg .room-poly'))
+          .find(zone => (zone.dataset.catId || zone.id) === roomId);
+      }
+
+      function transformRoomPoint(roomId, x, y) {
+        const zone = getLayoutZone(roomId);
+        if (!zone) return { x, y };
+        const bounds = zone.getBBox();
+        const centerX = bounds.x + bounds.width / 2;
+        const centerY = bounds.y + bounds.height / 2;
+        const offset = getRoomOffset(roomId);
+        return {
+          x: centerX + (x - centerX) * offset.scale + offset.x,
+          y: centerY + (y - centerY) * offset.scale + offset.y
         };
       }
 
       function getRoomMapPosition(room) {
-        const offset = getRoomOffset(room.id);
-        return {
-          x: (room.pinX / 100) * 1000 + offset.x,
-          y: (room.pinY / 100) * 1300 + offset.y
-        };
+        return transformRoomPoint(room.id, (room.pinX / 100) * 1000, (room.pinY / 100) * 1300);
       }
 
       function getExhibitMapPosition(exhibit) {
         const room = findRoomForExhibit(exhibit);
-        const offset = room ? getRoomOffset(room.id) : { x: 0, y: 0 };
-        return {
-          x: (Number(exhibit.pinX) / 100) * 1000 + offset.x,
-          y: (Number(exhibit.pinY) / 100) * 1300 + offset.y
-        };
+        const x = (Number(exhibit.pinX) / 100) * 1000;
+        const y = (Number(exhibit.pinY) / 100) * 1300;
+        return room ? transformRoomPoint(room.id, x, y) : { x, y };
       }
 
       function applyRoomLayout() {
-        Object.values(CATEGORY_ROOMS).forEach(room => {
-          const offset = getRoomOffset(room.id);
-          const zone = document.getElementById(room.zoneId);
-          if (zone) zone.setAttribute('transform', `translate(${offset.x}, ${offset.y})`);
+        document.querySelectorAll('#museumSvg .room-poly').forEach(zone => {
+          const roomId = zone.dataset.catId || zone.id;
+          zone.dataset.layoutId = roomId;
+          const offset = getRoomOffset(roomId);
+          const bounds = zone.getBBox();
+          const centerX = bounds.x + bounds.width / 2;
+          const centerY = bounds.y + bounds.height / 2;
+          zone.setAttribute('transform',
+            `translate(${offset.x + centerX * (1 - offset.scale)}, ${offset.y + centerY * (1 - offset.scale)}) scale(${offset.scale})`);
+        });
 
+        Object.values(CATEGORY_ROOMS).forEach(room => {
           const roomPin = document.getElementById(`pin_${room.id}`);
           if (roomPin) {
             const position = getRoomMapPosition(room);
@@ -3044,6 +3090,7 @@
           const position = getExhibitMapPosition(exhibit);
           pin.setAttribute('transform', `translate(${position.x}, ${position.y})`);
         });
+        updateLayoutSelection();
       }
 
       function svgPointFromEvent(event) {
@@ -3058,13 +3105,14 @@
       function startRoomDrag(event) {
         if (!roomLayoutEditMode || event.button !== 0) return;
         const zone = event.currentTarget;
-        const roomId = zone.dataset.catId;
-        const room = CATEGORY_ROOMS[roomId];
+        const roomId = zone.dataset.catId || zone.id;
         const point = svgPointFromEvent(event);
-        if (!room || !point) return;
+        if (!roomId || !point) return;
 
         event.preventDefault();
         event.stopPropagation();
+        selectedLayoutId = roomId;
+        updateLayoutSelection();
         const offset = getRoomOffset(roomId);
         activeRoomDrag = {
           roomId,
@@ -3092,11 +3140,18 @@
         if (Math.hypot(point.x - startPoint.x, point.y - startPoint.y) > 2) {
           activeRoomDrag.moved = true;
         }
-        const maxX = 1000 - bounds.x - bounds.width;
-        const maxY = 1300 - bounds.y - bounds.height;
-        const x = Math.min(maxX, Math.max(-bounds.x, startOffset.x + point.x - startPoint.x));
-        const y = Math.min(maxY, Math.max(-bounds.y, startOffset.y + point.y - startPoint.y));
-        roomOffsets[roomId] = { x, y };
+        const scale = startOffset.scale;
+        const centerX = bounds.x + bounds.width / 2;
+        const centerY = bounds.y + bounds.height / 2;
+        const transformedLeft = centerX + (bounds.x - centerX) * scale;
+        const transformedTop = centerY + (bounds.y - centerY) * scale;
+        const transformedRight = centerX + (bounds.x + bounds.width - centerX) * scale;
+        const transformedBottom = centerY + (bounds.y + bounds.height - centerY) * scale;
+        const maxX = 1000 - transformedRight;
+        const maxY = 1300 - transformedBottom;
+        const x = Math.min(maxX, Math.max(-transformedLeft, startOffset.x + point.x - startPoint.x));
+        const y = Math.min(maxY, Math.max(-transformedTop, startOffset.y + point.y - startPoint.y));
+        roomOffsets[roomId] = { x, y, scale };
         applyRoomLayout();
         event.preventDefault();
       }
@@ -3106,7 +3161,115 @@
         const drag = activeRoomDrag;
         activeRoomDrag = null;
         drag.zone.classList.remove('room-layout-dragging');
-        if (drag.moved) await saveRoomLayout(drag.previousOffsets);
+        if (drag.moved) {
+          await saveRoomLayout(drag.previousOffsets);
+          if (CATEGORY_ROOMS[drag.roomId] && activeRouteKey) renderRoute(activeRouteKey);
+        }
+      }
+
+      function startRoomResize(event) {
+        if (!roomLayoutEditMode || event.button !== 0 || !selectedLayoutId) return;
+        const zone = getLayoutZone(selectedLayoutId);
+        const point = svgPointFromEvent(event);
+        if (!zone || !point) return;
+        const bounds = zone.getBBox();
+        const offset = getRoomOffset(selectedLayoutId);
+        const centerX = bounds.x + bounds.width / 2;
+        const centerY = bounds.y + bounds.height / 2;
+        const center = {
+          x: centerX + offset.x,
+          y: centerY + offset.y
+        };
+        event.preventDefault();
+        event.stopPropagation();
+        activeRoomResize = {
+          roomId: selectedLayoutId,
+          pointerId: event.pointerId,
+          center,
+          startDistance: Math.hypot(point.x - center.x, point.y - center.y),
+          startScale: offset.scale,
+          previousOffsets: JSON.parse(JSON.stringify(roomOffsets))
+        };
+        try {
+          event.currentTarget.setPointerCapture(event.pointerId);
+        } catch (error) {
+          console.warn('Could not capture floor-map section resize:', error.message);
+        }
+      }
+
+      function moveRoomResize(event) {
+        if (!activeRoomResize || activeRoomResize.pointerId !== event.pointerId) return;
+        const point = svgPointFromEvent(event);
+        if (!point || activeRoomResize.startDistance < 1) return;
+        const resize = activeRoomResize;
+        const scale = Math.max(0.5, Math.min(2.5,
+          resize.startScale * Math.hypot(point.x - resize.center.x, point.y - resize.center.y) / resize.startDistance));
+        const offset = getRoomOffset(resize.roomId);
+        if (Math.abs(scale - resize.startScale) > 0.005) resize.moved = true;
+        roomOffsets[resize.roomId] = { ...offset, scale };
+        applyRoomLayout();
+        event.preventDefault();
+      }
+
+      async function finishRoomResize(event) {
+        if (!activeRoomResize || activeRoomResize.pointerId !== event.pointerId) return;
+        const resize = activeRoomResize;
+        activeRoomResize = null;
+        if (resize.moved) {
+          await saveRoomLayout(resize.previousOffsets);
+          if (CATEGORY_ROOMS[resize.roomId] && activeRouteKey) renderRoute(activeRouteKey);
+        }
+      }
+
+      function updateLayoutSelection() {
+        const svg = document.getElementById('museumSvg');
+        let overlay = svg && document.getElementById('roomLayoutSelection');
+        if (!svg || !roomLayoutEditMode || !selectedLayoutId) {
+          overlay?.remove();
+          return;
+        }
+
+        if (!overlay) {
+          overlay = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          overlay.id = 'roomLayoutSelection';
+          overlay.innerHTML = '<rect class="room-layout-selection"></rect><circle class="room-layout-resize-handle" r="12"></circle>';
+          overlay.querySelector('circle').addEventListener('pointerdown', startRoomResize);
+          svg.appendChild(overlay);
+        }
+        const zone = getLayoutZone(selectedLayoutId);
+        if (!zone) {
+          overlay.remove();
+          return;
+        }
+        overlay.dataset.layoutId = selectedLayoutId;
+        const bounds = zone.getBBox();
+        const matrix = zone.getCTM();
+        if (!matrix) return;
+        const points = [
+          [bounds.x, bounds.y],
+          [bounds.x + bounds.width, bounds.y],
+          [bounds.x, bounds.y + bounds.height],
+          [bounds.x + bounds.width, bounds.y + bounds.height]
+        ].map(([x, y]) => {
+          const point = svg.createSVGPoint();
+          point.x = x;
+          point.y = y;
+          return point.matrixTransform(matrix);
+        });
+        const xs = points.map(point => point.x);
+        const ys = points.map(point => point.y);
+        const left = Math.min(...xs);
+        const top = Math.min(...ys);
+        const right = Math.max(...xs);
+        const bottom = Math.max(...ys);
+        const rect = overlay.querySelector('rect');
+        rect.setAttribute('x', left);
+        rect.setAttribute('y', top);
+        rect.setAttribute('width', right - left);
+        rect.setAttribute('height', bottom - top);
+        const handle = overlay.querySelector('circle');
+        handle.setAttribute('cx', right);
+        handle.setAttribute('cy', bottom);
       }
 
       async function saveRoomLayout(previousOffsets) {
@@ -3143,9 +3306,11 @@
         if (button) {
           button.classList.toggle('active', enabled);
           button.setAttribute('aria-pressed', String(enabled));
-          button.textContent = enabled ? '✓ Done Arranging' : '✥ Arrange Rooms';
+          button.textContent = enabled ? '✓ Done Arranging' : '✥ Arrange & Resize Sections';
         }
-        if (status) status.textContent = enabled ? 'Drag a room block to reposition it.' : '';
+        if (!enabled) selectedLayoutId = null;
+        if (status) status.textContent = enabled ? 'Drag any section to move it; drag the selected corner handle to resize.' : '';
+        updateLayoutSelection();
       }
 
       async function loadRoomLayout() {
@@ -3192,7 +3357,7 @@
         <rect width="1000" height="1300" fill="url(#cadGrid)" />
 
         <!-- EXTERIOR RAIN WATER RESERVOIRS (Exact Circles from Blueprint Photo) -->
-        <g id="reservoirs" opacity="0.85">
+        <g id="reservoirs" class="room-poly" opacity="0.85">
           <!-- Top Right Reservoir -->
           <circle cx="830" cy="115" r="46" fill="rgba(0,229,255,0.06)" stroke="#00f0ff" stroke-width="2.5" stroke-dasharray="4,4" />
           <circle cx="830" cy="115" r="38" fill="none" stroke="#00f0ff" stroke-width="1.5" />
@@ -3317,13 +3482,14 @@
         </g>
 
         <!-- OFFICE SIDE EXTENSION (LIBRARY WING — Bracketed in Blueprint Photo) -->
-        <g id="zone_office_extension">
+        <g id="zone_library_shell" class="room-poly">
           <!-- Overall Boundary -->
           <rect x="65" y="440" width="170" height="540" rx="6" fill="url(#officeExtGrad)" stroke="#f59e0b" stroke-width="4" />
           
           <!-- Library Header Pill -->
           <rect x="75" y="452" width="150" height="28" rx="5" fill="#f59e0b" />
           <text x="150" y="471" text-anchor="middle" font-family="'Nunito',sans-serif" font-weight="900" font-size="11" fill="#03131c">LIBRARY EXTENSION</text>
+        </g>
 
           <!-- 📚 CATEGORY ROOM: READING & LEARNING (Franco's Reading Corner) -->
           <g id="zone_reading_corner" class="room-poly" data-cat-id="cat_reading_learning">
@@ -3352,7 +3518,6 @@
             <text x="150" y="872" text-anchor="middle" font-size="10" font-weight="800" fill="#fdba74">Everyday Heroes Section</text>
             <text x="150" y="886" text-anchor="middle" font-size="8.5" font-weight="700" fill="#fdba74">Values Showcase</text>
           </g>
-        </g>
 
         <!-- MAIN ENTRANCE, DOUBLE SWING DOORS & RAMP -->
         <g id="zone_entrance" class="room-poly">
@@ -3899,10 +4064,14 @@
           'zone_second_floor_carnival': 'cat_carnival_play'
         };
 
+        document.querySelectorAll('#museumSvg .room-poly').forEach(zone => {
+          zone.dataset.layoutId = zone.dataset.catId || zone.id;
+          zone.addEventListener('pointerdown', startRoomDrag);
+        });
+
         Object.entries(roomZoneMap).forEach(([zoneId, catRoomId]) => {
           const el = document.getElementById(zoneId);
           if (el) {
-            el.addEventListener('pointerdown', startRoomDrag);
             el.addEventListener('click', (e) => {
               if (roomLayoutEditMode || hasDragged) return;
               const room = CATEGORY_ROOMS[catRoomId];
@@ -3933,7 +4102,7 @@
           const el = document.getElementById(zoneId);
           if (el) {
             el.addEventListener('click', (e) => {
-              if (hasDragged) return;
+              if (roomLayoutEditMode || hasDragged) return;
               highlightRoomZone(zoneId);
               if (info.action) {
                 info.action();
@@ -4696,7 +4865,7 @@
           setRoomLayoutEditMode(!roomLayoutEditMode);
         });
         document.getElementById('btnResetRoomLayout')?.addEventListener('click', async () => {
-          if (!window.confirm('Reset all room positions to the original floor-plan layout?')) return;
+          if (!window.confirm('Reset all room positions and sizes to the original floor-plan layout?')) return;
           const previousOffsets = JSON.parse(JSON.stringify(roomOffsets));
           roomOffsets = {};
           applyRoomLayout();
@@ -4704,8 +4873,11 @@
         });
 
         window.addEventListener('pointermove', moveRoomDrag);
+        window.addEventListener('pointermove', moveRoomResize);
         window.addEventListener('pointerup', finishRoomDrag);
+        window.addEventListener('pointerup', finishRoomResize);
         window.addEventListener('pointercancel', finishRoomDrag);
+        window.addEventListener('pointercancel', finishRoomResize);
 
         // Floor Switcher
         document.getElementById('btnFloor1').addEventListener('click', () => switchFloor(1));
@@ -4993,7 +5165,7 @@
 
         // DRAG TO PAN (With strict movement threshold to fix click glitch)
         mapViewport.addEventListener('mousedown', (e) => {
-          if (roomLayoutEditMode && e.target.closest('.room-poly[data-cat-id]')) return;
+          if (roomLayoutEditMode && (e.target.closest('.room-poly') || e.target.closest('#roomLayoutSelection'))) return;
           if (e.button !== 0) return; // Primary left button only
           isPanning = true;
           hasDragged = false;
@@ -5068,7 +5240,7 @@
         let initialDist = 0;
 
         mapViewport.addEventListener('touchstart', (e) => {
-          if (roomLayoutEditMode && e.target.closest('.room-poly[data-cat-id]')) return;
+          if (roomLayoutEditMode && (e.target.closest('.room-poly') || e.target.closest('#roomLayoutSelection'))) return;
           if (e.touches.length === 1) {
             isPanning = true;
             hasDragged = false;

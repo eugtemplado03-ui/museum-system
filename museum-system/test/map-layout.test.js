@@ -37,19 +37,33 @@ test('map layout is public to read and admin-only to update', async () => {
     const saved = await request(app)
       .put('/api/map-layout')
       .set('Authorization', `Bearer ${adminToken}`)
-      .send({ roomOffsets: { cat_marine_nature: { x: 20, y: -15 } } });
+      .send({
+        roomOffsets: {
+          cat_marine_nature: { x: 20, y: -15 },
+          zone_aquarium: { x: 10, y: 25, scale: 1.4 }
+        }
+      });
     assert.equal(saved.status, 200);
-    assert.deepEqual(saved.body.roomOffsets, { cat_marine_nature: { x: 20, y: -15 } });
+    assert.deepEqual(saved.body.roomOffsets, {
+      cat_marine_nature: { x: 20, y: -15 },
+      zone_aquarium: { x: 10, y: 25, scale: 1.4 }
+    });
 
     const publicRead = await request(app).get('/api/map-layout');
-    assert.deepEqual(publicRead.body.roomOffsets, { cat_marine_nature: { x: 20, y: -15 } });
-    assert.deepEqual((await MapLayout.findOne({ id: 'singleton' })).roomOffsets.cat_marine_nature, { x: 20, y: -15 });
+    assert.deepEqual(publicRead.body.roomOffsets, saved.body.roomOffsets);
+    assert.deepEqual((await MapLayout.findOne({ id: 'singleton' })).roomOffsets, saved.body.roomOffsets);
 
     const invalid = await request(app)
       .put('/api/map-layout')
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ roomOffsets: { unknown_room: { x: 10, y: 10 } } });
     assert.equal(invalid.status, 400);
+
+    const invalidScale = await request(app)
+      .put('/api/map-layout')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ roomOffsets: { zone_aquarium: { x: 10, y: 10, scale: 3 } } });
+    assert.equal(invalidScale.status, 400);
   } finally {
     await mongoose.disconnect();
     await mongoServer.stop();

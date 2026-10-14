@@ -9,9 +9,20 @@ const ROOM_IDS = new Set([
   'cat_reading_learning',
   'cat_character_heritage',
   'cat_toys_collections',
-  'cat_carnival_play'
+  'cat_carnival_play',
+  'zone_aquarium',
+  'zone_function_hall',
+  'zone_stairs',
+  'zone_staff_office',
+  'zone_library_shell',
+  'zone_entrance',
+  'zone_stairs_landing',
+  'zone_mezzanine_void',
+  'reservoirs'
 ]);
 const MAX_OFFSET = 1300;
+const MIN_SCALE = 0.5;
+const MAX_SCALE = 2.5;
 
 router.get('/', async (req, res) => {
   try {
@@ -36,11 +47,15 @@ router.put('/', requireAdmin, async (req, res) => {
     if (!offset || typeof offset !== 'object' || Array.isArray(offset)) {
       return res.status(400).json({ error: `Invalid position for ${roomId}.` });
     }
-    const { x, y } = offset;
+    const { x, y, scale } = offset;
     if (!Number.isFinite(x) || !Number.isFinite(y) || Math.abs(x) > MAX_OFFSET || Math.abs(y) > MAX_OFFSET) {
       return res.status(400).json({ error: `Position for ${roomId} is outside the allowed range.` });
     }
+    if (Object.hasOwn(offset, 'scale') && (!Number.isFinite(scale) || scale < MIN_SCALE || scale > MAX_SCALE)) {
+      return res.status(400).json({ error: `Scale for ${roomId} must be between ${MIN_SCALE} and ${MAX_SCALE}.` });
+    }
     sanitizedOffsets[roomId] = { x, y };
+    if (Object.hasOwn(offset, 'scale')) sanitizedOffsets[roomId].scale = scale;
   }
 
   try {
