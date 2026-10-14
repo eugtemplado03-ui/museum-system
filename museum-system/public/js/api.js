@@ -64,7 +64,7 @@ const Api = (() => {
       const g = (db.gallery || []).find(item => item.id === id);
       if (g) return { gallery: g, item: g };
     }
-    if (path === '/api/museum-info') return { info: db.museumInfo || {} };
+    if (path === '/api/museum-info') return { museumInfo: db.museumInfo || {} };
     if (path === '/api/carousel' || path === '/api/carousel/admin') {
       return {
         slides: [

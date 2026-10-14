@@ -5049,6 +5049,25 @@ async function renderMuseumInfoTab(contentEl){
           <span class="info-card-icon">📖</span> About
         </h3>
         <div class="info-value" style="white-space:pre-wrap; font-weight:400; line-height:1.65;">${escapeHtml(info.about || '—')}</div>
+        <div class="info-value" style="white-space:pre-wrap; font-weight:400; line-height:1.65; margin-top:10px;">Vision: ${escapeHtml(info.aboutVision || '—')}</div>
+        <div class="info-value" style="white-space:pre-wrap; font-weight:400; line-height:1.65; margin-top:10px;">Mission: ${escapeHtml(info.aboutMission || '—')}</div>
+      </div>
+
+      <div class="info-card">
+        <h3 class="info-card-header">
+          <span class="info-card-icon">📬</span> Contact Information
+        </h3>
+        <div class="info-row"><span class="info-label">Email</span><span class="info-value">${escapeHtml(info.contactEmail || '—')}</span></div>
+        <div class="info-row"><span class="info-label">Contact phones</span><span class="info-value">${escapeHtml(info.contactPhones || '—')}</span></div>
+        <div class="info-row"><span class="info-label">Holiday closures</span><span class="info-value">${escapeHtml(info.contactHolidayClosures || '—')}</span></div>
+      </div>
+
+      <div class="info-card">
+        <h3 class="info-card-header">
+          <span class="info-card-icon">💖</span> Donation Information
+        </h3>
+        <div class="info-value" style="white-space:pre-wrap; font-weight:400; line-height:1.65;">${escapeHtml(info.donationIntro || '—')}</div>
+        <div class="info-value" style="white-space:pre-wrap; font-weight:400; line-height:1.65; margin-top:10px;">Bank: ${escapeHtml(info.donationBank || '—')}</div>
       </div>
 
       <div class="info-card">
@@ -5099,6 +5118,27 @@ function openMuseumInfoModal(info){
       <div class="form-field"><label>Phone *</label><input type="text" id="mi-phone" value="${escapeHtml(info.phone || '')}" required></div>
       <div class="form-field full"><label>Hours *</label><textarea id="mi-hours" rows="2" placeholder="Opening hours">${escapeHtml(info.hours || '')}</textarea></div>
       <div class="form-field full"><label>About</label><textarea id="mi-about" rows="4" placeholder="About the museum...">${escapeHtml(info.about || '')}</textarea></div>
+      <div class="form-field full"><label>About page introduction</label><textarea id="mi-aboutIntro" rows="2">${escapeHtml(info.aboutIntro || '')}</textarea></div>
+      <div class="form-field full"><label>Vision</label><textarea id="mi-aboutVision" rows="3">${escapeHtml(info.aboutVision || '')}</textarea></div>
+      <div class="form-field full"><label>Mission</label><textarea id="mi-aboutMission" rows="3">${escapeHtml(info.aboutMission || '')}</textarea></div>
+      <div class="form-field full"><label>Objectives (one per line)</label><textarea id="mi-aboutObjectives" rows="4">${escapeHtml(info.aboutObjectives || '')}</textarea></div>
+      <div class="form-field full"><label>What we do (one paragraph per line)</label><textarea id="mi-aboutWhatWeDo" rows="5">${escapeHtml(info.aboutWhatWeDo || '')}</textarea></div>
+      <div class="form-field full"><label>Foundation profile (one paragraph per line)</label><textarea id="mi-aboutFoundationProfile" rows="4">${escapeHtml(info.aboutFoundationProfile || '')}</textarea></div>
+
+      <div class="form-field full"><h3>Contact Page</h3></div>
+      <div class="form-field"><label>Contact email</label><input type="email" id="mi-contactEmail" value="${escapeHtml(info.contactEmail || '')}"></div>
+      <div class="form-field"><label>Contact phone numbers</label><input type="text" id="mi-contactPhones" value="${escapeHtml(info.contactPhones || '')}"></div>
+      <div class="form-field full"><label>Holiday closures</label><textarea id="mi-contactHolidayClosures" rows="2">${escapeHtml(info.contactHolidayClosures || '')}</textarea></div>
+      <div class="form-field full"><label>Why visit</label><textarea id="mi-contactWhyVisit" rows="3">${escapeHtml(info.contactWhyVisit || '')}</textarea></div>
+
+      <div class="form-field full"><h3>Donation Page</h3></div>
+      <div class="form-field full"><label>Introduction</label><textarea id="mi-donationIntro" rows="2">${escapeHtml(info.donationIntro || '')}</textarea></div>
+      <div class="form-field full"><label>Giving opportunities (one opportunity per line)</label><textarea id="mi-donationOpportunities" rows="4">${escapeHtml(info.donationOpportunities || '')}</textarea></div>
+      <div class="form-field full"><label>Sponsor a visit message</label><textarea id="mi-donationSponsor" rows="2">${escapeHtml(info.donationSponsor || '')}</textarea></div>
+      <div class="form-field full"><label>Dollar account details (one detail per line)</label><textarea id="mi-donationDollarAccount" rows="3">${escapeHtml(info.donationDollarAccount || '')}</textarea></div>
+      <div class="form-field full"><label>Peso account details (one detail per line)</label><textarea id="mi-donationPesoAccount" rows="3">${escapeHtml(info.donationPesoAccount || '')}</textarea></div>
+      <div class="form-field full"><label>Bank / branch details</label><textarea id="mi-donationBank" rows="2">${escapeHtml(info.donationBank || '')}</textarea></div>
+      <div class="form-field full"><label>Support message</label><textarea id="mi-donationSupportMessage" rows="3">${escapeHtml(info.donationSupportMessage || '')}</textarea></div>
       
       <div class="form-field full">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
@@ -5195,6 +5235,23 @@ function openMuseumInfoModal(info){
       phone,
       hours,
       about: document.getElementById('mi-about').value.trim(),
+      aboutIntro: document.getElementById('mi-aboutIntro').value.trim(),
+      aboutVision: document.getElementById('mi-aboutVision').value.trim(),
+      aboutMission: document.getElementById('mi-aboutMission').value.trim(),
+      aboutObjectives: document.getElementById('mi-aboutObjectives').value.trim(),
+      aboutWhatWeDo: document.getElementById('mi-aboutWhatWeDo').value.trim(),
+      aboutFoundationProfile: document.getElementById('mi-aboutFoundationProfile').value.trim(),
+      contactEmail: document.getElementById('mi-contactEmail').value.trim(),
+      contactPhones: document.getElementById('mi-contactPhones').value.trim(),
+      contactHolidayClosures: document.getElementById('mi-contactHolidayClosures').value.trim(),
+      contactWhyVisit: document.getElementById('mi-contactWhyVisit').value.trim(),
+      donationIntro: document.getElementById('mi-donationIntro').value.trim(),
+      donationOpportunities: document.getElementById('mi-donationOpportunities').value.trim(),
+      donationSponsor: document.getElementById('mi-donationSponsor').value.trim(),
+      donationDollarAccount: document.getElementById('mi-donationDollarAccount').value.trim(),
+      donationPesoAccount: document.getElementById('mi-donationPesoAccount').value.trim(),
+      donationBank: document.getElementById('mi-donationBank').value.trim(),
+      donationSupportMessage: document.getElementById('mi-donationSupportMessage').value.trim(),
       entranceFees,
       footerLinks
     };

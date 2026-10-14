@@ -43,7 +43,7 @@
         <div class="page-top-inner">
           <div class="page-hero contact-hero" style="margin-bottom:0 !important;">
             <div style="position:relative; z-index:1;">
-              <h1>Contact Museo Sang Bata sa Negros</h1>
+              <h1 data-museum-template="Contact {name}">Loading museum information...</h1>
               <p>Reach out for visitor information, group tours, school visits, and community programs.</p>
             </div>
             <div class="page-hero-icon" style="font-size:72px; flex-shrink:0; opacity:0.9;" aria-hidden="true">📬</div>
@@ -56,25 +56,22 @@
           <div class="content-grid">
             <div class="content-card" style="padding:28px; background:#fff; color:#1e241d;">
               <h2>Contact details</h2>
-              <p><strong>Email</strong>: museobata@yahoo.com</p>
-              <p><strong>Mobile</strong>: +639173003815 / +639186171736</p>
-              <p><strong>Address</strong>: Brgy. Old Sagay, Sagay City 6122, Negros Occidental, Philippines</p>
-              <p><strong>Museum hours</strong>: 8:00 AM – 5:00 PM Monday to Friday. Saturday and Sunday are open only for special booked tours.</p>
-              <p><strong>Closed on special holidays</strong>: Christmas, New Year, All Soul’s Day, All Saint’s Day, Holy Thursday, Good Friday, Easter Sunday.</p>
+              <p><strong>Email</strong>: <span data-museum-field="contactEmail">Loading...</span></p>
+              <p><strong>Mobile</strong>: <span data-museum-field="contactPhones">Loading...</span></p>
+              <p><strong>Address</strong>: <span data-museum-field="address">Loading...</span></p>
+              <p><strong>Museum hours</strong>: <span data-museum-field="hours">Loading...</span></p>
+              <p><strong>Closed on special holidays</strong>: <span data-museum-field="contactHolidayClosures">Loading...</span></p>
             </div>
 
             <div class="content-card" style="padding:28px; background:#fff; color:#1e241d;">
               <h2>Visitor rates</h2>
-              <p>Children: PHP 20.00</p>
-              <p>Adults: PHP 50.00</p>
-              <p>Senior citizens: PHP 40.00</p>
-              <p>Special guided tours with Junior Guides available upon request.</p>
+              <div data-museum-paragraphs="entranceFees"><p>Loading visitor rates...</p></div>
             </div>
           </div>
 
           <div class="content-card" style="padding:28px; background:#fff; color:#1e241d; margin-top:24px;">
             <h2>Why visit</h2>
-            <p>The museum is a local center for marine education and environmental awareness, designed especially for children. It supports community learning through exhibits, interactive programs, and partnerships with local schools and coastal towns.</p>
+            <p data-museum-field="contactWhyVisit">Loading...</p>
           </div>
         </div>
       </main>
@@ -84,6 +81,7 @@
   <footer id="siteFooter"></footer>
 
   <script src="/js/api.js"></script>
+  <script src="/js/museum-content.js"></script>
   <script src="/js/chatbot.js"></script>
   <script src="/js/sidebar.js"></script>
   <script src="/js/footer.js"></script>

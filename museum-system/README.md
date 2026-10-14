@@ -95,6 +95,12 @@ The dashboard now has three tabs:
 - **Analytics** — all-time / 7-day / 24-hour view totals, a per-exhibit breakdown of QR scans vs. other views, and a recent-activity log.
 - **Feedback** — every rating and comment submitted, with the exhibit it belongs to, and a Remove button for moderation.
 
+The **Museum Info** tab manages the shared museum name, tagline, address,
+phone, hours, visitor fees, About-page copy, contact details, donation
+opportunities, and bank deposit instructions. Changes are stored with the
+museum information record and appear on the public About, Contact, Donate,
+header, and footer surfaces.
+
 ## Museum chat assistant
 
 A floating chat widget (bottom-right, on the visitor pages) answers
