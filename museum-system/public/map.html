@@ -347,11 +347,11 @@
       touch-action: none;
     }
 
-    .room-layout-resize-handle[data-resize-axis="x"] {
+    .room-layout-resize-handle[data-resize-edge^="x-"] {
       cursor: ew-resize;
     }
 
-    .room-layout-resize-handle[data-resize-axis="y"] {
+    .room-layout-resize-handle[data-resize-edge^="y-"] {
       cursor: ns-resize;
     }
 
@@ -3365,31 +3365,20 @@
         const zone = getLayoutZone(selectedLayoutId);
         const point = svgPointFromEvent(event);
         if (!zone || !point) return;
-        const bounds = zone.getBBox();
+        const baseBounds = zone.getBBox();
+        const bounds = getLayoutBounds(zone);
         const offset = getRoomOffset(selectedLayoutId);
-        const matrix = zone.getCTM();
-        const svg = document.getElementById('museumSvg');
-        if (!matrix || !svg) return;
-        const centerX = bounds.x + bounds.width / 2;
-        const centerY = bounds.y + bounds.height / 2;
-        const toSvgPoint = (x, y) => {
-          const svgPoint = svg.createSVGPoint();
-          svgPoint.x = x;
-          svgPoint.y = y;
-          return svgPoint.matrixTransform(matrix);
-        };
-        const center = toSvgPoint(centerX, centerY);
+        if (!bounds) return;
         event.preventDefault();
         event.stopPropagation();
-        const axis = event.currentTarget.dataset.resizeAxis;
+        const edge = event.currentTarget.dataset.resizeEdge;
         activeRoomResize = {
           roomId: selectedLayoutId,
           pointerId: event.pointerId,
-          axis,
-          centerX: center.x,
-          centerY: center.y,
-          startDistanceX: Math.abs(toSvgPoint(bounds.x + bounds.width, centerY).x - center.x),
-          startDistanceY: Math.abs(toSvgPoint(centerX, bounds.y + bounds.height).y - center.y),
+          edge,
+          baseBounds,
+          fixedX: edge === 'x-left' ? bounds.right : bounds.left,
+          fixedY: edge === 'y-top' ? bounds.bottom : bounds.top,
           startScaleX: offset.scaleX,
           startScaleY: offset.scaleY,
           previousOffsets: JSON.parse(JSON.stringify(roomOffsets))
@@ -3406,15 +3395,33 @@
         const point = svgPointFromEvent(event);
         if (!point) return;
         const resize = activeRoomResize;
-        const nextScaleX = resize.axis === 'y' || resize.startDistanceX < 1
-          ? resize.startScaleX
-          : Math.max(MIN_LAYOUT_SCALE, Math.min(MAX_LAYOUT_SCALE, resize.startScaleX * Math.abs(point.x - resize.centerX) / resize.startDistanceX));
-        const nextScaleY = resize.axis === 'x' || resize.startDistanceY < 1
-          ? resize.startScaleY
-          : Math.max(MIN_LAYOUT_SCALE, Math.min(MAX_LAYOUT_SCALE, resize.startScaleY * Math.abs(point.y - resize.centerY) / resize.startDistanceY));
+        const baseCenterX = resize.baseBounds.x + resize.baseBounds.width / 2;
+        const baseCenterY = resize.baseBounds.y + resize.baseBounds.height / 2;
+        const adjustsX = resize.edge === 'x-left' || resize.edge === 'x-right' || resize.edge === 'both';
+        const adjustsY = resize.edge === 'y-top' || resize.edge === 'y-bottom' || resize.edge === 'both';
+        const nextScaleX = adjustsX
+          ? Math.max(MIN_LAYOUT_SCALE, Math.min(MAX_LAYOUT_SCALE,
+            (resize.edge === 'x-left' ? resize.fixedX - point.x : point.x - resize.fixedX) / resize.baseBounds.width))
+          : resize.startScaleX;
+        const nextScaleY = adjustsY
+          ? Math.max(MIN_LAYOUT_SCALE, Math.min(MAX_LAYOUT_SCALE,
+            (resize.edge === 'y-top' ? resize.fixedY - point.y : point.y - resize.fixedY) / resize.baseBounds.height))
+          : resize.startScaleY;
         const offset = getRoomOffset(resize.roomId);
+        const nextOffsetX = adjustsX
+          ? resize.fixedX - (baseCenterX + (resize.edge === 'x-left' ? resize.baseBounds.width / 2 : -resize.baseBounds.width / 2) * nextScaleX)
+          : offset.x;
+        const nextOffsetY = adjustsY
+          ? resize.fixedY - (baseCenterY + (resize.edge === 'y-top' ? resize.baseBounds.height / 2 : -resize.baseBounds.height / 2) * nextScaleY)
+          : offset.y;
         if (Math.abs(nextScaleX - resize.startScaleX) > 0.005 || Math.abs(nextScaleY - resize.startScaleY) > 0.005) resize.moved = true;
-        roomOffsets[resize.roomId] = { ...offset, scaleX: nextScaleX, scaleY: nextScaleY };
+        roomOffsets[resize.roomId] = {
+          ...offset,
+          x: nextOffsetX,
+          y: nextOffsetY,
+          scaleX: nextScaleX,
+          scaleY: nextScaleY
+        };
         applyRoomLayout();
         event.preventDefault();
       }
@@ -3440,7 +3447,7 @@
         if (!overlay) {
           overlay = document.createElementNS('http://www.w3.org/2000/svg', 'g');
           overlay.id = 'roomLayoutSelection';
-          overlay.innerHTML = '<rect class="room-layout-selection"></rect><circle class="room-layout-resize-handle" data-resize-axis="x" r="12"></circle><circle class="room-layout-resize-handle" data-resize-axis="y" r="12"></circle><circle class="room-layout-resize-handle" data-resize-axis="both" r="12"></circle>';
+          overlay.innerHTML = '<rect class="room-layout-selection"></rect><circle class="room-layout-resize-handle" data-resize-edge="x-left" r="12"></circle><circle class="room-layout-resize-handle" data-resize-edge="x-right" r="12"></circle><circle class="room-layout-resize-handle" data-resize-edge="y-top" r="12"></circle><circle class="room-layout-resize-handle" data-resize-edge="y-bottom" r="12"></circle><circle class="room-layout-resize-handle" data-resize-edge="both" r="12"></circle>';
           overlay.querySelectorAll('circle').forEach(handle => handle.addEventListener('pointerdown', startRoomResize));
           svg.appendChild(overlay);
         }
@@ -3457,13 +3464,19 @@
         rect.setAttribute('y', bounds.top);
         rect.setAttribute('width', bounds.right - bounds.left);
         rect.setAttribute('height', bounds.bottom - bounds.top);
-        const horizontalHandle = overlay.querySelector('[data-resize-axis="x"]');
-        horizontalHandle.setAttribute('cx', bounds.right);
-        horizontalHandle.setAttribute('cy', bounds.centerY);
-        const verticalHandle = overlay.querySelector('[data-resize-axis="y"]');
-        verticalHandle.setAttribute('cx', bounds.centerX);
-        verticalHandle.setAttribute('cy', bounds.bottom);
-        const cornerHandle = overlay.querySelector('[data-resize-axis="both"]');
+        const leftHandle = overlay.querySelector('[data-resize-edge="x-left"]');
+        leftHandle.setAttribute('cx', bounds.left);
+        leftHandle.setAttribute('cy', bounds.centerY);
+        const rightHandle = overlay.querySelector('[data-resize-edge="x-right"]');
+        rightHandle.setAttribute('cx', bounds.right);
+        rightHandle.setAttribute('cy', bounds.centerY);
+        const topHandle = overlay.querySelector('[data-resize-edge="y-top"]');
+        topHandle.setAttribute('cx', bounds.centerX);
+        topHandle.setAttribute('cy', bounds.top);
+        const bottomHandle = overlay.querySelector('[data-resize-edge="y-bottom"]');
+        bottomHandle.setAttribute('cx', bounds.centerX);
+        bottomHandle.setAttribute('cy', bounds.bottom);
+        const cornerHandle = overlay.querySelector('[data-resize-edge="both"]');
         cornerHandle.setAttribute('cx', bounds.right);
         cornerHandle.setAttribute('cy', bounds.bottom);
       }
