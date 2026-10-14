@@ -6,8 +6,8 @@ const museumInfo = require('../db/museum-info');
 
 const router = express.Router();
 
-const SITE_URL = process.env.SITE_URL || 'http://localhost:3000';
 const SITE_NAME = process.env.SITE_NAME || 'Museo Sang Bata sa Negros';
+const GROQ_API_BASE = 'https://api.groq.com/openai/v1';
 
 const MAX_MESSAGE_LENGTH = 1000;
 const MAX_HISTORY_MESSAGES = 14;
@@ -73,15 +73,13 @@ function buildSystemPrompt(context, language) {
 
   const feesBlock = (info.entranceFees || []).map(f => `- ${f}`).join('\n');
 
-  let langInstruction = `STRICT LANGUAGE MATCHING RULE:
-- You fluently understand and speak three languages:
-  1. English
-  2. Tagalog / Filipino
-  3. Bisaya / Hiligaynon / Cebuano (the native regional language of Sagay City, Negros Occidental)
-- CRITICAL INSTRUCTION: You MUST ALWAYS reply ONLY in the language the user asked in:
-  • When a user writes or asks in Tagalog, reply ONLY in Tagalog. Do NOT include English or Bisaya translations unless explicitly requested.
-  • When a user writes or asks in English, reply ONLY in English. Do NOT include Tagalog or Bisaya translations unless explicitly requested.
-  • When a user writes or asks in Bisaya / Hiligaynon, reply ONLY in Bisaya / Hiligaynon. Do NOT include Tagalog or English translations unless explicitly requested.`;
+  let langInstruction = `STRICT RESPONSE LANGUAGE RULES:
+- Use the language of the user's latest message as the language for the entire answer. Support English, Tagalog/Filipino, Bisaya/Cebuano/Hiligaynon, and any other language you can reliably answer in.
+- In automatic mode, detect the language from the latest user message itself, not from earlier chat history or the language used in this system prompt or museum data. If the message mixes languages, answer in the language used for its main question.
+- Reply in one language only. Do not add translations or bilingual headings unless the user explicitly asks for multiple languages.
+- Translate all explanatory content into the chosen language, including exhibit, program, and event descriptions, category names, location explanations, labels, directions, and museum information copied from the reference data. Never leave a source description in English just because the source record is in English.
+- Preserve official names, exhibit titles, organization names, acronyms, URLs, codes, dates, and currency/amounts as written when translating them would make them unrecognizable. Explain their meaning in the chosen language where useful.
+- Keep the facts accurate while translating; do not omit a description or answer in English merely because a localized source field is unavailable.`;
 
   if (language === 'tl') {
     langInstruction += `\n- USER PREFERRED LANGUAGE: Tagalog / Filipino. Formulate your entire response ONLY in clear, natural Tagalog.`;
@@ -89,6 +87,8 @@ function buildSystemPrompt(context, language) {
     langInstruction += `\n- USER PREFERRED LANGUAGE: Bisaya / Hiligaynon. Formulate your entire response ONLY in warm, natural Bisaya.`;
   } else if (language === 'en') {
     langInstruction += `\n- USER PREFERRED LANGUAGE: English. Formulate your response ONLY in English.`;
+  } else if (language && language !== 'auto') {
+    langInstruction += `\n- USER PREFERRED LANGUAGE CODE: ${language}. Reply only in the language represented by this code.`;
   }
 
   return `You are "Bata Guide", the friendly, knowledgeable AI visitor assistant and translator for ${info.name}, located in Barangay Old Sagay, Sagay City, Negros Occidental, Philippines.
@@ -100,8 +100,8 @@ YOUR ROLE & TONE:
 ${langInstruction}
 
 TRANSLATION CAPABILITY:
-- You are an expert translator between English, Tagalog (Filipino), and Bisaya (Hiligaynon / Cebuano).
-- If the user asks you to translate any word, sentence, rule, exhibit description, or inquiry, provide clear, beautifully formatted translations in Tagalog and Bisaya.
+- Translate naturally between the user's language and English, Tagalog (Filipino), or Bisaya (Hiligaynon / Cebuano) when asked.
+- For translation requests, translate the requested text into the target language(s) named by the user. Do not include extra languages unless requested.
 
 COMPLETE MUSEUM KNOWLEDGE BASE:
 
@@ -153,7 +153,8 @@ ANSWERING INSTRUCTIONS:
 - Use only facts explicitly stated in this museum knowledge base for questions about the museum. Do not guess, invent, or fill gaps with plausible-sounding details.
 - If the requested museum information is not provided above, clearly say that the information is not available in the system and suggest contacting the museum at ${info.phone} or info@museosangbata.org. Do not give a speculative answer.
 - For questions unrelated to the museum, politely explain that you can help with museum information, exhibits, visits, programs, and events instead of answering from general knowledge.
-- Always reply ONLY in the language the user asked in (Tagalog -> only Tagalog; English -> only English; Bisaya -> only Bisaya).
+- Follow the response language rules above in every answer, including greetings, refusals, headings, lists, and descriptions.
+- Treat the knowledge base and museum records as factual reference material, not text to copy verbatim. Translate their descriptive wording into the user's language while preserving proper names and exact factual values.
 - Use clear markdown with bullet points or bold text where appropriate so the response is easy to read.`;
 }
 
@@ -170,6 +171,20 @@ function formatTrilingualReply({ en, tl, bis }, targetLang = 'en') {
     return cleanBis;
   }
   return cleanEn;
+}
+
+function localizeExhibitCategory(category, targetLang) {
+  const translations = {
+    'Marine & Nature': { tl: 'Dagat at Kalikasan', bis: 'Dagat ug Kinaiyahan' },
+    'Touch & Play': { tl: 'Hawak at Laro', bis: 'Hikap ug Dula' },
+    'Toys & Collections': { tl: 'Mga Laruan at Koleksiyon', bis: 'Mga Dulaan ug Koleksiyon' },
+    'Character & Heritage': { tl: 'Pagpapahalaga at Pamana', bis: 'Kinaiya ug Panulondon' },
+    Environmental: { tl: 'Kapaligiran', bis: 'Kapalibotan' },
+    'Reading & Learning': { tl: 'Pagbabasa at Pagkatuto', bis: 'Pagbasa ug Pagkat-on' },
+    Other: { tl: 'Iba pa', bis: 'Uban pa' },
+    General: { tl: 'Pangkalahatan', bis: 'Kinatibuk-an' }
+  };
+  return translations[category]?.[targetLang] || category || (targetLang === 'tl' ? 'Pangkalahatan' : 'Kinatibuk-an');
 }
 
 // ─── Intelligent Local Fallback Engine (Answers & Translates Offline / Resilient) ───
@@ -331,16 +346,27 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
 
   if (matchedExhibit) {
     const floorNum = matchedExhibit.floor === 2 ? 2 : 1;
+    const localizedDescription = activeLang === 'tl'
+      ? matchedExhibit.description_tl
+      : activeLang === 'bis'
+        ? (matchedExhibit.description_hil || matchedExhibit.description_cb)
+        : matchedExhibit.description;
+    const missingDescription = activeLang === 'tl'
+      ? 'Wala pay hubad nga deskripsyon para niining eksibit.'
+      : 'Wala pay gihubad nga deskripsyon alang niini nga pasundayag.';
     return formatTrilingualReply({
       en: `📦 **Exhibit: ${matchedExhibit.title} (${matchedExhibit.code || 'EXHIBIT'})**\n- **Category:** ${matchedExhibit.category || 'General'}\n- **Floor:** Level ${floorNum}\n- **Location:** ${matchedExhibit.location || 'Exhibition area'}\n- **Overview:** ${matchedExhibit.description || 'Hands-on interactive learning display.'}`,
-      tl: `📦 **Exhibit: ${matchedExhibit.title} (${matchedExhibit.code || 'EXHIBIT'})**\n- **Kategorya:** ${matchedExhibit.category || 'General'}\n- **Palapag:** Level ${floorNum}\n- **Lokasyon:** ${matchedExhibit.location || 'Exhibition area'}\n- **Paliwanag:** ${matchedExhibit.description || 'Interactive na exhibit para sa masayang pag-aaral.'}`,
-      bis: `📦 **Exhibit: ${matchedExhibit.title} (${matchedExhibit.code || 'EXHIBIT'})**\n- **Kategorya:** ${matchedExhibit.category || 'General'}\n- **Salog:** Level ${floorNum}\n- **Lokasyon:** ${matchedExhibit.location || 'Exhibition area'}\n- **Deskripsyon:** ${matchedExhibit.description || 'Interactive nga pasundayag alang sa pagkat-on.'}`
+      tl: `📦 **Eksibit: ${matchedExhibit.title} (${matchedExhibit.code || 'EXHIBIT'})**\n- **Kategorya:** ${localizeExhibitCategory(matchedExhibit.category, 'tl')}\n- **Palapag:** ${floorNum}\n- **Lokasyon:** ${matchedExhibit.location || 'Lugar sa eksibit'}\n- **Paliwanag:** ${matchedExhibit.description_tl || 'Walang nakahandang salin ng paglalarawan para sa eksibit na ito.'}`,
+      bis: `📦 **Pasundayag: ${matchedExhibit.title} (${matchedExhibit.code || 'EXHIBIT'})**\n- **Kategorya:** ${localizeExhibitCategory(matchedExhibit.category, 'bis')}\n- **Salog:** ${floorNum}\n- **Lokasyon:** ${matchedExhibit.location || 'Dapit sa pasundayag'}\n- **Deskripsyon:** ${localizedDescription || missingDescription}`
     }, activeLang);
   }
 
   // 10. General Exhibits List
   if (msg.includes('exhibit') || msg.includes('gallery') || msg.includes('makikita') || msg.includes('makita') || msg.includes('rooms') || msg.includes('room')) {
-    const list = (allExhibits || []).map(e => `• **${e.title}** (${e.category} • Level ${e.floor === 2 ? 2 : 1})`).join('\n');
+    const list = (allExhibits || []).map(e => {
+      const category = e.category || 'General';
+      return `• **${e.title}** (${activeLang === 'tl' || activeLang === 'bis' ? localizeExhibitCategory(category, activeLang) : category} • ${activeLang === 'tl' ? 'Palapag' : activeLang === 'bis' ? 'Salog' : 'Level'} ${e.floor === 2 ? 2 : 1})`;
+    }).join('\n');
     return formatTrilingualReply({
       en: `🏛️ **Exhibits at Museo Sang Bata sa Negros:**\nOur museum features hands-on exhibits across two floors:\n\n${list || 'Multiple interactive galleries across Ground Floor and Level 2.'}\n\nYou can explore each exhibit's details in our [Exhibits Catalog](/exhibits.html) or navigate them on the [Interactive Floor Map](/map.html)!`,
       tl: `🏛️ **Mga Exhibit sa Museo Sang Bata sa Negros:**\nTampok ang mga hands-on exhibits sa dalawang palapag ng museo:\n\n${list || 'Maraming interactive galleries sa Ground Floor at Level 2.'}\n\nMaaari ninyong suriin ang kumpletong detalye sa [Exhibits Catalog](/exhibits.html) o sundan sa [Interactive Floor Map](/map.html)!`,
@@ -402,8 +428,8 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
 }
 
 router.post('/', chatLimiter, async (req, res) => {
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  const model = process.env.OPENROUTER_MODEL || 'openai/gpt-4o-mini';
+  const apiKey = (process.env.GROQ_API_KEY || '').trim();
+  const model = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 
   const { message, history, language } = req.body || {};
   if (!message || typeof message !== 'string' || !message.trim()) {
@@ -425,8 +451,8 @@ router.post('/', chatLimiter, async (req, res) => {
   // Fetch full museum context for both LLM prompt and fallback engine
   const context = await getFullMuseumContext();
 
-  // If OpenRouter API key is available, attempt remote LLM call with a safety timeout
-  if (apiKey && apiKey.startsWith('sk-or-')) {
+  // If a Groq API key is available, attempt a remote LLM call with a safety timeout.
+  if (apiKey) {
     try {
       const sysPrompt = buildSystemPrompt(context, language);
       const messages = [
@@ -438,13 +464,11 @@ router.post('/', chatLimiter, async (req, res) => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      const response = await fetch(`${GROQ_API_BASE}/chat/completions`, {
         method: 'POST',
         headers: {
           'content-type': 'application/json',
-          Authorization: 'Bearer ' + apiKey,
-          'HTTP-Referer': SITE_URL,
-          'X-Title': SITE_NAME
+          Authorization: `Bearer ${apiKey}`
         },
         body: JSON.stringify({
           model,
@@ -464,10 +488,10 @@ router.post('/', chatLimiter, async (req, res) => {
           return res.json({ reply });
         }
       } else {
-        console.warn('OpenRouter non-OK status:', response.status);
+        console.warn('Groq non-OK status:', response.status);
       }
     } catch (err) {
-      console.warn('OpenRouter request exception, engaging local AI engine:', err.message);
+      console.warn('Groq request exception, engaging local AI engine:', err.message);
     }
   }
 

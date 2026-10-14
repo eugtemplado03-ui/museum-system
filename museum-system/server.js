@@ -174,8 +174,8 @@ async function startServer() {
 
   app.listen(PORT, () => {
     console.log(`Museo Sang Bata sa Negros server running on http://localhost:${PORT}`);
-    if (!process.env.OPENROUTER_API_KEY) {
-      console.log('NOTE: OPENROUTER_API_KEY is not set — the museum chat assistant will be disabled until you add it to .env.');
+    if (!process.env.GROQ_API_KEY) {
+      console.log('NOTE: GROQ_API_KEY is not set — the museum chat assistant will use its local knowledge engine.');
     }
   });
 }
