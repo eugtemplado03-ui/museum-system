@@ -3061,6 +3061,70 @@
           .find(zone => (zone.dataset.catId || zone.id) === roomId);
       }
 
+      function getLayoutBounds(zone) {
+        const bounds = zone.getBBox();
+        const matrix = zone.getCTM();
+        const svg = document.getElementById('museumSvg');
+        if (!matrix || !svg) return null;
+        const points = [
+          [bounds.x, bounds.y],
+          [bounds.x + bounds.width, bounds.y],
+          [bounds.x, bounds.y + bounds.height],
+          [bounds.x + bounds.width, bounds.y + bounds.height]
+        ].map(([x, y]) => {
+          const point = svg.createSVGPoint();
+          point.x = x;
+          point.y = y;
+          return point.matrixTransform(matrix);
+        });
+        const xs = points.map(point => point.x);
+        const ys = points.map(point => point.y);
+        const left = Math.min(...xs);
+        const top = Math.min(...ys);
+        const right = Math.max(...xs);
+        const bottom = Math.max(...ys);
+        return {
+          left,
+          top,
+          right,
+          bottom,
+          centerX: (left + right) / 2,
+          centerY: (top + bottom) / 2,
+          area: (right - left) * (bottom - top)
+        };
+      }
+
+      function findLayoutDropTarget(drag, point) {
+        return Array.from(document.querySelectorAll('#museumSvg .room-poly'))
+          .filter(zone => zone !== drag.zone)
+          .map(zone => ({ zone, bounds: getLayoutBounds(zone) }))
+          .filter(({ bounds }) => bounds &&
+            point.x >= bounds.left && point.x <= bounds.right &&
+            point.y >= bounds.top && point.y <= bounds.bottom)
+          .sort((a, b) => a.bounds.area - b.bounds.area)[0] || null;
+      }
+
+      function swapLayoutSections(drag, targetZone, targetBounds) {
+        const draggedBounds = getLayoutBounds(drag.zone);
+        if (!draggedBounds) return;
+        const targetId = targetZone.dataset.catId || targetZone.id;
+        const draggedOffset = getRoomOffset(drag.roomId);
+        const targetOffset = getRoomOffset(targetId);
+        roomOffsets[drag.roomId] = {
+          ...draggedOffset,
+          x: draggedOffset.x + targetBounds.centerX - draggedBounds.centerX,
+          y: draggedOffset.y + targetBounds.centerY - draggedBounds.centerY
+        };
+        roomOffsets[targetId] = {
+          ...targetOffset,
+          x: targetOffset.x + drag.startCenter.centerX - targetBounds.centerX,
+          y: targetOffset.y + drag.startCenter.centerY - targetBounds.centerY
+        };
+        applyRoomLayout();
+        const status = document.getElementById('mapLayoutSaveStatus');
+        if (status) status.textContent = `Swapped ${drag.roomId.replaceAll('_', ' ')} with ${targetId.replaceAll('_', ' ')}.`;
+      }
+
       function transformRoomPoint(roomId, x, y) {
         const zone = getLayoutZone(roomId);
         if (!zone) return { x, y };
@@ -3142,6 +3206,7 @@
           startPoint: point,
           startOffset: offset,
           bounds: zone.getBBox(),
+          startCenter: getLayoutBounds(zone),
           previousOffsets: JSON.parse(JSON.stringify(roomOffsets))
         };
         zone.classList.add('room-layout-dragging');
@@ -3184,6 +3249,9 @@
         activeRoomDrag = null;
         drag.zone.classList.remove('room-layout-dragging');
         if (drag.moved) {
+          const point = svgPointFromEvent(event);
+          const target = point && findLayoutDropTarget(drag, point);
+          if (target) swapLayoutSections(drag, target.zone, target.bounds);
           await saveRoomLayout(drag.previousOffsets);
           if (CATEGORY_ROOMS[drag.roomId] && activeRouteKey) renderRoute(activeRouteKey);
         }
@@ -3279,40 +3347,22 @@
           return;
         }
         overlay.dataset.layoutId = selectedLayoutId;
-        const bounds = zone.getBBox();
-        const matrix = zone.getCTM();
-        if (!matrix) return;
-        const points = [
-          [bounds.x, bounds.y],
-          [bounds.x + bounds.width, bounds.y],
-          [bounds.x, bounds.y + bounds.height],
-          [bounds.x + bounds.width, bounds.y + bounds.height]
-        ].map(([x, y]) => {
-          const point = svg.createSVGPoint();
-          point.x = x;
-          point.y = y;
-          return point.matrixTransform(matrix);
-        });
-        const xs = points.map(point => point.x);
-        const ys = points.map(point => point.y);
-        const left = Math.min(...xs);
-        const top = Math.min(...ys);
-        const right = Math.max(...xs);
-        const bottom = Math.max(...ys);
+        const bounds = getLayoutBounds(zone);
+        if (!bounds) return;
         const rect = overlay.querySelector('rect');
-        rect.setAttribute('x', left);
-        rect.setAttribute('y', top);
-        rect.setAttribute('width', right - left);
-        rect.setAttribute('height', bottom - top);
+        rect.setAttribute('x', bounds.left);
+        rect.setAttribute('y', bounds.top);
+        rect.setAttribute('width', bounds.right - bounds.left);
+        rect.setAttribute('height', bounds.bottom - bounds.top);
         const horizontalHandle = overlay.querySelector('[data-resize-axis="x"]');
-        horizontalHandle.setAttribute('cx', right);
-        horizontalHandle.setAttribute('cy', (top + bottom) / 2);
+        horizontalHandle.setAttribute('cx', bounds.right);
+        horizontalHandle.setAttribute('cy', bounds.centerY);
         const verticalHandle = overlay.querySelector('[data-resize-axis="y"]');
-        verticalHandle.setAttribute('cx', (left + right) / 2);
-        verticalHandle.setAttribute('cy', bottom);
+        verticalHandle.setAttribute('cx', bounds.centerX);
+        verticalHandle.setAttribute('cy', bounds.bottom);
         const cornerHandle = overlay.querySelector('[data-resize-axis="both"]');
-        cornerHandle.setAttribute('cx', right);
-        cornerHandle.setAttribute('cy', bottom);
+        cornerHandle.setAttribute('cx', bounds.right);
+        cornerHandle.setAttribute('cy', bounds.bottom);
       }
 
       async function saveRoomLayout(previousOffsets) {
@@ -3367,7 +3417,7 @@
           button.textContent = enabled ? '✓ Done Arranging' : '✥ Arrange & Resize Sections';
         }
         if (!enabled) selectedLayoutId = null;
-        if (status) status.textContent = enabled ? 'Drag sections to move; right handle adjusts width, bottom adjusts height, corner adjusts both.' : '';
+        if (status) status.textContent = enabled ? 'Drop a section onto another to swap places; resize with the right, bottom, or corner handle.' : '';
         updateLayoutSelection();
       }
 
