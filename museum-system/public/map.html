@@ -348,6 +348,22 @@
       border-right: none;
     }
 
+    .map-layout-container.sidebar-right .map-directory-sidebar {
+      order: 2;
+      border-right: none;
+      border-left: 1.5px solid #1e293b;
+      box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .map-layout-container.sidebar-right .map-viewport {
+      order: 1;
+    }
+
+    .map-layout-container.sidebar-right .map-directory-sidebar.collapsed {
+      transform: translateX(100%);
+      border-left: none;
+    }
+
     .mobile-sidepanel-fab,
     .mobile-sidepanel-hud-btn,
     .sidebar-mobile-close-btn,
@@ -1772,6 +1788,7 @@
         position: absolute;
         top: 0;
         left: 0;
+        right: auto;
         bottom: 0;
         width: min(300px, 84vw) !important;
         max-width: 84vw;
@@ -1789,6 +1806,23 @@
       .map-directory-sidebar.collapsed {
         transform: translateX(-105%) !important;
         width: min(300px, 84vw) !important;
+      }
+
+      .map-layout-container.sidebar-right .map-directory-sidebar {
+        left: auto;
+        right: 0;
+        border-left: 1.5px solid var(--sidebar-border);
+        border-right: none;
+        box-shadow: -10px 0 35px rgba(0, 0, 0, 0.85);
+      }
+
+      .map-layout-container.sidebar-right .map-directory-sidebar,
+      .map-layout-container.sidebar-right .map-directory-sidebar.collapsed {
+        transform: translateX(105%) !important;
+      }
+
+      .map-layout-container.sidebar-right .map-directory-sidebar.open {
+        transform: translateX(0) !important;
       }
 
       /* Mobile Side Panel Floating Action Button & Backdrop */
@@ -1869,6 +1903,10 @@
         transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease !important;
         user-select: none !important;
         -webkit-tap-highlight-color: transparent !important;
+      }
+      .map-layout-container.sidebar-right .mobile-sidepanel-fab {
+        left: auto !important;
+        right: 12px !important;
       }
       .mobile-sidepanel-fab:active {
         transform: scale(0.96) !important;
@@ -2279,6 +2317,11 @@
             title="Toggle Rooms Directory Sidebar" style="color: #ffffff !important;">
             <span style="color: #ffffff !important;">📋 Directory</span>
           </button>
+          <button class="seg-btn" id="btnSwitchSidebarSide" type="button"
+            title="Move Rooms Directory to the right side" aria-label="Move Rooms Directory to the right side"
+            style="color: #ffffff !important;">
+            <span style="color: #ffffff !important;">⇄ Move Right</span>
+          </button>
         </div>
       </div>
 
@@ -2514,6 +2557,34 @@
       let currentFloor = 1;
       let is3DMode = false;
       document.body.classList.add('theme-light');
+      const mapLayout = document.querySelector('.map-layout-container');
+      const sidebarSideButton = document.getElementById('btnSwitchSidebarSide');
+      const SIDEBAR_SIDE_KEY = 'museum_map_directory_side';
+
+      function setSidebarSide(side) {
+        const isRight = side === 'right';
+        mapLayout?.classList.toggle('sidebar-right', isRight);
+        if (sidebarSideButton) {
+          const label = isRight ? '⇄ Move Left' : '⇄ Move Right';
+          const nextSide = isRight ? 'left' : 'right';
+          sidebarSideButton.querySelector('span').textContent = label;
+          sidebarSideButton.title = `Move Rooms Directory to the ${nextSide} side`;
+          sidebarSideButton.setAttribute('aria-label', `Move Rooms Directory to the ${nextSide} side`);
+        }
+        try {
+          localStorage.setItem(SIDEBAR_SIDE_KEY, isRight ? 'right' : 'left');
+        } catch (error) {
+          console.warn('Could not save floor map directory position:', error);
+        }
+      }
+
+      let savedSidebarSide = 'left';
+      try {
+        savedSidebarSide = localStorage.getItem(SIDEBAR_SIDE_KEY) === 'right' ? 'right' : 'left';
+      } catch (error) {
+        console.warn('Could not load floor map directory position:', error);
+      }
+      setSidebarSide(savedSidebarSide);
 
       // ── CATEGORY ROOM DEFINITIONS (Every Category is an Architectural Room that Houses Exhibits) ──
       const CATEGORY_ROOMS = {
@@ -4442,6 +4513,10 @@
 
         // Toggle Directory Sidebar & Mobile Side Panel Listeners
         document.getElementById('btnToggleSidebar')?.addEventListener('click', () => toggleSidePanel());
+        sidebarSideButton?.addEventListener('click', () => {
+          const side = mapLayout?.classList.contains('sidebar-right') ? 'left' : 'right';
+          setSidebarSide(side);
+        });
         document.getElementById('mobileSidepanelFab')?.addEventListener('click', () => toggleSidePanel());
         document.getElementById('btnMobileHudSidepanel')?.addEventListener('click', () => toggleSidePanel());
         document.getElementById('sidebarMobileCloseBtn')?.addEventListener('click', () => toggleSidePanel(false));
