@@ -1870,6 +1870,39 @@
     }
 
     @media (max-width: 768px) {
+      .map-toolbar-row {
+        flex-wrap: wrap !important;
+        justify-content: flex-start;
+        overflow-x: visible;
+      }
+
+      .map-toolbar-row .map-search-wrap {
+        flex: 0 0 95px;
+      }
+
+      .map-toolbar-row .chips-row {
+        flex: 1 1 180px;
+        min-width: 0;
+      }
+
+      .map-layout-edit-controls {
+        flex: 0 0 100%;
+        flex-wrap: wrap;
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+      }
+
+      .map-layout-save-status[data-status-kind="success"],
+      .map-layout-save-status[data-status-kind="hint"] {
+        display: none !important;
+      }
+
+      .map-layout-save-status {
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+
       .map-layout-container {
         height: calc(100vh - 86px) !important;
         height: calc(100dvh - 86px) !important;
@@ -2310,7 +2343,7 @@
       }
 
       .map-toolbar-row {
-        flex-wrap: nowrap !important;
+        flex-wrap: wrap !important;
         gap: 3px !important;
       }
 
@@ -2328,7 +2361,7 @@
 
       .chips-row {
         width: auto !important;
-        flex: 1 1 auto !important;
+        flex: 1 1 0% !important;
         height: 24px !important;
         gap: 3px !important;
       }
@@ -3452,7 +3485,10 @@
         const status = document.getElementById('mapLayoutSaveStatus');
         const signInLink = document.getElementById('mapLayoutSignIn');
         if (signInLink) signInLink.hidden = true;
-        if (status) status.textContent = 'Saving shared layout…';
+        if (status) {
+          status.dataset.statusKind = 'pending';
+          status.textContent = 'Saving shared layout…';
+        }
         try {
           const response = await fetch('/api/map-layout', {
             method: 'PUT',
@@ -3479,11 +3515,17 @@
           }
           roomOffsets = result.roomOffsets || {};
           applyRoomLayout();
-          if (status) status.textContent = successMessage || 'Layout saved for everyone.';
+          if (status) {
+            status.dataset.statusKind = 'success';
+            status.textContent = successMessage || 'Layout saved for everyone.';
+          }
         } catch (error) {
           roomOffsets = previousOffsets;
           applyRoomLayout();
-          if (status) status.textContent = `Could not save layout: ${error.message}`;
+          if (status) {
+            status.dataset.statusKind = 'error';
+            status.textContent = `Could not save layout: ${error.message}`;
+          }
           console.error('Floor-map layout save failed:', error);
         }
       }
@@ -3499,7 +3541,10 @@
           button.textContent = enabled ? '✓ Done Arranging' : '✥ Arrange & Resize Sections';
         }
         if (!enabled) selectedLayoutId = null;
-        if (status) status.textContent = enabled ? 'Drop a section onto another to swap places and sizes; resize with the right, bottom, or corner handle.' : '';
+        if (status) {
+          status.dataset.statusKind = enabled ? 'hint' : '';
+          status.textContent = enabled ? 'Drop a section onto another to swap places and sizes; resize with the right, bottom, or corner handle.' : '';
+        }
         updateLayoutSelection();
       }
 
@@ -3513,7 +3558,10 @@
           roomOffsets = {};
           console.error('Floor-map layout load failed:', error);
           const status = document.getElementById('mapLayoutSaveStatus');
-          if (status) status.textContent = `Could not load shared layout: ${error.message}`;
+          if (status) {
+            status.dataset.statusKind = 'error';
+            status.textContent = `Could not load shared layout: ${error.message}`;
+          }
         }
       }
 
