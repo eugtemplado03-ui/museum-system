@@ -338,6 +338,23 @@
       touch-action: none;
     }
 
+    .room-layout-resize-handle[data-resize-axis="x"] {
+      cursor: ew-resize;
+    }
+
+    .room-layout-resize-handle[data-resize-axis="y"] {
+      cursor: ns-resize;
+    }
+
+    .map-layout-sign-in {
+      color: #ffffff;
+      text-decoration: none;
+    }
+
+    .map-layout-sign-in[hidden] {
+      display: none;
+    }
+
     .chip {
       padding: 4px 10px;
       border-radius: 16px;
@@ -2405,6 +2422,7 @@
         <div class="map-layout-edit-controls" id="mapLayoutEditControls" hidden>
           <button class="chip" id="btnArrangeRooms" type="button" aria-pressed="false">✥ Arrange &amp; Resize Sections</button>
           <button class="chip" id="btnResetRoomLayout" type="button">Reset Layout</button>
+          <a class="chip map-layout-sign-in" id="mapLayoutSignIn" href="/?tab=admin" hidden>Sign in again</a>
           <span class="map-layout-save-status" id="mapLayoutSaveStatus" role="status" aria-live="polite"></span>
         </div>
       </div>
@@ -3028,10 +3046,13 @@
 
       function getRoomOffset(roomId) {
         const offset = roomOffsets[roomId] || {};
+        const scaleX = offset.scaleX ?? offset.scale ?? 1;
+        const scaleY = offset.scaleY ?? offset.scale ?? 1;
         return {
           x: Number.isFinite(Number(offset.x)) ? Number(offset.x) : 0,
           y: Number.isFinite(Number(offset.y)) ? Number(offset.y) : 0,
-          scale: Number.isFinite(Number(offset.scale)) ? Number(offset.scale) : 1
+          scaleX: Number.isFinite(Number(scaleX)) ? Number(scaleX) : 1,
+          scaleY: Number.isFinite(Number(scaleY)) ? Number(scaleY) : 1
         };
       }
 
@@ -3048,8 +3069,8 @@
         const centerY = bounds.y + bounds.height / 2;
         const offset = getRoomOffset(roomId);
         return {
-          x: centerX + (x - centerX) * offset.scale + offset.x,
-          y: centerY + (y - centerY) * offset.scale + offset.y
+          x: centerX + (x - centerX) * offset.scaleX + offset.x,
+          y: centerY + (y - centerY) * offset.scaleY + offset.y
         };
       }
 
@@ -3073,7 +3094,7 @@
           const centerX = bounds.x + bounds.width / 2;
           const centerY = bounds.y + bounds.height / 2;
           zone.setAttribute('transform',
-            `translate(${offset.x + centerX * (1 - offset.scale)}, ${offset.y + centerY * (1 - offset.scale)}) scale(${offset.scale})`);
+            `translate(${offset.x + centerX * (1 - offset.scaleX)}, ${offset.y + centerY * (1 - offset.scaleY)}) scale(${offset.scaleX}, ${offset.scaleY})`);
         });
 
         Object.values(CATEGORY_ROOMS).forEach(room => {
@@ -3140,18 +3161,19 @@
         if (Math.hypot(point.x - startPoint.x, point.y - startPoint.y) > 2) {
           activeRoomDrag.moved = true;
         }
-        const scale = startOffset.scale;
+        const scaleX = startOffset.scaleX;
+        const scaleY = startOffset.scaleY;
         const centerX = bounds.x + bounds.width / 2;
         const centerY = bounds.y + bounds.height / 2;
-        const transformedLeft = centerX + (bounds.x - centerX) * scale;
-        const transformedTop = centerY + (bounds.y - centerY) * scale;
-        const transformedRight = centerX + (bounds.x + bounds.width - centerX) * scale;
-        const transformedBottom = centerY + (bounds.y + bounds.height - centerY) * scale;
+        const transformedLeft = centerX + (bounds.x - centerX) * scaleX;
+        const transformedTop = centerY + (bounds.y - centerY) * scaleY;
+        const transformedRight = centerX + (bounds.x + bounds.width - centerX) * scaleX;
+        const transformedBottom = centerY + (bounds.y + bounds.height - centerY) * scaleY;
         const maxX = 1000 - transformedRight;
         const maxY = 1300 - transformedBottom;
         const x = Math.min(maxX, Math.max(-transformedLeft, startOffset.x + point.x - startPoint.x));
         const y = Math.min(maxY, Math.max(-transformedTop, startOffset.y + point.y - startPoint.y));
-        roomOffsets[roomId] = { x, y, scale };
+        roomOffsets[roomId] = { x, y, scaleX, scaleY };
         applyRoomLayout();
         event.preventDefault();
       }
@@ -3174,20 +3196,31 @@
         if (!zone || !point) return;
         const bounds = zone.getBBox();
         const offset = getRoomOffset(selectedLayoutId);
+        const matrix = zone.getCTM();
+        const svg = document.getElementById('museumSvg');
+        if (!matrix || !svg) return;
         const centerX = bounds.x + bounds.width / 2;
         const centerY = bounds.y + bounds.height / 2;
-        const center = {
-          x: centerX + offset.x,
-          y: centerY + offset.y
+        const toSvgPoint = (x, y) => {
+          const svgPoint = svg.createSVGPoint();
+          svgPoint.x = x;
+          svgPoint.y = y;
+          return svgPoint.matrixTransform(matrix);
         };
+        const center = toSvgPoint(centerX, centerY);
         event.preventDefault();
         event.stopPropagation();
+        const axis = event.currentTarget.dataset.resizeAxis;
         activeRoomResize = {
           roomId: selectedLayoutId,
           pointerId: event.pointerId,
-          center,
-          startDistance: Math.hypot(point.x - center.x, point.y - center.y),
-          startScale: offset.scale,
+          axis,
+          centerX: center.x,
+          centerY: center.y,
+          startDistanceX: Math.abs(toSvgPoint(bounds.x + bounds.width, centerY).x - center.x),
+          startDistanceY: Math.abs(toSvgPoint(centerX, bounds.y + bounds.height).y - center.y),
+          startScaleX: offset.scaleX,
+          startScaleY: offset.scaleY,
           previousOffsets: JSON.parse(JSON.stringify(roomOffsets))
         };
         try {
@@ -3200,13 +3233,17 @@
       function moveRoomResize(event) {
         if (!activeRoomResize || activeRoomResize.pointerId !== event.pointerId) return;
         const point = svgPointFromEvent(event);
-        if (!point || activeRoomResize.startDistance < 1) return;
+        if (!point) return;
         const resize = activeRoomResize;
-        const scale = Math.max(0.5, Math.min(2.5,
-          resize.startScale * Math.hypot(point.x - resize.center.x, point.y - resize.center.y) / resize.startDistance));
+        const nextScaleX = resize.axis === 'y' || resize.startDistanceX < 1
+          ? resize.startScaleX
+          : Math.max(0.5, Math.min(2.5, resize.startScaleX * Math.abs(point.x - resize.centerX) / resize.startDistanceX));
+        const nextScaleY = resize.axis === 'x' || resize.startDistanceY < 1
+          ? resize.startScaleY
+          : Math.max(0.5, Math.min(2.5, resize.startScaleY * Math.abs(point.y - resize.centerY) / resize.startDistanceY));
         const offset = getRoomOffset(resize.roomId);
-        if (Math.abs(scale - resize.startScale) > 0.005) resize.moved = true;
-        roomOffsets[resize.roomId] = { ...offset, scale };
+        if (Math.abs(nextScaleX - resize.startScaleX) > 0.005 || Math.abs(nextScaleY - resize.startScaleY) > 0.005) resize.moved = true;
+        roomOffsets[resize.roomId] = { ...offset, scaleX: nextScaleX, scaleY: nextScaleY };
         applyRoomLayout();
         event.preventDefault();
       }
@@ -3232,8 +3269,8 @@
         if (!overlay) {
           overlay = document.createElementNS('http://www.w3.org/2000/svg', 'g');
           overlay.id = 'roomLayoutSelection';
-          overlay.innerHTML = '<rect class="room-layout-selection"></rect><circle class="room-layout-resize-handle" r="12"></circle>';
-          overlay.querySelector('circle').addEventListener('pointerdown', startRoomResize);
+          overlay.innerHTML = '<rect class="room-layout-selection"></rect><circle class="room-layout-resize-handle" data-resize-axis="x" r="12"></circle><circle class="room-layout-resize-handle" data-resize-axis="y" r="12"></circle><circle class="room-layout-resize-handle" data-resize-axis="both" r="12"></circle>';
+          overlay.querySelectorAll('circle').forEach(handle => handle.addEventListener('pointerdown', startRoomResize));
           svg.appendChild(overlay);
         }
         const zone = getLayoutZone(selectedLayoutId);
@@ -3267,14 +3304,22 @@
         rect.setAttribute('y', top);
         rect.setAttribute('width', right - left);
         rect.setAttribute('height', bottom - top);
-        const handle = overlay.querySelector('circle');
-        handle.setAttribute('cx', right);
-        handle.setAttribute('cy', bottom);
+        const horizontalHandle = overlay.querySelector('[data-resize-axis="x"]');
+        horizontalHandle.setAttribute('cx', right);
+        horizontalHandle.setAttribute('cy', (top + bottom) / 2);
+        const verticalHandle = overlay.querySelector('[data-resize-axis="y"]');
+        verticalHandle.setAttribute('cx', (left + right) / 2);
+        verticalHandle.setAttribute('cy', bottom);
+        const cornerHandle = overlay.querySelector('[data-resize-axis="both"]');
+        cornerHandle.setAttribute('cx', right);
+        cornerHandle.setAttribute('cy', bottom);
       }
 
       async function saveRoomLayout(previousOffsets) {
-        const token = localStorage.getItem('museum_admin_token');
+        const token = localStorage.getItem('museum_admin_token') || sessionStorage.getItem('museum_admin_token');
         const status = document.getElementById('mapLayoutSaveStatus');
+        const signInLink = document.getElementById('mapLayoutSignIn');
+        if (signInLink) signInLink.hidden = true;
         if (status) status.textContent = 'Saving shared layout…';
         try {
           const response = await fetch('/api/map-layout', {
@@ -3285,8 +3330,21 @@
             },
             body: JSON.stringify({ roomOffsets })
           });
-          const result = await response.json();
-          if (!response.ok) throw new Error(result.error || `Request failed (${response.status})`);
+          const responseText = await response.text();
+          let result = {};
+          try {
+            result = responseText ? JSON.parse(responseText) : {};
+          } catch {
+            result = {};
+          }
+          if (!response.ok) {
+            if (response.status === 401) {
+              localStorage.removeItem('museum_admin_token');
+              sessionStorage.removeItem('museum_admin_token');
+              if (signInLink) signInLink.hidden = false;
+            }
+            throw new Error(result.error || responseText || `Request failed (${response.status})`);
+          }
           roomOffsets = result.roomOffsets || {};
           applyRoomLayout();
           if (status) status.textContent = 'Layout saved for everyone.';
@@ -3309,7 +3367,7 @@
           button.textContent = enabled ? '✓ Done Arranging' : '✥ Arrange & Resize Sections';
         }
         if (!enabled) selectedLayoutId = null;
-        if (status) status.textContent = enabled ? 'Drag any section to move it; drag the selected corner handle to resize.' : '';
+        if (status) status.textContent = enabled ? 'Drag sections to move; right handle adjusts width, bottom adjusts height, corner adjusts both.' : '';
         updateLayoutSelection();
       }
 
@@ -4854,7 +4912,7 @@
         const layoutControls = document.getElementById('mapLayoutEditControls');
         if (layoutControls) {
           try {
-            layoutControls.hidden = !localStorage.getItem('museum_admin_token');
+            layoutControls.hidden = !(localStorage.getItem('museum_admin_token') || sessionStorage.getItem('museum_admin_token'));
           } catch (error) {
             layoutControls.hidden = true;
             console.warn('Could not check admin session for map arrangement:', error.message);

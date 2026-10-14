@@ -47,15 +47,23 @@ router.put('/', requireAdmin, async (req, res) => {
     if (!offset || typeof offset !== 'object' || Array.isArray(offset)) {
       return res.status(400).json({ error: `Invalid position for ${roomId}.` });
     }
-    const { x, y, scale } = offset;
+    const { x, y, scale, scaleX, scaleY } = offset;
     if (!Number.isFinite(x) || !Number.isFinite(y) || Math.abs(x) > MAX_OFFSET || Math.abs(y) > MAX_OFFSET) {
       return res.status(400).json({ error: `Position for ${roomId} is outside the allowed range.` });
     }
     if (Object.hasOwn(offset, 'scale') && (!Number.isFinite(scale) || scale < MIN_SCALE || scale > MAX_SCALE)) {
       return res.status(400).json({ error: `Scale for ${roomId} must be between ${MIN_SCALE} and ${MAX_SCALE}.` });
     }
+    for (const [axis, axisScale] of [['horizontal', scaleX], ['vertical', scaleY]]) {
+      const property = axis === 'horizontal' ? 'scaleX' : 'scaleY';
+      if (Object.hasOwn(offset, property) && (!Number.isFinite(axisScale) || axisScale < MIN_SCALE || axisScale > MAX_SCALE)) {
+        return res.status(400).json({ error: `${axis} scale for ${roomId} must be between ${MIN_SCALE} and ${MAX_SCALE}.` });
+      }
+    }
     sanitizedOffsets[roomId] = { x, y };
     if (Object.hasOwn(offset, 'scale')) sanitizedOffsets[roomId].scale = scale;
+    if (Object.hasOwn(offset, 'scaleX')) sanitizedOffsets[roomId].scaleX = scaleX;
+    if (Object.hasOwn(offset, 'scaleY')) sanitizedOffsets[roomId].scaleY = scaleY;
   }
 
   try {
