@@ -277,6 +277,43 @@
       display: none;
     }
 
+    .map-layout-edit-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .map-layout-edit-controls[hidden] {
+      display: none;
+    }
+
+    .map-layout-save-status {
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    body.map-layout-edit-mode .room-poly[data-cat-id] {
+      cursor: grab;
+      touch-action: none;
+    }
+
+    body.map-layout-edit-mode .room-poly[data-cat-id]:hover {
+      filter: brightness(1.2) drop-shadow(0 0 10px rgba(56, 189, 248, 0.8));
+    }
+
+    body.map-layout-edit-mode .category-room-pin,
+    body.map-layout-edit-mode .individual-exhibit-pin {
+      pointer-events: none;
+    }
+
+    body.map-layout-edit-mode .room-poly[data-cat-id].room-layout-dragging {
+      cursor: grabbing;
+      filter: brightness(1.3) drop-shadow(0 0 16px rgba(56, 189, 248, 0.95));
+    }
+
     .chip {
       padding: 4px 10px;
       border-radius: 16px;
@@ -2341,6 +2378,11 @@
           <button class="chip" data-cat="Toys &amp; Collections" style="color: #ffffff !important;">🧸 Toys &amp; Collections (1)</button>
           <button class="chip" data-cat="Carnival &amp; Discovery" style="color: #ffffff !important;">🎡 Carnival &amp; Discovery (1)</button>
         </div>
+        <div class="map-layout-edit-controls" id="mapLayoutEditControls" hidden>
+          <button class="chip" id="btnArrangeRooms" type="button" aria-pressed="false">✥ Arrange Rooms</button>
+          <button class="chip" id="btnResetRoomLayout" type="button">Reset Layout</button>
+          <span class="map-layout-save-status" id="mapLayoutSaveStatus" role="status" aria-live="polite"></span>
+        </div>
       </div>
     </div>
   </header>
@@ -2843,6 +2885,9 @@
       let selectedRoom = null;
       let selectedExhibit = null;
       let activeRouteKey = null;
+      let roomOffsets = {};
+      let roomLayoutEditMode = false;
+      let activeRoomDrag = null;
       let activeDirectionsSpeech = null;
       let speechUtterance = null;
       let isTtsPlaying = false;
@@ -2953,6 +2998,168 @@
           }
         }
         return null;
+      }
+
+      function getRoomOffset(roomId) {
+        const offset = roomOffsets[roomId] || {};
+        return {
+          x: Number.isFinite(Number(offset.x)) ? Number(offset.x) : 0,
+          y: Number.isFinite(Number(offset.y)) ? Number(offset.y) : 0
+        };
+      }
+
+      function getRoomMapPosition(room) {
+        const offset = getRoomOffset(room.id);
+        return {
+          x: (room.pinX / 100) * 1000 + offset.x,
+          y: (room.pinY / 100) * 1300 + offset.y
+        };
+      }
+
+      function getExhibitMapPosition(exhibit) {
+        const room = findRoomForExhibit(exhibit);
+        const offset = room ? getRoomOffset(room.id) : { x: 0, y: 0 };
+        return {
+          x: (Number(exhibit.pinX) / 100) * 1000 + offset.x,
+          y: (Number(exhibit.pinY) / 100) * 1300 + offset.y
+        };
+      }
+
+      function applyRoomLayout() {
+        Object.values(CATEGORY_ROOMS).forEach(room => {
+          const offset = getRoomOffset(room.id);
+          const zone = document.getElementById(room.zoneId);
+          if (zone) zone.setAttribute('transform', `translate(${offset.x}, ${offset.y})`);
+
+          const roomPin = document.getElementById(`pin_${room.id}`);
+          if (roomPin) {
+            const position = getRoomMapPosition(room);
+            roomPin.setAttribute('transform', `translate(${position.x}, ${position.y})`);
+          }
+        });
+
+        exhibitsData.forEach(exhibit => {
+          const pin = document.getElementById(`ex_pin_${exhibit.code || exhibit.id}`);
+          if (!pin || exhibit.pinX == null || exhibit.pinY == null) return;
+          const position = getExhibitMapPosition(exhibit);
+          pin.setAttribute('transform', `translate(${position.x}, ${position.y})`);
+        });
+      }
+
+      function svgPointFromEvent(event) {
+        const svg = document.getElementById('museumSvg');
+        if (!svg) return null;
+        const point = svg.createSVGPoint();
+        point.x = event.clientX;
+        point.y = event.clientY;
+        return point.matrixTransform(svg.getScreenCTM().inverse());
+      }
+
+      function startRoomDrag(event) {
+        if (!roomLayoutEditMode || event.button !== 0) return;
+        const zone = event.currentTarget;
+        const roomId = zone.dataset.catId;
+        const room = CATEGORY_ROOMS[roomId];
+        const point = svgPointFromEvent(event);
+        if (!room || !point) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+        const offset = getRoomOffset(roomId);
+        activeRoomDrag = {
+          roomId,
+          zone,
+          pointerId: event.pointerId,
+          startPoint: point,
+          startOffset: offset,
+          bounds: zone.getBBox(),
+          previousOffsets: JSON.parse(JSON.stringify(roomOffsets))
+        };
+        zone.classList.add('room-layout-dragging');
+        try {
+          zone.setPointerCapture(event.pointerId);
+        } catch (error) {
+          console.warn('Could not capture floor-map room drag:', error.message);
+        }
+      }
+
+      function moveRoomDrag(event) {
+        if (!activeRoomDrag || activeRoomDrag.pointerId !== event.pointerId) return;
+        const point = svgPointFromEvent(event);
+        if (!point) return;
+
+        const { roomId, bounds, startOffset, startPoint } = activeRoomDrag;
+        if (Math.hypot(point.x - startPoint.x, point.y - startPoint.y) > 2) {
+          activeRoomDrag.moved = true;
+        }
+        const maxX = 1000 - bounds.x - bounds.width;
+        const maxY = 1300 - bounds.y - bounds.height;
+        const x = Math.min(maxX, Math.max(-bounds.x, startOffset.x + point.x - startPoint.x));
+        const y = Math.min(maxY, Math.max(-bounds.y, startOffset.y + point.y - startPoint.y));
+        roomOffsets[roomId] = { x, y };
+        applyRoomLayout();
+        event.preventDefault();
+      }
+
+      async function finishRoomDrag(event) {
+        if (!activeRoomDrag || activeRoomDrag.pointerId !== event.pointerId) return;
+        const drag = activeRoomDrag;
+        activeRoomDrag = null;
+        drag.zone.classList.remove('room-layout-dragging');
+        if (drag.moved) await saveRoomLayout(drag.previousOffsets);
+      }
+
+      async function saveRoomLayout(previousOffsets) {
+        const token = localStorage.getItem('museum_admin_token');
+        const status = document.getElementById('mapLayoutSaveStatus');
+        if (status) status.textContent = 'Saving shared layout…';
+        try {
+          const response = await fetch('/api/map-layout', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ roomOffsets })
+          });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error || `Request failed (${response.status})`);
+          roomOffsets = result.roomOffsets || {};
+          applyRoomLayout();
+          if (status) status.textContent = 'Layout saved for everyone.';
+        } catch (error) {
+          roomOffsets = previousOffsets;
+          applyRoomLayout();
+          if (status) status.textContent = `Could not save layout: ${error.message}`;
+          console.error('Floor-map layout save failed:', error);
+        }
+      }
+
+      function setRoomLayoutEditMode(enabled) {
+        roomLayoutEditMode = enabled;
+        document.body.classList.toggle('map-layout-edit-mode', enabled);
+        const button = document.getElementById('btnArrangeRooms');
+        const status = document.getElementById('mapLayoutSaveStatus');
+        if (button) {
+          button.classList.toggle('active', enabled);
+          button.setAttribute('aria-pressed', String(enabled));
+          button.textContent = enabled ? '✓ Done Arranging' : '✥ Arrange Rooms';
+        }
+        if (status) status.textContent = enabled ? 'Drag a room block to reposition it.' : '';
+      }
+
+      async function loadRoomLayout() {
+        try {
+          const response = await fetch('/api/map-layout');
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error || `Request failed (${response.status})`);
+          roomOffsets = result.roomOffsets || {};
+        } catch (error) {
+          roomOffsets = {};
+          console.error('Floor-map layout load failed:', error);
+          const status = document.getElementById('mapLayoutSaveStatus');
+          if (status) status.textContent = `Could not load shared layout: ${error.message}`;
+        }
       }
 
       // Render High-Visibility Architectural Ground Floor Plan (Category-Only Rooms)
@@ -3293,8 +3500,7 @@
             if (!matchRoom && !matchExhibit) return;
           }
 
-          const posX = (room.pinX / 100) * 1000;
-          const posY = (room.pinY / 100) * 1300;
+          const { x: posX, y: posY } = getRoomMapPosition(room);
           const color = room.color;
           const count = room.exhibitCodes.length;
           const countText = count === 1 ? '1 Exhibit' : `${count} Exhibits`;
@@ -3378,9 +3584,8 @@
             if (!matchTitle && !matchCode && !matchCat) return;
           }
 
-          const posX = (Number(ex.pinX) / 100) * 1000;
-          const posY = (Number(ex.pinY) / 100) * 1300;
           const parentRoom = findRoomForExhibit(ex);
+          const { x: posX, y: posY } = getExhibitMapPosition(ex);
           const pinColor = parentRoom ? parentRoom.color : '#00f0ff';
 
           const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -3642,8 +3847,7 @@
           switchFloor(room.floor, false);
         }
 
-        const posX = (room.pinX / 100) * 1000;
-        const posY = (room.pinY / 100) * 1300;
+        const { x: posX, y: posY } = getRoomMapPosition(room);
 
         zoomLevel = Math.max(zoomLevel, 0.88);
         panX = -(posX - 500) * zoomLevel;
@@ -3673,6 +3877,7 @@
         document.getElementById('btnFloor2').setAttribute('aria-selected', currentFloor === 2);
 
         svgMount.innerHTML = currentFloor === 1 ? renderGroundFloorSvg() : renderSecondFloorSvg();
+        applyRoomLayout();
 
         if (clearDirections) clearRoute();
         else if (reRenderRoute && activeRouteKey) renderRoute(activeRouteKey);
@@ -3697,8 +3902,9 @@
         Object.entries(roomZoneMap).forEach(([zoneId, catRoomId]) => {
           const el = document.getElementById(zoneId);
           if (el) {
+            el.addEventListener('pointerdown', startRoomDrag);
             el.addEventListener('click', (e) => {
-              if (hasDragged) return; // User was panning the map, not clicking room!
+              if (roomLayoutEditMode || hasDragged) return;
               const room = CATEGORY_ROOMS[catRoomId];
               if (room) {
                 closeExhibitDrawer();
@@ -4218,8 +4424,9 @@
           return parentRoom ? (WAYFINDING_ROUTES[parentRoom.id]?.pathD || null) : null;
         }
 
-        const destX = Math.round((Number(ex.pinX) / 100) * 1000);
-        const destY = Math.round((Number(ex.pinY) / 100) * 1300);
+        const { x: exhibitX, y: exhibitY } = getExhibitMapPosition(ex);
+        const destX = Math.round(exhibitX);
+        const destY = Math.round(exhibitY);
         const floor = Number(ex.floor) === 2 ? 2 : (parentRoom?.floor === 2 ? 2 : 1);
 
         if (floor === 2) {
@@ -4316,11 +4523,14 @@
 
         if (targetExhibit && targetExhibit.pinX != null && targetExhibit.pinY != null) {
           finalPathD = generateExhibitWalkingPath(targetExhibit, parentRoom);
-          destX = Math.round((Number(targetExhibit.pinX) / 100) * 1000);
-          destY = Math.round((Number(targetExhibit.pinY) / 100) * 1300);
+          const position = getExhibitMapPosition(targetExhibit);
+          destX = Math.round(position.x);
+          destY = Math.round(position.y);
         } else if (parentRoom && parentRoom.pinX != null && parentRoom.pinY != null) {
-          destX = Math.round((Number(parentRoom.pinX) / 100) * 1000);
-          destY = Math.round((Number(parentRoom.pinY) / 100) * 1300);
+          const position = getRoomMapPosition(parentRoom);
+          destX = Math.round(position.x);
+          destY = Math.round(position.y);
+          finalPathD = finalPathD.replace(/([ML])\s*[-\d.]+[,\s]+[-\d.]+\s*$/, `$1 ${destX} ${destY}`);
         }
 
         if (finalPathD) {
@@ -4472,6 +4682,31 @@
 
       // Setup All Events with Drag/Click Separation & Responsive Fit
       function initEvents() {
+        const layoutControls = document.getElementById('mapLayoutEditControls');
+        if (layoutControls) {
+          try {
+            layoutControls.hidden = !localStorage.getItem('museum_admin_token');
+          } catch (error) {
+            layoutControls.hidden = true;
+            console.warn('Could not check admin session for map arrangement:', error.message);
+          }
+        }
+
+        document.getElementById('btnArrangeRooms')?.addEventListener('click', () => {
+          setRoomLayoutEditMode(!roomLayoutEditMode);
+        });
+        document.getElementById('btnResetRoomLayout')?.addEventListener('click', async () => {
+          if (!window.confirm('Reset all room positions to the original floor-plan layout?')) return;
+          const previousOffsets = JSON.parse(JSON.stringify(roomOffsets));
+          roomOffsets = {};
+          applyRoomLayout();
+          await saveRoomLayout(previousOffsets);
+        });
+
+        window.addEventListener('pointermove', moveRoomDrag);
+        window.addEventListener('pointerup', finishRoomDrag);
+        window.addEventListener('pointercancel', finishRoomDrag);
+
         // Floor Switcher
         document.getElementById('btnFloor1').addEventListener('click', () => switchFloor(1));
         document.getElementById('btnFloor2').addEventListener('click', () => switchFloor(2));
@@ -4758,6 +4993,7 @@
 
         // DRAG TO PAN (With strict movement threshold to fix click glitch)
         mapViewport.addEventListener('mousedown', (e) => {
+          if (roomLayoutEditMode && e.target.closest('.room-poly[data-cat-id]')) return;
           if (e.button !== 0) return; // Primary left button only
           isPanning = true;
           hasDragged = false;
@@ -4832,6 +5068,7 @@
         let initialDist = 0;
 
         mapViewport.addEventListener('touchstart', (e) => {
+          if (roomLayoutEditMode && e.target.closest('.room-poly[data-cat-id]')) return;
           if (e.touches.length === 1) {
             isPanning = true;
             hasDragged = false;
@@ -4887,6 +5124,7 @@
 
       // Load Exhibits Data from Backend API
       async function loadData() {
+        await loadRoomLayout();
         try {
           const res = await fetch('/api/exhibits');
           if (res.ok) {

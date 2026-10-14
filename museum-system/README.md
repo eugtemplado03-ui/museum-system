@@ -101,6 +101,10 @@ opportunities, and bank deposit instructions. Changes are stored with the
 museum information record and appear on the public About, Contact, Donate,
 header, and footer surfaces.
 
+Admins can also use **Arrange Rooms** on the floor map to drag room sections
+and their exhibit markers into position. The shared map layout is saved for
+all visitors; use **Reset Layout** to restore the original positions.
+
 ## Museum chat assistant
 
 A floating chat widget (bottom-right, on the visitor pages) answers
