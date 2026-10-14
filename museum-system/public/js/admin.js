@@ -183,6 +183,7 @@ const SIDEBAR_ITEMS = [
   { id: 'events',         label: 'Events',            icon: '📅', group: 'Operations' },
   { id: 'feedback',       label: 'Feedback',          icon: '💬', group: 'System' },
   { id: 'museumInfo',     label: 'Museum Info',       icon: 'ℹ️', group: 'System' },
+  { id: 'chatApiKey',     label: 'Groq API Key',      icon: '🔐', group: 'System' },
 ];
 
 function handleSignOut() {
@@ -412,6 +413,7 @@ async function renderDashboard(){
   else if(activeTab === 'analytics') await renderAnalyticsTab(contentEl);
   else if(activeTab === 'feedback') await renderFeedbackTab(contentEl);
   else if(activeTab === 'museumInfo') await renderMuseumInfoTab(contentEl);
+  else if(activeTab === 'chatApiKey') await renderChatApiKeyTab(contentEl);
 };
 
 let adminCatalogCategory = 'All';
@@ -5014,6 +5016,115 @@ function openGalleryModal(id){
 }
 
 boot();
+
+async function renderChatApiKeyTab(contentEl) {
+  let settings;
+  try {
+    ({ settings } = await Api.getGroqApiKeySettings());
+  } catch (err) {
+    contentEl.innerHTML = `<div class="empty-state"><h2>Could not load Groq API key settings</h2><p>${escapeHtml(err.message)}</p></div>`;
+    return;
+  }
+
+  const describeSource = current => {
+    if (current.source === 'dashboard') return 'A dashboard-managed Groq key is active. The saved key is never returned to this page.';
+    if (current.source === 'environment') return 'Museum AI services are using the server GROQ_API_KEY environment variable.';
+    if (current.source === 'disabled') return 'The Groq API key has been removed and Groq requests are disabled.';
+    return 'No Groq API key is configured. The chatbot uses its built-in local response engine; translation and speech use their fallback behavior.';
+  };
+
+  contentEl.innerHTML = `
+    <div style="max-width:760px;padding:24px;">
+      <section style="padding:24px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 8px 24px rgba(15,23,42,.06);">
+        <h2 style="margin:0 0 8px;">🔐 Groq API Key</h2>
+        <p style="margin:0 0 18px;color:#64748b;">Manage the server-side key used by the museum chatbot, translation, and text-to-speech. The key is encrypted in the database and is never sent back to the browser or exposed to visitors.</p>
+        <div id="groqApiKeyStatus" role="status" aria-live="polite" style="padding:12px 14px;margin-bottom:18px;border-radius:9px;background:#f1f5f9;">${escapeHtml(describeSource(settings))} Model: ${escapeHtml(settings.model)}.</div>
+        <form id="groqApiKeyForm">
+          <div class="form-field">
+            <label for="groqApiKeyInput">${settings.source === 'dashboard' ? 'Replace Groq API key' : 'Groq API key'}</label>
+            <input id="groqApiKeyInput" name="apiKey" type="password" autocomplete="new-password" spellcheck="false" maxlength="512" placeholder="Paste a new Groq API key" required>
+            <small>Saving a new key replaces the currently active chatbot key.</small>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;">
+            <button type="submit" id="saveGroqApiKeyBtn" class="btn btn-primary">Save API Key</button>
+            <button type="button" id="removeGroqApiKeyBtn" class="btn btn-danger" ${settings.source === 'none' || settings.source === 'disabled' ? 'hidden' : ''}>Remove and disable Groq</button>
+            <button type="button" id="useEnvironmentGroqApiKeyBtn" class="btn btn-secondary" ${!settings.environmentConfigured || settings.source === 'environment' ? 'hidden' : ''}>Use server environment key</button>
+          </div>
+          <p id="groqApiKeyError" role="alert" style="color:#b91c1c;margin:12px 0 0;" hidden></p>
+        </form>
+      </section>
+    </div>
+  `;
+
+  const form = document.getElementById('groqApiKeyForm');
+  const input = document.getElementById('groqApiKeyInput');
+  const errorEl = document.getElementById('groqApiKeyError');
+  const saveButton = document.getElementById('saveGroqApiKeyBtn');
+  const removeButton = document.getElementById('removeGroqApiKeyBtn');
+  const environmentButton = document.getElementById('useEnvironmentGroqApiKeyBtn');
+
+  const updateStatus = nextSettings => {
+    settings = nextSettings;
+    document.getElementById('groqApiKeyStatus').textContent =
+      `${describeSource(settings)} Model: ${settings.model}.`;
+    document.querySelector('label[for="groqApiKeyInput"]').textContent =
+      settings.source === 'dashboard' ? 'Replace Groq API key' : 'Groq API key';
+    removeButton.hidden = settings.source === 'none' || settings.source === 'disabled';
+    environmentButton.hidden = !settings.environmentConfigured || settings.source === 'environment';
+  };
+
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    errorEl.hidden = true;
+    saveButton.disabled = true;
+    try {
+      const result = await Api.setGroqApiKey(input.value);
+      input.value = '';
+      updateStatus(result.settings);
+      toast('Groq API key saved.');
+    } catch (err) {
+      errorEl.textContent = err.message || 'Could not save the Groq API key.';
+      errorEl.hidden = false;
+    } finally {
+      saveButton.disabled = false;
+    }
+  });
+
+  removeButton.addEventListener('click', async () => {
+    if (!window.confirm('Remove the active Groq key and disable Groq API requests?')) return;
+    errorEl.hidden = true;
+    removeButton.disabled = true;
+    try {
+      const result = await Api.removeGroqApiKey();
+      input.value = '';
+      updateStatus(result.settings);
+      toast('Groq API key removed. The chatbot local response engine remains available.');
+    } catch (err) {
+      errorEl.textContent = err.message || 'Could not remove the Groq API key.';
+      errorEl.hidden = false;
+    } finally {
+      removeButton.disabled = false;
+    }
+  });
+
+  environmentButton.addEventListener('click', async () => {
+    errorEl.hidden = true;
+    environmentButton.disabled = true;
+    try {
+      const result = await Api.useEnvironmentGroqApiKey();
+      input.value = '';
+      updateStatus(result.settings);
+      toast(result.settings.source === 'environment'
+        ? 'Server environment Groq key is active.'
+        : 'Dashboard key removed; no environment Groq key is configured.');
+    } catch (err) {
+      errorEl.textContent = err.message || 'Could not restore the server environment key.';
+      errorEl.hidden = false;
+    } finally {
+      environmentButton.disabled = false;
+    }
+  });
+}
 
 // ─── Museum Info ───
 async function renderMuseumInfoTab(contentEl){

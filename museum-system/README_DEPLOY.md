@@ -32,12 +32,12 @@ Notes:
 
 3) Heroku
 
-You can deploy using the `Procfile` included. Push to a Heroku app (set `NODE_ENV=production` and any required env vars like `OPENROUTER_API_KEY`):
+You can deploy using the `Procfile` included. Push to a Heroku app (set `NODE_ENV=production` and any required env vars like `GROQ_API_KEY`):
 
 ```bash
 heroku create my-museum-app
 git push heroku main
-heroku config:set OPENROUTER_API_KEY=...
+heroku config:set GROQ_API_KEY=...
 heroku open
 ```
 

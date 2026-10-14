@@ -1,4 +1,5 @@
 const express = require('express');
+const chatApiKey = require('../db/chat-api-key');
 
 const router = express.Router();
 
@@ -146,23 +147,27 @@ CRITICAL RULES FOR FILIPINO (TAGALOG):
 }
 
 // ── Translation status endpoint ──────────────────────────────────
-router.get('/status', (req, res) => {
-  const hasGroqKey = Boolean((process.env.GROQ_API_KEY || '').trim());
-  const hasFishKey = Boolean((process.env.FISH_AUDIO_API_KEY || '').trim());
-  res.json({
-    translationConfigured: hasGroqKey,
-    groqConfigured: hasGroqKey,
-    fishAudioConfigured: hasFishKey,
-    fishAudioModel: process.env.FISH_AUDIO_MODEL || 's2.1-pro-free',
-    fishAudioVoiceId: process.env.FISH_AUDIO_VOICE_ID || process.env.FISH_AUDIO_REFERENCE_ID || null,
-    ttsProvider: hasGroqKey ? 'groq-orpheus' : 'google-tts-fallback'
-  });
+router.get('/status', async (req, res) => {
+  try {
+    const { apiKey } = await chatApiKey.getGroqConfiguration();
+    const hasGroqKey = Boolean(apiKey);
+    const hasFishKey = Boolean((process.env.FISH_AUDIO_API_KEY || '').trim());
+    res.json({
+      translationConfigured: hasGroqKey,
+      groqConfigured: hasGroqKey,
+      fishAudioConfigured: hasFishKey,
+      fishAudioModel: process.env.FISH_AUDIO_MODEL || 's2.1-pro-free',
+      fishAudioVoiceId: process.env.FISH_AUDIO_VOICE_ID || process.env.FISH_AUDIO_REFERENCE_ID || null,
+      ttsProvider: hasGroqKey ? 'groq-orpheus' : 'google-tts-fallback'
+    });
+  } catch (err) {
+    console.error('Failed to load Groq service status:', err.message);
+    res.status(500).json({ error: 'Failed to load AI service status.' });
+  }
 });
 
 // ── Translation endpoint (Groq openai/gpt-oss-120b) ──────────────
 router.post('/translate', async (req, res) => {
-  const groqKey = (process.env.GROQ_API_KEY || '').trim();
-
   const text = req.body && req.body.text;
   const rawLang = (req.body && (req.body.targetLang || req.body.lang || req.body.language)) || '';
   if (!text || typeof text !== 'string' || !text.trim()) {
@@ -170,6 +175,14 @@ router.post('/translate', async (req, res) => {
   }
   if (!rawLang || !String(rawLang).trim()) {
     return res.status(400).json({ error: 'Target language is required.' });
+  }
+
+  let groqKey;
+  try {
+    ({ apiKey: groqKey } = await chatApiKey.getGroqConfiguration());
+  } catch (err) {
+    console.error('Failed to load Groq translation key:', err.message);
+    return res.status(500).json({ error: 'Failed to load translation service settings.' });
   }
 
   const targetLang = normalizeTargetLang(rawLang);
@@ -186,7 +199,7 @@ router.post('/translate', async (req, res) => {
   }
 
   if (!groqKey) {
-    return res.status(503).json({ error: 'Translation service not configured. Set GROQ_API_KEY in .env and restart the server.' });
+    return res.status(503).json({ error: 'Translation service is not configured. Add a Groq key in the admin dashboard or server environment.' });
   }
 
   const systemPrompt = getSystemPrompt(targetLang);
@@ -269,7 +282,13 @@ router.post('/speak', async (req, res) => {
   }
 
   // ── 1. Groq Orpheus TTS ───────────────────────────────────────────
-  const groqKey = process.env.GROQ_API_KEY;
+  let groqKey;
+  try {
+    ({ apiKey: groqKey } = await chatApiKey.getGroqConfiguration());
+  } catch (err) {
+    console.error('Failed to load Groq text-to-speech key:', err.message);
+    return res.status(500).json({ error: 'Failed to load text-to-speech settings.' });
+  }
   if (groqKey && groqKey.trim()) {
     try {
       console.log(`[TTS] Generating speech with Groq Orpheus (canopylabs/orpheus-v1-english)...`);

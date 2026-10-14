@@ -176,9 +176,6 @@ async function startServer() {
 
   app.listen(PORT, () => {
     console.log(`Museo Sang Bata sa Negros server running on http://localhost:${PORT}`);
-    if (!process.env.GROQ_API_KEY) {
-      console.log('NOTE: GROQ_API_KEY is not set — the museum chat assistant will use its local knowledge engine.');
-    }
   });
 }
 

@@ -3,6 +3,7 @@ const exhibits = require('../db/exhibits');
 const programs = require('../db/programs');
 const events = require('../db/events');
 const museumInfo = require('../db/museum-info');
+const chatApiKey = require('../db/chat-api-key');
 
 const router = express.Router();
 
@@ -428,7 +429,13 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
 }
 
 router.post('/', chatLimiter, async (req, res) => {
-  const apiKey = (process.env.GROQ_API_KEY || '').trim();
+  let apiKey;
+  try {
+    ({ apiKey } = await chatApiKey.getGroqConfiguration());
+  } catch (err) {
+    console.error('Failed to load Groq chatbot settings:', err.message);
+    return res.status(500).json({ error: 'Failed to load chatbot settings.' });
+  }
   const model = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 
   const { message, history, language } = req.body || {};

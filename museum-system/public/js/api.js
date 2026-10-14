@@ -196,6 +196,11 @@ const Api = (() => {
     getMuseumInfo: () => request('/api/museum-info'),
     updateMuseumInfo: (payload) => request('/api/museum-info', { method: 'PUT', body: JSON.stringify(payload) }),
 
+    getGroqApiKeySettings: () => request('/api/admin/api-keys/groq'),
+    setGroqApiKey: (apiKey) => request('/api/admin/api-keys/groq', { method: 'PUT', body: JSON.stringify({ apiKey }) }),
+    removeGroqApiKey: () => request('/api/admin/api-keys/groq', { method: 'DELETE' }),
+    useEnvironmentGroqApiKey: () => request('/api/admin/api-keys/groq/use-environment', { method: 'POST' }),
+
     getCarousel: () => request('/api/carousel'),
     getAdminCarousel: () => request('/api/carousel/admin'),
     createCarouselSlide: (payload) => request('/api/carousel', { method: 'POST', body: JSON.stringify(payload) }),

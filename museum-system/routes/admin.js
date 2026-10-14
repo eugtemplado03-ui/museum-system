@@ -2,9 +2,55 @@ const express = require('express');
 const analytics = require('../db/analytics');
 const ratings = require('../db/ratings');
 const exhibits = require('../db/exhibits');
-const { requireAuth } = require('../middleware/auth');
+const chatApiKey = require('../db/chat-api-key');
+const { requireAuth, requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();
+
+function sendGroqApiKeyStatus(res, configuration) {
+  res.json({ settings: chatApiKey.getGroqApiKeyStatus(configuration) });
+}
+
+router.get('/api-keys/groq', requireAdmin, async (req, res) => {
+  try {
+    sendGroqApiKeyStatus(res, await chatApiKey.getGroqConfiguration());
+  } catch (err) {
+    console.error('Failed to fetch Groq API key settings:', err.message);
+    res.status(500).json({ error: 'Failed to fetch Groq API key settings.' });
+  }
+});
+
+router.put('/api-keys/groq', requireAdmin, async (req, res) => {
+  const apiKey = typeof req.body?.apiKey === 'string' ? req.body.apiKey.trim() : '';
+  if (!apiKey || apiKey.length > 512 || /[\r\n\0]/.test(apiKey)) {
+    return res.status(400).json({ error: 'Enter a valid Groq API key (maximum 512 characters).' });
+  }
+  try {
+    sendGroqApiKeyStatus(res, await chatApiKey.setGroqApiKey(apiKey));
+  } catch (err) {
+    console.error('Failed to update Groq API key settings:', err.message);
+    res.status(500).json({ error: 'Failed to update Groq API key settings.' });
+  }
+});
+
+router.delete('/api-keys/groq', requireAdmin, async (req, res) => {
+  try {
+    sendGroqApiKeyStatus(res, await chatApiKey.disableGroqApiKey());
+  } catch (err) {
+    console.error('Failed to remove Groq API key:', err.message);
+    res.status(500).json({ error: 'Failed to remove Groq API key.' });
+  }
+});
+
+router.post('/api-keys/groq/use-environment', requireAdmin, async (req, res) => {
+  try {
+    sendGroqApiKeyStatus(res, await chatApiKey.useEnvironmentGroqApiKey());
+  } catch (err) {
+    console.error('Failed to restore Groq API key environment setting:', err.message);
+    res.status(500).json({ error: 'Failed to restore Groq API key environment setting.' });
+  }
+});
+
 router.use(requireAuth);
 
 async function withExhibitInfo(exhibitId) {

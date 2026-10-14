@@ -121,30 +121,35 @@ questions about the museum only — exhibits, programs, events, hours, fees,
 location, and visit planning. It's grounded in the live exhibit/program/
 event catalog and the facts in `db/museum-info.js`, and is instructed to
 decline anything outside that scope, including attempts to override its
-instructions. It calls [OpenRouter](https://openrouter.ai/), so you can
-point it at any model OpenRouter hosts (GPT, Claude, Gemini, Llama, etc.)
-without changing code.
+instructions. It calls [Groq](https://groq.com/), using the server-side key
+configured in the admin dashboard or the optional `GROQ_API_KEY` environment
+variable.
 
-To enable it:
+To configure it from the dashboard:
 
-1. Get an API key from [openrouter.ai/keys](https://openrouter.ai/keys).
-2. Add it to `.env`: `OPENROUTER_API_KEY=sk-or-...`
-3. Restart the server. Without a key, the widget still shows but replies
-   with a friendly "not configured yet" message instead of erroring.
+1. Open Admin Dashboard → **Groq API Key**.
+2. Enter a Groq API key from [console.groq.com/keys](https://console.groq.com/keys)
+   and save it. Key changes take effect without restarting the server.
+3. Use **Remove and disable Groq** to remove the managed key and disable Groq
+   API requests. If a server environment key exists, the dashboard offers a
+   separate option to switch back to it.
+
+The managed Groq key is shared by the chatbot, translation, and text-to-speech
+services. Dashboard-managed keys are encrypted in MongoDB using a key derived from
+`JWT_SECRET`. Keep `JWT_SECRET` stable; if it is rotated, re-enter the Groq
+key in the admin dashboard. Without an active Groq key, the chatbot uses its
+local response engine.
 
 **If a key ever gets pasted somewhere it shouldn't (chat, a public repo,
 etc.), treat it as compromised and rotate it immediately at
-[openrouter.ai/keys](https://openrouter.ai/keys) — don't keep using it.**
+[console.groq.com/keys](https://console.groq.com/keys) — don't keep using it.**
 
 Notes:
-- Each message costs a small amount on your OpenRouter account — there's a
+- Groq API usage may have costs and rate limits — there's a
   basic per-IP rate limit (30 messages / 10 minutes) baked in, but for a
   public kiosk you may want a stricter limit or a budget alert.
-- The model used is set by `OPENROUTER_MODEL` in `.env` (defaults to
-  `openai/gpt-4o`) — change it to any model slug from
-  [openrouter.ai/models](https://openrouter.ai/models).
-- `SITE_URL` and `SITE_NAME` are sent to OpenRouter to identify your app —
-  update them to your real deployed URL once you have one.
+- The chatbot model is set by `GROQ_MODEL` in `.env` (defaults to
+  `llama-3.3-70b-versatile`).
 - To change what the assistant knows, edit `db/museum-info.js` (hours,
   fees, address) — exhibit, program, and event facts come straight from
   their respective catalogs, so editing them in the admin dashboard updates
@@ -177,7 +182,7 @@ routes/
   programs.js              Programs API (public read, admin write)
   events.js                 Events API (public read, admin write)
   gallery.js                 Gallery API (public read, admin write)
-  chat.js                 Museum-scoped chat assistant endpoint (OpenRouter)
+  chat.js                 Museum-scoped chat assistant endpoint (Groq)
 scripts/
   seed.js                Creates first admin user + sample exhibits/programs/events/gallery
 public/                 Static frontend (served directly by Express)
