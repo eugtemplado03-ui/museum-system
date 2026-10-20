@@ -12,6 +12,40 @@
     if (!container.childElementCount) container.hidden = true;
   }
 
+  // Render fee groups as headings with bulleted prices while keeping their source text dynamic.
+  function renderRateSections(container, value) {
+    const lines = (Array.isArray(value) ? value : String(value || '').split(/\r?\n/))
+      .map(item => String(item).trim())
+      .filter(Boolean);
+    container.replaceChildren();
+
+    let currentList = null;
+    lines.forEach(line => {
+      if (/:\s*$/.test(line)) {
+        const heading = document.createElement('h3');
+        heading.className = 'rates-subtitle';
+        heading.textContent = line.replace(/:\s*$/, '');
+        container.appendChild(heading);
+        currentList = document.createElement('ul');
+        currentList.className = 'rates-list';
+        container.appendChild(currentList);
+        return;
+      }
+
+      if (!currentList) {
+        currentList = document.createElement('ul');
+        currentList.className = 'rates-list';
+        container.appendChild(currentList);
+      }
+
+      const item = document.createElement('li');
+      item.textContent = line;
+      currentList.appendChild(item);
+    });
+
+    container.hidden = lines.length === 0;
+  }
+
   // Populate data-bound page fields and lists from the museum-info endpoint.
   async function loadMuseumContent() {
     try {
@@ -34,6 +68,10 @@
         renderTextLines(element, museumInfo[element.dataset.museumParagraphs], 'p');
       });
 
+      document.querySelectorAll('[data-museum-rates]').forEach(element => {
+        renderRateSections(element, museumInfo[element.dataset.museumRates]);
+      });
+
       document.querySelectorAll('[data-museum-list]').forEach(element => {
         renderTextLines(element, museumInfo[element.dataset.museumList], 'li');
       });
@@ -41,7 +79,7 @@
       document.title = document.title.replace('Museo Sang Bata sa Negros', museumInfo.name || '');
     } catch (error) {
       console.error('Museum content load error:', error);
-      document.querySelectorAll('[data-museum-field], [data-museum-template], [data-museum-paragraphs], [data-museum-list]')
+      document.querySelectorAll('[data-museum-field], [data-museum-template], [data-museum-paragraphs], [data-museum-list], [data-museum-rates]')
         .forEach(element => { element.textContent = 'Museum information is currently unavailable.'; });
     }
   }
