@@ -1,3 +1,4 @@
+// Admin APIs for credential management, usage metrics, analytics, and ratings.
 const express = require('express');
 const analytics = require('../db/analytics');
 const ratings = require('../db/ratings');
@@ -10,15 +11,18 @@ const { requireAuth, requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
+// Return the Groq key's public status without exposing its value.
 function sendGroqApiKeyStatus(res, configuration) {
   res.json({ settings: chatApiKey.getGroqApiKeyStatus(configuration) });
 }
 
+// Validate a non-empty credential while rejecting control characters and overlong input.
 function validCredential(value, maxLength = 512) {
   return typeof value === 'string' && value.trim().length > 0 &&
     value.trim().length <= maxLength && !/[\r\n\0]/.test(value);
 }
 
+// Gather provider settings concurrently and expose only non-secret configuration metadata.
 async function getApiManagementSettings() {
   const [groqConfiguration, cloudinaryConfiguration, customProviders] = await Promise.all([
     chatApiKey.getGroqConfiguration(),
@@ -194,6 +198,7 @@ router.delete('/api-management/custom/:id', requireAdmin, async (req, res) => {
 
 router.use(requireAuth);
 
+// Attach an exhibit's current code and title to analytics or rating records.
 async function withExhibitInfo(exhibitId) {
   const ex = await exhibits.findById(exhibitId);
   return { code: ex ? ex.code : null, title: ex ? ex.title : '(deleted exhibit)' };

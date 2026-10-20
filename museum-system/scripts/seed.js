@@ -19,6 +19,7 @@ const ratings = require('../db/ratings');
 const ADMIN_USERNAME = process.env.SEED_ADMIN_USER || 'admin';
 const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASS || 'museum-admin-2026';
 
+// Create the initial administrator only when the user collection is empty.
 async function seedAdmin() {
   if (await users.count() > 0) {
     console.log('Users already exist — skipping admin creation.');
@@ -30,6 +31,7 @@ async function seedAdmin() {
   console.log('IMPORTANT: sign in and change this password / rotate credentials before going live.');
 }
 
+// Populate the exhibit catalog only when it has no existing records.
 async function seedExhibits() {
   const allExhibits = await exhibits.all();
   if (allExhibits.length > 0) {
@@ -187,6 +189,7 @@ async function seedExhibits() {
   console.log(`Seeded ${samples.length} exhibits based on museosangbata.org.`);
 }
 
+// Populate educational programs only when none are already stored.
 async function seedPrograms() {
   const allProgs = await programs.all();
   if (allProgs.length > 0) {
@@ -217,6 +220,7 @@ async function seedPrograms() {
   console.log(`Seeded ${items.length} programs based on museosangbata.org.`);
 }
 
+// Add the initial event list only when the event collection is empty.
 async function seedEvents() {
   const allEvents = await events.all();
   if (allEvents.length > 0) {
@@ -241,6 +245,7 @@ async function seedEvents() {
   console.log(`Seeded ${items.length} events based on museosangbata.org.`);
 }
 
+// Add sample gallery entries only when the gallery is empty.
 async function seedGallery() {
   const allGallery = await gallery.all();
   if (allGallery.length > 0) {
@@ -261,6 +266,7 @@ async function seedGallery() {
   console.log(`Seeded ${items.length} gallery photos based on museosangbata.org.`);
 }
 
+// Add demonstration reviews only when ratings are absent and matching exhibits exist.
 async function seedRatings() {
   const existing = await ratings.allForAdmin();
   if (existing.length > 0) {
@@ -289,6 +295,7 @@ async function seedRatings() {
   console.log(`Seeded ${sampleReviews.length} sample visitor ratings and reviews.`);
 }
 
+// Connect to MongoDB, run each idempotent seed step, and close the connection.
 async function main() {
   try {
     if (!process.env.MONGODB_URI) {

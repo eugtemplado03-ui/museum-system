@@ -1,3 +1,4 @@
+// Translation and speech endpoints with provider status reporting and fallback audio generation.
 const express = require('express');
 const chatApiKey = require('../db/chat-api-key');
 const apiUsage = require('../db/api-usage');
@@ -12,6 +13,7 @@ const audioCacheMeta = new Map();
 // Groq API base URL
 const GROQ_API_BASE = 'https://api.groq.com/openai/v1';
 
+// Split long speech text at sentence/word boundaries to fit the fallback TTS request limit.
 function splitIntoChunks(str, maxLen = 140) {
   const clean = str.replace(/[\r\n]+/g, ' ').trim();
   const sentences = clean.match(/[^.!?—–;]+[.!?—–;]+|[^.!?—–;]+$/g) || [clean];
@@ -47,6 +49,7 @@ function splitIntoChunks(str, maxLen = 140) {
   return chunks.length ? chunks : [clean.slice(0, maxLen)];
 }
 
+// Map common language names and codes to the service's supported language identifiers.
 function normalizeTargetLang(raw) {
   if (!raw) return 'en';
   const l = String(raw).toLowerCase().trim();
@@ -57,6 +60,7 @@ function normalizeTargetLang(raw) {
   return l;
 }
 
+// Build the provider instructions for a supported translation target language.
 function getSystemPrompt(rawTargetLang) {
   const targetLang = normalizeTargetLang(rawTargetLang);
   if (targetLang === 'hil') {
@@ -168,6 +172,7 @@ router.get('/status', async (req, res) => {
 });
 
 // ── Translation endpoint (Groq openai/gpt-oss-120b) ──────────────
+// Translate text through Groq, using a cache and returning English unchanged.
 router.post('/translate', async (req, res) => {
   const text = req.body && req.body.text;
   const rawLang = (req.body && (req.body.targetLang || req.body.lang || req.body.language)) || '';
@@ -284,6 +289,7 @@ router.post('/translate', async (req, res) => {
 });
 
 // ── TTS endpoint (Groq Orpheus primary → Google TTS fallback) ─────
+// Generate cached speech with Groq Orpheus first and Google TTS as the fallback.
 router.post('/speak', async (req, res) => {
   const rawLang = (req.body && (req.body.lang || req.body.targetLang || req.body.language)) || 'tl';
   const lang = normalizeTargetLang(rawLang);

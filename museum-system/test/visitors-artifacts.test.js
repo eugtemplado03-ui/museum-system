@@ -9,7 +9,7 @@ test('Visitor log CRUD and statistics workflow', async () => {
   const mongoServer = await MongoMemoryServer.create();
   await mongoose.connect(mongoServer.getUri());
   try {
-    // 1. Create visitor entries
+    // 1. Create visitor entries; this keeps the visitor store and per-visit log data consistent before the stats assertions.
     const v1 = await visitors.create({
       visitorName: 'Maria Santos',
       groupName: 'Sagay National High School',
@@ -77,7 +77,7 @@ test('Artifacts log CRUD, auto accession numbering, and statistics workflow', as
   const mongoServer = await MongoMemoryServer.create();
   await mongoose.connect(mongoServer.getUri());
   try {
-    // 1. Create artifact logs
+    // 1. Create artifact logs; accession numbering and category rollups are validated as soon as records are created.
     const a1 = await artifactLogs.create({
       name: 'Tridacna Gigas (Giant Clam) Shell Specimen',
       category: 'Marine Specimen',

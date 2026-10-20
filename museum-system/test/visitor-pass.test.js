@@ -36,7 +36,7 @@ test('Visitor Pass, QR generation, and Returning Quick Check-in workflow', async
     assert.equal(found.visitorName, 'Juan Dela Cruz');
     assert.equal(found.email, 'juan@example.com');
 
-    // 3. Quick check-in for returning visitor using the same pass code
+    // 3. Quick check-in for returning visitor using the same pass code: this confirms the stored code can re-enter the system without creating a new visitor record.
     const quickVisit = await visitors.quickCheckin(passCode);
     assert.ok(quickVisit, 'Quick checkin should succeed');
     assert.equal(quickVisit.visitorCode, passCode, 'Should maintain the same visitor code');

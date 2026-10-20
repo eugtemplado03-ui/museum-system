@@ -60,6 +60,7 @@ async function testScanner() {
     mobile: true
   });
 
+  // The scanner is hidden behind the visitor state, so the test seeds the same local flags a real visitor would have after check-in.
   await send('Page.addScriptToEvaluateOnNewDocument', {
     source: `
       sessionStorage.setItem('museum_visitor_checked_in', 'true');
@@ -142,7 +143,7 @@ async function testScanner() {
   });
   console.log('After stop scanner state:', afterStop.result.value);
 
-  // 4. Test QR Photo Decoder using a real QR image for EX-001
+  // 4. Test QR Photo Decoder using a real QR image for EX-001; this verifies the image pipeline can recover the exhibit link without a live camera.
   console.log('Generating QR code data URL for EX-001...');
   const qrDataUrl = await QRCode.toDataURL('http://localhost:3000/exhibit.html?code=EX-001&src=scan', {
     width: 400,

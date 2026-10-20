@@ -12,6 +12,7 @@
 
   const currentPath = window.location.pathname.toLowerCase();
 
+  // Map the current route to the sidebar item that should appear active.
   function getActiveNavKey() {
     if (currentPath === '/' || currentPath.endsWith('/index.html') || currentPath === '') return 'home';
     if (currentPath.includes('map')) return 'map';
@@ -29,6 +30,7 @@
 
   const activeKey = getActiveNavKey();
 
+  // Select the staff or visitor sidebar present on the current page.
   function getActiveSidebarElement() {
     return document.querySelector('.admin-sidebar') || document.querySelector('.user-sidebar') || document.getElementById('userSidebar');
   }
@@ -43,6 +45,7 @@
     })[m]);
   }
 
+  // Resolve the active account and its display/link details for the sidebar footer.
   function getUserStatusInfo() {
     const isAdmin = (typeof Gate !== 'undefined')
       ? Gate.isAdminLoggedIn()
@@ -120,6 +123,7 @@
     };
   }
 
+  // Return the account-status markup used when creating a visitor sidebar.
   function renderSidebarUserStatusHtml() {
     const status = getUserStatusInfo();
     return `
@@ -132,6 +136,7 @@
     `;
   }
 
+  // Refresh or insert the signed-in account block in a sidebar footer.
   function updateSidebarUserStatus(sidebar) {
     if (!sidebar) sidebar = getActiveSidebarElement();
     if (!sidebar) return;
@@ -160,6 +165,7 @@
     }
   }
 
+  // Create or enhance sidebar controls and bind click, keyboard, and touch behavior.
   function initSidebar() {
     // 1. Place Navigation Button in the VERY LEFT CORNER of .topbar
     const topbar = document.querySelector('.topbar');
@@ -384,6 +390,7 @@
     loadCategoriesForSidebar();
   }
 
+  // Open the active sidebar and synchronize its account status and accessible state.
   function openSidebar() {
     const sidebar = getActiveSidebarElement();
     const toggleBtn = document.getElementById('sidebarToggleBtn');
@@ -465,6 +472,7 @@
     sidebar.setAttribute('aria-hidden', 'false');
   }
 
+  // Close the sidebar and restore the page's normal scroll and ARIA state.
   function closeSidebar() {
     const sidebar = getActiveSidebarElement();
     const toggleBtn = document.getElementById('sidebarToggleBtn');
@@ -482,6 +490,7 @@
     }
   }
 
+  // Toggle between the open and closed sidebar states.
   function toggleSidebar() {
     if (document.body.classList.contains('sidebar-open')) {
       closeSidebar();
@@ -490,6 +499,7 @@
     }
   }
 
+  // Fetch category names and add their links to the visitor sidebar.
   async function loadCategoriesForSidebar() {
     const container = document.getElementById('dynamicSidebarCategories') || document.getElementById('homeSidebarCategories');
     if (!container) return;

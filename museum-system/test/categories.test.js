@@ -8,6 +8,7 @@ test('categories management workflow', async () => {
   const mongoServer = await MongoMemoryServer.create();
   await mongoose.connect(mongoServer.getUri());
   try {
+    // The category suite starts from a blank in-memory database and then walks through create, rename, and delete flows in order.
     const initial = await exhibits.categories();
     assert.ok(Array.isArray(initial));
     assert.ok(initial.length > 0);

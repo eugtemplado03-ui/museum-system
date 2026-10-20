@@ -1,3 +1,4 @@
+// Public museum information endpoint and authenticated editing endpoint.
 const express = require('express');
 const museumInfo = require('../db/museum-info');
 const { requireAuth } = require('../middleware/auth');

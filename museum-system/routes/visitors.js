@@ -1,3 +1,4 @@
+// Public visitor check-in/pass APIs and authenticated visitor-log management.
 const express = require('express');
 const QRCode = require('qrcode');
 const rateLimit = require('express-rate-limit');
@@ -15,6 +16,7 @@ const checkinLimiter = rateLimit({
 });
 
 // Public check-in endpoint with strict input validation
+// Validate public check-in details and field lengths before creating a visitor pass.
 function validateCheckin(body) {
   const errors = [];
   if (!body.visitorName || !body.visitorName.trim()) {
@@ -110,6 +112,7 @@ router.post('/checkin', checkinLimiter, async (req, res) => {
 });
 
 // Quick check-in for returning visitors using their Visitor Pass Code or Scanned QR
+// Accept a pass code or decoded QR payload and record a returning visitor's new visit.
 router.post('/quick-checkin', checkinLimiter, async (req, res) => {
   const code = (req.body && (req.body.visitorCode || req.body.code || req.body.pass)) || '';
   if (!code || typeof code !== 'string' || !code.trim()) {
@@ -236,6 +239,7 @@ router.get('/checkin/qr', async (req, res) => {
 // All visitor log endpoints below are Admin Only
 router.use(requireAuth);
 
+// Check required visitor-log fields before an administrator creates a record.
 function validate(body) {
   const errors = [];
   if (!body.visitorName || !body.visitorName.trim()) {

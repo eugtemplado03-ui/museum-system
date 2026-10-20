@@ -17,6 +17,7 @@ test('Visitors API - Digital Pass and Quick Check-in Routes', async (t) => {
   let createdVisitorCode = null;
 
   try {
+    // These subtests walk through the pass lifecycle in order: create, retrieve QR, re-entry, and invalid-code rejection.
     await t.test('POST /api/visitors/checkin creates visitor with code and QR', async () => {
       const res = await request(app)
         .post('/api/visitors/checkin')

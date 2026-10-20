@@ -1,3 +1,4 @@
+// Persistence helpers for gallery entries, including legacy single-image fields.
 const mongoose = require('mongoose');
 const { nanoid } = require('nanoid');
 
@@ -13,6 +14,7 @@ const gallerySchema = new mongoose.Schema({
 
 const Gallery = mongoose.models.Gallery || mongoose.model('Gallery', gallerySchema);
 
+// Accept an image array or legacy single image path and return a normalized array.
 function normalizeImagePaths(value) {
   if (!value) return [];
   if (Array.isArray(value)) return value.filter(Boolean).map(String);
@@ -20,15 +22,18 @@ function normalizeImagePaths(value) {
   return [];
 }
 
+// List gallery entries with the newest entry first.
 async function all() {
   const items = await Gallery.find({}).lean();
   return items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }
 
+// Look up a gallery entry by its public ID.
 async function findById(id) {
   return await Gallery.findOne({ id }).lean();
 }
 
+// Create a gallery entry and mirror its first image into the legacy field.
 async function create(payload) {
   const paths = normalizeImagePaths(payload.imagePaths ?? payload.imagePath);
   const item = new Gallery({
@@ -42,6 +47,7 @@ async function create(payload) {
   return item.toObject();
 }
 
+// Update supplied fields while keeping imagePath aligned with imagePaths.
 async function update(id, payload) {
   const existing = await Gallery.findOne({ id });
   if (!existing) return null;
@@ -59,6 +65,7 @@ async function update(id, payload) {
   return existing.toObject();
 }
 
+// Delete a gallery entry and report whether it existed.
 async function remove(id) {
   const result = await Gallery.deleteOne({ id });
   return result.deletedCount > 0;

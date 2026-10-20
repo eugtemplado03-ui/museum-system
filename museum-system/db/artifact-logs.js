@@ -1,3 +1,4 @@
+// Persistence and reporting helpers for the museum's artifact inventory log.
 const mongoose = require('mongoose');
 const { nanoid } = require('nanoid');
 
@@ -20,6 +21,7 @@ const artifactLogSchema = new mongoose.Schema({
 
 const ArtifactLog = mongoose.models.ArtifactLog || mongoose.model('ArtifactLog', artifactLogSchema);
 
+// Find inventory records matching the supplied filters, newest changes first.
 async function all(filter = {}) {
   let query = {};
 
@@ -55,10 +57,12 @@ async function all(filter = {}) {
   });
 }
 
+// Look up one inventory record by its public ID.
 async function findById(id) {
   return await ArtifactLog.findOne({ id }).lean();
 }
 
+// Generate the next accession number for the current calendar year.
 async function generateAccessionNo() {
   const year = new Date().getFullYear();
   const prefix = `MSBN-${year}-`;
@@ -76,6 +80,7 @@ async function generateAccessionNo() {
   return `${prefix}${String(maxSeq + 1).padStart(3, '0')}`;
 }
 
+// Create an inventory record, generating an accession number when none is supplied.
 async function create(payload) {
   const now = new Date();
   const accessionNo = (payload.accessionNo || '').trim() || await generateAccessionNo();
@@ -98,6 +103,7 @@ async function create(payload) {
   return artifact.toObject();
 }
 
+// Apply only supplied inventory fields and refresh the record's modification time.
 async function update(id, payload) {
   const existing = await ArtifactLog.findOne({ id });
   if (!existing) return null;
@@ -120,11 +126,13 @@ async function update(id, payload) {
   return existing.toObject();
 }
 
+// Delete an inventory record and report whether one existed.
 async function remove(id) {
   const result = await ArtifactLog.deleteOne({ id });
   return result.deletedCount > 0;
 }
 
+// Summarize inventory counts by condition, status, and category.
 async function stats() {
   const list = await ArtifactLog.find({}).lean();
 

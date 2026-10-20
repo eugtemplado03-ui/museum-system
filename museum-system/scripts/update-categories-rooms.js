@@ -1,9 +1,11 @@
+// Applies the curated exhibit category/room mapping to MongoDB and local JSON catalogs.
 require('dotenv').config();
 const mongoose = require('mongoose');
 const fs = require('fs');
 const path = require('path');
 const { Exhibit, Category } = require('../db/exhibits');
 
+// Update exhibit category and map-zone values in the database and data files.
 async function main() {
   console.log('Connecting to MongoDB...');
   await mongoose.connect(process.env.MONGODB_URI);

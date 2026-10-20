@@ -20,6 +20,7 @@ if (!fs.existsSync(dbDir)) {
 const cloudinaryConfig = require('./cloudinary-config');
 const CLOUDINARY_DB_PUBLIC_ID = 'museum_db/data_json';
 
+// Return the currently active Cloudinary client, if persistence is configured.
 function getCloudinary() {
   return cloudinaryConfig.getCloudinary();
 }
@@ -28,6 +29,7 @@ function getCloudinary() {
 let _uploadQueued = false;
 let _uploadTimer = null;
 
+// Queue a non-blocking, debounced backup of the latest database snapshot.
 function uploadToCloudinary(data) {
   const cld = getCloudinary();
   if (!cld) return;
@@ -98,6 +100,7 @@ async function downloadFromCloudinary() {
 
 // ─── Core database functions ─────────────────────────────────────────────────
 
+// Return an empty database with every supported collection initialized.
 function defaultData() {
   return { users: [], exhibits: [], categories: [], favorites: [], ratings: [], scanEvents: [], programs: [], events: [], gallery: [], visitors: [], artifactLogs: [] };
 }
@@ -145,6 +148,7 @@ async function restoreFromCloud() {
   return false;
 }
 
+// Persist locally via rename, then queue the Cloudinary backup.
 function save(data) {
   // atomic-ish write: write to temp file then rename
   const tmp = DB_FILE + '.tmp';
@@ -155,6 +159,7 @@ function save(data) {
   uploadToCloudinary(data);
 }
 
+// Normalize legacy single-image values and current arrays to one consistent shape.
 function normalizeImagePaths(value) {
   if (!value) return [];
   if (Array.isArray(value)) return value.filter(Boolean).map(String);
@@ -162,6 +167,7 @@ function normalizeImagePaths(value) {
   return [];
 }
 
+// Select the best available image path, preferring optimized and multi-image fields.
 function getPrimaryImagePath(item) {
   if (!item) return '';
   if (Array.isArray(item)) return item[0] || '';

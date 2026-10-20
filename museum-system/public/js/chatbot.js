@@ -1,3 +1,4 @@
+// Multilingual Bata Guide chat panel, including localized prompts and message rendering.
 (function(){
   const LANG_DATA = {
     auto: {
@@ -31,16 +32,16 @@
     },
     bis: {
       placeholder: 'Pangutana sa Bisaya / Tagalog / English…',
-      welcome: 'Maayong pag-abot! Ako si **Bata Guide**, ang imong AI assistant sa **Museo Sang Bata sa Negros**. Motubag ko sa imong mga pangutana sa **Bisaya**, **Tagalog**, ug **English** bahin sa mga exhibit, Staff Office sa ilalom sa hagdanan, Touch Pool, o bayad sa ticket!',
+      welcome: 'Maayong pag-abot! Ako si **Bata Guide**, imong giya sa **Museo Sang Bata sa Negros**. Motubag ko sa pinulongan nga imong gipili bahin sa mga exhibit, Staff Office sa ilalom sa hagdanan, Touch Pool, ug bayad sa pagsulod!',
       suggestions: [
-        'Tagpila ang bayad sa ticket ug unsa oras abli?',
+        'Tagpila ang bayad sa pagsulod ug unsang orasa abli?',
         'Asa dapit ang Staff Office?',
         'Sultihi ko bahin sa Touch Pool',
         'Unsang mga exhibit ang naa sa Level 2?',
-        'Pwede ba magkuha og litrato ug pagkaon?',
+        'Mahimo ba akong magkuha og litrato ug magdala og pagkaon?',
         'Naa bay access ramp para sa wheelchair?',
-        'Unsaon pag-adto gikan sa Bacolod?',
-        'I-translate kini sa Bisaya'
+        'Unsaon pag-adto sa museo gikan sa Bacolod?',
+        'Hubara kini sa Bisaya'
       ]
     }
   };
@@ -122,6 +123,7 @@
   `;
   document.body.appendChild(root);
 
+  // Build suggestion buttons from the active language's prompt list.
   function renderChips(suggestions) {
     return suggestions.map(s => `<button class="chat-chip" data-suggestion="${escapeHtml(s)}">${escapeHtml(s)}</button>`).join('');
   }
@@ -140,6 +142,7 @@
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
+  // Append a message, using formatted HTML only for bot responses.
   function addMessage(role, text){
     const div = document.createElement('div');
     div.className = 'chat-msg ' + role;
@@ -152,6 +155,7 @@
     scrollToBottom();
   }
 
+  // Show or remove the pending-response indicator in the message list.
   function setTyping(on){
     let el = document.getElementById('chatTyping');
     if(on){
@@ -168,6 +172,7 @@
     scrollToBottom();
   }
 
+  // Update labels and suggestions without replacing an ongoing conversation.
   function setLanguage(lang) {
     if (!LANG_DATA[lang]) return;
     state.lang = lang;
@@ -185,6 +190,7 @@
     }
   }
 
+  // Reset the conversation and restore the greeting for the selected language.
   function resetChat() {
     state.history = [];
     const config = LANG_DATA[state.lang] || LANG_DATA.auto;
@@ -197,6 +203,7 @@
     scrollToBottom();
   }
 
+  // Send a visitor prompt, render the assistant response, and manage typing state.
   async function sendMessage(text){
     if(!text || !text.trim() || state.sending) return;
     const clean = text.trim();
@@ -234,6 +241,7 @@
     input.focus();
   }
 
+  // Bind suggestion chips after each language change replaces their markup.
   function bindChipEvents() {
     suggestionsEl.querySelectorAll('[data-suggestion]').forEach(btn=>{
       btn.onclick = () => sendMessage(btn.dataset.suggestion);

@@ -6,6 +6,7 @@ const Gate = (() => {
   const ADMIN_TOKEN_KEY = 'museum_admin_token';
   const ADMIN_USERNAME_KEY = 'museum_admin_username';
 
+  // Accept a same-day check-in from either storage scope and refresh the tab session.
   function isVisitorCheckedIn() {
     if (sessionStorage.getItem(CHECKIN_KEY) === 'true') return true;
     try {
@@ -20,18 +21,22 @@ const Gate = (() => {
     return false;
   }
 
+  // Check both storage scopes because admin sessions may be tab- or browser-persistent.
   function isAdminLoggedIn() {
     return !!localStorage.getItem(ADMIN_TOKEN_KEY) || !!sessionStorage.getItem(ADMIN_TOKEN_KEY);
   }
 
+  // Treat a visitor check-in or admin token as an authenticated site session.
   function isAuthenticated() {
     return isVisitorCheckedIn() || isAdminLoggedIn();
   }
 
+  // Return the stored visitor name, with a generic label when none was saved.
   function getVisitorName() {
     return sessionStorage.getItem(VISITOR_NAME_KEY) || localStorage.getItem(VISITOR_NAME_KEY) || 'Visitor';
   }
 
+  // Recover the admin display name from stored profile data or the token payload.
   function getAdminUsername() {
     let name = localStorage.getItem(ADMIN_USERNAME_KEY) || sessionStorage.getItem(ADMIN_USERNAME_KEY) || '';
     if (!name) {
@@ -49,6 +54,7 @@ const Gate = (() => {
     return name || '';
   }
 
+  // Persist the visitor check-in and optional name for the current day.
   function setVisitorCheckedIn(name) {
     const today = new Date().toISOString().slice(0, 10);
     sessionStorage.setItem(CHECKIN_KEY, 'true');
@@ -60,11 +66,13 @@ const Gate = (() => {
     }
   }
 
+  // Clear visitor credentials and return to the visitor sign-up gate.
   function logoutVisitor() {
     clearVisitorCheckin();
     window.location.href = '/?action=signout';
   }
 
+  // Remove visitor identity and check-in data from both browser storage scopes.
   function clearVisitorCheckin() {
     sessionStorage.removeItem(CHECKIN_KEY);
     sessionStorage.removeItem(VISITOR_NAME_KEY);
@@ -75,6 +83,7 @@ const Gate = (() => {
     localStorage.removeItem('museum_visitor_session');
   }
 
+  // Remove the admin token, username, and portal marker from browser storage.
   function clearAdminSession() {
     localStorage.removeItem(ADMIN_TOKEN_KEY);
     sessionStorage.removeItem(ADMIN_TOKEN_KEY);
@@ -83,21 +92,25 @@ const Gate = (() => {
     sessionStorage.removeItem(ADMIN_USERNAME_KEY);
   }
 
+  // Clear both visitor and admin sessions, for account switching or reset.
   function clearAllSessions() {
     clearVisitorCheckin();
     clearAdminSession();
   }
 
+  // Clear admin credentials and return to the staff sign-in tab.
   function logoutAdmin() {
     clearAdminSession();
     window.location.href = '/?tab=admin';
   }
 
+  // Identify routes that host the sign-in/check-in gate rather than protected content.
   function isGatePage(pathname) {
     const p = (pathname || window.location.pathname).toLowerCase();
     return p === '/' || p === '/index.html' || p === '/checkin' || p === '/checkin.html' || p === '/login' || p === '/login.html' || p.endsWith('/index.html');
   }
 
+  // Enforce route access and redirect authenticated users to their requested destination.
   function enforce() {
     const isGate = isGatePage();
     const urlParams = new URLSearchParams(window.location.search);
@@ -144,6 +157,7 @@ const Gate = (() => {
   }
 
   // Inject Mobile "Back to Admin Dashboard" controls when logged in as admin
+  // Keep a quick route back to staff tools available while an admin browses public pages.
   function injectAdminPublicControls() {
     if (!isAdminLoggedIn()) return;
     if (isGatePage()) return;

@@ -1,3 +1,4 @@
+// Visitor chatbot endpoint with cached museum context and an offline response fallback.
 const express = require('express');
 const exhibits = require('../db/exhibits');
 const programs = require('../db/programs');
@@ -28,6 +29,27 @@ let cachedContext = null;
 let cacheTimestamp = 0;
 const CACHE_TTL_MS = 90 * 1000; // 90 seconds cache
 
+// Resolve an explicit language selection first, then detect the language of the current message.
+function detectChatLanguage(userMessage, preferredLang = 'auto') {
+  const msg = String(userMessage || '').toLowerCase().trim();
+  const selectedLanguage = String(preferredLang || 'auto').toLowerCase();
+  if (selectedLanguage === 'tl') return 'tl';
+  if (selectedLanguage === 'bis' || selectedLanguage === 'ceb') return 'bis';
+  if (selectedLanguage === 'en') return 'en';
+
+  const hasBisayaWords = /\b(unsa|unsang|asa|asan|dapit|tagpila|pila|ninyo|nato|atong|inyong|nako|nimo|kami|kita|diin|hain|adlaw|kabataan|palihug|palihog|ngano|nganong|kaayo|mokaon|magkaon|moinum|mag-inom|adto|moadto|pag-adto|unsaon|gani|kamo|sulod|pasulod|hagdanan|diri|didto|kinsa|maayong|udto|gabii|bisaya|hiligaynon|ilonggo|cebuano|ayaw|way|adunay|naa|naay|hubad|ihubad|tapad|ilalom|ibabaw|salog|abli|hikap|mohikap|sultihi|tudloi)\b/i.test(msg);
+  const hasTagalogWords = /\b(ano|anong|saan|nasaan|nasa|san|magkano|paano|kailan|meron|may|mayroon|po|opo|ba|namin|ninyo|natin|atin|inyo|ako|ko|kami|tayo|pwede|pede|pumunta|punta|kuha|kumuha|larawan|pagkain|inumin|kumain|uminom|sino|bakit|kumusta|kamusta|salamat|umaga|tanghali|tagalog|filipino|paki|pakisabi|sabihin|ikwento|kwento|huwag|bawal|walang|isalin|salin|katabi|itaas|palapag|bukas|sarado|mag-aaral|papasok|pasok)\b/i.test(msg);
+
+  if (/\b(magkano|saan|nasaan|ano|anong|paano|kailan|po|opo|kamusta|kumusta|salamat|paki|pakiusap|pwede|pede|walang|meron|mayroon|bawal|pumunta|kuha|larawan|pagkain|inumin|mag-aaral|ikwento|sabihin)\b/i.test(msg)) return 'tl';
+  if (/\b(tagpila|asa|asan|unsa|unsang|diin|hain|ngano|nganong|naa|naay|pila|palihug|palihog|kaayo|mokaon|magkaon|moinum|mag-inom|adto|moadto|pag-adto|unsaon|sulod|hagdanan|diri|didto|maayong|udto|gabii|bisaya|hiligaynon|ayaw|way|adunay|hubad|ihubad|tapad|ilalom|salog|abli|hikap|mohikap|sultihi|tudloi)\b/i.test(msg)) return 'bis';
+  if (hasTagalogWords && !hasBisayaWords) return 'tl';
+  if (hasBisayaWords && !hasTagalogWords) return 'bis';
+  if (hasTagalogWords) return 'tl';
+  if (hasBisayaWords) return 'bis';
+  return 'en';
+}
+
+// Reuse a short-lived museum-data snapshot, falling back to cached/minimal context on DB errors.
 async function getFullMuseumContext() {
   const now = Date.now();
   if (cachedContext && (now - cacheTimestamp < CACHE_TTL_MS)) {
@@ -55,13 +77,18 @@ async function getFullMuseumContext() {
   }
 }
 
-function buildSystemPrompt(context, language) {
+// Build the provider prompt with records and instructions for the exact response language.
+function buildSystemPrompt(context, responseLanguage) {
   const { info, allExhibits, allPrograms, allEvents } = context;
 
   const exhibitBlock = (allExhibits || []).map(e => (
     `- [${e.code || 'EXHIBIT'}] "${e.title}" (Category: ${e.category || 'General'}, Floor: Level ${e.floor === 2 ? 2 : 1})
       Location in museum: ${e.location || 'Exhibition floor'}
-      Description: ${e.description || 'Interactive hands-on exhibit.'}
+      Description (translate its explanation into the response language): ${responseLanguage === 'tl'
+        ? (e.description_tl || e.description || 'Interactive hands-on exhibit.')
+        : responseLanguage === 'bis'
+          ? (e.description_hil || e.description_cb || e.description || 'Interactive hands-on exhibit.')
+          : (e.description || 'Interactive hands-on exhibit.')}
       ${e.directions ? `Walking Directions: ${typeof e.directions === 'object' ? (e.directions.en || '') : e.directions}` : ''}`
   )).join('\n\n');
 
@@ -75,23 +102,18 @@ function buildSystemPrompt(context, language) {
 
   const feesBlock = (info.entranceFees || []).map(f => `- ${f}`).join('\n');
 
-  let langInstruction = `STRICT RESPONSE LANGUAGE RULES:
-- Use the language of the user's latest message as the language for the entire answer. Support English, Tagalog/Filipino, Bisaya/Cebuano/Hiligaynon, and any other language you can reliably answer in.
-- In automatic mode, detect the language from the latest user message itself, not from earlier chat history or the language used in this system prompt or museum data. If the message mixes languages, answer in the language used for its main question.
-- Reply in one language only. Do not add translations or bilingual headings unless the user explicitly asks for multiple languages.
-- Translate all explanatory content into the chosen language, including exhibit, program, and event descriptions, category names, location explanations, labels, directions, and museum information copied from the reference data. Never leave a source description in English just because the source record is in English.
-- Preserve official names, exhibit titles, organization names, acronyms, URLs, codes, dates, and currency/amounts as written when translating them would make them unrecognizable. Explain their meaning in the chosen language where useful.
-- Keep the facts accurate while translating; do not omit a description or answer in English merely because a localized source field is unavailable.`;
-
-  if (language === 'tl') {
-    langInstruction += `\n- USER PREFERRED LANGUAGE: Tagalog / Filipino. Formulate your entire response ONLY in clear, natural Tagalog.`;
-  } else if (language === 'bis' || language === 'ceb') {
-    langInstruction += `\n- USER PREFERRED LANGUAGE: Bisaya / Hiligaynon. Formulate your entire response ONLY in warm, natural Bisaya.`;
-  } else if (language === 'en') {
-    langInstruction += `\n- USER PREFERRED LANGUAGE: English. Formulate your response ONLY in English.`;
-  } else if (language && language !== 'auto') {
-    langInstruction += `\n- USER PREFERRED LANGUAGE CODE: ${language}. Reply only in the language represented by this code.`;
-  }
+  const languageName = responseLanguage === 'tl'
+    ? 'Tagalog / Filipino'
+    : responseLanguage === 'bis'
+      ? 'Bisaya / Cebuano / Hiligaynon'
+      : 'English';
+  const langInstruction = `STRICT RESPONSE LANGUAGE RULES:
+- REQUIRED OUTPUT LANGUAGE: ${languageName}. Write every sentence of the answer in this language.
+- Apply this rule to the entire answer: headings, labels, explanations, descriptions, directions, lists, greetings, and closing text.
+- Translate descriptive source data into ${languageName} before using it. Never copy an English description, category, location explanation, program/event description, or direction into the answer.
+- Do not mix languages or add translations unless the user explicitly asks for multiple languages.
+- Preserve only official names, exhibit titles, organization names, acronyms, URLs, record codes, dates, and currency/amounts when translation would make them unrecognizable. Keep surrounding explanations in ${languageName}.
+- Keep facts accurate. If a source description is English-only, translate its meaning rather than omitting it or repeating it in English.`;
 
   return `You are "Bata Guide", the friendly, knowledgeable AI visitor assistant and translator for ${info.name}, located in Barangay Old Sagay, Sagay City, Negros Occidental, Philippines.
 
@@ -161,6 +183,7 @@ ANSWERING INSTRUCTIONS:
 }
 
 // ─── Helper to format response in the matched language only ───
+// Select the requested language from a prepared English/Tagalog/Bisaya reply.
 function formatTrilingualReply({ en, tl, bis }, targetLang = 'en') {
   const cleanEn = (en || '').trim();
   const cleanTl = (tl || '').trim();
@@ -175,6 +198,7 @@ function formatTrilingualReply({ en, tl, bis }, targetLang = 'en') {
   return cleanEn;
 }
 
+// Translate known exhibit categories while preserving unrecognized labels.
 function localizeExhibitCategory(category, targetLang) {
   const translations = {
     'Marine & Nature': { tl: 'Dagat at Kalikasan', bis: 'Dagat ug Kinaiyahan' },
@@ -190,41 +214,11 @@ function localizeExhibitCategory(category, targetLang) {
 }
 
 // ─── Intelligent Local Fallback Engine (Answers & Translates Offline / Resilient) ───
+// Answer common visitor questions locally when Groq is unavailable or returns no reply.
 function generateLocalFallbackReply(userMessage, { info, allExhibits, allPrograms, allEvents }, preferredLang = 'auto') {
   const msg = (userMessage || '').toLowerCase().trim();
 
-  // Comprehensive Language detection
-  const isBisayaExplicit = preferredLang === 'bis' || preferredLang === 'ceb';
-  const isTagalogExplicit = preferredLang === 'tl';
-  const isEnglishExplicit = preferredLang === 'en';
-
-  const hasBisayaWords = /\b(unsa|unsang|asa|asan|dapit|tagpila|pila|ninyo|nato|atong|inyong|nako|nimo|kami|kita|diin|hain|adlaw|kabataan|palihug|palihog|ngano|nganong|kaayo|mokaon|magkaon|moinum|mag-inom|adto|moadto|pag-adto|unsaon|gani|kamo|sulod|pasulod|hagdanan|diri|didto|kinsa|maayong|udto|gabii|bisaya|hiligaynon|ilonggo|cebuano|ayaw|way|adunay|naa|naay|hubad|ihubad|tapad|ilalom|ibabaw|salog|abli|hikap|mohikap|sultihi|tudloi)\b/i.test(msg);
-  const hasTagalogWords = /\b(ano|anong|saan|nasaan|nasa|san|magkano|paano|kailan|meron|may|mayroon|po|opo|ba|namin|ninyo|natin|atin|inyo|ako|ko|kami|tayo|pwede|pede|pumunta|punta|kuha|kumuha|larawan|pagkain|inumin|kumain|uminom|sino|bakit|kumusta|kamusta|salamat|umaga|tanghali|tagalog|filipino|paki|pakisabi|sabihin|ikwento|kwento|huwag|bawal|walang|isalin|salin|katabi|itaas|palapag|bukas|sarado|mag-aaral|papasok|pasok)\b/i.test(msg);
-
-  let activeLang = 'en';
-  if (isTagalogExplicit) {
-    activeLang = 'tl';
-  } else if (isBisayaExplicit) {
-    activeLang = 'bis';
-  } else if (isEnglishExplicit) {
-    activeLang = 'en';
-  } else {
-    if (/\b(magkano|saan|nasaan|ano|anong|paano|kailan|po|opo|kamusta|kumusta|salamat|paki|pakiusap|pwede|pede|walang|meron|mayroon|bawal|pumunta|kuha|larawan|pagkain|inumin|mag-aaral|ikwento|sabihin)\b/i.test(msg)) {
-      activeLang = 'tl';
-    } else if (/\b(tagpila|asa|asan|unsa|unsang|diin|hain|ngano|nganong|naa|naay|pila|palihug|palihog|kaayo|mokaon|magkaon|moinum|mag-inom|adto|moadto|pag-adto|unsaon|sulod|hagdanan|diri|didto|maayong|udto|gabii|bisaya|hiligaynon|ayaw|way|adunay|hubad|ihubad|tapad|ilalom|salog|abli|hikap|mohikap|sultihi|tudloi)\b/i.test(msg)) {
-      activeLang = 'bis';
-    } else if (hasTagalogWords && !hasBisayaWords) {
-      activeLang = 'tl';
-    } else if (hasBisayaWords && !hasTagalogWords) {
-      activeLang = 'bis';
-    } else if (hasTagalogWords) {
-      activeLang = 'tl';
-    } else if (hasBisayaWords) {
-      activeLang = 'bis';
-    } else {
-      activeLang = 'en';
-    }
-  }
+  const activeLang = detectChatLanguage(msg, preferredLang);
 
   // ── TRANSLATION REQUESTS ──
   const isTranslateRequest = /\b(translate|i-translate|itranslate|isalin|salin|hubad|ihubad|paghubad|kahulugan|meaning)\b/i.test(msg);
@@ -255,7 +249,7 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
     }
 
     if (toBisaya) {
-      return `🌐 **Hubad sa Bisaya (Translation to Bisaya):**\n"${bisText}"`;
+      return `🌐 **Hubad sa Bisaya:**\n"${bisText}"`;
     }
     if (toTagalog) {
       return `🌐 **Salin sa Tagalog (Translation to Tagalog):**\n"${tlText}"`;
@@ -268,7 +262,7 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
     return formatTrilingualReply({
       en: `💼 **Staff Office Location:**\nThe **Staff Office** is located on **Level 1 (Ground Floor) inside the Central Function Hall, situated directly under the stairs** and right beside the J.G. Marañon memorial gallery section.\n\nIf you need administrative assistance, tour booking coordination, or staff guidance, enter through the Main Entrance doors, walk across the Function Hall, and look to your left under the staircase!`,
       tl: `💼 **Lokasyon ng Staff Office:**\nAng **Staff Office** ay matatagpuan sa **Level 1 (Ground Floor)** sa loob ng **Central Function Hall, direktang nasa ilalim ng hagdanan (under the stairs)**, katabi ng J.G. Marañon memorial section.\n\nKung kailangan ninyo ng tulong sa tour booking, impormasyon sa pamunuan, o tulong ng staff, pumasok lamang sa Main Entrance, tumawid sa Function Hall, at kumaliwa patungo sa ilalim ng hagdan!`,
-      bis: `💼 **Lokasyon sa Staff Office:**\nAng **Staff Office** anaa sa **Level 1 (Ground Floor)** sa sulod sa **Central Function Hall, diretso sa ilalom sa hagdanan (under the stairs)**, tapad sa J.G. Marañon memorial gallery section.\n\nKung kinahanglan nimo og tabang sa tour booking, pangutana sa administrasyon, o mopalit og tiket, pagsulod lang sa Main Entrance, tabok sa Function Hall, ug liko sa wala padulong sa ilalom sa hagdanan!`
+      bis: `💼 **Lokasyon sang Staff Office:**\nAng **Staff Office** ara sa **Level 1 (Ground Floor)** sa sulod sang **Central Function Hall**, direkta sa idalom sang hagdan, kag tupad sang memorial nga bahin ni J.G. Marañon.\n\nKon kinahanglan mo sang bulig sa pagpareserba sang tour ukon impormasyon, magsulod sa Main Entrance, magtabok sa Function Hall, kag magliso sa wala pakadto sa idalom sang hagdan!`
     }, activeLang);
   }
 
@@ -277,7 +271,7 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
     return formatTrilingualReply({
       en: `♿ **Accessibility & Wheelchair Access:**\nYes! Museo Sang Bata sa Negros is fully wheelchair and stroller accessible.\n\n- **Access Ramp:** A dedicated exterior concrete access ramp is located directly at the front entrance alongside the steps, leading smoothly into the reception foyer.\n- **Ground Floor Layout:** All Ground Floor exhibition rooms (Marine & Nature Room, Splash Zone Touch Pool, Reading Corner, Heritage Gallery, and Function Hall) are on a single flat level with wide doorways.`,
       tl: `♿ **Accessibility at Wheelchair Ramp:**\nOo, ganap na accessible ang Museo Sang Bata sa Negros para sa mga naka-wheelchair at stroller!\n\n- **Entrance Ramp:** May kongkretong access ramp sa harapan ng Main Entrance katabi ng mga baytang ng hagdan para sa maginhawang pagpasok.\n- **Ground Floor:** Ang lahat ng gallery sa Ground Floor (Marine & Nature Room, Touch Pool, Franco's Reading Corner, Character & Heritage Room, at Function Hall) ay nasa iisang patag na palapag na may malalapad na pintuan.`,
-      bis: `♿ **Accessibility ug Wheelchair Ramp:**\nOo, accessible kaayo ang Museo Sang Bata sa Negros para sa mga naka-wheelchair ug stroller!\n\n- **Access Ramp:** Adunay kongkretong access ramp sa atubangan sa Main Entrance tupad sa mga baytang sa hagdanan alang sa hapsay nga pagsulod.\n- **Ground Floor:** Ang tanang gallery sa ubos (Marine & Nature Room, Splash Zone Touch Pool, Franco's Reading Corner, Character & Heritage Room, ug Function Hall) anaa sa usa ka patag nga salog nga may lapad nga mga pultahan.`
+      bis: `♿ **Dali nga Pagsulod kag Rampa:**\nOo, masulod sing hapos ang Museo Sang Bata sa Negros sang mga tawo nga nagagamit sang wheelchair kag kariton sang bata!\n\n- **Rampa:** May konkreto nga rampa sa atubang sang Main Entrance, tupad sang hagdan, agod mangin hapos ang pagsulod.\n- **Ground Floor:** Ang tanan nga galeriya sa idalom (Marine & Nature Room, Splash Zone Touch Pool, Franco's Reading Corner, Character & Heritage Room, kag Function Hall) ara sa pareho nga patag nga salog kag may malapad nga mga puwertahan.`
     }, activeLang);
   }
 
@@ -286,7 +280,7 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
     return formatTrilingualReply({
       en: `📸 **Photography & Video Guidelines:**\n- **Personal Souvenir Photos & Videos:** Warmly welcomed! Visitors and families are encouraged to take souvenir photos with our interactive displays.\n- **Flash Precaution:** Please turn off camera flash around live saltwater aquariums and the Touch Pool to protect the sensitive eyes of our marine animals.\n- **Commercial Shoots:** Commercial filming requires advance coordination with museum management at the Staff Office.`,
       tl: `📸 **Panuntunan sa Pagkuha ng Litrato at Video:**\n- **Personal Photos & Videos:** Pwedeng-pwede po kumuha ng litrato at souvenir videos kasama ang inyong pamilya sa mga interactive exhibits!\n- **Pakiusap sa Flash:** Iwasan po ang camera flash malapit sa mga saltwater aquarium at Touch Pool upang hindi masilaw o maabala ang mga live marine animals.\n- **Commercial Shoots:** Para sa commercial filming o media video shoots, mangyaring makipag-ugnayan muna sa Staff Office.`,
-      bis: `📸 **Mga Lagda sa Pagkuha og Litrato ug Video:**\n- **Personal Photos & Videos:** Gidasig ug libre ang pagkuha og souvenir photos ug video sa inyong pamilya uban sa mga interactive exhibits!\n- **Pahimangno sa Flash:** Palihug patya ang flash sa inyong camera duol sa mga saltwater aquarium ug Touch Pool aron dili madaot o makuyawan ang mga buhi nga marine animals.\n- **Commercial Shoots:** Alang sa commercial filming o media coverage, palihug pakig-alayon daan sa Staff Office.`
+      bis: `📸 **Mga Lagda sa Pagkuha sang Retrato kag Bidyo:**\n- **Retrato kag bidyo para sa handumanan:** Ginasugyot ang pagkuha sang retrato kag bidyo upod sa pamilya sa mga exhibit.\n- **Pahimangno sa suga sang kamera:** Palihug patya ang suga sang kamera malapit sa mga aquarium nga may tubig-dagat kag sa Touch Pool agod indi madisturbo ang mga sapat sa dagat.\n- **Pagkuha para sa negosyo:** Kon may pagkuha sang bidyo para sa negosyo ukon media, palihug magpakig-angot anay sa Staff Office.`
     }, activeLang);
   }
 
@@ -295,7 +289,7 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
     return formatTrilingualReply({
       en: `🍱 **Food & Beverage Policy:**\n- Eating and drinking are strictly prohibited inside the exhibition galleries and at the Touch Pool to safeguard our displays and sea creatures.\n- Visitors are welcome to enjoy snacks, drinks, and packed lunch (*baon*) at designated seating in the central Function Hall during tour breaks or outdoors.`,
       tl: `🍱 **Panuntunan sa Pagkain at Inumin:**\n- Bawal po kumain at uminom sa loob ng mga **exhibition galleries** at sa tabi ng **Touch Pool** upang maprotektahan ang mga exhibits at marine creatures.\n- Maaari ninyong kainin ang inyong baon, meryenda, o inumin sa mga designated seating areas sa labas ng museo o sa loob ng **Function Hall** tuwing break time.`,
-      bis: `🍱 **Palisiya sa Pagkaon ug Inom:**\n- **Bawal magkaon o mag-inom** sa sulod sa mga exhibit galleries ug duol sa Touch Pool aron mapanalipdan ang mga displays ug ang buhi nga mga linalang sa dagat.\n- Mahimo ninyong kaonon ang inyong baon, meryenda, o ilimnon sa designated outdoor areas o sa sulod sa **Function Hall** panahon sa break sa inyong tour.`
+      bis: `🍱 **Mga Lagda sa Pagkaon kag Inom:**\n- **Bawal magkaon ukon mag-inom** sa sulod sang mga galeriya sang exhibit kag malapit sa Touch Pool agod maprotektahan ang mga butang nga ginapakita kag ang mga sapat sa dagat.\n- Mahimo ka magkaon sang baon, meryenda, ukon ilimnon sa mga gintudlo nga lugar sa gwa ukon sa **Function Hall** samtang nagapahuway sa paglibot.`
     }, activeLang);
   }
 
@@ -303,12 +297,12 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
   if (msg.includes('ticket') || msg.includes('fee') || msg.includes('price') || msg.includes('entrance') || msg.includes('cost') || msg.includes('magkano') || msg.includes('tagpila') || msg.includes('bayad') || msg.includes('pila')) {
     const feesListEn = (info.entranceFees && info.entranceFees.length) ? info.entranceFees.map(f => `• ${f}`).join('\n') : `• Students with ID: ₱20.00\n• Senior Citizens & PWD: ₱40.00\n• Adults: ₱50.00`;
     const feesListTl = `• Mga Mag-aaral (may ID): ₱20.00\n• Senior Citizens at PWD: ₱40.00\n• Matatanda (Adults): ₱50.00`;
-    const feesListBis = `• Mga Estudyante (may ID): ₱20.00\n• Senior Citizens ug PWD: ₱40.00\n• Adulto: ₱50.00`;
+    const feesListBis = `• Mga estudyante (may ID): ₱20.00\n• Mga tigulang kag PWD: ₱40.00\n• Mga adulto: ₱50.00`;
 
     return formatTrilingualReply({
       en: `🎟️ **Entrance Fees & Admission Rates:**\n${feesListEn}\n• Children under 3 years old: FREE admission.\n\nTickets can be purchased directly at the Visitor Reception Desk upon arrival at the Main Entrance!`,
       tl: `🎟️ **Halaga ng Entrance Ticket:**\n${feesListTl}\n• Libre ang mga batang wala pang 3 taong gulang.\n\nMabibili ang tickets sa Visitor Reception Desk pagpasok sa Main Entrance foyer!`,
-      bis: `🎟️ **Bayad sa Entrance & Tickets:**\n${feesListBis}\n• Libre ang mga bata ubos sa 3 ka tuig ang panuigon.\n\nMakapalit kamo og ticket sa Visitor Reception Desk pag-abot ninyo sa Main Entrance!`
+      bis: `🎟️ **Bayad sa Pagsulod:**\n${feesListBis}\n• Libre ang mga bata nga wala pa magtatlo ka tuig.\n\nMakabakal ka sang tiket sa lamesa sang pagbaton sa mga bisita pag-abot sa Main Entrance!`
     }, activeLang);
   }
 
@@ -317,7 +311,7 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
     return formatTrilingualReply({
       en: `⏰ **Operating Hours & Schedule:**\n- **Monday to Friday:** 8:00 AM – 5:00 PM (open for general public, walk-ins, families, and school tours).\n- **Saturday & Sunday:** Open exclusively for advance-booked group tours and special reservations.\n- **Recommended Duration:** Most visitors spend about 1.5 to 2.5 hours exploring all interactive galleries across both floors.`,
       tl: `⏰ **Oras at Iskedyul ng Museo:**\n- **Lunes hanggang Biyernes:** 8:00 AM – 5:00 PM (bukas para sa regular walk-ins, pamilya, at school field trips).\n- **Sabado at Linggo:** Bukas para sa mga advance-booked group tours at special events.\n- **Rekomendadong Oras:** Karaniwang tumatagal ng 1.5 hanggang 2.5 oras ang paglilibot sa lahat ng exhibits sa Ground Floor at Level 2.`,
-      bis: `⏰ **Oras ug Iskedyul sa Pag-abli:**\n- **Lunes hangtod Biyernes:** 8:00 AM – 5:00 PM (abli alang sa regular visitors, pamilya, ug school field trips).\n- **Sabado ug Domingo:** Abli alang sa mga advance-booked group tours ug espesyal nga mga kalihokan.\n- **Gidugayon sa Pagbisita:** Kasagaran molungtad og 1.5 hangtod 2.5 ka oras ang paglibot sa tanang mga interactive galleries sa Ground Floor ug Level 2.`
+      bis: `⏰ **Oras kag Iskedyul sang Pag-abli:**\n- **Lunes tubtob Biyernes:** 8:00 AM – 5:00 PM (abri para sa tanan nga bisita, pamilya, kag mga pagbisita sang eskwelahan).\n- **Sabado kag Domingo:** Abri para sa mga grupo nga nagpareserba anay kag sa mga pinasahi nga kalihokan.\n- **Gidugayon sang Pagbisita:** Kasagaran nagalawig sing 1.5 tubtob 2.5 ka oras ang paglibot sa mga galeriya sa Ground Floor kag Level 2.`
     }, activeLang);
   }
 
@@ -326,7 +320,7 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
     return formatTrilingualReply({
       en: `🪜 **Level 2 (Upper Mezzanine Level):**\nAccessed via the staircase inside the Function Hall (directly above the Staff Office), Level 2 houses:\n1. **🧸 Toys & Collections Room (*Hampanganan*):** A world of folk toys from over 50 countries, vintage McDonald's promotional toys, and Beanie Babies collection.\n2. **🎡 Carnival & Discovery Room:** An interactive Play Lab featuring sensory exploration hubs, game stations, and brain-teasing puzzles.\n3. **👀 Mezzanine Void Balcony:** An open-to-below balcony overlooking the central Function Hall.`,
       tl: `🪜 **Level 2 (Ikalawang Palapag / Upper Mezzanine):**\nMaaaring puntahan gamit ang hagdanan sa loob ng Function Hall (sa itaas mismo ng Staff Office):\n1. **🧸 Toys & Collections Room (*Hampanganan*):** Koleksyon ng mga tradisyonal na laruan mula sa mahigit 50 bansa, vintage McDonald's toys, at Beanie Babies.\n2. **🎡 Carnival & Discovery Room:** Isang interactive Play Lab na may mga hands-on games at sensory learning stations.\n3. **👀 Mezzanine Void Balcony:** Isang bukas na balkonahe na tanaw ang buong Central Function Hall sa ibaba.`,
-      bis: `🪜 **Level 2 (Ikaduhang Salog / Upper Mezzanine):**\nMasulod pinaagi sa hagdanan sa Function Hall (ibabaw mismo sa Staff Office):\n1. **🧸 Toys & Collections Room (*Hampanganan*):** Koleksyon sa tradisyonal nga mga dulaan gikan sa kapin 50 ka nasod, vintage McDonald's toys, ug Beanie Babies.\n2. **🎡 Carnival & Discovery Room:** Interactive Play Lab nga adunay sensory learning hubs ug hands-on educational games.\n3. **👀 Mezzanine Void Balcony:** Bukas nga balkonahe nga naglantaw sa Central Function Hall sa ubos.`
+      bis: `🪜 **Level 2 (Ikaduha nga Salog):**\nMaabot ini paagi sa hagdan sa Function Hall, direkta sa ibabaw sang Staff Office:\n1. **🧸 Toys & Collections Room (*Hampanganan*):** Koleksyon sang tradisyonal nga mga dulaan halin sa sobra 50 ka pungsod, lakip ang mga dulaan sang McDonald's kag Beanie Babies.\n2. **🎡 Carnival & Discovery Room:** Lugar sang pagtuon paagi sa pag-eksperimento, mga dula, kag mga buluhaton para sa mga pagbati.\n3. **👀 Mezzanine Void Balcony:** Bukas nga balkonahe nga nagatan-aw sa Central Function Hall sa idalom.`
     }, activeLang);
   }
 
@@ -335,7 +329,7 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
     return formatTrilingualReply({
       en: `💦 **Touch & Play Room (Splash Zone):**\nLocated in the Ground Floor East Wing, the Splash Zone features our famous living marine **Touch Pool**!\n- Children and visitors can gently interact with real seashore animals including sea stars (starfish), sea cucumbers, hermit crabs, sea snails, and small reef fish.\n- Junior Museum Guides assist each visitor to ensure animals are handled safely underwater. Wash hands with clean water (no soap) before touching!`,
       tl: `💦 **Touch & Play Room (Splash Zone):**\nMatatagpuan sa Ground Floor East Wing, tampok dito ang ating tanyag na marine **Touch Pool**!\n- Malugod na makakahawak ang mga bata at bisita sa mga buhay na yamang-dagat tulad ng starfish (sea stars), sea cucumbers, hermit crabs, at maliliit na isda sa bahura.\n- Paki-hugas po ang mga kamay gamit ang malinis na tubig (walang sabon) bago humawak, at hawakan sila nang marahan sa ilalim ng tubig.`,
-      bis: `💦 **Touch & Play Room (Splash Zone):**\nNahimutang sa Ground Floor East Wing, ania ang atong buhi nga **Touch Pool**!\n- Ang mga bisita ug kabataan mahimong makahikap sa buhi nga mga linalang sa dagat sama sa mga bituon sa dagat (sea stars), balat (sea cucumbers), alimango sa baybay (hermit crabs), ug gagmayng isda sa reef.\n- Palihug panghunaw sa kamot gamit ang tubig (ayaw paggamit og sabon) sa dili pa mohikap, ug kupti sila sa hinay nga paagi ubos sa tubig.`
+      bis: `💦 **Touch & Play Room (Splash Zone):**\nAri sa Ground Floor East Wing ang aton **Touch Pool** nga may buhi nga mga sapat sa dagat!\n- Mahimo mahikap sing mahinalongon sang mga bisita kag kabataan ang mga bituon sa dagat, balat, alimango nga nagapuyo sa mga kinhason, kag magagmay nga isda sa bahura.\n- Palihug hugasi ang mga kamot sa matinlo nga tubig nga wala sing sabon antes maghikap. Hikapa sila sing mahinalongon samtang yara sa tubig.`
     }, activeLang);
   }
 
@@ -372,7 +366,7 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
     return formatTrilingualReply({
       en: `🏛️ **Exhibits at Museo Sang Bata sa Negros:**\nOur museum features hands-on exhibits across two floors:\n\n${list || 'Multiple interactive galleries across Ground Floor and Level 2.'}\n\nYou can explore each exhibit's details in our [Exhibits Catalog](/exhibits.html) or navigate them on the [Interactive Floor Map](/map.html)!`,
       tl: `🏛️ **Mga Exhibit sa Museo Sang Bata sa Negros:**\nTampok ang mga hands-on exhibits sa dalawang palapag ng museo:\n\n${list || 'Maraming interactive galleries sa Ground Floor at Level 2.'}\n\nMaaari ninyong suriin ang kumpletong detalye sa [Exhibits Catalog](/exhibits.html) o sundan sa [Interactive Floor Map](/map.html)!`,
-      bis: `🏛️ **Mga Exhibit sa Museo Sang Bata sa Negros:**\nAdunay nagkalain-laing interactive exhibits sa duha ka salog sa museo:\n\n${list || 'Daghang interactive galleries sa Ground Floor ug Level 2.'}\n\nMahimo nimong tan-awon ang tibuok detalye sa [Exhibits Catalog](/exhibits.html) o subayon kini sa [Interactive Floor Map](/map.html)!`
+      bis: `🏛️ **Mga Exhibit sa Museo Sang Bata sa Negros:**\nMay nagkalain-lain nga exhibit sa duha ka salog sang museyo:\n\n${list || 'May madamo nga galeriya sa Ground Floor kag Level 2.'}\n\nTan-awa ang bug-os nga detalye sa [Talaan sang mga Exhibit](/exhibits.html) ukon pangitaa ang mga ini sa [Mapa sang Salog](/map.html)!`
     }, activeLang);
   }
 
@@ -381,7 +375,7 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
     return formatTrilingualReply({
       en: `📍 **Location & Travel Directions:**\n- **Address:** ${info.address} (Shoreline of Barangay Old Sagay, beside the Sagay Marine Reserve and Old Sagay Port).\n- **From Bacolod City:**\n  1. Take a Ceres Bus or passenger van from Bacolod North Bus Terminal to Sagay City (~2 to 2.5 hours).\n  2. At Sagay terminal, take a tricycle or pedicab directly to *Museo Sang Bata sa Negros* at Old Sagay Port (~10 to 15 minutes).\n- **Parking:** Free visitor parking is available directly in front of the museum.`,
       tl: `📍 **Lokasyon at Direksyon sa Pagbiyahe (Commute galing Bacolod):**\n- **Address:** ${info.address} (Baybayin ng Barangay Old Sagay, katabi ng Sagay Marine Reserve at Old Sagay Port).\n- **Paggaling sa Bacolod City:**\n  1. Sumakay ng Ceres Bus o van mula Bacolod North Bus Terminal patungong Sagay City (~2 hanggang 2.5 oras).\n  2. Sa Sagay terminal, sumakay ng tricycle o pedicab papuntang *Museo Sang Bata sa Negros* sa Old Sagay Port (~10 hanggang 15 minuto).\n- **Paradahan:** May libreng paradahan sa tapat ng museo.`,
-      bis: `📍 **Lokasyon ug Giya sa Pagbiyahe (Commute gikan Bacolod):**\n- **Address:** ${info.address} (Daplin sa baybayon sa Barangay Old Sagay, tupad sa Sagay Marine Reserve ug Old Sagay Port).\n- **Gikan sa Bacolod City:**\n  1. Sakay og Ceres Bus o van gikan sa Bacolod North Terminal padulong sa Sagay City (~2 hangtod 2.5 ka oras nga biyahe).\n  2. Pag-abot sa Sagay terminal, sakay og tricycle o pedicab diretso sa *Museo Sang Bata sa Negros* sa Old Sagay Port (~10 hangtod 15 minutos).\n- **Parking:** Adunay libreng parkingan sa atubangan sa museyo.`
+      bis: `📍 **Lokasyon kag Giya sa Pagbiyahe:**\n- **Adres:** ${info.address} (Sa baybayon sang Barangay Old Sagay, tupad sang Sagay Marine Reserve kag Old Sagay Port).\n- **Halin sa Bacolod City:**\n  1. Sakay sang Ceres Bus ukon van halin sa Bacolod North Bus Terminal pakadto sa Sagay City (mga 2 tubtob 2.5 ka oras).\n  2. Pag-abot sa terminal sang Sagay, sakay sang traysikol ukon pedikab pakadto sa *Museo Sang Bata sa Negros* sa Old Sagay Port (mga 10 tubtob 15 ka minutos).\n- **Paradahan:** May libre nga paradahan sa atubang sang museyo.`
     }, activeLang);
   }
 
@@ -390,7 +384,7 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
     return formatTrilingualReply({
       en: `🚌 **School Field Trips & Group Tours:**\nWe warmly welcome educational field trips, delegations, and community groups!\n- **Junior Museum Guides:** School groups are led by our trained youth Junior Guides for interactive marine science storytelling.\n- **Advance Booking:** Please reserve in advance by calling **${info.phone}** or emailing **info@museosangbata.org** with your estimated group size and preferred date.`,
       tl: `🚌 **School Field Trips at Group Tours:**\nMalugod naming tinatanggap ang mga lakbay-aral ng mga paaralan at grupo!\n- **Junior Museum Guides:** Ang inyong grupo ay gagabayan ng ating sinanay na Junior Guides para sa masayang pag-aaral ng marine science.\n- **Paunang Booking:** Mangyaring tumawag sa **${info.phone}** o mag-email sa **info@museosangbata.org** bago ang inyong nakatakdang pagbisita.`,
-      bis: `🚌 **School Field Trips ug Group Tours:**\nMalipayon kaming mo-abiabi sa mga eskwelahan, grupo, ug delegasyon!\n- **Junior Museum Guides:** Ang mga grupo pagatabangan sa atong batan-ong Junior Guides alang sa interactive science storytelling.\n- **Pagpareserba:** Palihug pag-book daan pinaagi sa pagtawag sa **${info.phone}** o pag-email sa **info@museosangbata.org** aron maandam ang inyong pagbisita.`
+      bis: `🚌 **Mga Pagbisita sang Eskwelahan kag Grupo:**\nMalipayon kami nga magbaton sang mga eskwelahan, grupo, kag delegasyon!\n- **Junior Museum Guides:** Giyahan sang amon nabansay nga mga batan-on nga giya ang mga grupo samtang ginapaathag ang siyensiya sang kadagatan.\n- **Pagpareserba:** Palihug magpareserba anay paagi sa pagtawag sa **${info.phone}** ukon pagpadala sang mensahe sa **info@museosangbata.org**. Isugid ang kadamuon sang inyo grupo kag ang gusto nga petsa.`
     }, activeLang);
   }
 
@@ -399,7 +393,7 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
     return formatTrilingualReply({
       en: `💖 **Donations & Volunteering:**\n*Museo Sang Bata sa Negros* is a non-stock, non-profit children's learning center.\n- **Donations:** Help us sponsor free admissions and marine tours for underprivileged public school children and sustain our living marine habitats. You can donate via our [Donate Page](/donate.html) or in person at the Staff Office.\n- **Volunteering:** Inquire at the front desk or call ${info.phone}.`,
       tl: `💖 **Donasyon at Pagboboluntaryo:**\nAng *Museo Sang Bata sa Negros* ay isang non-profit foundation para sa kabataan.\n- **Donasyon:** Ang bawat ambag ay nakatutulong na pondohan ang libreng lakbay-aral ng mga batang mag-aaral mula sa public schools at mapangalagaan ang ating marine habitats. Mag-donate sa [Donate Page](/donate.html) o sa Staff Office.\n- **Pagboboluntaryo:** Tumawag sa ${info.phone} para sa programang Junior Guides!`,
-      bis: `💖 **Donasyon ug Pagboluntaryo:**\nAng *Museo Sang Bata sa Negros* usa ka non-stock, non-profit nga institusyon.\n- **Donasyon:** Ang inyong suporta makatabang sa paghatag og libreng pagbisita alang sa mga kabataan sa pampublikong eskwelahan ug pag-atiman sa atong Touch Pool marine habitats. Makadonar pinaagi sa [Donate Page](/donate.html) o sa Staff Office.\n- **Pagboluntaryo:** Bukas kami sa mga estudyante ug storytellers nga gusto moabag isip Junior Guides! Tawag sa ${info.phone}.`
+      bis: `💖 **Donasyon kag Pagboluntaryo:**\nAng *Museo Sang Bata sa Negros* isa ka institusyon nga wala nagapangita sang ganansiya.\n- **Donasyon:** Ang imo bulig makasuporta sa libre nga pagbisita sang mga kabataan halin sa pampubliko nga eskwelahan kag sa pag-atipan sang mga sapat sa Touch Pool. Maghatag paagi sa [Pahina sang Donasyon](/donate.html) ukon sa Staff Office.\n- **Pagboluntaryo:** Ginatugutan ang mga estudyante kag manug-asoy sang estorya nga magbulig bilang Junior Guides. Tawag sa ${info.phone}.`
     }, activeLang);
   }
 
@@ -408,7 +402,7 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
     return formatTrilingualReply({
       en: `🏛️ **About & History:**\nFounded in 2003 through the vision of late Governor Joseph G. Marañon and community cultural advocates, *Museo Sang Bata sa Negros* is the first hands-on interactive children's museum in the Philippines outside Metro Manila, dedicated to marine conservation and children's discovery.`,
       tl: `🏛️ **Kasaysayan ng Museo:**\nItinatag noong 2003 sa pamamagitan ng adhikain ni dating Gobernador Joseph G. Marañon, ang *Museo Sang Bata sa Negros* ang kauna-unahang hands-on children's museum sa labas ng Metro Manila.\n- Katabi ng Sagay Marine Reserve, ang layunin nito ay magturo ng pangangalaga sa kalikasan at yamang-dagat sa pamamagitan ng **Marine Conservation Education Program**.`,
-      bis: `🏛️ **Mahitungod ug Kasaysayan sa Museo:**\nGitukod niadtong tuig 2003 pinaagi sa panan-aw sa kanhi Gobernador Joseph G. Marañon ug mga cultural advocates, ang *Museo Sang Bata sa Negros* mao ang pinakaunang interactive children's museum sa gawas sa Metro Manila.\n- Nahimutang tupad sa Sagay Marine Reserve, ang nag-unang misyon niini mao ang **Marine Conservation Education Program** aron tudloan ang mga bata sa pag-amuma sa atong kadagatan.`
+      bis: `🏛️ **Parte kag Kasaysayan sang Museyo:**\nGintukod sang tuig 2003 paagi sa panan-aw sang anay Gobernador Joseph G. Marañon kag mga tigpalapnag sang kultura ang *Museo Sang Bata sa Negros*, ang una nga museyo para sa kabataan nga may mga interactive nga exhibit sa guwa sang Metro Manila.\n- Tupad ini sang Sagay Marine Reserve. Ang panguna nga katuyuan sini amo ang **Marine Conservation Education Program**, nga nagatudlo sa kabataan sa pag-atipan sang aton kadagatan.`
     }, activeLang);
   }
 
@@ -417,7 +411,7 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
     return formatTrilingualReply({
       en: `👋 **Hello and welcome to Museo Sang Bata sa Negros!**\nI'm **Bata Guide**, your interactive museum guide. I answer in English, Tagalog, and Bisaya!\n• 🏛️ **Exhibits** (Under the Sea, Touch Pool, Hampanganan)\n• 📍 **Staff Office** (under the stairs in Function Hall)\n• 🎟️ **Tickets & Hours** (₱20-₱50, 8 AM–5 PM)\n• ♿ **Accessibility & Ramp**\n• 📸 **Photo & Food Rules**`,
       tl: `👋 **Maligayang pagdating sa Museo Sang Bata sa Negros!**\nAko si **Bata Guide**, ang iyong interactive museum guide. Sumasagot ako sa Tagalog, Bisaya, at English!\n• 🏛️ **Mga Exhibit** (Under the Sea, Touch Pool, Hampanganan)\n• 📍 **Staff Office** (sa ilalim ng hagdanan sa Function Hall)\n• 🎟️ **Tickets at Oras** (₱20-₱50, 8 AM–5 PM)\n• ♿ **Wheelchair Access at Ramp**\n• 📸 **Panuntunan sa Litrato at Pagkain**`,
-      bis: `👋 **Maayong pag-abot sa Museo Sang Bata sa Negros!**\nAko si **Bata Guide**, ang imong interactive museum guide. Motubag ko sa Bisaya, Tagalog, ug English!\n• 🏛️ **Mga Exhibit** (Under the Sea, Touch Pool, Hampanganan)\n• 📍 **Staff Office** (ilalom sa hagdanan sa Function Hall)\n• 🎟️ **Tickets ug Oras** (₱20-₱50, 8 AM–5 PM)\n• ♿ **Wheelchair Access ug Ramp**\n• 📸 **Mga Lagda sa Litrato ug Pagkaon**`
+      bis: `👋 **Maayong pag-abot sa Museo Sang Bata sa Negros!**\nAko si **Bata Guide**, ang imo giya sa museyo. Motubag ako sa pinulongan nga imo ginpili!\n• 🏛️ **Mga Exhibit** (Under the Sea, Touch Pool, Hampanganan)\n• 📍 **Staff Office** (sa idalom sang hagdan sa Function Hall)\n• 🎟️ **Bayad kag Oras** (₱20-₱50, 8 AM–5 PM)\n• ♿ **Rampa para sa wheelchair**\n• 📸 **Mga lagda sa retrato kag pagkaon**`
     }, activeLang);
   }
 
@@ -429,6 +423,7 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
   }, activeLang);
 }
 
+// Use Groq for a visitor question when configured, then fall back to local museum knowledge.
 router.post('/', chatLimiter, async (req, res) => {
   let apiKey;
   try {
@@ -458,6 +453,7 @@ router.post('/', chatLimiter, async (req, res) => {
 
   // Fetch full museum context for both LLM prompt and fallback engine
   const context = await getFullMuseumContext();
+  const responseLanguage = detectChatLanguage(message, language);
 
   // If a Groq API key is available, attempt a remote LLM call with a safety timeout.
   if (apiKey) {
@@ -465,7 +461,7 @@ router.post('/', chatLimiter, async (req, res) => {
     let usageRecorded = false;
     let timeoutId;
     try {
-      const sysPrompt = buildSystemPrompt(context, language);
+      const sysPrompt = buildSystemPrompt(context, responseLanguage);
       const messages = [
         { role: 'system', content: sysPrompt },
         ...cleanHistory,
@@ -525,7 +521,7 @@ router.post('/', chatLimiter, async (req, res) => {
   }
 
   // Resilient Local Knowledge & Translation Engine: Answers & translates reliably!
-  const localReply = generateLocalFallbackReply(message.trim(), context, language);
+  const localReply = generateLocalFallbackReply(message.trim(), context, responseLanguage);
   res.json({ reply: localReply });
 });
 

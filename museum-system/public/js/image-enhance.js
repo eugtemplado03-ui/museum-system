@@ -1,5 +1,6 @@
 // Lightweight client-side image sharpening using canvas convolution
 (function(){
+  // Apply a square convolution kernel to image pixels and return a new ImageData.
   function convolve(pixels, weights){
     const side = Math.round(Math.sqrt(weights.length));
     const half = Math.floor(side/2);
@@ -35,6 +36,7 @@
     return new ImageData(output, sw, sh);
   }
 
+  // Sharpen one eligible image through a canvas, skipping repeat and unreadable sources.
   function enhanceImageElement(img){
     if(!img || img.dataset.enhanced) return;
     const maxW = 1200;
@@ -62,6 +64,7 @@
     }
   }
 
+  // Enhance all marked images now or when their load event completes.
   function enhanceAll(){
     document.querySelectorAll('img.img-enhance').forEach(img=>{
       if(img.complete) enhanceImageElement(img);

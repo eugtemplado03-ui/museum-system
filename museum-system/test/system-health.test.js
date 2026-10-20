@@ -4,6 +4,7 @@ const assert = require('node:assert');
 test('System Endpoints Health Check', async (t) => {
   const baseUrl = 'http://localhost:3000';
 
+  // A quick smoke pass covers both static pages and API endpoints to catch missing routes or broken HTML shells early.
   const pages = [
     { path: '/', name: 'Landing Page' },
     { path: '/dashboard.html', name: 'Visitor Dashboard' },

@@ -1,3 +1,4 @@
+// Records daily Groq usage and the most recently observed provider rate limits.
 const mongoose = require('mongoose');
 
 const dailyUsageSchema = new mongoose.Schema({
@@ -37,6 +38,7 @@ const DailyUsage = mongoose.models.ApiDailyUsage ||
 const RateLimit = mongoose.models.ApiRateLimit ||
   mongoose.model('ApiRateLimit', rateLimitSchema);
 
+// Read a header from either Fetch Headers or a plain response-header object.
 function header(response, name) {
   if (!response?.headers) return null;
   const value = typeof response.headers.get === 'function'
@@ -45,10 +47,12 @@ function header(response, name) {
   return value === undefined || value === null || value === '' ? null : String(value);
 }
 
+// Convert provider usage values to non-negative integer counts.
 function finiteUsage(value) {
   return Number.isFinite(Number(value)) && Number(value) >= 0 ? Math.floor(Number(value)) : 0;
 }
 
+// Extract valid rate-limit headers, returning null when the response has none.
 function rateLimitSnapshot(response) {
   const values = {
     requestLimit: header(response, 'x-ratelimit-limit-requests'),
@@ -69,6 +73,7 @@ function rateLimitSnapshot(response) {
   return Object.values(values).some(value => value !== null) ? values : null;
 }
 
+// Increment the UTC daily usage bucket and refresh the latest Groq rate-limit snapshot.
 async function recordGroqUsage({ service, model, response = null, usage = null, audioCharacters = 0 }) {
   if (mongoose.connection.readyState !== 1) {
     throw new Error('API usage cannot be recorded while MongoDB is disconnected.');
@@ -125,6 +130,7 @@ async function recordGroqUsage({ service, model, response = null, usage = null, 
   }
 }
 
+// Aggregate recent daily usage by service and include the latest rate-limit metadata.
 async function getGroqUsage(days = 30) {
   if (mongoose.connection.readyState !== 1) {
     throw new Error('API usage is unavailable while MongoDB is disconnected.');
@@ -195,6 +201,7 @@ async function getGroqUsage(days = 30) {
   };
 }
 
+// Record usage without allowing telemetry failures to affect the API request.
 async function recordGroqUsageSafely(entry) {
   try {
     await recordGroqUsage(entry);

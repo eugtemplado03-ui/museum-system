@@ -1,6 +1,8 @@
+// Populate the shared site footer and load the sidebar controller when needed.
 (function(){
   const footer = document.getElementById('siteFooter') || (function(){ const f = document.createElement('footer'); f.id='siteFooter'; document.body.appendChild(f); return f; })();
   
+  // Load shared museum details, render footer links, and show a fallback on failure.
   async function loadFooter() {
     try {
       const res = await fetch('/api/museum-info');

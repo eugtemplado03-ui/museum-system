@@ -18,7 +18,7 @@ test('System Security & Hardening Test Suite', async (t) => {
   });
 
   await t.test('2. ReDoS / Regex Injection Immunity & Rate Limiter in Login', async () => {
-    // Malicious regex strings should not cause catastrophic backtracking or crash the server
+    // Malicious regex strings are intentionally short but hostile; this loop confirms the login endpoint fails fast instead of hanging.
     const redosPayloads = [
       '^.*$',
       '(a+)+$',
@@ -125,7 +125,7 @@ test('System Security & Hardening Test Suite', async (t) => {
   });
 
   await t.test('5. File Upload Extension Restrictions (MIME / Extension Guard)', async () => {
-    // First, login as admin to get a valid token
+    // The upload guard is only meaningful when the request is authenticated, so the test obtains a valid admin token first.
     const loginRes = await fetch(`${baseUrl}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

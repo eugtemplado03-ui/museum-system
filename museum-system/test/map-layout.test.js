@@ -16,6 +16,7 @@ test('map layout is public to read and admin-only to update', async () => {
     const app = express();
     app.use(express.json());
     app.use('/api/map-layout', mapLayoutRoutes);
+    // Public reads are allowed, but room offsets are only writable by admins; the sequence below verifies that boundary explicitly.
     const adminToken = jwt.sign({ id: 'admin-1', role: 'admin' }, JWT_SECRET);
 
     const initial = await request(app).get('/api/map-layout');

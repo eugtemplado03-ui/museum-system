@@ -1,3 +1,4 @@
+// Stores and resolves the Groq API key, preferring an explicit dashboard override.
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const { JWT_SECRET } = require('../middleware/auth');
@@ -22,6 +23,7 @@ const chatApiKeySchema = new mongoose.Schema({
 
 const ChatApiKey = mongoose.models.ChatApiKey || mongoose.model('ChatApiKey', chatApiKeySchema);
 
+// Encrypt the configured key with a fresh IV for authenticated storage.
 function encryptKey(apiKey) {
   const iv = crypto.randomBytes(12);
   const cipher = crypto.createCipheriv('aes-256-gcm', ENCRYPTION_KEY, iv);
@@ -36,6 +38,7 @@ function encryptKey(apiKey) {
   };
 }
 
+// Verify and decrypt a saved key record.
 function decryptKey(record) {
   const decipher = crypto.createDecipheriv(
     'aes-256-gcm',
@@ -49,6 +52,7 @@ function decryptKey(record) {
   ]).toString('utf8');
 }
 
+// Prefer the saved dashboard key/disable when MongoDB is available; otherwise use the environment key.
 async function getGroqConfiguration() {
   const environmentKey = (process.env.GROQ_API_KEY || '').trim();
   if (mongoose.connection.readyState === 0) {
@@ -78,6 +82,7 @@ async function getGroqConfiguration() {
   };
 }
 
+// Save the dashboard key as an encrypted override and return its resolved status.
 async function setGroqApiKey(apiKey) {
   const encrypted = encryptKey(apiKey);
   await ChatApiKey.findOneAndUpdate(
@@ -88,6 +93,7 @@ async function setGroqApiKey(apiKey) {
   return getGroqConfiguration();
 }
 
+// Disable the key and erase the stored ciphertext while retaining an explicit override.
 async function disableGroqApiKey() {
   await ChatApiKey.findOneAndUpdate(
     { id: KEY_ID },
@@ -100,11 +106,13 @@ async function disableGroqApiKey() {
   return getGroqConfiguration();
 }
 
+// Remove the dashboard override so the environment key can be used again.
 async function useEnvironmentGroqApiKey() {
   await ChatApiKey.deleteOne({ id: KEY_ID });
   return getGroqConfiguration();
 }
 
+// Expose configuration metadata without returning the API key itself.
 function getGroqApiKeyStatus(configuration) {
   return {
     configured: Boolean(configuration.apiKey),

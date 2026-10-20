@@ -1,3 +1,4 @@
+// Persists carousel slides and their singleton display settings.
 const mongoose = require('mongoose');
 const { nanoid } = require('nanoid');
 
@@ -87,6 +88,7 @@ const DEFAULT_SLIDES = [
   }
 ];
 
+// Populate the default carousel only when no slides have been saved yet.
 async function ensureSeed() {
   const count = await CarouselSlide.countDocuments();
   if (count === 0) {
@@ -97,6 +99,7 @@ async function ensureSeed() {
   }
 }
 
+// Return slides in display order, optionally including inactive entries.
 async function all(includeInactive = false) {
   await ensureSeed();
   const query = includeInactive ? {} : { active: { $ne: false } };
@@ -104,10 +107,12 @@ async function all(includeInactive = false) {
   return items.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 }
 
+// Find a slide by its public ID.
 async function findById(id) {
   return await CarouselSlide.findOne({ id }).lean();
 }
 
+// Create a slide, using the current count as its default display position.
 async function create(payload) {
   const count = await CarouselSlide.countDocuments();
   const slide = new CarouselSlide({
@@ -126,6 +131,7 @@ async function create(payload) {
   return slide.toObject();
 }
 
+// Update supplied slide fields while preserving unspecified values.
 async function update(id, payload) {
   const existing = await CarouselSlide.findOne({ id });
   if (!existing) return null;
@@ -144,11 +150,13 @@ async function update(id, payload) {
   return existing.toObject();
 }
 
+// Delete a slide and report whether it existed.
 async function remove(id) {
   const res = await CarouselSlide.deleteOne({ id });
   return res.deletedCount > 0;
 }
 
+// Assign sequential display positions in the order provided by the caller.
 async function reorder(orderedIds) {
   if (!Array.isArray(orderedIds)) return false;
   for (let i = 0; i < orderedIds.length; i++) {
@@ -157,6 +165,7 @@ async function reorder(orderedIds) {
   return true;
 }
 
+// Replace saved slides with the built-in defaults and return the resulting list.
 async function resetToDefaults() {
   await CarouselSlide.deleteMany({});
   for (const slide of DEFAULT_SLIDES) {
@@ -166,6 +175,7 @@ async function resetToDefaults() {
   return await all(true);
 }
 
+// Read the singleton autoplay settings, creating defaults on first access.
 async function getSettings() {
   let settings = await CarouselSettings.findOne({ id: 'singleton' }).lean();
   if (!settings) {
@@ -176,6 +186,7 @@ async function getSettings() {
   return settings;
 }
 
+// Update the singleton autoplay settings, accepting only intervals from 1–60 seconds.
 async function updateSettings(payload) {
   let settings = await CarouselSettings.findOne({ id: 'singleton' });
   if (!settings) {

@@ -1,3 +1,4 @@
+// Reads and updates the singleton record that supplies public museum information.
 const mongoose = require('mongoose');
 
 const museumInfoSchema = new mongoose.Schema({
@@ -81,6 +82,7 @@ const DEFAULT_INFO = {
   ]
 };
 
+// Return stored museum details combined with defaults for older records.
 async function getInfo() {
   const storedInfo = await MuseumInfo.findOne({ id: 'singleton' }).lean();
   if (!storedInfo) {
@@ -91,6 +93,7 @@ async function getInfo() {
   return { ...DEFAULT_INFO, ...storedInfo };
 }
 
+// Apply supplied fields to the singleton record, backfilling defaults for older installs.
 async function updateInfo(payload) {
   const storedInfo = await MuseumInfo.findOne({ id: 'singleton' }).lean();
   const info = storedInfo

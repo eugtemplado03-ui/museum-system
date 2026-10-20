@@ -1,9 +1,11 @@
+// Public program reads and authenticated program creation, updates, and deletion.
 const express = require('express');
 const programs = require('../db/programs');
 const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
+// Require a non-empty title for program creation and updates.
 function validate(body) {
   const errors = [];
   if (!body.title || !body.title.trim()) errors.push('Title is required.');

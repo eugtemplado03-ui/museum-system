@@ -1,9 +1,11 @@
+// Copies exhibit map fields from the local catalog into matching MongoDB records.
 require('dotenv').config();
 const mongoose = require('mongoose');
 const fs = require('fs');
 const path = require('path');
 const { Exhibit } = require('../db/exhibits');
 
+// Synchronize floor, pin, zone, and location values by exhibit code.
 async function sync() {
   try {
     if (!process.env.MONGODB_URI) {

@@ -48,6 +48,7 @@ async function run() {
   await send('Page.enable');
   await send('Runtime.enable');
 
+  // The gate logic is viewport-sensitive, so a phone-sized browser is used before the scanned-link flow runs.
   // Mobile viewport: iPhone 14
   await send('Emulation.setDeviceMetricsOverride', {
     width: 390,
@@ -56,6 +57,7 @@ async function run() {
     mobile: true
   });
 
+  // This first pass simulates a visitor landing on a scanned exhibit link before any gate flow has been completed.
   // TEST 1: Unauthenticated user opens /exhibit.html?code=EX-001
   console.log('1. Testing Unauthenticated Scanned Link Access (/exhibit.html?code=EX-001)...');
   await send('Page.navigate', { url: 'http://localhost:3000/exhibit.html?code=EX-001' });

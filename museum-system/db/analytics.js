@@ -1,3 +1,4 @@
+// Stores and summarizes exhibit scan and view activity.
 const mongoose = require('mongoose');
 const { nanoid } = require('nanoid');
 
@@ -12,6 +13,7 @@ const scanEventSchema = new mongoose.Schema({
 
 const ScanEvent = mongoose.models.ScanEvent || mongoose.model('ScanEvent', scanEventSchema);
 
+// Persist one exhibit interaction and trim the collection to its retention cap.
 async function record(exhibitId, source) {
   const event = new ScanEvent({
     exhibitId,
@@ -30,10 +32,12 @@ async function record(exhibitId, source) {
   }
 }
 
+// Return all retained interaction records for aggregation.
 async function all() {
   return await ScanEvent.find({}).lean();
 }
 
+// Group retained interactions by exhibit, splitting scans from ordinary views.
 async function summaryByExhibit() {
   const events = await all();
   const map = new Map();
@@ -46,11 +50,13 @@ async function summaryByExhibit() {
   return Array.from(map.values()).sort((a, b) => b.total - a.total);
 }
 
+// Return the newest interaction records, defaulting to the latest 25.
 async function recent(limit) {
   const events = await ScanEvent.find({}).sort({ _id: -1 }).limit(Math.max(1, limit || 25)).lean();
   return events;
 }
 
+// Build one scan/view count per calendar day for the requested period.
 async function dailyStats(days = 30) {
   const events = await all();
   const now = Date.now();
@@ -78,6 +84,7 @@ async function dailyStats(days = 30) {
   return result;
 }
 
+// Count retained events overall and within the rolling 7-day and 24-hour windows.
 async function totals() {
   const events = await all();
   const last7 = events.filter(e => Date.now() - new Date(e.at).getTime() <= 7 * 24 * 60 * 60 * 1000);

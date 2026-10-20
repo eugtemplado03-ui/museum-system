@@ -1,3 +1,4 @@
+// Stores exhibit ratings and produces visitor-facing and administrative summaries.
 const mongoose = require('mongoose');
 const { nanoid } = require('nanoid');
 // We need to require the Mongoose model for Exhibit to fetch exhibits in topRatedExhibits
@@ -16,11 +17,13 @@ const ratingSchema = new mongoose.Schema({
 
 const Rating = mongoose.models.Rating || mongoose.model('Rating', ratingSchema);
 
+// Return an exhibit's ratings with the newest submissions first.
 async function forExhibit(exhibitId) {
   const ratings = await Rating.find({ exhibitId }).lean();
   return ratings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }
 
+// Compute the rounded average and count for one exhibit.
 async function summaryForExhibit(exhibitId) {
   const ratings = await forExhibit(exhibitId);
   if (ratings.length === 0) return { average: null, count: 0 };
@@ -28,6 +31,7 @@ async function summaryForExhibit(exhibitId) {
   return { average: Math.round((sum / ratings.length) * 10) / 10, count: ratings.length };
 }
 
+// Create or replace one visitor's rating for an exhibit.
 async function submit(visitorId, exhibitId, rating, comment, visitorName) {
   const name = (visitorName || '').trim().slice(0, 50) || 'Visitor';
   
@@ -52,6 +56,7 @@ async function submit(visitorId, exhibitId, rating, comment, visitorName) {
   return record.toObject();
 }
 
+// Enrich exhibits with ratings and representative reviews, then rank them.
 async function topRatedExhibits(limit = 6) {
   const allExhibits = await Exhibit.find({}).lean();
   
@@ -81,11 +86,13 @@ async function topRatedExhibits(limit = 6) {
   return enriched.slice(0, limit);
 }
 
+// Return every rating for the authenticated admin view, newest first.
 async function allForAdmin() {
   const ratings = await Rating.find({}).lean();
   return ratings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }
 
+// Delete a rating by its public ID and report whether it existed.
 async function remove(id) {
   const result = await Rating.deleteOne({ id });
   return result.deletedCount > 0;

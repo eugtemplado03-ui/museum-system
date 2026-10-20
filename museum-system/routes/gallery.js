@@ -1,3 +1,4 @@
+// Public gallery reads and authenticated gallery media management.
 const express = require('express');
 const gallery = require('../db/gallery');
 const { requireAuth } = require('../middleware/auth');

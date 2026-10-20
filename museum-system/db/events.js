@@ -1,3 +1,4 @@
+// Persistence helpers for museum events and their associated media.
 const mongoose = require('mongoose');
 const { nanoid } = require('nanoid');
 
@@ -16,6 +17,7 @@ const eventSchema = new mongoose.Schema({
 
 const Event = mongoose.models.Event || mongoose.model('Event', eventSchema);
 
+// Accept both the current image-path array and the legacy single-path value.
 function normalizeImagePaths(value) {
   if (!value) return [];
   if (Array.isArray(value)) return value.filter(Boolean).map(String);
@@ -23,6 +25,7 @@ function normalizeImagePaths(value) {
   return [];
 }
 
+// List events with dated entries first and newest dates at the top.
 async function all() {
   const events = await Event.find({}).lean();
   return events.sort((a, b) => {
@@ -34,10 +37,12 @@ async function all() {
   });
 }
 
+// Look up an event by its public ID.
 async function findById(id) {
   return await Event.findOne({ id }).lean();
 }
 
+// Create an event and keep the legacy primary-image field in sync with imagePaths.
 async function create(payload) {
   const paths = normalizeImagePaths(payload.imagePaths ?? payload.imagePath);
   const event = new Event({
@@ -53,6 +58,7 @@ async function create(payload) {
   return event.toObject();
 }
 
+// Update supplied event fields and synchronize both image representations.
 async function update(id, payload) {
   const existing = await Event.findOne({ id });
   if (!existing) return null;
@@ -73,6 +79,7 @@ async function update(id, payload) {
   return existing.toObject();
 }
 
+// Delete an event and report whether it existed.
 async function remove(id) {
   const result = await Event.deleteOne({ id });
   return result.deletedCount > 0;

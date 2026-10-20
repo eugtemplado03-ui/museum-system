@@ -1,4 +1,6 @@
+// Fill page-specific museum information fields and text lists from the shared API.
 (function () {
+  // Replace a container with non-empty text entries, hiding it when no entries remain.
   function renderTextLines(container, value, tagName) {
     const values = Array.isArray(value) ? value : String(value || '').split(/\r?\n/);
     container.replaceChildren();
@@ -10,6 +12,7 @@
     if (!container.childElementCount) container.hidden = true;
   }
 
+  // Populate data-bound page fields and lists from the museum-info endpoint.
   async function loadMuseumContent() {
     try {
       const response = await fetch('/api/museum-info');

@@ -47,6 +47,7 @@ test('API Management protects, encrypts, and updates built-in and custom provide
     app.use(express.json());
     app.use('/api/admin', adminRoutes);
     app.use('/api/chat', chatRoutes);
+    // These assertions validate the admin gate and provider settings flow before the mocked Groq calls are exercised.
     const adminToken = jwt.sign({ id: 'api-admin', role: 'admin' }, JWT_SECRET);
     const visitorToken = jwt.sign({ id: 'api-visitor', role: 'visitor' }, JWT_SECRET);
 
@@ -81,6 +82,7 @@ test('API Management protects, encrypts, and updates built-in and custom provide
     assert.equal(JSON.stringify(savedGroq.body).includes('managed-groq-test-secret'), false);
     assert.equal((await chatApiKey.getGroqConfiguration()).apiKey, 'managed-groq-test-secret');
 
+    // Route behavior is validated with a mocked Groq response so malformed, rate-limited, and failed upstream calls are all exercised in one test.
     const originalFetch = global.fetch;
     let fetchMode = 'success';
     global.fetch = async (url, options) => {

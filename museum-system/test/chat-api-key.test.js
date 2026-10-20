@@ -21,6 +21,7 @@ test('Groq API key settings are admin-only, encrypted, and removable', async () 
     await mongoose.connect(mongoServer.getUri());
     await chatApiKey.ChatApiKey.deleteMany({});
 
+    // This check exercises the permission and encryption flow around the Groq key without leaving a real secret in the database.
     const app = express();
     app.use(express.json());
     app.use('/api/admin', adminRoutes);

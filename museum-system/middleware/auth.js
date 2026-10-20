@@ -1,3 +1,4 @@
+// Provides JWT verification and administrator-role authorization middleware.
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
@@ -13,6 +14,7 @@ if (!JWT_SECRET || JWT_SECRET === 'change-this-secret-in-production') {
   }
 }
 
+// Verify the bearer token and attach its claims to the request.
 function requireAuth(req, res, next) {
   const header = req.headers.authorization || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
@@ -28,6 +30,7 @@ function requireAuth(req, res, next) {
   }
 }
 
+// Require a valid session whose token claims identify an administrator.
 function requireAdmin(req, res, next) {
   requireAuth(req, res, () => {
     if (!req.user || req.user.role !== 'admin') {

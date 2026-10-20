@@ -1,3 +1,4 @@
+// Manages dashboard and environment API credentials, keeping saved secrets encrypted.
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const { encryptCredential, decryptCredential } = require('./api-credential-encryption');
@@ -14,6 +15,7 @@ const apiCredentialSchema = new mongoose.Schema({
 
 const ApiCredential = mongoose.models.ApiCredential || mongoose.model('ApiCredential', apiCredentialSchema);
 
+// Read complete Cloudinary credentials from the deployment environment.
 function getEnvironmentCloudinaryConfiguration() {
   const credentials = {
     cloudName: (process.env.CLOUDINARY_CLOUD_NAME || '').trim(),
@@ -28,6 +30,7 @@ function getEnvironmentCloudinaryConfiguration() {
   };
 }
 
+// Prefer dashboard settings when MongoDB is connected; otherwise resolve from environment variables.
 async function getCloudinaryConfiguration() {
   const environment = getEnvironmentCloudinaryConfiguration();
   if (mongoose.connection.readyState !== 1) {
@@ -57,6 +60,7 @@ async function getCloudinaryConfiguration() {
   return { ...environment, environmentConfigured: environment.configured };
 }
 
+// Encrypt and persist dashboard-managed Cloudinary credentials.
 async function saveCloudinaryConfiguration(credentials) {
   const encrypted = encryptCredential(JSON.stringify(credentials));
   await ApiCredential.findOneAndUpdate(
@@ -74,6 +78,7 @@ async function saveCloudinaryConfiguration(credentials) {
   return getCloudinaryConfiguration();
 }
 
+// Disable Cloudinary and remove the saved secret without changing environment variables.
 async function disableCloudinaryConfiguration() {
   await ApiCredential.findOneAndUpdate(
     { id: 'cloudinary' },
@@ -86,11 +91,13 @@ async function disableCloudinaryConfiguration() {
   return getCloudinaryConfiguration();
 }
 
+// Remove the dashboard override so environment credentials become active again.
 async function useEnvironmentCloudinaryConfiguration() {
   await ApiCredential.deleteOne({ id: 'cloudinary' });
   return getCloudinaryConfiguration();
 }
 
+// List custom providers without selecting or returning their encrypted keys.
 async function listCustomProviders() {
   const providers = await ApiCredential.find({ id: /^custom-/ })
     .select('id name disabled updatedAt')
@@ -105,6 +112,7 @@ async function listCustomProviders() {
   }));
 }
 
+// Create or replace a custom provider key, returning only its non-secret metadata.
 async function saveCustomProvider(name, apiKey, id = null) {
   const isNew = id === null;
   const providerId = isNew ? `custom-${crypto.randomUUID()}` : id;
@@ -138,6 +146,7 @@ async function saveCustomProvider(name, apiKey, id = null) {
   };
 }
 
+// Delete a custom provider after validating that its ID has the expected format.
 async function removeCustomProvider(id) {
   if (typeof id !== 'string' || !/^custom-[a-f0-9-]{36}$/.test(id)) return false;
   const result = await ApiCredential.deleteOne({ id });

@@ -1,6 +1,8 @@
+// Persistence and check-in helpers for visitor passes and visit statistics.
 const mongoose = require('mongoose');
 const { nanoid } = require('nanoid');
 
+// Generate a six-character pass code that avoids visually ambiguous characters.
 function generateVisitorCode() {
   const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
   let code = '';
@@ -34,6 +36,7 @@ const visitorSchema = new mongoose.Schema({
 
 const Visitor = mongoose.models.Visitor || mongoose.model('Visitor', visitorSchema);
 
+// Filter visitor records and sort them by visit date/time, newest first.
 async function all(filter = {}) {
   let query = {};
   
@@ -74,10 +77,12 @@ async function all(filter = {}) {
   });
 }
 
+// Look up a visitor record by its public ID.
 async function findById(id) {
   return await Visitor.findOne({ id }).lean();
 }
 
+// Return the current date and time in museum-local time, with a UTC fallback.
 function getPhilippineDateTime() {
   const now = new Date();
   try {
@@ -89,6 +94,7 @@ function getPhilippineDateTime() {
   }
 }
 
+// Create a visitor record with normalized fields and local-time defaults.
 async function create(payload) {
   const ph = getPhilippineDateTime();
   const defaultDate = ph.date;
@@ -119,6 +125,7 @@ async function create(payload) {
   return visitor.toObject();
 }
 
+// Find the newest visitor matching a pass code, stored ID, or case variant.
 async function findByCode(code) {
   if (!code || typeof code !== 'string') return null;
   const clean = code.trim().toUpperCase();
@@ -132,6 +139,7 @@ async function findByCode(code) {
   }).sort({ createdAt: -1 }).lean();
 }
 
+// Create a new visit for an existing pass holder using the current local date/time.
 async function quickCheckin(code) {
   const existing = await findByCode(code);
   if (!existing) return null;
@@ -165,6 +173,7 @@ async function quickCheckin(code) {
   return visitor.toObject();
 }
 
+// Update supplied visitor fields and refresh the modification timestamp.
 async function update(id, payload) {
   const existing = await Visitor.findOne({ id });
   if (!existing) return null;
@@ -190,11 +199,13 @@ async function update(id, payload) {
   return existing.toObject();
 }
 
+// Delete a visitor record and report whether it existed.
 async function remove(id) {
   const result = await Visitor.deleteOne({ id });
   return result.deletedCount > 0;
 }
 
+// Aggregate visit and visitor counts by date window, group, purpose, and status.
 async function stats() {
   const list = await Visitor.find({}).lean();
   const today = new Date().toISOString().slice(0, 10);

@@ -327,6 +327,7 @@
       let autoPlayTimer = null;
       let isPaused = false;
 
+      // Start the slide-advance interval unless autoplay is disabled or paused.
       function startAutoPlay() {
         stopAutoPlay();
         if (total <= 1) return;
@@ -337,6 +338,7 @@
         }, AUTOPLAY_INTERVAL);
       }
 
+      // Stop the active slide-advance interval.
       function stopAutoPlay() {
         if (autoPlayTimer) {
           clearInterval(autoPlayTimer);
@@ -344,6 +346,7 @@
         }
       }
 
+      // Restart autoplay after user navigation or a pause.
       function restartAutoPlay() {
         stopAutoPlay();
         startAutoPlay();
@@ -353,6 +356,7 @@
       carousel._startAutoPlay = startAutoPlay;
       carousel._restartAutoPlay = restartAutoPlay;
 
+      // Update the active slide, navigation controls, and position of the track.
       function updateSlide(index, animate = true) {
         currentIndex = (index + total) % total;
         carousel.dataset.slide = currentIndex;

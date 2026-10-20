@@ -3,6 +3,7 @@
  * Displays photos in a full-screen view with Next/Prev buttons, dots, counter, swipe gestures, and zoom.
  */
 document.addEventListener('DOMContentLoaded', () => {
+  // Create the shared overlay and expose methods for opening, closing, and paging it.
   function createLightbox() {
     const overlay = document.createElement('div');
     overlay.className = 'lightbox-overlay';
@@ -34,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let album = [];
     let currentIndex = 0;
 
+    // Render the selected image and keep navigation controls in sync with the album.
     function renderCurrent(animate = true) {
       if (!album.length) return;
       const item = album[currentIndex];
@@ -70,12 +72,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    // Move to an album index, wrapping at either end.
     function goTo(index) {
       if (!album.length) return;
       currentIndex = (index + album.length) % album.length;
       renderCurrent();
     }
 
+    // Normalize a URL, item, or album into the viewer's state and display it.
     function show(items, initialIdx = 0) {
       if (typeof items === 'string') {
         album = [{ src: items, alt: '' }];
@@ -96,6 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.style.overflow = 'hidden';
     }
 
+    // Hide the overlay and release the page scroll lock.
     function hide() {
       overlay.classList.remove('open');
       setTimeout(() => {

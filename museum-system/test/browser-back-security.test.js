@@ -48,6 +48,7 @@ async function testBrowserBackSecurity() {
   await send('Page.enable');
   await send('Runtime.enable');
 
+  // The visitor flow is seeded first so the later browser-back regression can be measured against a real authenticated state.
   // STEP 1: Log in / Check in as Visitor
   console.log('1. Checking in as Visitor on gate page...');
   await send('Page.navigate', { url: 'http://localhost:3000/' });

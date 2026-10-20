@@ -7,6 +7,7 @@ const app = express();
 app.use(express.json());
 app.use('/api/tts', ttsRoutes);
 
+// These checks hit the translation layer directly without depending on a live external service.
 describe('TTS and Translation API', () => {
   it('GET /api/tts/status returns system configuration', async () => {
     const res = await request(app).get('/api/tts/status');

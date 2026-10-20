@@ -1,3 +1,4 @@
+// Configures local/Cloudinary media uploads with extension, MIME, and size checks.
 const multer = require('multer');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('cloudinary').v2;
@@ -39,6 +40,7 @@ const remoteStorage = new CloudinaryStorage({
 const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.mp4', '.webm', '.ogg', '.mov', '.m4v'];
 const DANGEROUS_EXTENSIONS = ['.html', '.htm', '.svg', '.xml', '.php', '.phtml', '.js', '.sh', '.exe', '.bat', '.cmd', '.py', '.msi', '.vbs', '.jsp'];
 
+// Reject unsafe extensions and mismatches between file extensions and MIME families.
 function fileFilter(req, file, cb) {
   const ext = path.extname(file.originalname || '').toLowerCase();
   
@@ -73,6 +75,7 @@ const localUpload = multer({ ...uploadOptions, storage: localStorage });
 const remoteUpload = multer({ ...uploadOptions, storage: remoteStorage });
 
 const upload = {
+  // Select storage from the latest Cloudinary settings before running Multer.
   single(fieldName) {
     return async (req, res, next) => {
       try {

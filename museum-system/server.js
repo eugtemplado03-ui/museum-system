@@ -1,3 +1,4 @@
+// Configures the museum API, static site, database startup, and deployment fallbacks.
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -133,6 +134,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Auto-seed initial catalog if database is empty on fresh deployment
+// Connect services and restore required data before accepting requests.
 async function startServer() {
   try {
     const mongoUri = process.env.MONGODB_URI;

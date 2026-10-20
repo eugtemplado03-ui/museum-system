@@ -1,9 +1,11 @@
+// Visitor-facing API for listing and changing exhibit favorites.
 const express = require('express');
 const favorites = require('../db/favorites');
 const exhibits = require('../db/exhibits');
 
 const router = express.Router();
 
+// Reject missing or implausibly short/long visitor identifiers before querying storage.
 function isValidVisitorId(id) {
   return typeof id === 'string' && id.length >= 6 && id.length <= 80;
 }

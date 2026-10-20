@@ -1,8 +1,10 @@
+// Applies the active Cloudinary credentials and exposes the configured client.
 const cloudinary = require('cloudinary').v2;
 
 let hasOverride = false;
 let activeCloudinary = null;
 
+// Normalize dashboard or environment credentials to the shape Cloudinary expects.
 function normalizeCredentials(credentials) {
   if (!credentials) return null;
   const cloudName = String(credentials.cloudName || '').trim();
@@ -12,6 +14,7 @@ function normalizeCredentials(credentials) {
   return { cloud_name: cloudName, api_key: apiKey, api_secret: apiSecret };
 }
 
+// Apply a credential override; null explicitly disables the configured client.
 function configureCloudinary(credentials) {
   const normalized = normalizeCredentials(credentials);
   hasOverride = true;
@@ -25,6 +28,7 @@ function configureCloudinary(credentials) {
   return cloudinary;
 }
 
+// Return the active client, lazily configuring it from environment variables if needed.
 function getCloudinary() {
   if (hasOverride) return activeCloudinary;
   if (!activeCloudinary) {

@@ -61,6 +61,7 @@ async function test() {
     expression: "sessionStorage.setItem('museum_visitor_checked_in', 'true'); localStorage.setItem('museum_visitor_checked_in', 'true');"
   });
 
+  // The workflow seeds visitor state and then exercises the same map interactions a returning visitor follows in the app.
   await send('Page.navigate', { url: 'http://localhost:3000/map.html' });
   // Wait for data to load completely
   await new Promise(r => setTimeout(r, 3000));

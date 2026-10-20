@@ -1,3 +1,4 @@
+// Shared browser API client for museum data, visitor identity, and admin requests.
 const Api = (() => {
   const TOKEN_KEY = 'museum_admin_token';
   const VISITOR_KEY = 'museum_visitor_id';
@@ -6,6 +7,7 @@ const Api = (() => {
   function setToken(t) { localStorage.setItem(TOKEN_KEY, t); }
   function clearToken() { localStorage.removeItem(TOKEN_KEY); }
 
+  // Reuse the browser's visitor identifier, creating and persisting one when needed.
   function getVisitorId() {
     let id = localStorage.getItem(VISITOR_KEY);
     if (!id) {
@@ -16,6 +18,7 @@ const Api = (() => {
   }
 
   let _staticDataCache = null;
+  // Load the bundled data file once so offline/static deployments can reuse it.
   async function getStaticData() {
     if (_staticDataCache) return _staticDataCache;
     const paths = ['data.json', './data.json', '/data.json', '/museum-system/data.json'];
@@ -31,6 +34,7 @@ const Api = (() => {
     return null;
   }
 
+  // Resolve supported read-only API routes against the bundled JSON dataset.
   async function fallbackStatic(path, method) {
     if (method && method !== 'GET') return null;
     const db = await getStaticData();
@@ -82,6 +86,7 @@ const Api = (() => {
     return null;
   }
 
+  // Send an API request with JSON/auth headers and use bundled data for failed GETs.
   async function request(path, opts = {}) {
     const method = (opts.method || 'GET').toUpperCase();
     const headers = opts.headers || {};

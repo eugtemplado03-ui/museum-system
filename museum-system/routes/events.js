@@ -1,9 +1,11 @@
+// Public event reads and authenticated event creation, updates, and deletion.
 const express = require('express');
 const events = require('../db/events');
 const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
+// Require a non-empty title for event creation and updates.
 function validate(body) {
   const errors = [];
   if (!body.title || !body.title.trim()) errors.push('Title is required.');

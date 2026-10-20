@@ -1,3 +1,4 @@
+// Public exhibit catalog and visitor interactions, plus authenticated catalog management.
 const express = require('express');
 const QRCode = require('qrcode');
 
@@ -10,6 +11,7 @@ const { upload } = require('../middleware/upload');
 
 const router = express.Router();
 
+// Build an absolute public exhibit URL using deployment proxy headers when present.
 function publicUrlForExhibit(req, code) {
   const rawProto = req.headers['x-forwarded-proto'] || req.protocol;
   const protocol = (typeof rawProto === 'string' && rawProto.includes(',')) ? rawProto.split(',')[0].trim() : rawProto;
@@ -18,6 +20,7 @@ function publicUrlForExhibit(req, code) {
   return `${base.replace(/\/$/, '')}/exhibit.html?code=${encodeURIComponent(code)}`;
 }
 
+// Ensure a title is present and register newly supplied categories before persistence.
 async function validatePayload(body) {
   const errors = [];
   if (!body.title || !body.title.trim()) errors.push('Title is required.');
@@ -31,6 +34,7 @@ async function validatePayload(body) {
   return errors;
 }
 
+// Add rating and favorite counts to an exhibit for visitor-facing responses.
 async function enrich(ex) {
   // If ratings/favorites modules are still sync during migration, await resolves them safely.
   // Once they are rewritten to Mongoose, they will naturally return Promises.

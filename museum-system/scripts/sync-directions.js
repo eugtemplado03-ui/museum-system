@@ -1,9 +1,11 @@
+// Synchronizes derived exhibit directions into local JSON data and MongoDB.
 require('dotenv').config();
 const mongoose = require('mongoose');
 const fs = require('fs');
 const path = require('path');
 const { Exhibit, KNOWN_EXHIBIT_DIRECTIONS, computeDefaultDirections } = require('../db/exhibits');
 
+// Refresh exhibit directions from the curated code map or category-based defaults.
 async function syncDirections() {
   console.log('--- SYNCING EXHIBIT DIRECTIONS ---');
 

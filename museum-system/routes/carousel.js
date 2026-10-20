@@ -1,3 +1,4 @@
+// Public carousel reads and authenticated slide/settings management endpoints.
 const express = require('express');
 const carousel = require('../db/carousel');
 const { requireAuth } = require('../middleware/auth');

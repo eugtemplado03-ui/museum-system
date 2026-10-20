@@ -1,5 +1,6 @@
 /* ================================================================
    Museo Sang Bata sa Negros — QR Exhibit System
+   Shared responsive and component styles for visitor and staff pages.
    Theme: museosangbata.org  (teal · white · orange)
    ================================================================ */
 
@@ -215,6 +216,7 @@ button { font-family: inherit; cursor: pointer; }
   box-shadow: 0 2px 10px rgba(247,148,29,0.4);
 }
 
+/* Keep the fixed top bar compact on small screens; navigation moves to the sidebar toggle. */
 @media (max-width: 860px) {
   .topbar .nav-links {
     display: none !important;

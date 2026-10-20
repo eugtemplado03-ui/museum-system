@@ -1,3 +1,4 @@
+// Encrypts API credentials at rest using the server's JWT secret as key material.
 const crypto = require('crypto');
 const { JWT_SECRET } = require('../middleware/auth');
 
@@ -9,6 +10,7 @@ const ENCRYPTION_KEY = Buffer.from(crypto.hkdfSync(
   32
 ));
 
+// Encrypt a credential with a fresh IV; the authentication tag travels with the record.
 function encryptCredential(value) {
   const iv = crypto.randomBytes(12);
   const cipher = crypto.createCipheriv('aes-256-gcm', ENCRYPTION_KEY, iv);
@@ -23,6 +25,7 @@ function encryptCredential(value) {
   };
 }
 
+// Authenticate and decrypt a credential record previously produced by encryptCredential.
 function decryptCredential(record) {
   const decipher = crypto.createDecipheriv(
     'aes-256-gcm',

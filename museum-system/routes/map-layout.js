@@ -1,3 +1,4 @@
+// Public floor-map layout reads and admin-only transform updates.
 const express = require('express');
 const mapLayout = require('../db/map-layout');
 const { requireAdmin } = require('../middleware/auth');
@@ -33,6 +34,7 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Accept only known map elements and bounded transforms in persisted layout updates.
 router.put('/', requireAdmin, async (req, res) => {
   const { roomOffsets } = req.body || {};
   if (!roomOffsets || typeof roomOffsets !== 'object' || Array.isArray(roomOffsets)) {

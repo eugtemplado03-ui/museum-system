@@ -49,7 +49,7 @@ async function testWelcomePage() {
   await send('Page.enable');
   await send('Runtime.enable');
 
-  // STEP 1: Verify elements on the landing page
+  // STEP 1: Verify elements on the landing page; this checks the homepage shell before any direct check-in flow is triggered.
   console.log('1. Checking page elements and content...');
   await send('Page.navigate', { url: 'http://localhost:3000/' });
   await new Promise(r => setTimeout(r, 1500));
@@ -145,7 +145,7 @@ async function testWelcomePage() {
   fs.writeFileSync(path.join(artifactDir, 'verified-welcome-direct-checkin.png'), Buffer.from(snap2.data, 'base64'));
   console.log('Saved verified-welcome-direct-checkin.png');
 
-  // STEP 4: Submit check-in and verify direct redirect to exhibit EX-001
+  // STEP 4: Submit check-in and verify direct redirect to exhibit EX-001; the route should land on the exhibit detail page instead of staying on the landing screen.
   console.log('4. Submitting check-in and verifying redirect to exhibit EX-001...');
   await send('Runtime.evaluate', {
     expression: `

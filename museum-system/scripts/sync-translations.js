@@ -1,9 +1,11 @@
+// Synchronizes curated exhibit descriptions into their MongoDB records by code.
 require('dotenv').config();
 const mongoose = require('mongoose');
 const fs = require('fs');
 const path = require('path');
 const { Exhibit } = require('../db/exhibits');
 
+// Copy available local translations while retaining existing database text as fallback.
 async function syncTranslations() {
   console.log('--- SYNCING EXHIBIT TRANSLATIONS TO MONGODB ATLAS ---');
 

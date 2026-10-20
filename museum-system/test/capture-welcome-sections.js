@@ -44,6 +44,7 @@ const os = require('os');
     ws.send(JSON.stringify({ id: curId, method: m, params: p }));
   });
 
+  // These screenshots freeze the landing page at each major section so layout regressions are easy to compare over time.
   await send('Page.enable');
   await send('Runtime.enable');
   await send('Page.navigate', { url: 'http://localhost:3000/' });

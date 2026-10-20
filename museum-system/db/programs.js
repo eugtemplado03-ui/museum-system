@@ -1,3 +1,4 @@
+// Persistence helpers for educational programs and their associated media.
 const mongoose = require('mongoose');
 const { nanoid } = require('nanoid');
 
@@ -16,6 +17,7 @@ const programSchema = new mongoose.Schema({
 
 const Program = mongoose.models.Program || mongoose.model('Program', programSchema);
 
+// Accept both current image arrays and legacy single-image values.
 function normalizeImagePaths(value) {
   if (!value) return [];
   if (Array.isArray(value)) return value.filter(Boolean).map(String);
@@ -23,15 +25,18 @@ function normalizeImagePaths(value) {
   return [];
 }
 
+// List programs alphabetically by title.
 async function all() {
   const programs = await Program.find({}).lean();
   return programs.sort((a, b) => a.title.localeCompare(b.title));
 }
 
+// Look up a program by its public ID.
 async function findById(id) {
   return await Program.findOne({ id }).lean();
 }
 
+// Create a program and mirror its first image into the legacy field.
 async function create(payload) {
   const paths = normalizeImagePaths(payload.imagePaths ?? payload.imagePath);
   const program = new Program({
@@ -47,6 +52,7 @@ async function create(payload) {
   return program.toObject();
 }
 
+// Update supplied program fields while preserving existing values for omitted fields.
 async function update(id, payload) {
   const existing = await Program.findOne({ id });
   if (!existing) return null;
@@ -67,6 +73,7 @@ async function update(id, payload) {
   return existing.toObject();
 }
 
+// Delete a program and report whether it existed.
 async function remove(id) {
   const result = await Program.deleteOne({ id });
   return result.deletedCount > 0;

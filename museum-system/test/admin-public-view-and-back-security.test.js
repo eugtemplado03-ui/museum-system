@@ -48,6 +48,7 @@ async function testAdminPublicViewAndBackSecurity() {
   await send('Page.enable');
   await send('Runtime.enable');
 
+  // The public-view regression is only visible in a narrow mobile layout, so the viewport is resized before the admin flow begins.
   // Set mobile device metrics to test mobile topbar button & floating dock
   await send('Emulation.setDeviceMetricsOverride', {
     width: 390,
@@ -56,6 +57,7 @@ async function testAdminPublicViewAndBackSecurity() {
     mobile: true
   });
 
+  // The first step creates a real visitor state so the later back-button regression can be reproduced accurately.
   // STEP 1: Check in as Visitor
   console.log('1. Checking in as Visitor...');
   await send('Page.navigate', { url: 'http://localhost:3000/' });

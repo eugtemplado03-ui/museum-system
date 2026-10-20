@@ -1,3 +1,4 @@
+// Imports collections from the embedded JSON store into the configured MongoDB database.
 require('dotenv').config();
 const mongoose = require('mongoose');
 const fs = require('fs');
@@ -15,6 +16,7 @@ const museumInfo = require('../db/museum-info');
 const analytics = require('../db/analytics');
 const favorites = require('../db/favorites');
 
+// Copy each populated JSON collection into MongoDB and close the connection afterward.
 async function migrate() {
   try {
     if (!process.env.MONGODB_URI) {

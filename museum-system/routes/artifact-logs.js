@@ -1,3 +1,4 @@
+// Authenticated API for listing, maintaining, and summarizing artifact records.
 const express = require('express');
 const artifactLogs = require('../db/artifact-logs');
 const { requireAuth } = require('../middleware/auth');
@@ -7,6 +8,7 @@ const router = express.Router();
 // All artifact log endpoints are Admin Only
 router.use(requireAuth);
 
+// Check the required artifact name before creating or updating a record.
 function validate(body) {
   const errors = [];
   if (!body.name || !body.name.trim()) {

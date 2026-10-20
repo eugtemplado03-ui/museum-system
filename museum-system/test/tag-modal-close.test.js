@@ -64,7 +64,7 @@ async function testTagModal() {
   await send('Page.navigate', { url: 'http://localhost:3000/admin.html' });
   await new Promise(r => setTimeout(r, 2500));
 
-  // Switch to Exhibits Catalog tab to populate exhibitsCache and render table
+  // The modal test needs a populated catalog table, so it switches to the exhibit view before opening the tag dialog.
   console.log('Switching to Exhibits Catalog section...');
   await send('Runtime.evaluate', {
     expression: `
@@ -130,7 +130,7 @@ async function testTagModal() {
   });
   console.log('Modal closed successfully after clicking Close button:', afterCloseCheck.result.value);
 
-  // Re-open and test corner close button
+  // The second close path checks the floating corner control, which is easy to miss in a UI-only regression.
   console.log('Re-opening modal to test corner close button (✕)...');
   await send('Runtime.evaluate', { expression: `openTagModal('EX-001');` });
   await new Promise(r => setTimeout(r, 500));

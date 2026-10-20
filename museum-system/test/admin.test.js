@@ -12,6 +12,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 
+// The auth checks run against a disposable Mongo instance so the route tests stay isolated from any local data.
 beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();
   const uri = mongoServer.getUri();
@@ -49,6 +50,7 @@ describe('Admin Authentication', () => {
     expect(response.status).toBe(401);
   });
 });
+// The JWT gate is the critical boundary here: the checks below confirm that admin-only responses stay locked behind a valid token.
 describe('Admin Routes', () => {
   it('should deny access without a token', async () => {
     const response = await request(app).get('/api/admin/me');

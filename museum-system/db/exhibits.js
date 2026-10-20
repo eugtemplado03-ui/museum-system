@@ -1,3 +1,4 @@
+// Persistence, normalization, and category/direction helpers for museum exhibits.
 const mongoose = require('mongoose');
 const { nanoid } = require('nanoid');
 
@@ -39,10 +40,12 @@ const DEFAULT_CATEGORIES = [
   'Character & Heritage', 'Environmental', 'Reading & Learning', 'Other'
 ];
 
+// Escape user-provided text before embedding it in a regular-expression query.
 function escapeRegex(str) {
   return String(str || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+// Accept both the current image-path array and the legacy single-path value.
 function normalizeImagePaths(value) {
   if (!value) return [];
   if (Array.isArray(value)) return value.filter(Boolean).map(String);
@@ -50,6 +53,7 @@ function normalizeImagePaths(value) {
   return [];
 }
 
+// Allocate the next sequential EX-NNN code from the current catalog.
 async function nextCode() {
   const exhibits = await Exhibit.find({}, { code: 1 }).lean();
   let max = 0;
@@ -60,6 +64,7 @@ async function nextCode() {
   return 'EX-' + String(max + 1).padStart(3, '0');
 }
 
+// Initialize category records from defaults and any categories already in the catalog.
 async function ensureCategories() {
   const count = await Category.countDocuments();
   if (count === 0) {
@@ -86,6 +91,7 @@ const KNOWN_EXHIBIT_DIRECTIONS = {
   'EX-011': "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located in the coastal mangrove habitat section."
 };
 
+// Supply museum-specific walking directions when an exhibit has none saved.
 function computeDefaultDirections(item) {
   if (!item) return '';
   if (item.code && KNOWN_EXHIBIT_DIRECTIONS[item.code.toUpperCase()]) {
@@ -124,6 +130,7 @@ try {
   curatedData = require('./data.json');
 } catch (e) {}
 
+// Convert a Mongoose/plain record and fill missing directions or curated translations.
 function enrichExhibit(doc) {
   if (!doc) return doc;
   const obj = typeof doc.toObject === 'function' ? doc.toObject() : { ...doc };
@@ -144,22 +151,26 @@ function enrichExhibit(doc) {
   return obj;
 }
 
+// Return exhibits in code order, enriched with derived directions and translations.
 async function all() {
   const exhibits = await Exhibit.find({}).lean();
   return exhibits.map(enrichExhibit).sort((a, b) => a.code.localeCompare(b.code));
 }
 
+// Find an exhibit by case-insensitive code and enrich its display fields.
 async function findByCode(code) {
   const safeCode = escapeRegex(code);
   const doc = await Exhibit.findOne({ code: { $regex: new RegExp(`^${safeCode}$`, 'i') } }).lean();
   return enrichExhibit(doc);
 }
 
+// Find an exhibit by ID and enrich its display fields.
 async function findById(id) {
   const doc = await Exhibit.findOne({ id }).lean();
   return enrichExhibit(doc);
 }
 
+// Create an exhibit with the next code and normalized map/media values.
 async function create(payload) {
   const paths = normalizeImagePaths(payload.imagePaths ?? payload.imagePath);
   const exhibit = new Exhibit({
@@ -188,6 +199,7 @@ async function create(payload) {
   return enrichExhibit(exhibit);
 }
 
+// Update supplied exhibit fields while preserving media paths and derived defaults.
 async function update(id, payload) {
   const existing = await Exhibit.findOne({ id });
   if (!existing) return null;
@@ -232,17 +244,20 @@ async function update(id, payload) {
   return enrichExhibit(existing);
 }
 
+// Delete an exhibit and report whether it existed.
 async function remove(id) {
   const result = await Exhibit.deleteOne({ id });
   return result.deletedCount > 0;
 }
 
+// Ensure category records exist, then return their names.
 async function categories() {
   await ensureCategories();
   const cats = await Category.find({}).lean();
   return cats.map(c => c.name);
 }
 
+// Add a trimmed category unless a case-insensitive match already exists.
 async function addCategory(category) {
   const value = String(category || '').trim();
   if (!value) return null;
@@ -255,6 +270,7 @@ async function addCategory(category) {
   return value;
 }
 
+// Rename a category, merging into an existing match and updating affected exhibits.
 async function updateCategory(oldCategory, newCategory) {
   const oldValue = String(oldCategory || '').trim();
   const newValue = String(newCategory || '').trim();
@@ -283,6 +299,7 @@ async function updateCategory(oldCategory, newCategory) {
   return newValue;
 }
 
+// Remove a category and move its exhibits to a remaining category or "Other".
 async function deleteCategory(category) {
   const value = String(category || '').trim();
   if (!value) return false;
@@ -311,6 +328,7 @@ async function deleteCategory(category) {
   return true;
 }
 
+// Ensure the category exists and assign all supplied exhibit IDs to it.
 async function assignExhibitsToCategory(category, exhibitIds) {
   const catName = String(category || '').trim();
   if (!catName) return false;
@@ -331,6 +349,7 @@ async function assignExhibitsToCategory(category, exhibitIds) {
   return true;
 }
 
+// Return the current exhibit count without loading exhibit records.
 async function countDocuments() {
   return await Exhibit.countDocuments();
 }

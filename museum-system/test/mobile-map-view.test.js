@@ -57,6 +57,7 @@ async function run() {
     mobile: true
   });
 
+  // Mobile map tests preload the visitor state so the route panel is visible without the standard gate flow.
   await send('Runtime.evaluate', {
     expression: `
       sessionStorage.setItem('museum_visitor_checked_in', 'true');
@@ -117,7 +118,7 @@ async function run() {
   fs.writeFileSync(path.join(artifactDir, 'verified-mobile-map-directions-expanded.png'), Buffer.from(snap2.data, 'base64'));
   console.log('Saved verified-mobile-map-directions-expanded.png');
 
-  // 3. Click collapse button to minimize directions
+  // 3. Click collapse button to minimize directions; this verifies the compact mobile drawer can be reduced without losing the route.
   await send('Runtime.evaluate', {
     expression: `
       document.getElementById('dirCollapseBtn').click();

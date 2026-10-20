@@ -8,6 +8,7 @@ test('museum info includes editable About, Contact, and Donate content', async (
   const mongoServer = await MongoMemoryServer.create();
   try {
     await mongoose.connect(mongoServer.getUri());
+    // Seed a legacy document first so the test proves the migration path preserves about, contact, and donate fields.
     await museumInfo.MuseumInfo.collection.insertOne({ id: 'singleton', name: 'Existing Museum' });
 
     const legacyInfo = await museumInfo.getInfo();

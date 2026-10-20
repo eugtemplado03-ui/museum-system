@@ -22,7 +22,7 @@ test('offline exhibit answers use the requested language description', async () 
     phone: '+63 900 000 0000',
     entranceFees: []
   });
-  exhibits.all = async () => [{
+  const exhibitRecord = {
     title: 'Story of Plastic',
     code: 'EX-008',
     category: 'Environmental',
@@ -31,7 +31,8 @@ test('offline exhibit answers use the requested language description', async () 
     description: 'This exhibit explains plastic pollution and its effects on marine life.',
     description_tl: 'Ipinapaliwanag ng eksibit na ito ang polusyon mula sa plastik at epekto nito sa yamang-dagat.',
     description_cb: 'Gipasabot sa pasundayag ang polusyon sa plastik ug ang epekto niini sa kinabuhi sa dagat.'
-  }];
+  };
+  exhibits.all = async () => [exhibitRecord];
   programs.all = async () => [];
   events.all = async () => [];
 
@@ -47,6 +48,15 @@ test('offline exhibit answers use the requested language description', async () 
     assert.ok(bisayaResponse.body.reply.includes('Gipasabot sa pasundayag ang polusyon sa plastik'));
     assert.ok(!bisayaResponse.body.reply.includes('This exhibit explains plastic pollution'));
 
+    exhibitRecord.description_cb = '';
+    const missingBisayaTranslation = await request(app)
+      .post('/api/chat')
+      .send({ message: 'Unsa ang Story of Plastic?', language: 'auto' });
+    assert.equal(missingBisayaTranslation.status, 200);
+    assert.ok(missingBisayaTranslation.body.reply.includes('Wala pay gihubad nga deskripsyon'));
+    assert.ok(!missingBisayaTranslation.body.reply.includes('This exhibit explains plastic pollution'));
+    exhibitRecord.description_cb = 'Gipasabot sa pasundayag ang polusyon sa plastik ug ang epekto niini sa kinabuhi sa dagat.';
+
     const tagalogResponse = await request(app)
       .post('/api/chat')
       .send({ message: 'Ano ang Story of Plastic?', language: 'auto' });
@@ -60,7 +70,10 @@ test('offline exhibit answers use the requested language description', async () 
       groqRequest = { url, body: JSON.parse(options.body) };
       return {
         ok: true,
-        json: async () => ({ choices: [{ message: { content: 'Ang deskripsyon gipahayag sa Bisaya.' } }] })
+        json: async () => ({
+          choices: [{ message: { content: 'Ang deskripsyon gipahayag sa Bisaya.' } }],
+          usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 }
+        })
       };
     };
     const aiResponse = await request(app)
@@ -69,9 +82,18 @@ test('offline exhibit answers use the requested language description', async () 
     assert.equal(aiResponse.status, 200);
     assert.equal(aiResponse.body.reply, 'Ang deskripsyon gipahayag sa Bisaya.');
     assert.equal(groqRequest.url, 'https://api.groq.com/openai/v1/chat/completions');
-    assert.match(groqRequest.body.messages[0].content, /detect the language from the latest user message itself/i);
-    assert.match(groqRequest.body.messages[0].content, /translate all explanatory content into the chosen language/i);
-    assert.match(groqRequest.body.messages[0].content, /Never leave a source description in English/i);
+    assert.match(groqRequest.body.messages[0].content, /Translate descriptive source data into Bisaya \/ Cebuano \/ Hiligaynon/i);
+    assert.match(groqRequest.body.messages[0].content, /Never copy an English description/i);
+    assert.match(groqRequest.body.messages[0].content, /REQUIRED OUTPUT LANGUAGE: Bisaya \/ Cebuano \/ Hiligaynon/i);
+    assert.match(groqRequest.body.messages[0].content, /Write every sentence of the answer in this language/i);
+    assert.ok(groqRequest.body.messages[0].content.includes(exhibitRecord.description_cb));
+    assert.ok(!groqRequest.body.messages[0].content.includes(exhibitRecord.description));
+
+    const selectedBisayaResponse = await request(app)
+      .post('/api/chat')
+      .send({ message: 'What does Story of Plastic explain?', language: 'bis' });
+    assert.equal(selectedBisayaResponse.status, 200);
+    assert.match(groqRequest.body.messages[0].content, /REQUIRED OUTPUT LANGUAGE: Bisaya \/ Cebuano \/ Hiligaynon/i);
   } finally {
     if (originalApiKey === undefined) delete process.env.GROQ_API_KEY;
     else process.env.GROQ_API_KEY = originalApiKey;

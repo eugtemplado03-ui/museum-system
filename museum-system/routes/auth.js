@@ -1,3 +1,4 @@
+// Handles administrator sign-in, session lookup, and password changes.
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');

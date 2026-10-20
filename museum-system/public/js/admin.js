@@ -1,3 +1,4 @@
+// Staff portal UI for authentication, museum content, collections, and visitor operations.
 const CATEGORIES = ['Marine & Nature','Touch & Play','Toys & Collections','Character & Heritage','Environmental','Reading & Learning','Other'];
 const CATEGORY_ICON = {
   'Marine & Nature':'&#128031;','Touch & Play':'&#9995;','Toys & Collections':'&#129692;',
@@ -8,6 +9,7 @@ function escapeHtml(str){
   return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
 
+// Show a brief status message and remove any previous toast before replacing it.
 function toast(msg, isError){
   document.querySelectorAll('.toast').forEach(t=>t.remove());
   const el = document.createElement('div');
@@ -17,6 +19,7 @@ function toast(msg, isError){
   setTimeout(()=>el.remove(), 2600);
 }
 
+// Add a dismissible modal overlay and enable the page's modal scroll state.
 function openModal(html){
   closeModal();
   const overlay = document.createElement('div');
@@ -27,6 +30,7 @@ function openModal(html){
   document.body.appendChild(overlay);
   document.body.classList.add('modal-open');
 }
+// Remove open modal overlays and restore normal page scrolling.
 function closeModal(){
   document.querySelectorAll('.modal-overlay, #modalOverlay').forEach(el => el.remove());
   document.body.classList.remove('modal-open');
@@ -39,6 +43,7 @@ if (!window._modalEscListenerAdded) {
   window._modalEscListenerAdded = true;
 }
 
+// Render an upload preview list and bind its replace/remove actions to the paths array.
 function renderImagePreviewList(paths, containerId){
   const container = document.getElementById(containerId);
   if(!container) return;
@@ -101,6 +106,7 @@ const app = document.getElementById('app');
 let exhibitsCache = [];
 let categoriesCache = [];
 
+// Fetch category names into the cache used by staff forms and navigation.
 async function loadCategories(){
   try{
     const res = await Api.listCategories();
@@ -110,6 +116,7 @@ async function loadCategories(){
   }
 }
 
+// Clear session state if browser history attempts to return from the authenticated portal.
 function setupAdminBackButtonSecurity() {
   if (window._adminBackSecurityInit) return;
   window._adminBackSecurityInit = true;
@@ -140,6 +147,7 @@ function setupAdminBackButtonSecurity() {
   });
 }
 
+// Validate the stored admin token before opening the dashboard.
 async function boot(){
   if(!Api.getToken()){
     renderLogin();
@@ -156,6 +164,7 @@ async function boot(){
   }
 }
 
+// Return the staff sign-in flow to the gate after clearing stale portal UI state.
 function renderLogin(){
   closeModal();
   sessionStorage.removeItem('museum_in_admin');
@@ -186,6 +195,7 @@ const SIDEBAR_ITEMS = [
   { id: 'apiManagement',  label: 'API Management',    icon: '🔌', group: 'System' },
 ];
 
+// Clear authenticated staff state and navigate back to the sign-in gate.
 function handleSignOut() {
   sessionStorage.removeItem('museum_in_admin');
   if (typeof Gate !== 'undefined') {
@@ -199,6 +209,7 @@ function handleSignOut() {
   renderLogin();
 }
 
+// Return accessible markup for the password visibility toggle used in admin forms.
 function passwordVisibilityToggle(inputId) {
   return `<button type="button" class="btn-toggle-password" data-password-target="${inputId}" aria-label="Show password" title="Show password">
     <svg class="eye-icon eye-show" xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -210,6 +221,7 @@ function passwordVisibilityToggle(inputId) {
   </button>`;
 }
 
+// Open the password-change form and submit the new credentials through the API.
 function openAdminPasswordModal() {
   openModal(`
     <h2>Change Admin Password</h2>
@@ -285,6 +297,7 @@ function openAdminPasswordModal() {
   });
 }
 
+// Render the active admin section and wire shared navigation controls.
 async function renderDashboard(){
   const toggleBtn = document.getElementById('sidebarToggleBtn');
   if (toggleBtn) toggleBtn.remove();
@@ -421,6 +434,7 @@ let adminCatalogSearch = '';
 let adminCatalogSort = 'code-asc';
 let adminCategorySearch = '';
 
+// Fetch dashboard summaries and populate the staff home tab and its charts.
 async function renderDashboardHomeTab(contentEl){
   contentEl.innerHTML = `<div class="empty-state" style="color:var(--ink-soft);"><p>Loading dashboard…</p></div>`;
   try{
@@ -825,6 +839,7 @@ async function renderDashboardHomeTab(contentEl){
   }
 }
 
+// Build the dashboard's exhibit-category chart and connect its category filters.
 function initDashboardPieChart(exhibits, categoryCounts, resources) {
   const canvas = document.getElementById('dashPieCanvas');
   if (!canvas) return;
@@ -841,6 +856,7 @@ function initDashboardPieChart(exhibits, categoryCounts, resources) {
     '#14b8a6', '#ec4899', '#8b5cf6', '#eab308', '#06b6d4', '#64748b'
   ];
 
+  // Rebuild the pie chart for the selected resource/category view.
   function buildChart(mode) {
     if (window.dashPieChartInstance) {
       window.dashPieChartInstance.destroy();
@@ -995,6 +1011,7 @@ function initDashboardPieChart(exhibits, categoryCounts, resources) {
   });
 }
 
+// Initialize the dashboard traffic chart from daily visitor and scan totals.
 function initDashboardTrafficChart(dailyData) {
   const canvas = document.getElementById('dashTrafficChart');
   if (!canvas) return;
@@ -1023,6 +1040,7 @@ function initDashboardTrafficChart(dailyData) {
     }
   }
 
+  // Re-render the traffic chart using the selected metric.
   function renderChart(metric) {
     if (window.dashTrafficChartInstance) {
       window.dashTrafficChartInstance.destroy();
@@ -1162,6 +1180,7 @@ function initDashboardTrafficChart(dailyData) {
   });
 }
 
+// Fetch exhibits and render the catalog with its search, filter, and edit actions.
 async function renderCatalogTab(contentEl){
   contentEl.innerHTML = `<div class="empty-state" style="color:var(--ink-soft);"><p>Loading catalog…</p></div>`;
   try{
@@ -1308,6 +1327,7 @@ async function renderCatalogTab(contentEl){
   tbody.querySelectorAll('[data-tag]').forEach(b=>b.addEventListener('click', ()=>openTagModal(b.dataset.tag)));
 }
 
+// Ask for confirmation before removing an exhibit, then refresh the catalog.
 function confirmDelete(id){
   if(!confirm('Delete this exhibit? This cannot be undone.')) return;
   Api.deleteExhibit(id)
@@ -1316,6 +1336,7 @@ function confirmDelete(id){
 }
 
 // ─── Exhibit QR Tag Modal (Admin Only) ───
+// Draw the exhibit placard and QR code to a downloadable canvas image.
 async function downloadPlacardCanvas(ex, qrUrl) {
   const btn = document.getElementById('downloadTagBtn');
   const originalText = btn ? btn.innerHTML : '';
@@ -1335,6 +1356,7 @@ async function downloadPlacardCanvas(ex, qrUrl) {
     const ctx = canvas.getContext('2d');
     ctx.scale(scale, scale);
 
+    // Draw a rounded canvas rectangle, falling back when roundRect is unavailable.
     function drawRRect(x, y, w, h, r, fill, stroke, strokeW = 1.5) {
       ctx.beginPath();
       if (ctx.roundRect) ctx.roundRect(x, y, w, h, r);
@@ -1354,6 +1376,7 @@ async function downloadPlacardCanvas(ex, qrUrl) {
       if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = strokeW; ctx.stroke(); }
     }
 
+    // Resolve an image URL to an HTMLImageElement, returning null if it cannot load.
     function loadImgSafe(url) {
       return new Promise((resolve) => {
         if (!url) return resolve(null);
@@ -1426,6 +1449,7 @@ async function downloadPlacardCanvas(ex, qrUrl) {
   }
 }
 
+// Show the selected exhibit's QR tag and offer its preview/download actions.
 function openTagModal(code){
   const ex = exhibitsCache.find(x => x.code === code || x.id === code);
   if (!ex) { toast('Exhibit not found', true); return; }
@@ -1536,6 +1560,7 @@ function openTagModal(code){
 }
 
 // ─── Interactive Floor Plan Pinpoint Picker Helpers ───
+// Describe the room containing an exhibit pin, based on its floor coordinates.
 function detectRoomFromCoords(floor, pinX, pinY) {
   if (pinX == null || pinY == null) return 'No pinpoint placed';
   const x = Number(pinX);
@@ -1561,6 +1586,7 @@ function detectRoomFromCoords(floor, pinX, pinY) {
   }
 }
 
+// Classify a floor-plan coordinate into the zone used for room labels.
 function detectRoomZone(floor, pinX, pinY) {
   if (pinX == null || pinY == null) return '';
   const x = Number(pinX);
@@ -1581,6 +1607,7 @@ function detectRoomZone(floor, pinX, pinY) {
   }
 }
 
+// Suggest a default floor-plan pin for a new exhibit's category.
 function getRoomCenterForCategory(cat) {
   const c = String(cat || '').toLowerCase();
   if (c.includes('toy')) {
@@ -1601,6 +1628,7 @@ function getRoomCenterForCategory(cat) {
   return { floor: 1, pinX: 50, pinY: 34, name: 'Marine & Nature Room' };
 }
 
+// Create SVG markers for other exhibits and the currently edited pin.
 function renderBlueprintPinsLayer(otherExhibits, activePin, showOtherPins) {
   let pinsSvg = '<g id="miniBlueprintPinsLayer">';
 
@@ -1673,6 +1701,7 @@ function renderBlueprintPinsLayer(otherExhibits, activePin, showOtherPins) {
   return pinsSvg;
 }
 
+// Render the compact floor-plan SVG and overlay its exhibit pin markers.
 function renderMiniBlueprintSvg(floor, otherExhibits = [], activePin = null, showOtherPins = true) {
   const pinsLayer = renderBlueprintPinsLayer(otherExhibits, activePin, showOtherPins);
 
@@ -1914,6 +1943,7 @@ function renderMiniBlueprintSvg(floor, otherExhibits = [], activePin = null, sho
 }
 
 // ─── Exhibit Edit/Create Modal (with map coordinates) ───
+// Open the exhibit editor with existing values or defaults for a new exhibit.
 function openEditModal(id, defaultCategory){
   const ex = id ? exhibitsCache.find(x=>x.id===id) : null;
   const isEdit = Boolean(ex);
@@ -2061,6 +2091,7 @@ function openEditModal(id, defaultCategory){
   const exClearVideoBtn = document.getElementById('ex-clear-video-btn');
   const exVideoPreview = document.getElementById('exVideoPreview');
 
+  // Refresh the edit form's video preview and clear-video control from its URL field.
   function refreshVideoPreview() {
     const val = (exVideoInput.value || '').trim();
     if (exClearVideoBtn) exClearVideoBtn.style.display = val ? '' : 'none';
@@ -2211,6 +2242,7 @@ function openEditModal(id, defaultCategory){
 
   let showOtherPins = true;
 
+  // Synchronize the floor selector, coordinate fields, and floor-plan pin display.
   function updatePinUi() {
     if (exFloor1Btn) exFloor1Btn.classList.toggle('active', currentFloor === 1);
     if (exFloor2Btn) exFloor2Btn.classList.toggle('active', currentFloor === 2);
@@ -2291,6 +2323,7 @@ function openEditModal(id, defaultCategory){
 
   let isPinDragging = false;
 
+  // Convert a pointer location on the floor plan into normalized SVG pin coordinates.
   function setPinFromPointer(e) {
     const svgEl = exFloorViewport ? exFloorViewport.querySelector('svg') : null;
     if (!svgEl) return;
@@ -2431,6 +2464,7 @@ function openEditModal(id, defaultCategory){
   });
 }
 
+// Fetch category/exhibit data and render category management controls.
 async function renderCategoriesTab(contentEl){
   contentEl.innerHTML = `<div class="empty-state" style="color:var(--ink-soft);"><p>Loading categories…</p></div>`;
   try{
@@ -2556,11 +2590,13 @@ async function renderCategoriesTab(contentEl){
   });
 }
 
+// Let staff assign exhibits to or remove them from the selected category.
 function openAssignExhibitsModal(category){
   const cat = String(category || '').trim();
   const currentAssigned = new Set(exhibitsCache.filter(e => String(e.category || '').trim().toLowerCase() === cat.toLowerCase()).map(e => e.id));
   let selectedIds = new Set(currentAssigned);
 
+  // Filter cached exhibits and redraw the selection rows for the assignment modal.
   const renderList = (filterText = '') => {
     const listEl = document.getElementById('assignList');
     if (!listEl) return;
@@ -2599,6 +2635,7 @@ function openAssignExhibitsModal(category){
     });
   };
 
+  // Reflect the current assignment selection count in the modal.
   const updateSelectedCount = () => {
     const countEl = document.getElementById('assignSelectedCount');
     if (countEl) countEl.textContent = `${selectedIds.size} exhibit${selectedIds.size === 1 ? '' : 's'} selected`;
@@ -2664,6 +2701,7 @@ function openAssignExhibitsModal(category){
   });
 }
 
+// Open the create/rename form for a catalog category.
 function openCategoryModal(category){
   const isEdit = Boolean(category);
   openModal(`
@@ -2686,6 +2724,7 @@ function openCategoryModal(category){
   document.getElementById('cancelCategory').addEventListener('click', closeModal);
 
   const saveBtn = document.getElementById('saveCategory');
+  // Validate and persist the category name, then refresh the category view.
   const doSave = async ()=>{
     const newName = input.value.trim();
     const errorEl = document.getElementById('catError');
@@ -2730,6 +2769,7 @@ function openCategoryModal(category){
   input.addEventListener('keydown', e=>{ if(e.key === 'Enter'){ e.preventDefault(); doSave(); } });
 }
 
+// Confirm category removal and explain its effect on the assigned exhibits.
 function openDeleteCategoryModal(category, count){
   openModal(`
     <h2>Delete category "${escapeHtml(category)}"?</h2>
@@ -2766,6 +2806,7 @@ function openDeleteCategoryModal(category, count){
   });
 }
 
+// Fetch museum activity metrics and render the analytics tab.
 async function renderAnalyticsTab(contentEl){
   contentEl.innerHTML = `<div class="empty-state" style="color:var(--ink-soft);"><p>Loading analytics…</p></div>`;
   let data;
@@ -2850,6 +2891,7 @@ async function renderAnalyticsTab(contentEl){
   }
 }
 
+// Draw the daily visitor/scan trend and bind its metric controls.
 function renderAnalyticsChart(daily) {
   const ctx = document.getElementById('analyticsChart');
   if (!ctx) return;
@@ -2924,6 +2966,7 @@ function renderAnalyticsChart(daily) {
 let adminFeedbackSearch = '';
 let adminFeedbackRating = 'all';
 
+// Fetch visitor ratings and render the feedback list and summary.
 async function renderFeedbackTab(contentEl){
   contentEl.innerHTML = `<div class="empty-state" style="color:var(--ink-soft);"><p>Loading feedback…</p></div>`;
   let ratings;
@@ -3018,6 +3061,7 @@ async function renderFeedbackTab(contentEl){
 }
 
 // ── Common CSV Download Helper ────────────────────────────────────
+// Trigger a browser download for prepared CSV content.
 function downloadCSV(csvContent, filename){
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -3044,6 +3088,7 @@ let adminHistoryVisitorsGroupFilter = 'All';
 let adminHistoryVisitorsPreset = 'past5'; // 'past5', 'past7', 'past30', 'all', 'custom'
 let adminHistoryVisitorsDate = '';
 
+// Return today's calendar date as YYYY-MM-DD in the museum's Manila timezone.
 function getPhilippineTodayIso() {
   const now = new Date();
   try {
@@ -3053,6 +3098,7 @@ function getPhilippineTodayIso() {
   }
 }
 
+// Return a YYYY-MM-DD date for the requested number of days before today.
 function getPastDateIso(daysAgo) {
   const d = new Date();
   d.setDate(d.getDate() - daysAgo);
@@ -3064,6 +3110,7 @@ function getPastDateIso(daysAgo) {
 }
 
 // ─── 1. Live Visitor Log (Today's Visitors) ───
+// Fetch today's check-ins and render the live visitor log and summary.
 async function renderVisitorsTab(contentEl){
   contentEl.innerHTML = `<div class="empty-state" style="color:var(--ink-soft);"><p>Loading live visitor logs…</p></div>`;
   try{
@@ -3291,6 +3338,7 @@ async function renderVisitorsTab(contentEl){
 }
 
 // ─── 2. Visitor History (Past 5 Days & Complete Historical Archive) ───
+// Fetch historical check-ins and render searchable/filterable visitor records.
 async function renderVisitorHistoryTab(contentEl){
   contentEl.innerHTML = `<div class="empty-state" style="color:var(--ink-soft);"><p>Loading visitor history archive…</p></div>`;
   try{
@@ -3556,6 +3604,7 @@ async function renderVisitorHistoryTab(contentEl){
 }
 
 // ─── 3. Read-Only Visitor Details Modal (Immutable Details) ───
+// Show a read-only detail view for the selected visitor record.
 function openVisitorDetailsModal(id){
   const v = visitorsCache.find(x => x.id === id);
   if(!v) return;
@@ -3676,6 +3725,7 @@ function openVisitorDetailsModal(id){
 }
 
 // ─── 4. Walk-in Front Desk Registration Modal (New Walk-in Only) ───
+// Open the front-desk form for registering a walk-in visitor group.
 function openVisitorWalkinModal(){
   const now = new Date();
   const defaultDate = getPhilippineTodayIso();
@@ -3840,6 +3890,7 @@ function openVisitorWalkinModal(){
   });
 }
 
+// Convert visitor records to CSV and download them using the shared helper.
 function exportVisitorsCSV(list, filename){
   const headers = ['Date', 'Time', 'Visitor / Contact Person', 'Group / Organization', 'Group Type', 'Pax', 'Purpose', 'Tour Guide', 'Phone', 'Email', 'Address', 'Sex', 'Age', 'Notes'];
   const rows = list.map(v => [
@@ -3863,6 +3914,7 @@ function exportVisitorsCSV(list, filename){
   toast('Visitor CSV exported');
 }
 
+// Open a print-ready visitor history report in a separate browser window.
 function printVisitorsHistoryReport(list) {
   const win = window.open('', '_blank', 'width=900,height=750');
   if (!win) { toast('Popup blocked. Please allow popups to print.', true); return; }
@@ -3945,6 +3997,7 @@ function printVisitorsHistoryReport(list) {
   win.document.close();
 }
 
+// Show the QR code visitors can scan to reach the check-in flow.
 function openVisitorCheckinQrModal(){
   openModal(`
     <h2>Visitor Check-in QR Code</h2>
@@ -3974,6 +4027,7 @@ let adminArtifactsCategoryFilter = 'All';
 let adminArtifactsConditionFilter = 'All';
 let adminArtifactsStatusFilter = 'All';
 
+// Fetch artifact inventory and render its filters, records, and action controls.
 async function renderArtifactsTab(contentEl){
   contentEl.innerHTML = `<div class="empty-state" style="color:var(--ink-soft);"><p>Loading artifacts inventory log…</p></div>`;
   try{
@@ -4200,6 +4254,7 @@ async function renderArtifactsTab(contentEl){
   }
 }
 
+// Export the selected artifact records as a downloadable CSV file.
 function exportArtifactsCSV(list){
   const headers = ['Accession #', 'Artifact Name', 'Category', 'Condition', 'Status', 'Location', 'Acquisition Date', 'Donor / Source', 'Estimated Value', 'Description', 'Notes'];
   const rows = list.map(a => [
@@ -4221,6 +4276,7 @@ function exportArtifactsCSV(list){
   toast('Artifacts inventory CSV exported');
 }
 
+// Open the artifact create/edit form and save changes through the API.
 function openArtifactModal(a){
   const isEdit = Boolean(a);
   const now = new Date();
@@ -4349,6 +4405,7 @@ function openArtifactModal(a){
 let programsCache = [];
 let adminProgramsSearch = '';
 
+// Fetch programs and render the staff management list.
 async function renderProgramsTab(contentEl){
   contentEl.innerHTML = `<div class="empty-state" style="color:var(--ink-soft);"><p>Loading programs…</p></div>`;
   try{
@@ -4420,6 +4477,7 @@ async function renderProgramsTab(contentEl){
   }));
 }
 
+// Open the program create/edit form using cached data when an ID is supplied.
 function openProgramModal(id){
   const p = id ? programsCache.find(x=>x.id===id) : null;
   let pendingImagePaths = p ? (Array.isArray(p.imagePaths) ? [...p.imagePaths] : (p.imagePath ? [p.imagePath] : [])) : [];
@@ -4541,6 +4599,7 @@ let eventsCache = [];
 let adminEventsSearch = '';
 let adminEventsTimeFilter = 'all';
 
+// Fetch events and render the staff management list.
 async function renderEventsTab(contentEl){
   contentEl.innerHTML = `<div class="empty-state" style="color:var(--ink-soft);"><p>Loading events…</p></div>`;
   try{
@@ -4643,6 +4702,7 @@ async function renderEventsTab(contentEl){
   }));
 }
 
+// Open the event create/edit form using cached data when an ID is supplied.
 function openEventModal(id){
   const ev = id ? eventsCache.find(x=>x.id===id) : null;
   let pendingImagePaths = ev ? (Array.isArray(ev.imagePaths) ? [...ev.imagePaths] : (ev.imagePath ? [ev.imagePath] : [])) : [];
@@ -4765,6 +4825,7 @@ let gallerySelection = new Set();
 let adminGallerySearch = '';
 let adminGalleryTypeFilter = 'all';
 
+// Fetch gallery entries and render the media management list.
 async function renderGalleryTab(contentEl){
   contentEl.innerHTML = `<div class="empty-state" style="color:var(--ink-soft);"><p>Loading gallery…</p></div>`;
   try{
@@ -4885,6 +4946,7 @@ async function renderGalleryTab(contentEl){
     catch(e){ toast(e.message, true); }
   }));
 
+  // Keep bulk-delete controls and selection counts in sync with selected entries.
   function updateGallerySelectionControls(){
     const deleteSelectedBtn = document.getElementById('deleteSelectedGalleryBtn');
     const selectionCountEl = document.getElementById('gallerySelectionCount');
@@ -4893,6 +4955,7 @@ async function renderGalleryTab(contentEl){
   }
 }
 
+// Open the gallery create/edit form and retain pending media selections.
 function openGalleryModal(id){
   const g = id ? galleryCache.find(x=>x.id===id) : null;
   let pendingImagePaths = g ? (Array.isArray(g.imagePaths) && g.imagePaths.length ? [...g.imagePaths] : (g.imagePath ? [g.imagePath] : [])) : [];
@@ -5017,6 +5080,7 @@ function openGalleryModal(id){
 
 boot();
 
+// Render the staff controls for configuring external-service API keys.
 async function renderApiManagementTab(contentEl) {
   let settings;
   try {
@@ -5041,6 +5105,7 @@ async function renderApiManagementTab(contentEl) {
     ? new Date(usageRateLimits.observedAt).toLocaleString()
     : '';
 
+  // Explain whether a provider uses managed credentials, environment config, or fallback.
   const describeSource = (current, service) => {
     if (current.source === 'dashboard') return 'Dashboard-managed credentials are active and encrypted at rest.';
     if (current.source === 'environment') return `Using server environment credentials${service === 'groq' ? ' (GROQ_API_KEY)' : ''}.`;
@@ -5180,10 +5245,12 @@ async function renderApiManagementTab(contentEl) {
     </div>
   `;
 
+  // Present a request error beside the relevant API credential form.
   const setError = (element, err) => {
     element.textContent = err.message || 'Could not save API credentials.';
     element.hidden = false;
   };
+  // Save the submitted provider credentials, refresh status, and report the outcome.
   const refresh = async successMessage => {
     await renderApiManagementTab(contentEl);
     if (successMessage) toast(successMessage);
@@ -5358,6 +5425,7 @@ async function renderApiManagementTab(contentEl) {
 }
 
 // ─── Museum Info ───
+// Load and render the museum-wide information editor.
 async function renderMuseumInfoTab(contentEl){
   let info = {};
   try{
@@ -5435,6 +5503,7 @@ async function renderMuseumInfoTab(contentEl){
   document.getElementById('editMuseumInfoBtn')?.addEventListener('click', ()=>openMuseumInfoModal(info));
 }
 
+// Open the museum-info form and submit updated public-facing details.
 function openMuseumInfoModal(info){
   const feesHtml = (info.entranceFees || []).map((f, i) => `
     <div class="form-field" style="display:flex; gap:8px; align-items:center;">
@@ -5613,6 +5682,7 @@ function openMuseumInfoModal(info){
 
 let _adminPreviewTimer = null;
 
+// Load carousel slides and settings, then render the staff preview and controls.
 async function renderCarouselTab(contentEl) {
   if (_adminPreviewTimer) {
     clearInterval(_adminPreviewTimer);
@@ -5779,6 +5849,7 @@ async function renderCarouselTab(contentEl) {
     const pDots = contentEl.querySelectorAll('#adminPreviewIndicators .carousel-dot');
     const pSlides = pStage ? pStage.querySelectorAll('.carousel-slide-item') : [];
 
+    // Show a carousel preview slide and update active slide indicators.
     function updatePreviewSlide(index) {
       if (!pSlides.length) return;
       previewIdx = (index + pSlides.length) % pSlides.length;
@@ -5796,6 +5867,7 @@ async function renderCarouselTab(contentEl) {
       }
     }
 
+    // Start automatic slide advancement for the admin carousel preview.
     function startPreviewTimer() {
       if (_adminPreviewTimer) clearInterval(_adminPreviewTimer);
       _adminPreviewTimer = setInterval(() => {
@@ -5936,6 +6008,7 @@ async function renderCarouselTab(contentEl) {
   });
 }
 
+// Open the carousel slide create/edit form and preserve its position in the list.
 function openSlideModal(slide, allSlides) {
   const isEditing = Boolean(slide);
   const title = isEditing ? 'Edit Carousel Slide' : 'Add New Carousel Slide';
@@ -6091,6 +6164,7 @@ function openSlideModal(slide, allSlides) {
   });
 }
 
+// Edit carousel autoplay settings and persist the selected interval/state.
 function openCarouselSettingsModal(settings) {
   const currentSec = Math.round((settings.autoplayInterval || 5000) / 1000);
 
@@ -6147,6 +6221,7 @@ function openCarouselSettingsModal(settings) {
   });
 }
 
+// Ask for confirmation before deleting a carousel slide.
 function confirmDeleteSlide(id, title) {
   openModal(`
     <h2>🗑️ Delete Carousel Slide</h2>

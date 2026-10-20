@@ -1,3 +1,4 @@
+// Creates resized JPEG derivatives for local catalog images and saves their paths to data.json.
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -9,16 +10,19 @@ const DATA_PATH = path.join(ROOT, 'db', 'data.json');
 const UPLOADS = path.join(ROOT, 'uploads');
 const OPT_DIR = path.join(UPLOADS, 'optimized');
 
+// Download a remote image and return its bytes for Sharp processing.
 async function fetchBuffer(url){
   const res = await fetch(url);
   if(!res.ok) throw new Error('Failed to fetch ' + url);
   return Buffer.from(await res.arrayBuffer());
 }
 
+// Derive a stable optimized filename from the original image source.
 function hashName(src){
   return crypto.createHash('sha1').update(src).digest('hex') + '.jpg';
 }
 
+// Resize, orient, sharpen, and encode image bytes as a JPEG at the destination.
 async function processBuffer(buf, outPath){
   await sharp(buf)
     .resize({ width: 1600, withoutEnlargement: true })
@@ -30,6 +34,7 @@ async function processBuffer(buf, outPath){
 
 function ensureDir(dir){ if(!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true }); }
 
+// Resolve a local or remote source, reuse existing derivatives, and return its public path.
 async function enhanceImage(src){
   if(!src) return null;
   try{
@@ -60,6 +65,7 @@ async function enhanceImage(src){
   }
 }
 
+// Optimize supported catalog image fields and persist successful derivative paths.
 async function enhanceAll(){
   const data = JSON.parse(fs.readFileSync(DATA_PATH, 'utf8'));
   // fields to check: exhibits[].imagePath, gallery[].imagePath, programs[].imagePath, events[].imagePath

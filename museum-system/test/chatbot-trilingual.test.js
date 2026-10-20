@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert');
 
 test('AI Chatbot Strict Language Matching (Tagalog -> Tagalog only, English -> English only, Bisaya -> Bisaya only)', async (t) => {
+  // This prompt matrix intentionally spans the supported languages so a one-language leak shows up as a specific mismatch.
   const baseUrl = 'http://localhost:3000';
 
   const testCases = [
@@ -61,6 +62,7 @@ test('AI Chatbot Strict Language Matching (Tagalog -> Tagalog only, English -> E
     }
   ];
 
+  // The loop keeps the assertions consistent while each case checks the exact language gate for one request.
   for (const tc of testCases) {
     await t.test(tc.name, async () => {
       const res = await fetch(`${baseUrl}/api/chat`, {

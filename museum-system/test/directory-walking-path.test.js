@@ -49,6 +49,7 @@ async function run() {
   await send('Runtime.enable');
   await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
 
+  // The map only renders route details after a visitor check-in flag is present, so the test seeds that state before navigating.
   await send('Runtime.evaluate', {
     expression: `
       sessionStorage.setItem('museum_visitor_checked_in', 'true');
@@ -59,6 +60,7 @@ async function run() {
   await send('Page.navigate', { url: 'http://localhost:3000/map.html' });
   await new Promise(r => setTimeout(r, 2500));
 
+  // The first click verifies the direct directory flow builds the walking path without opening an extra drawer.
   // Test 1: Click "Under the Sea" (EX-001) in directory
   console.log('Clicking "Under the Sea" (EX-001) in the directory...');
   const clickRes1 = await send('Runtime.evaluate', {
