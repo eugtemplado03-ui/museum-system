@@ -82,9 +82,13 @@ test('API Management protects, encrypts, and updates built-in and custom provide
     assert.equal((await chatApiKey.getGroqConfiguration()).apiKey, 'managed-groq-test-secret');
 
     const originalFetch = global.fetch;
+    let fetchMode = 'success';
     global.fetch = async (url, options) => {
       assert.match(String(url), /api\.groq\.com\/openai\/v1\/chat\/completions$/);
       assert.equal(options.headers.Authorization, 'Bearer managed-groq-test-secret');
+      if (fetchMode === 'malformed') return new Response('not valid JSON', { status: 200 });
+      if (fetchMode === 'rate-limit') return new Response('rate limited', { status: 429 });
+      if (fetchMode === 'network-error') throw new Error('Network unavailable');
       return new Response(JSON.stringify({
         choices: [{ message: { content: 'Mocked museum answer.' } }],
         usage: { prompt_tokens: 23, completion_tokens: 5, total_tokens: 28 }
@@ -107,6 +111,27 @@ test('API Management protects, encrypts, and updates built-in and custom provide
         .send({ message: 'What can I see at the museum?' });
       assert.equal(chatResponse.status, 200);
       assert.equal(chatResponse.body.reply, 'Mocked museum answer.');
+
+      fetchMode = 'malformed';
+      const malformedResponse = await request(app)
+        .post('/api/chat')
+        .send({ message: 'Tell me about the museum.' });
+      assert.equal(malformedResponse.status, 200);
+      assert.ok(malformedResponse.body.reply);
+
+      fetchMode = 'rate-limit';
+      const rateLimitedResponse = await request(app)
+        .post('/api/chat')
+        .send({ message: 'What can I visit?' });
+      assert.equal(rateLimitedResponse.status, 200);
+      assert.ok(rateLimitedResponse.body.reply);
+
+      fetchMode = 'network-error';
+      const networkErrorResponse = await request(app)
+        .post('/api/chat')
+        .send({ message: 'What are the exhibits?' });
+      assert.equal(networkErrorResponse.status, 200);
+      assert.ok(networkErrorResponse.body.reply);
     } finally {
       global.fetch = originalFetch;
     }
@@ -117,6 +142,13 @@ test('API Management protects, encrypts, and updates built-in and custom provide
     assert.equal((await request(app)
       .get('/api/admin/api-management/usage?days=365')
       .set('Authorization', `Bearer ${adminToken}`)).status, 400);
+
+    const chatUsage = await request(app)
+      .get('/api/admin/api-management/usage?days=30')
+      .set('Authorization', `Bearer ${adminToken}`);
+    assert.equal(chatUsage.body.usage.totals.requests, 4);
+    assert.equal(chatUsage.body.usage.totals.succeeded, 2);
+    assert.equal(chatUsage.body.usage.totals.failed, 2);
 
     await apiUsage.recordGroqUsage({
       service: 'chat',
@@ -156,9 +188,9 @@ test('API Management protects, encrypts, and updates built-in and custom provide
       .get('/api/admin/api-management/usage?days=30')
       .set('Authorization', `Bearer ${adminToken}`);
     assert.equal(usageResponse.status, 200);
-    assert.equal(usageResponse.body.usage.totals.requests, 3);
-    assert.equal(usageResponse.body.usage.totals.succeeded, 2);
-    assert.equal(usageResponse.body.usage.totals.failed, 1);
+    assert.equal(usageResponse.body.usage.totals.requests, 6);
+    assert.equal(usageResponse.body.usage.totals.succeeded, 3);
+    assert.equal(usageResponse.body.usage.totals.failed, 3);
     assert.equal(usageResponse.body.usage.totals.inputTokens, 34);
     assert.equal(usageResponse.body.usage.totals.outputTokens, 12);
     assert.equal(usageResponse.body.usage.totals.totalTokens, 46);

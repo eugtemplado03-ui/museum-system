@@ -461,6 +461,9 @@ router.post('/', chatLimiter, async (req, res) => {
 
   // If a Groq API key is available, attempt a remote LLM call with a safety timeout.
   if (apiKey) {
+    let groqResponse = null;
+    let usageRecorded = false;
+    let timeoutId;
     try {
       const sysPrompt = buildSystemPrompt(context, language);
       const messages = [
@@ -470,7 +473,7 @@ router.post('/', chatLimiter, async (req, res) => {
       ];
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      timeoutId = setTimeout(() => controller.abort(), 10000);
 
       const response = await fetch(`${GROQ_API_BASE}/chat/completions`, {
         method: 'POST',
@@ -488,6 +491,7 @@ router.post('/', chatLimiter, async (req, res) => {
       });
 
       clearTimeout(timeoutId);
+      groqResponse = response;
 
       if (response.ok) {
         const data = await response.json();
@@ -497,16 +501,25 @@ router.post('/', chatLimiter, async (req, res) => {
           response,
           usage: data.usage
         });
+        usageRecorded = true;
         const reply = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content || '').trim();
         if (reply) {
           return res.json({ reply });
         }
       } else {
         await apiUsage.recordGroqUsageSafely({ service: 'chat', model, response });
+        usageRecorded = true;
         console.warn('Groq non-OK status:', response.status);
       }
     } catch (err) {
-      await apiUsage.recordGroqUsageSafely({ service: 'chat', model });
+      clearTimeout(timeoutId);
+      if (!usageRecorded) {
+        await apiUsage.recordGroqUsageSafely({
+          service: 'chat',
+          model,
+          response: groqResponse
+        });
+      }
       console.warn('Groq request exception, engaging local AI engine:', err.message);
     }
   }

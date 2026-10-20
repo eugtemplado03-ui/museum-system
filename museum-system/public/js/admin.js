@@ -5059,6 +5059,7 @@ async function renderApiManagementTab(contentEl) {
           <div>
             <h3 style="margin:0 0 6px;">Groq usage &amp; limits</h3>
             <p style="margin:0;color:#64748b;">This museum app's recorded usage for the last 30 days.</p>
+            <small style="display:block;margin-top:8px;color:#64748b;">Failed counts are failed Groq API calls, not failed visitor requests. Chat may still answer using its local fallback, and speech may fall back to Google TTS. Older counts may include failures recorded before tracking was corrected.</small>
           </div>
           <button type="button" id="refreshApiUsage" class="btn btn-secondary btn-small">Refresh usage</button>
         </div>
@@ -5070,7 +5071,7 @@ async function renderApiManagementTab(contentEl) {
               <div style="padding:14px;background:#f8fafc;border-radius:10px;"><strong>${usageNumber(usageTotals.totalTokens)}</strong><div>Reported tokens</div></div>
               <div style="padding:14px;background:#f8fafc;border-radius:10px;"><strong>${usageNumber(usageTotals.inputTokens)}</strong><div>Input tokens</div></div>
               <div style="padding:14px;background:#f8fafc;border-radius:10px;"><strong>${usageNumber(usageTotals.outputTokens)}</strong><div>Output tokens</div></div>
-              <div style="padding:14px;background:#f8fafc;border-radius:10px;"><strong>${usageNumber(usageTotals.failed)}</strong><div>Failed requests</div></div>
+              <div style="padding:14px;background:#f8fafc;border-radius:10px;"><strong>${usageNumber(usageTotals.failed)}</strong><div>Failed Groq calls</div></div>
               <div style="padding:14px;background:#f8fafc;border-radius:10px;"><strong>${usageNumber(usageTotals.audioRequests)}</strong><div>Speech requests</div></div>
             </div>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:16px;">
