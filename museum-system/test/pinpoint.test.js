@@ -31,6 +31,10 @@ test('Floor map pin stationary hover and clean exhibit name badge', async () => 
   // Verify exhibit name badge is defined
   assert.ok(mapHtml.includes('.individual-exhibit-pin .exhibit-name-badge'), 'exhibit-name-badge class styled');
   assert.ok(mapHtml.includes('.individual-exhibit-pin.active-pin .exhibit-name-badge'), 'active-pin shows badge');
+  assert.ok(mapHtml.includes('class="exhibit-photo-preview"'), 'Individual pins render a photo preview when an image exists');
+  assert.ok(mapHtml.includes('.individual-exhibit-pin:hover .exhibit-photo-preview'), 'Hover reveals the exhibit photo');
+  assert.ok(mapHtml.includes('.individual-exhibit-pin.active-pin .exhibit-photo-preview'), 'Touch selection keeps the exhibit photo visible');
+  assert.ok(mapHtml.includes('ex.imagePaths[0]') && mapHtml.includes('ex.imagePath'), 'Photo preview uses current and legacy exhibit image paths');
 
   // Verify click toggles active-pin and does not open drawer
   assert.ok(mapHtml.includes("g.classList.contains('active-pin')"), 'Pin click toggles active-pin');

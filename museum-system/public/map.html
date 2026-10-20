@@ -824,6 +824,19 @@
       pointer-events: auto;
     }
 
+    /* Show exhibit photos on hover, focus, or touch selection. */
+    .individual-exhibit-pin .exhibit-photo-preview {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s ease;
+    }
+
+    .individual-exhibit-pin:hover .exhibit-photo-preview,
+    .individual-exhibit-pin:focus .exhibit-photo-preview,
+    .individual-exhibit-pin.active-pin .exhibit-photo-preview {
+      opacity: 1;
+    }
+
     .exhibit-pin-halo {
       animation: radarPulse 2.4s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
       transform-origin: 0 -20px;
@@ -4003,6 +4016,7 @@
           g.style.cursor = 'pointer';
 
           const displayTitle = (ex.title || ex.code || 'Exhibit').trim();
+          const previewImage = (Array.isArray(ex.imagePaths) && ex.imagePaths[0]) || ex.imagePath || '';
           // Dynamic badge width so exhibit name is clearly displayed without clipping
           const badgeWidth = Math.max(90, Math.min(270, displayTitle.length * 8.5 + 26));
           const badgeHeight = 26;
@@ -4020,6 +4034,16 @@
           <!-- Inner Core Color Dot -->
           <circle cx="0" cy="-28" r="8" fill="${pinColor}" />
           <circle cx="0" cy="-28" r="3.5" fill="#ffffff" />
+
+          ${previewImage ? `
+          <g class="exhibit-photo-preview" aria-hidden="true">
+            <rect x="-57" y="-164" width="114" height="82" rx="9"
+                  fill="#ffffff" stroke="${pinColor}" stroke-width="2"
+                  filter="drop-shadow(0 4px 12px rgba(0,0,0,0.85))" />
+            <image href="${escapeHtml(previewImage)}" x="-53" y="-160" width="106" height="74"
+                   preserveAspectRatio="xMidYMid slice" />
+          </g>
+          ` : ''}
 
           <!-- Exhibit Name Badge (Shown ONLY when cursor hits pin or on click) -->
           <g class="exhibit-name-badge">
