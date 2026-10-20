@@ -5158,11 +5158,18 @@ async function renderApiManagementTab(contentEl) {
               : '<small style="display:block;margin-top:10px;color:#64748b;">Rate limits appear after the next Groq API response.</small>'}
             <small style="display:block;margin-top:8px;color:#64748b;">Groq rate limits are organization-wide and may be shared with other apps. Usage totals here include only requests from this museum app; speech requests are counted separately because token usage is not returned for audio.</small>
             <div style="overflow:auto;margin-top:16px;">
-              <table class="ledger" style="width:100%;">
+              <table class="ledger api-usage-table" style="width:100%;">
                 <thead><tr><th>Service</th><th>Requests</th><th>Input tokens</th><th>Output tokens</th><th>Total tokens</th><th>Speech characters</th></tr></thead>
                 <tbody>
                   ${usage.byService.length
-                    ? usage.byService.map(service => `<tr><td>${escapeHtml(service.service)}</td><td>${usageNumber(service.requests)}</td><td>${usageNumber(service.inputTokens)}</td><td>${usageNumber(service.outputTokens)}</td><td>${usageNumber(service.totalTokens)}</td><td>${usageNumber(service.audioCharacters)}</td></tr>`).join('')
+                    ? usage.byService.map(service => `<tr>
+                        <td data-label="Service">${escapeHtml(service.service)}</td>
+                        <td data-label="Requests">${usageNumber(service.requests)}</td>
+                        <td data-label="Input tokens">${usageNumber(service.inputTokens)}</td>
+                        <td data-label="Output tokens">${usageNumber(service.outputTokens)}</td>
+                        <td data-label="Total tokens">${usageNumber(service.totalTokens)}</td>
+                        <td data-label="Speech characters">${usageNumber(service.audioCharacters)}</td>
+                      </tr>`).join('')
                     : '<tr><td colspan="6">No Groq requests recorded in this period.</td></tr>'}
                 </tbody>
               </table>

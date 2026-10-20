@@ -4008,6 +4008,23 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
     text-align: left;
     flex-shrink: 0;
   }
+  /* Keep usage rows readable as labeled, lightweight cards when the table headers are hidden on phones. */
+  table.ledger.api-usage-table tr {
+    background: #ffffff !important;
+    background-image: none !important;
+    border: 1px solid #dbe3ef !important;
+    border-radius: 12px !important;
+    padding: 6px !important;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08) !important;
+  }
+  table.ledger.api-usage-table td {
+    min-height: 36px !important;
+    padding: 9px 10px !important;
+    font-size: 13px !important;
+  }
+  table.ledger.api-usage-table td:first-child {
+    font-weight: 800 !important;
+  }
   table.ledger td.title-cell {
     font-size: 16px !important;
     color: #000000 !important;
