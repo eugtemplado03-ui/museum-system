@@ -44,7 +44,8 @@ test('visitor rates render as section headings with bulleted items', async () =>
       'Students w/ ID — ₱20.00',
       'Adults — ₱50.00',
       'Special Tour with Jr. Guides & Kassie Kasag:',
-      '1 Person — ₱800.00 / person'
+      '1 Person — ₱800.00 / person',
+      'Special guided tour (with Jr. Guides): PHP 800/person (1 pax), PHP 450/person (2 pax), PHP 300/person (3–4 pax), PHP 200/person (5–7 pax), PHP 150/person (8–9 pax), PHP 130/person (10+ pax)'
     ]
   };
   const source = fs.readFileSync(path.join(__dirname, '../public/js/museum-content.js'), 'utf8');
@@ -63,6 +64,8 @@ test('visitor rates render as section headings with bulleted items', async () =>
       ['H3', 'rates-subtitle', 'Regular Tour'],
       ['UL', 'rates-list', ''],
       ['H3', 'rates-subtitle', 'Special Tour with Jr. Guides & Kassie Kasag'],
+      ['UL', 'rates-list', ''],
+      ['H3', 'rates-subtitle', 'Special guided tour (with Jr. Guides)'],
       ['UL', 'rates-list', '']
     ]
   );
@@ -73,5 +76,16 @@ test('visitor rates render as section headings with bulleted items', async () =>
   assert.deepEqual(
     ratesContainer.children[3].children.map(item => item.textContent),
     ['1 Person — ₱800.00 / person']
+  );
+  assert.deepEqual(
+    ratesContainer.children[5].children.map(item => item.textContent),
+    [
+      'PHP 800/person (1 pax)',
+      'PHP 450/person (2 pax)',
+      'PHP 300/person (3–4 pax)',
+      'PHP 200/person (5–7 pax)',
+      'PHP 150/person (8–9 pax)',
+      'PHP 130/person (10+ pax)'
+    ]
   );
 });

@@ -21,14 +21,25 @@
 
     let currentList = null;
     lines.forEach(line => {
-      if (/:\s*$/.test(line)) {
+      const sectionMatch = line.match(/^(.+?):\s*(.*)$/);
+      const startsWithRate = sectionMatch && /^(?:PHP|₱)\s*[\d,.]+/i.test(sectionMatch[2]);
+      const bundledRates = sectionMatch && sectionMatch[2]
+        ? sectionMatch[2].split(/,\s*(?=(?:PHP|₱)\s*[\d,.]+)/i).map(rate => rate.trim()).filter(Boolean)
+        : [];
+
+      if (sectionMatch && (!sectionMatch[2] || startsWithRate)) {
         const heading = document.createElement('h3');
         heading.className = 'rates-subtitle';
-        heading.textContent = line.replace(/:\s*$/, '');
+        heading.textContent = sectionMatch[1].trim();
         container.appendChild(heading);
         currentList = document.createElement('ul');
         currentList.className = 'rates-list';
         container.appendChild(currentList);
+        bundledRates.forEach(rate => {
+          const item = document.createElement('li');
+          item.textContent = rate;
+          currentList.appendChild(item);
+        });
         return;
       }
 
