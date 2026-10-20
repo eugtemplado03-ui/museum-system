@@ -4,6 +4,7 @@ const programs = require('../db/programs');
 const events = require('../db/events');
 const museumInfo = require('../db/museum-info');
 const chatApiKey = require('../db/chat-api-key');
+const apiUsage = require('../db/api-usage');
 
 const router = express.Router();
 
@@ -490,14 +491,22 @@ router.post('/', chatLimiter, async (req, res) => {
 
       if (response.ok) {
         const data = await response.json();
+        await apiUsage.recordGroqUsageSafely({
+          service: 'chat',
+          model,
+          response,
+          usage: data.usage
+        });
         const reply = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content || '').trim();
         if (reply) {
           return res.json({ reply });
         }
       } else {
+        await apiUsage.recordGroqUsageSafely({ service: 'chat', model, response });
         console.warn('Groq non-OK status:', response.status);
       }
     } catch (err) {
+      await apiUsage.recordGroqUsageSafely({ service: 'chat', model });
       console.warn('Groq request exception, engaging local AI engine:', err.message);
     }
   }

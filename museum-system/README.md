@@ -114,31 +114,46 @@ Category-room exhibit markers move and resize with their room. The shared map
 layout is saved for all visitors; use **Reset Layout** to restore the original
 positions and sizes.
 
+## API Management
+
+Administrators can open **Admin Dashboard → API Management** to configure the
+Groq and Cloudinary integrations, and to add, edit, or remove custom provider
+keys. Built-in credentials are encrypted in MongoDB and are never returned to
+the browser. Custom keys are stored securely for management, but are not
+connected to application features automatically.
+
+The Groq usage panel records this app's daily request counts and provider-
+reported input/output tokens for chat and translation. Speech requests and
+characters are counted separately. It also shows the latest rate-limit headers
+returned by Groq. Groq documents the request headers as organization-wide
+requests per day (RPD) and tokens per minute (TPM), so remaining quota may
+reflect other apps using the same organization. Usage history is retained for
+up to 90 days; tracking requires MongoDB. This is not an account-wide billing
+report, and the dashboard does not estimate cost.
+
+Groq is used by the museum chat, translation, and text-to-speech services.
+Cloudinary is used for remote image/video uploads and database backups. Each
+integration can use server environment variables or dashboard-managed
+credentials; a dashboard override can be removed to return to the environment
+configuration, or disabled independently.
+
+For Groq, set the optional `GROQ_API_KEY` and `GROQ_MODEL` environment
+variables, or enter a key from
+[console.groq.com/keys](https://console.groq.com/keys) in API Management.
+For Cloudinary, configure `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and
+`CLOUDINARY_API_SECRET`, or enter those credentials in API Management.
+
+Managed credentials are encrypted in MongoDB using a key derived from
+`JWT_SECRET`. Keep `JWT_SECRET` stable; if it is rotated, re-enter the
+dashboard-managed credentials. Without an active Groq key, the chatbot uses
+its local response engine.
+
 ## Museum chat assistant
 
-A floating chat widget (bottom-right, on the visitor pages) answers
-questions about the museum only — exhibits, programs, events, hours, fees,
-location, and visit planning. It's grounded in the live exhibit/program/
-event catalog and the facts in `db/museum-info.js`, and is instructed to
-decline anything outside that scope, including attempts to override its
-instructions. It calls [Groq](https://groq.com/), using the server-side key
-configured in the admin dashboard or the optional `GROQ_API_KEY` environment
-variable.
-
-To configure it from the dashboard:
-
-1. Open Admin Dashboard → **Groq API Key**.
-2. Enter a Groq API key from [console.groq.com/keys](https://console.groq.com/keys)
-   and save it. Key changes take effect without restarting the server.
-3. Use **Remove and disable Groq** to remove the managed key and disable Groq
-   API requests. If a server environment key exists, the dashboard offers a
-   separate option to switch back to it.
-
-The managed Groq key is shared by the chatbot, translation, and text-to-speech
-services. Dashboard-managed keys are encrypted in MongoDB using a key derived from
-`JWT_SECRET`. Keep `JWT_SECRET` stable; if it is rotated, re-enter the Groq
-key in the admin dashboard. Without an active Groq key, the chatbot uses its
-local response engine.
+The visitor pages include a chat widget that answers museum questions using
+the live exhibit, program, and event catalogs together with museum information.
+When configured, it calls Groq; otherwise it uses the local response engine.
+The Groq key is shared with translation and text-to-speech.
 
 **If a key ever gets pasted somewhere it shouldn't (chat, a public repo,
 etc.), treat it as compromised and rotate it immediately at

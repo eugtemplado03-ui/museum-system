@@ -134,14 +134,6 @@ app.get('/api/health', (req, res) => {
 
 // Auto-seed initial catalog if database is empty on fresh deployment
 async function startServer() {
-  // ── Restore data.json from Cloudinary (survives Render restarts) ──
-  try {
-    const { restoreFromCloud } = require('./db/store');
-    await restoreFromCloud();
-  } catch (e) {
-    console.warn('[DB] Cloud restore skipped:', e.message);
-  }
-
   try {
     const mongoUri = process.env.MONGODB_URI;
     if (mongoUri) {
@@ -161,6 +153,23 @@ async function startServer() {
     }
   } catch (err) {
     console.error('Failed to connect to MongoDB:', err);
+  }
+
+  try {
+    const apiManagement = require('./db/api-management');
+    const { configureCloudinary } = require('./db/cloudinary-config');
+    const configuration = await apiManagement.getCloudinaryConfiguration();
+    configureCloudinary(configuration.configured ? configuration.credentials : null);
+  } catch (err) {
+    console.warn('[API Management] Cloudinary configuration unavailable:', err.message);
+  }
+
+  // Load dashboard-managed Cloudinary credentials before restoring the backup.
+  try {
+    const { restoreFromCloud } = require('./db/store');
+    await restoreFromCloud();
+  } catch (e) {
+    console.warn('[DB] Cloud restore skipped:', e.message);
   }
 
   try {

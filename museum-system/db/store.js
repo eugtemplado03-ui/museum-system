@@ -17,21 +17,11 @@ if (!fs.existsSync(dbDir)) {
 }
 
 // ─── Cloudinary helpers ──────────────────────────────────────────────────────
-let cloudinary = null;
+const cloudinaryConfig = require('./cloudinary-config');
 const CLOUDINARY_DB_PUBLIC_ID = 'museum_db/data_json';
 
 function getCloudinary() {
-  if (cloudinary) return cloudinary;
-  if (process.env.CLOUDINARY_CLOUD_NAME) {
-    cloudinary = require('cloudinary').v2;
-    cloudinary.config({
-      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-      api_key:    process.env.CLOUDINARY_API_KEY,
-      api_secret: process.env.CLOUDINARY_API_SECRET
-    });
-    return cloudinary;
-  }
-  return null;
+  return cloudinaryConfig.getCloudinary();
 }
 
 // Upload data.json to Cloudinary as a raw file (non-blocking, fire-and-forget)

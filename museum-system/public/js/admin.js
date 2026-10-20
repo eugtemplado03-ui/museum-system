@@ -183,7 +183,7 @@ const SIDEBAR_ITEMS = [
   { id: 'events',         label: 'Events',            icon: '📅', group: 'Operations' },
   { id: 'feedback',       label: 'Feedback',          icon: '💬', group: 'System' },
   { id: 'museumInfo',     label: 'Museum Info',       icon: 'ℹ️', group: 'System' },
-  { id: 'chatApiKey',     label: 'Groq API Key',      icon: '🔐', group: 'System' },
+  { id: 'apiManagement',  label: 'API Management',    icon: '🔌', group: 'System' },
 ];
 
 function handleSignOut() {
@@ -413,7 +413,7 @@ async function renderDashboard(){
   else if(activeTab === 'analytics') await renderAnalyticsTab(contentEl);
   else if(activeTab === 'feedback') await renderFeedbackTab(contentEl);
   else if(activeTab === 'museumInfo') await renderMuseumInfoTab(contentEl);
-  else if(activeTab === 'chatApiKey') await renderChatApiKeyTab(contentEl);
+  else if(activeTab === 'apiManagement') await renderApiManagementTab(contentEl);
 };
 
 let adminCatalogCategory = 'All';
@@ -5017,112 +5017,342 @@ function openGalleryModal(id){
 
 boot();
 
-async function renderChatApiKeyTab(contentEl) {
+async function renderApiManagementTab(contentEl) {
   let settings;
   try {
-    ({ settings } = await Api.getGroqApiKeySettings());
+    ({ settings } = await Api.getApiManagementSettings());
   } catch (err) {
-    contentEl.innerHTML = `<div class="empty-state"><h2>Could not load Groq API key settings</h2><p>${escapeHtml(err.message)}</p></div>`;
+    contentEl.innerHTML = `<div class="empty-state"><h2>Could not load API management settings</h2><p>${escapeHtml(err.message)}</p></div>`;
     return;
   }
 
-  const describeSource = current => {
-    if (current.source === 'dashboard') return 'A dashboard-managed Groq key is active. The saved key is never returned to this page.';
-    if (current.source === 'environment') return 'Museum AI services are using the server GROQ_API_KEY environment variable.';
-    if (current.source === 'disabled') return 'The Groq API key has been removed and Groq requests are disabled.';
-    return 'No Groq API key is configured. The chatbot uses its built-in local response engine; translation and speech use their fallback behavior.';
+  let usage = null;
+  let usageError = '';
+  try {
+    ({ usage } = await Api.getGroqApiUsage(30));
+  } catch (err) {
+    usageError = err.message || 'Usage information is unavailable.';
+  }
+
+  const usageNumber = value => Number(value || 0).toLocaleString();
+  const usageTotals = usage?.totals || {};
+  const usageRateLimits = usage?.rateLimits;
+  const usageUpdatedAt = usageRateLimits?.observedAt
+    ? new Date(usageRateLimits.observedAt).toLocaleString()
+    : '';
+
+  const describeSource = (current, service) => {
+    if (current.source === 'dashboard') return 'Dashboard-managed credentials are active and encrypted at rest.';
+    if (current.source === 'environment') return `Using server environment credentials${service === 'groq' ? ' (GROQ_API_KEY)' : ''}.`;
+    if (current.source === 'disabled') return 'This provider has been disabled in API Management.';
+    return service === 'groq'
+      ? 'Not configured. Chatbot uses its local response engine; translation and speech use their fallback behavior.'
+      : 'Not configured. File uploads use local server storage and cloud backup is unavailable.';
   };
 
   contentEl.innerHTML = `
-    <div style="max-width:760px;padding:24px;">
-      <section style="padding:24px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 8px 24px rgba(15,23,42,.06);">
-        <h2 style="margin:0 0 8px;">🔐 Groq API Key</h2>
-        <p style="margin:0 0 18px;color:#64748b;">Manage the server-side key used by the museum chatbot, translation, and text-to-speech. The key is encrypted in the database and is never sent back to the browser or exposed to visitors.</p>
-        <div id="groqApiKeyStatus" role="status" aria-live="polite" style="padding:12px 14px;margin-bottom:18px;border-radius:9px;background:#f1f5f9;">${escapeHtml(describeSource(settings))} Model: ${escapeHtml(settings.model)}.</div>
-        <form id="groqApiKeyForm">
-          <div class="form-field">
-            <label for="groqApiKeyInput">${settings.source === 'dashboard' ? 'Replace Groq API key' : 'Groq API key'}</label>
-            <input id="groqApiKeyInput" name="apiKey" type="password" autocomplete="new-password" spellcheck="false" maxlength="512" placeholder="Paste a new Groq API key" required>
-            <small>Saving a new key replaces the currently active chatbot key.</small>
+    <div style="max-width:1100px;padding:24px;">
+      <h2 style="margin:0 0 8px;">🔐 API Management</h2>
+      <p style="margin:0 0 22px;color:#64748b;">Add, replace, and remove provider credentials. Built-in integrations take effect immediately. Secrets are encrypted and never shown after saving.</p>
+      <section style="margin-bottom:20px;padding:22px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 8px 24px rgba(15,23,42,.06);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+          <div>
+            <h3 style="margin:0 0 6px;">Groq usage &amp; limits</h3>
+            <p style="margin:0;color:#64748b;">This museum app's recorded usage for the last 30 days.</p>
           </div>
-          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;">
-            <button type="submit" id="saveGroqApiKeyBtn" class="btn btn-primary">Save API Key</button>
-            <button type="button" id="removeGroqApiKeyBtn" class="btn btn-danger" ${settings.source === 'none' || settings.source === 'disabled' ? 'hidden' : ''}>Remove and disable Groq</button>
-            <button type="button" id="useEnvironmentGroqApiKeyBtn" class="btn btn-secondary" ${!settings.environmentConfigured || settings.source === 'environment' ? 'hidden' : ''}>Use server environment key</button>
+          <button type="button" id="refreshApiUsage" class="btn btn-secondary btn-small">Refresh usage</button>
+        </div>
+        ${usageError
+          ? `<p role="alert" style="color:#b91c1c;margin:14px 0 0;">Usage unavailable: ${escapeHtml(usageError)}</p>`
+          : `
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:12px;margin-top:18px;">
+              <div style="padding:14px;background:#f8fafc;border-radius:10px;"><strong>${usageNumber(usageTotals.requests)}</strong><div>Requests</div></div>
+              <div style="padding:14px;background:#f8fafc;border-radius:10px;"><strong>${usageNumber(usageTotals.totalTokens)}</strong><div>Reported tokens</div></div>
+              <div style="padding:14px;background:#f8fafc;border-radius:10px;"><strong>${usageNumber(usageTotals.inputTokens)}</strong><div>Input tokens</div></div>
+              <div style="padding:14px;background:#f8fafc;border-radius:10px;"><strong>${usageNumber(usageTotals.outputTokens)}</strong><div>Output tokens</div></div>
+              <div style="padding:14px;background:#f8fafc;border-radius:10px;"><strong>${usageNumber(usageTotals.failed)}</strong><div>Failed requests</div></div>
+              <div style="padding:14px;background:#f8fafc;border-radius:10px;"><strong>${usageNumber(usageTotals.audioRequests)}</strong><div>Speech requests</div></div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:16px;">
+              <div style="padding:14px;border:1px solid #e2e8f0;border-radius:10px;">
+                <strong>Requests per day (RPD)</strong>
+                <div>Limit: ${usageRateLimits?.requestLimit == null ? 'Not yet reported' : usageNumber(usageRateLimits.requestLimit)}</div>
+                <div>Remaining: ${usageRateLimits?.remainingRequests == null ? 'Not yet reported' : usageNumber(usageRateLimits.remainingRequests)}</div>
+                <div>Reset: ${escapeHtml(usageRateLimits?.resetRequests || 'Not reported')}</div>
+              </div>
+              <div style="padding:14px;border:1px solid #e2e8f0;border-radius:10px;">
+                <strong>Tokens per minute (TPM)</strong>
+                <div>Limit: ${usageRateLimits?.tokenLimit == null ? 'Not yet reported' : usageNumber(usageRateLimits.tokenLimit)}</div>
+                <div>Remaining: ${usageRateLimits?.remainingTokens == null ? 'Not yet reported' : usageNumber(usageRateLimits.remainingTokens)}</div>
+                <div>Reset: ${escapeHtml(usageRateLimits?.resetTokens || 'Not reported')}</div>
+              </div>
+            </div>
+            ${usageRateLimits
+              ? `<small style="display:block;margin-top:10px;color:#64748b;">Latest headers: ${escapeHtml(usageRateLimits.service)} / ${escapeHtml(usageRateLimits.model)}; HTTP ${usageRateLimits.httpStatus == null ? 'unknown' : usageRateLimits.httpStatus}${usageRateLimits.retryAfter ? `; retry after ${escapeHtml(usageRateLimits.retryAfter)}` : ''}${usageUpdatedAt ? `; observed ${escapeHtml(usageUpdatedAt)}` : ''}.</small>`
+              : '<small style="display:block;margin-top:10px;color:#64748b;">Rate limits appear after the next Groq API response.</small>'}
+            <small style="display:block;margin-top:8px;color:#64748b;">Groq rate limits are organization-wide and may be shared with other apps. Usage totals here include only requests from this museum app; speech requests are counted separately because token usage is not returned for audio.</small>
+            <div style="overflow:auto;margin-top:16px;">
+              <table class="ledger" style="width:100%;">
+                <thead><tr><th>Service</th><th>Requests</th><th>Input tokens</th><th>Output tokens</th><th>Total tokens</th><th>Speech characters</th></tr></thead>
+                <tbody>
+                  ${usage.byService.length
+                    ? usage.byService.map(service => `<tr><td>${escapeHtml(service.service)}</td><td>${usageNumber(service.requests)}</td><td>${usageNumber(service.inputTokens)}</td><td>${usageNumber(service.outputTokens)}</td><td>${usageNumber(service.totalTokens)}</td><td>${usageNumber(service.audioCharacters)}</td></tr>`).join('')
+                    : '<tr><td colspan="6">No Groq requests recorded in this period.</td></tr>'}
+                </tbody>
+              </table>
+            </div>
+          `}
+      </section>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,390px),1fr));gap:18px;">
+        <section style="padding:22px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 8px 24px rgba(15,23,42,.06);">
+          <h3 style="margin:0 0 12px;">Groq AI</h3>
+          <div role="status" aria-live="polite" style="padding:12px;margin-bottom:16px;border-radius:9px;background:#f1f5f9;">${escapeHtml(describeSource(settings.groq, 'groq'))} Model: ${escapeHtml(settings.groq.model)}.</div>
+          <form id="managedGroqForm">
+            <div class="form-field">
+              <label for="managedGroqKey">API key${settings.groq.source === 'dashboard' ? ' (enter a replacement to edit)' : ''}</label>
+              <input id="managedGroqKey" name="apiKey" type="password" autocomplete="new-password" spellcheck="false" maxlength="512" placeholder="Paste Groq API key" required>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;">
+              <button type="submit" class="btn btn-primary">Save Groq key</button>
+              <button type="button" id="removeManagedGroq" class="btn btn-danger" ${settings.groq.source === 'none' || settings.groq.source === 'disabled' ? 'hidden' : ''}>Remove and disable</button>
+              <button type="button" id="environmentGroq" class="btn btn-secondary" ${!settings.groq.environmentConfigured || settings.groq.source === 'environment' ? 'hidden' : ''}>Use environment key</button>
+            </div>
+            <p id="managedGroqError" role="alert" style="color:#b91c1c;margin:12px 0 0;" hidden></p>
+          </form>
+          <small style="display:block;margin-top:14px;color:#64748b;">Used by museum chat, translation, and text-to-speech.</small>
+        </section>
+
+        <section style="padding:22px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 8px 24px rgba(15,23,42,.06);">
+          <h3 style="margin:0 0 12px;">Cloudinary</h3>
+          <div role="status" aria-live="polite" style="padding:12px;margin-bottom:16px;border-radius:9px;background:#f1f5f9;">${escapeHtml(describeSource(settings.cloudinary, 'cloudinary'))}</div>
+          <form id="managedCloudinaryForm">
+            <div class="form-field">
+              <label for="cloudinaryCloudName">Cloud name</label>
+              <input id="cloudinaryCloudName" name="cloudName" autocomplete="off" maxlength="128" required>
+            </div>
+            <div class="form-field">
+              <label for="cloudinaryApiKey">API key</label>
+              <input id="cloudinaryApiKey" name="apiKey" type="password" autocomplete="new-password" maxlength="512" required>
+            </div>
+            <div class="form-field">
+              <label for="cloudinaryApiSecret">API secret${settings.cloudinary.source === 'dashboard' ? ' (enter replacement credentials to edit)' : ''}</label>
+              <input id="cloudinaryApiSecret" name="apiSecret" type="password" autocomplete="new-password" maxlength="512" required>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;">
+              <button type="submit" class="btn btn-primary">Save Cloudinary credentials</button>
+              <button type="button" id="removeManagedCloudinary" class="btn btn-danger" ${settings.cloudinary.source === 'none' || settings.cloudinary.source === 'disabled' ? 'hidden' : ''}>Remove and disable</button>
+              <button type="button" id="environmentCloudinary" class="btn btn-secondary" ${!settings.cloudinary.environmentConfigured || settings.cloudinary.source === 'environment' ? 'hidden' : ''}>Use environment credentials</button>
+            </div>
+            <p id="managedCloudinaryError" role="alert" style="color:#b91c1c;margin:12px 0 0;" hidden></p>
+          </form>
+          <small style="display:block;margin-top:14px;color:#64748b;">Used for image/video uploads and the data backup.</small>
+        </section>
+      </div>
+
+      <section style="margin-top:20px;padding:22px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 8px 24px rgba(15,23,42,.06);">
+        <h3 style="margin:0 0 8px;">Custom API providers</h3>
+        <p style="margin:0 0 16px;color:#64748b;">Store additional provider keys securely. Custom keys are managed here but are not connected to museum features automatically.</p>
+        <div id="customProviderList" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:14px;">
+          ${settings.customProviders.map(provider => `
+            <form class="customProviderForm" data-provider-id="${escapeHtml(provider.id)}" style="padding:16px;border:1px solid #e2e8f0;border-radius:10px;">
+              <label>Provider name</label>
+              <input name="name" value="${escapeHtml(provider.name)}" maxlength="80" required>
+              <label style="display:block;margin-top:10px;">${provider.configured ? 'Replacement API key' : 'API key'}</label>
+              <input name="apiKey" type="password" autocomplete="new-password" maxlength="4096" placeholder="Enter a new key" required>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;">
+                <button type="submit" class="btn btn-primary btn-small">Save changes</button>
+                <button type="button" class="btn btn-danger btn-small removeCustomProvider">Remove</button>
+              </div>
+              <p class="customProviderError" role="alert" style="color:#b91c1c;margin:10px 0 0;" hidden></p>
+            </form>
+          `).join('')}
+        </div>
+        <form id="addCustomProviderForm" style="margin-top:18px;padding-top:18px;border-top:1px solid #e2e8f0;">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px;">
+            <div class="form-field"><label for="newProviderName">Provider name</label><input id="newProviderName" name="name" maxlength="80" placeholder="e.g. Maps provider" required></div>
+            <div class="form-field"><label for="newProviderApiKey">API key</label><input id="newProviderApiKey" name="apiKey" type="password" autocomplete="new-password" maxlength="4096" required></div>
           </div>
-          <p id="groqApiKeyError" role="alert" style="color:#b91c1c;margin:12px 0 0;" hidden></p>
+          <button type="submit" class="btn btn-primary">Add custom provider</button>
+          <p id="addCustomProviderError" role="alert" style="color:#b91c1c;margin:10px 0 0;" hidden></p>
         </form>
       </section>
     </div>
   `;
 
-  const form = document.getElementById('groqApiKeyForm');
-  const input = document.getElementById('groqApiKeyInput');
-  const errorEl = document.getElementById('groqApiKeyError');
-  const saveButton = document.getElementById('saveGroqApiKeyBtn');
-  const removeButton = document.getElementById('removeGroqApiKeyBtn');
-  const environmentButton = document.getElementById('useEnvironmentGroqApiKeyBtn');
-
-  const updateStatus = nextSettings => {
-    settings = nextSettings;
-    document.getElementById('groqApiKeyStatus').textContent =
-      `${describeSource(settings)} Model: ${settings.model}.`;
-    document.querySelector('label[for="groqApiKeyInput"]').textContent =
-      settings.source === 'dashboard' ? 'Replace Groq API key' : 'Groq API key';
-    removeButton.hidden = settings.source === 'none' || settings.source === 'disabled';
-    environmentButton.hidden = !settings.environmentConfigured || settings.source === 'environment';
+  const setError = (element, err) => {
+    element.textContent = err.message || 'Could not save API credentials.';
+    element.hidden = false;
+  };
+  const refresh = async successMessage => {
+    await renderApiManagementTab(contentEl);
+    if (successMessage) toast(successMessage);
   };
 
-  form.addEventListener('submit', async event => {
+  document.getElementById('refreshApiUsage').addEventListener('click', async event => {
+    const button = event.currentTarget;
+    button.disabled = true;
+    try {
+      await renderApiManagementTab(contentEl);
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  document.getElementById('managedGroqForm').addEventListener('submit', async event => {
     event.preventDefault();
+    const form = event.currentTarget;
+    const errorEl = document.getElementById('managedGroqError');
+    const button = form.querySelector('button[type="submit"]');
     errorEl.hidden = true;
-    saveButton.disabled = true;
+    button.disabled = true;
     try {
-      const result = await Api.setGroqApiKey(input.value);
-      input.value = '';
-      updateStatus(result.settings);
-      toast('Groq API key saved.');
+      await Api.setManagedGroqApiKey(form.elements.apiKey.value);
+      await refresh('Groq API key saved.');
     } catch (err) {
-      errorEl.textContent = err.message || 'Could not save the Groq API key.';
-      errorEl.hidden = false;
+      setError(errorEl, err);
     } finally {
-      saveButton.disabled = false;
+      button.disabled = false;
     }
   });
 
-  removeButton.addEventListener('click', async () => {
+  document.getElementById('removeManagedGroq').addEventListener('click', async event => {
     if (!window.confirm('Remove the active Groq key and disable Groq API requests?')) return;
+    const button = event.currentTarget;
+    const errorEl = document.getElementById('managedGroqError');
     errorEl.hidden = true;
-    removeButton.disabled = true;
+    button.disabled = true;
     try {
-      const result = await Api.removeGroqApiKey();
-      input.value = '';
-      updateStatus(result.settings);
-      toast('Groq API key removed. The chatbot local response engine remains available.');
+      await Api.removeManagedGroqApiKey();
+      await refresh('Groq API key removed and disabled.');
     } catch (err) {
-      errorEl.textContent = err.message || 'Could not remove the Groq API key.';
-      errorEl.hidden = false;
+      setError(errorEl, err);
     } finally {
-      removeButton.disabled = false;
+      button.disabled = false;
     }
   });
 
-  environmentButton.addEventListener('click', async () => {
+  document.getElementById('environmentGroq').addEventListener('click', async event => {
+    const button = event.currentTarget;
+    const errorEl = document.getElementById('managedGroqError');
     errorEl.hidden = true;
-    environmentButton.disabled = true;
+    button.disabled = true;
     try {
-      const result = await Api.useEnvironmentGroqApiKey();
-      input.value = '';
-      updateStatus(result.settings);
-      toast(result.settings.source === 'environment'
-        ? 'Server environment Groq key is active.'
-        : 'Dashboard key removed; no environment Groq key is configured.');
+      await Api.useEnvironmentGroqApiKey();
+      await refresh('Groq environment configuration restored.');
     } catch (err) {
-      errorEl.textContent = err.message || 'Could not restore the server environment key.';
-      errorEl.hidden = false;
+      setError(errorEl, err);
     } finally {
-      environmentButton.disabled = false;
+      button.disabled = false;
     }
+  });
+
+  document.getElementById('managedCloudinaryForm').addEventListener('submit', async event => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const errorEl = document.getElementById('managedCloudinaryError');
+    const button = form.querySelector('button[type="submit"]');
+    errorEl.hidden = true;
+    button.disabled = true;
+    try {
+      await Api.setManagedCloudinaryCredentials({
+        cloudName: form.elements.cloudName.value,
+        apiKey: form.elements.apiKey.value,
+        apiSecret: form.elements.apiSecret.value
+      });
+      await refresh('Cloudinary credentials saved.');
+    } catch (err) {
+      setError(errorEl, err);
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  document.getElementById('removeManagedCloudinary').addEventListener('click', async event => {
+    if (!window.confirm('Remove the managed Cloudinary credentials and disable Cloudinary? Uploads will use local storage.')) return;
+    const button = event.currentTarget;
+    const errorEl = document.getElementById('managedCloudinaryError');
+    errorEl.hidden = true;
+    button.disabled = true;
+    try {
+      await Api.removeManagedCloudinaryCredentials();
+      await refresh('Cloudinary credentials removed and disabled.');
+    } catch (err) {
+      setError(errorEl, err);
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  document.getElementById('environmentCloudinary').addEventListener('click', async event => {
+    const button = event.currentTarget;
+    const errorEl = document.getElementById('managedCloudinaryError');
+    errorEl.hidden = true;
+    button.disabled = true;
+    try {
+      await Api.useEnvironmentCloudinaryCredentials();
+      await refresh('Cloudinary environment credentials restored.');
+    } catch (err) {
+      setError(errorEl, err);
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  document.getElementById('addCustomProviderForm').addEventListener('submit', async event => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const errorEl = document.getElementById('addCustomProviderError');
+    const button = form.querySelector('button[type="submit"]');
+    errorEl.hidden = true;
+    button.disabled = true;
+    try {
+      await Api.addCustomApiProvider({
+        name: form.elements.name.value,
+        apiKey: form.elements.apiKey.value
+      });
+      await refresh('Custom API provider added.');
+    } catch (err) {
+      setError(errorEl, err);
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  contentEl.querySelectorAll('.customProviderForm').forEach(form => {
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      const errorEl = form.querySelector('.customProviderError');
+      const button = form.querySelector('button[type="submit"]');
+      errorEl.hidden = true;
+      button.disabled = true;
+      try {
+        await Api.updateCustomApiProvider(form.dataset.providerId, {
+          name: form.elements.name.value,
+          apiKey: form.elements.apiKey.value
+        });
+        await refresh('Custom API provider updated.');
+      } catch (err) {
+        setError(errorEl, err);
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    form.querySelector('.removeCustomProvider').addEventListener('click', async event => {
+      if (!window.confirm(`Remove ${form.elements.name.value} from API Management?`)) return;
+      const button = event.currentTarget;
+      const errorEl = form.querySelector('.customProviderError');
+      errorEl.hidden = true;
+      button.disabled = true;
+      try {
+        await Api.removeCustomApiProvider(form.dataset.providerId);
+        await refresh('Custom API provider removed.');
+      } catch (err) {
+        setError(errorEl, err);
+      } finally {
+        button.disabled = false;
+      }
+    });
   });
 }
 

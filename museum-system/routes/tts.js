@@ -1,5 +1,6 @@
 const express = require('express');
 const chatApiKey = require('../db/chat-api-key');
+const apiUsage = require('../db/api-usage');
 
 const router = express.Router();
 
@@ -204,10 +205,12 @@ router.post('/translate', async (req, res) => {
 
   const systemPrompt = getSystemPrompt(targetLang);
 
+  let groqResponse;
+  let usageRecorded = false;
   try {
     console.log(`[Translation] Translating to ${targetLang} using Groq openai/gpt-oss-120b...`);
 
-    const response = await fetch(`${GROQ_API_BASE}/chat/completions`, {
+    groqResponse = await fetch(`${GROQ_API_BASE}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -227,13 +230,26 @@ router.post('/translate', async (req, res) => {
       })
     });
 
-    if (!response.ok) {
-      const errBody = await response.text();
-      console.error('[Translation] Groq API error:', response.status, errBody);
-      return res.status(502).json({ error: 'Translation service error: ' + response.status });
+    if (!groqResponse.ok) {
+      await apiUsage.recordGroqUsageSafely({
+        service: 'translation',
+        model: 'openai/gpt-oss-120b',
+        response: groqResponse
+      });
+      usageRecorded = true;
+      const errBody = await groqResponse.text();
+      console.error('[Translation] Groq API error:', groqResponse.status, errBody);
+      return res.status(502).json({ error: 'Translation service error: ' + groqResponse.status });
     }
 
-    const data = await response.json();
+    const data = await groqResponse.json();
+    await apiUsage.recordGroqUsageSafely({
+      service: 'translation',
+      model: 'openai/gpt-oss-120b',
+      response: groqResponse,
+      usage: data.usage
+    });
+    usageRecorded = true;
     const msg = data.choices && data.choices[0] && data.choices[0].message;
     // gpt-oss-120b is a reasoning model — content holds the final answer
     let translatedText = (msg && msg.content || '').trim();
@@ -255,6 +271,13 @@ router.post('/translate', async (req, res) => {
     console.log(`[Translation] Done (${targetLang}): "${translatedText.substring(0, 60)}..."`);
     res.json({ translatedText });
   } catch (err) {
+    if (!usageRecorded) {
+      await apiUsage.recordGroqUsageSafely({
+        service: 'translation',
+        model: 'openai/gpt-oss-120b',
+        response: groqResponse
+      });
+    }
     console.error('[Translation] Groq request threw:', err.message);
     res.status(502).json({ error: 'Translation failed: ' + err.message });
   }
@@ -290,13 +313,15 @@ router.post('/speak', async (req, res) => {
     return res.status(500).json({ error: 'Failed to load text-to-speech settings.' });
   }
   if (groqKey && groqKey.trim()) {
+    let groqResponse;
+    let usageRecorded = false;
     try {
       console.log(`[TTS] Generating speech with Groq Orpheus (canopylabs/orpheus-v1-english)...`);
 
       const controller = new AbortController();
       const groqTimeout = setTimeout(() => controller.abort(), 20000);
 
-      const response = await fetch(`${GROQ_API_BASE}/audio/speech`, {
+      groqResponse = await fetch(`${GROQ_API_BASE}/audio/speech`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -312,8 +337,16 @@ router.post('/speak', async (req, res) => {
       });
       clearTimeout(groqTimeout);
 
-      if (response.ok) {
-        const audioBuffer = await response.arrayBuffer();
+      await apiUsage.recordGroqUsageSafely({
+        service: 'speech',
+        model: 'canopylabs/orpheus-v1-english',
+        response: groqResponse,
+        audioCharacters: cleanText.length
+      });
+      usageRecorded = true;
+
+      if (groqResponse.ok) {
+        const audioBuffer = await groqResponse.arrayBuffer();
         const buf = Buffer.from(audioBuffer);
         audioCache.set(cacheKey, buf);
         audioCacheMeta.set(cacheKey, { type: 'audio/wav', provider: 'groq-orpheus' });
@@ -323,10 +356,18 @@ router.post('/speak', async (req, res) => {
         console.log(`[TTS] Groq Orpheus audio generated (${buf.byteLength} bytes, WAV).`);
         return res.send(buf);
       } else {
-        const errText = await response.text();
-        console.warn(`[TTS] Groq Orpheus returned status ${response.status}: ${errText}. Falling back to Google TTS.`);
+        const errText = await groqResponse.text();
+        console.warn(`[TTS] Groq Orpheus returned status ${groqResponse.status}: ${errText}. Falling back to Google TTS.`);
       }
     } catch (err) {
+      if (!usageRecorded) {
+        await apiUsage.recordGroqUsageSafely({
+          service: 'speech',
+          model: 'canopylabs/orpheus-v1-english',
+          response: groqResponse,
+          audioCharacters: cleanText.length
+        });
+      }
       if (err.name === 'AbortError') {
         console.warn('[TTS] Groq Orpheus request timed out. Falling back to Google TTS.');
       } else {
