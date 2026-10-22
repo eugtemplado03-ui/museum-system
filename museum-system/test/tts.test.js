@@ -220,6 +220,65 @@ describe('Groq chat, translation, and speech API', () => {
     }
   });
 
+  it('POST /api/tts/speak retries once after a short Groq rate limit', async () => {
+    const originalFetch = global.fetch;
+    jest.spyOn(chatApiKey, 'getGroqConfiguration')
+      .mockResolvedValue({ apiKey: 'test-groq-key' });
+    const usageSpy = jest.spyOn(apiUsage, 'recordGroqUsageSafely').mockResolvedValue();
+    global.fetch = jest.fn()
+      .mockResolvedValueOnce(new Response('rate limited', {
+        status: 429,
+        headers: { 'retry-after': '0' }
+      }))
+      .mockResolvedValueOnce(new Response(makeWavBuffer(Buffer.from([1, 2])), {
+        status: 200,
+        headers: { 'Content-Type': 'audio/wav' }
+      }));
+
+    try {
+      const res = await request(app)
+        .post('/api/tts/speak')
+        .send({ text: `Short Groq rate limit ${Date.now()}`, lang: 'en' });
+
+      expect(res.status).toBe(200);
+      expect(res.headers['x-tts-provider']).toBe('groq-orpheus');
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(usageSpy).toHaveBeenCalledTimes(2);
+      expect(usageSpy.mock.calls[0][0].response.status).toBe(429);
+      expect(usageSpy.mock.calls[1][0].response.status).toBe(200);
+    } finally {
+      global.fetch = originalFetch;
+    }
+  });
+
+  it('POST /api/tts/speak returns a helpful 429 when Groq rate limit needs a longer wait', async () => {
+    const originalFetch = global.fetch;
+    jest.spyOn(chatApiKey, 'getGroqConfiguration')
+      .mockResolvedValue({ apiKey: 'test-groq-key' });
+    const usageSpy = jest.spyOn(apiUsage, 'recordGroqUsageSafely').mockResolvedValue();
+    global.fetch = jest.fn(async () => new Response('rate limited', {
+      status: 429,
+      headers: { 'retry-after': '45' }
+    }));
+
+    try {
+      const res = await request(app)
+        .post('/api/tts/speak')
+        .send({ text: `Long Groq rate limit ${Date.now()}`, lang: 'en' });
+
+      expect(res.status).toBe(429);
+      expect(res.headers['retry-after']).toBe('45');
+      expect(res.body.code).toBe('GROQ_TTS_RATE_LIMITED');
+      expect(res.body.retryAfterSeconds).toBe(45);
+      expect(res.body.error).toContain('wait at least 45 seconds');
+      expect(res.body.error).toContain('audio limits');
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(usageSpy).toHaveBeenCalledTimes(1);
+    } finally {
+      global.fetch = originalFetch;
+    }
+  });
+
   it.each([
     ['tl', 'Filipino (Tagalog)'],
     ['cb', 'Cebuano (Bisaya)'],

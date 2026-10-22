@@ -349,7 +349,7 @@
                 <div><span>Location</span><b>${escapeHtml(exhibit.location||'—')}</b></div>
               </div>
               <div style="display:flex; gap:8px; align-items:center; margin-top:6px;">
-                <label for="langSelect" style="font-size:13px; font-weight:700;">Text &amp; voice language:</label>
+                <label for="langSelect" style="font-size:13px; font-weight:700;">Text language:</label>
                 <select id="langSelect" style="padding:6px 8px; font-size:14px;">
                   <option value="original">Original (English)</option>
                   <option value="tl">Tagalog (Filipino)</option>
@@ -357,7 +357,7 @@
                   <option value="hil">Hiligaynon (Ilonggo)</option>
                 </select>
               </div>
-              <div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">Groq voice narration currently supports English only; text translation supports Tagalog and Bisaya.</div>
+              <div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">Voice narration is available in English only. Tagalog, Bisaya, and Hiligaynon translations remain available as text.</div>
               <div class="plaque-cat-detail">Category: <strong>${escapeHtml(exhibit.category)}</strong></div>
               <div class="plaque-desc" id="plaqueDesc" data-desc-original="${escapeHtml(exhibit.description||'')||''}" data-desc-tl="${escapeHtml(exhibit.description_tl||'')||''}" data-desc-cb="${escapeHtml(exhibit.description_cb||'')||''}" data-desc-hil="${escapeHtml(exhibit.description_hil||'')||''}">
                 ${escapeHtml(exhibit.description||'No description on file yet.')}
@@ -668,10 +668,15 @@
       let _ttsSeq = 0;
       let _ttsAbortCtrl = null;
 
+      function isSpeechLanguageSupported() {
+        return !langSelect || langSelect.value === 'original';
+      }
+
       function setStatus(msg, isLoading) {
         statusEl.textContent = msg;
-        playBtn.disabled  = isLoading || false;
+        playBtn.disabled  = isLoading || !isSpeechLanguageSupported();
         stopBtn.disabled  = !isLoading;
+        playBtn.title = isSpeechLanguageSupported() ? '' : 'Groq voice narration is available in English only.';
       }
 
       function stopAudio() {
@@ -726,6 +731,7 @@
 
       // ── Speak text using high-fidelity natural voice streaming ──────────
       async function speakCurrent() {
+        if (!isSpeechLanguageSupported()) return;
         stopDirVoice();
         stopAudio();
         const textToSpeak = _currentText || _cache.original;
@@ -784,6 +790,7 @@
         langSelect.addEventListener('change', async () => {
           stopAudio();
           const v = langSelect.value;
+          setStatus('', false);
           if (v === 'original') {
             _currentText = _cache.original;
             descEl.textContent = _currentText || 'No description on file yet.';

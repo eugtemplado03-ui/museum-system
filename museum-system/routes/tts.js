@@ -12,6 +12,52 @@ const audioCacheMeta = new Map();
 
 // Groq API base URL
 const GROQ_API_BASE = 'https://api.groq.com/openai/v1';
+const MAX_TTS_RATE_LIMIT_RETRIES = 1;
+const MAX_AUTOMATIC_TTS_RETRY_MS = 2000;
+
+function getRetryAfterMs(response) {
+  const retryAfter = response.headers && response.headers.get('retry-after');
+  if (!retryAfter) return null;
+
+  const seconds = Number(retryAfter);
+  if (Number.isFinite(seconds) && seconds >= 0) return seconds * 1000;
+
+  const retryAt = Date.parse(retryAfter);
+  return Number.isNaN(retryAt) ? null : Math.max(0, retryAt - Date.now());
+}
+
+function getTtsRateLimitMessage(retryAfterMs) {
+  if (retryAfterMs === null) {
+    return 'Groq speech is temporarily rate-limited. Please wait a little while and try again. If this continues, check your Groq organization request and audio limits.';
+  }
+  if (retryAfterMs < 1000) {
+    return 'Groq speech is temporarily rate-limited. Please try again shortly. If this continues, check your Groq organization request and audio limits.';
+  }
+
+  const waitSeconds = Math.ceil(retryAfterMs / 1000);
+  return `Groq speech is temporarily rate-limited. Please wait at least ${waitSeconds} seconds and try again. If this continues, check your Groq organization request and audio limits.`;
+}
+
+async function fetchSpeechWithRateLimitRetry(makeRequest, onResponse) {
+  let retryCount = 0;
+  let response = await makeRequest();
+  await onResponse(response);
+
+  const retryAfterMs = response.status === 429 ? getRetryAfterMs(response) : null;
+  if (
+    retryCount >= MAX_TTS_RATE_LIMIT_RETRIES ||
+    retryAfterMs === null ||
+    retryAfterMs > MAX_AUTOMATIC_TTS_RETRY_MS
+  ) {
+    return response;
+  }
+
+  retryCount++;
+  await new Promise(resolve => setTimeout(resolve, retryAfterMs));
+  response = await makeRequest();
+  await onResponse(response);
+  return response;
+}
 
 // Groq Orpheus accepts at most 200 characters per speech request.
 function splitIntoChunks(str, maxLen = 200) {
@@ -414,13 +460,18 @@ router.post('/speak', async (req, res) => {
   const audioBuffers = [];
   let groqResponse;
   let usageRecorded = false;
+  let currentChunk = '';
 
   try {
     for (const chunk of chunks) {
+      currentChunk = chunk;
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 30000);
       try {
-        groqResponse = await fetch(`${GROQ_API_BASE}/audio/speech`, {
+        groqResponse = await fetchSpeechWithRateLimitRetry(() => {
+          groqResponse = null;
+          usageRecorded = false;
+          return fetch(`${GROQ_API_BASE}/audio/speech`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -433,21 +484,34 @@ router.post('/speak', async (req, res) => {
             input: chunk
           }),
           signal: controller.signal
+          });
+        }, async response => {
+          groqResponse = response;
+          await apiUsage.recordGroqUsageSafely({
+            service: 'speech',
+            model: speechConfiguration.model,
+            response,
+            audioCharacters: chunk.length
+          });
+          usageRecorded = true;
         });
       } finally {
         clearTimeout(timeout);
       }
 
-      await apiUsage.recordGroqUsageSafely({
-        service: 'speech',
-        model: speechConfiguration.model,
-        response: groqResponse,
-        audioCharacters: chunk.length
-      });
-      usageRecorded = true;
-
       if (!groqResponse.ok) {
         console.error(`[TTS] Groq speech request failed (${groqResponse.status}).`);
+        if (groqResponse.status === 429) {
+          const retryAfterMs = getRetryAfterMs(groqResponse);
+          const retryAfter = groqResponse.headers.get('retry-after');
+          if (retryAfter) res.set('Retry-After', retryAfter);
+          return res.status(429).json({
+            error: getTtsRateLimitMessage(retryAfterMs),
+            code: 'GROQ_TTS_RATE_LIMITED',
+            language: lang,
+            retryAfterSeconds: retryAfterMs === null ? null : Math.ceil(retryAfterMs / 1000)
+          });
+        }
         const error = groqResponse.status === 401
           ? 'Groq rejected the configured API key. Update GROQ_API_KEY in the server environment or API Management.'
           : `Groq speech generation failed (HTTP ${groqResponse.status}). Please try again.`;
@@ -468,7 +532,6 @@ router.post('/speak', async (req, res) => {
         });
       }
       audioBuffers.push(audioBuffer);
-      usageRecorded = false;
     }
 
     usageRecorded = true;
@@ -485,7 +548,7 @@ router.post('/speak', async (req, res) => {
         service: 'speech',
         model: speechConfiguration.model,
         response: groqResponse,
-        audioCharacters: chunks[audioBuffers.length] ? chunks[audioBuffers.length].length : 0
+        audioCharacters: currentChunk.length
       });
     }
     console.error('[TTS] Groq speech request failed:', err.message);

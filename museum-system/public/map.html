@@ -2656,7 +2656,7 @@
         <button class="lang-btn" data-lang="cb">Bisaya (Cebuano)</button>
         <button class="lang-btn" data-lang="hil">Hiligaynon (Ilonggo)</button>
       </div>
-      <p style="margin:6px 0 0; font-size:11px; color:#94a3b8;">Audio narration follows the selected language.</p>
+      <p style="margin:6px 0 0; font-size:11px; color:#94a3b8;">Voice narration is available in English only. Translated exhibit text remains available in Tagalog, Bisaya, and Hiligaynon.</p>
 
       <p class="drawer-desc" id="drawerDesc">
         Exhibit details loading…
@@ -4612,6 +4612,25 @@
       let _mapAudioSource = null; // 'dir' | 'drawer' | null
       let _mapAudioAbortCtrl = null;
 
+      function isGroqSpeechLanguageSupported(lang) {
+        return lang === 'en' || lang === 'ar';
+      }
+
+      function updateDrawerSpeechAvailability(lang) {
+        const drawerBtn = document.getElementById('btnAudioPlay');
+        const status = document.getElementById('audioStatus');
+        const supported = isGroqSpeechLanguageSupported(lang);
+        if (drawerBtn) {
+          drawerBtn.disabled = !supported;
+          drawerBtn.title = supported ? '' : 'Groq voice narration is available in English only.';
+        }
+        if (status) {
+          status.textContent = supported
+            ? 'Listen to exhibit narration'
+            : 'Voice narration is English-only; translated text remains available.';
+        }
+      }
+
       // Stop and cleanly unload any audio (prevents duplicate voices, unbinds error handlers)
       function stopAudio() {
         _mapAudioSeq++;
@@ -4650,8 +4669,9 @@
         const drawerBtn = document.getElementById('btnAudioPlay');
         if (drawerBtn) {
           drawerBtn.textContent = '▶ Play Audio';
-          drawerBtn.disabled = false;
         }
+        const activeTab = document.querySelector('.lang-btn.active');
+        updateDrawerSpeechAvailability(activeTab ? activeTab.dataset.lang : 'en');
 
         const st = document.getElementById('audioStatus');
         if (st && (st.textContent.includes('Playing') || st.textContent.includes('Loading'))) {
@@ -4662,6 +4682,10 @@
       // Audio narration uses Groq-generated server audio only.
       async function playAudio(text, lang = 'en', source = 'drawer') {
         if (!text || !text.trim()) return;
+        if (source === 'drawer' && !isGroqSpeechLanguageSupported(lang)) {
+          updateDrawerSpeechAvailability(lang);
+          return;
+        }
 
         // If user clicked the same audio button while playing/loading, toggle STOP cleanly
         if (_mapAudioSource === source && (_mapAudioEl || _mapAudioAbortCtrl || isTtsPlaying)) {
@@ -5307,6 +5331,7 @@
           document.querySelectorAll('.lang-btn').forEach(t => {
             t.classList.toggle('active', t.dataset.lang === lang);
           });
+          updateDrawerSpeechAvailability(lang);
 
           const descEl = document.getElementById('drawerDesc');
           if (!descEl) return;

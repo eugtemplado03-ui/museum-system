@@ -144,7 +144,10 @@ Groq Orpheus speech currently supports English and Saudi Arabic only.
 speech generation for Tagalog, Cebuano/Bisaya, or Hiligaynon; the app reports
 those languages as unsupported instead of sending their speech to another
 provider. Translation and chatbot responses in those languages continue to
-use Groq text models.
+use Groq text models. If Groq returns HTTP 429 for speech, the app retries
+once when the provider gives a short retry window; longer waits are reported
+to the visitor. Continued rate limits require waiting for the Groq limit to
+reset or checking the organization audio/request limits in the Groq console.
 For Cloudinary, configure `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and
 `CLOUDINARY_API_SECRET`, or enter those credentials in API Management.
 
