@@ -131,15 +131,27 @@ reflect other apps using the same organization. Usage history is retained for
 up to 90 days; tracking requires MongoDB. This is not an account-wide billing
 report, and the dashboard does not estimate cost.
 
-Groq is used by the museum chat, translation, and text-to-speech services.
-Cloudinary is used for remote image/video uploads and database backups. Each
-integration can use server environment variables or dashboard-managed
-credentials; a dashboard override can be removed to return to the environment
-configuration, or disabled independently.
+Groq is used by the museum chat and description translation. Groq's hosted
+Orpheus speech models currently support English and Saudi Arabic, so English
+narration uses Groq while local-language narration uses a separate speech
+provider. Cloudinary is used for remote image/video uploads and database
+backups. Each integration can use server environment variables or
+dashboard-managed credentials; a dashboard override can be removed to return
+to the environment configuration, or disabled independently.
 
 For Groq, set the optional `GROQ_API_KEY` and `GROQ_MODEL` environment
 variables, or enter a key from
 [console.groq.com/keys](https://console.groq.com/keys) in API Management.
+For multilingual exhibit narration, configure `FISH_AUDIO_API_KEY` and
+language-specific voice model IDs (`FISH_AUDIO_VOICE_ID_TL`,
+`FISH_AUDIO_VOICE_ID_CEB`, and `FISH_AUDIO_VOICE_ID_HIL`) in the server
+environment. Select voices that support the narration language and test sample
+exhibits before publishing. The optional shared `FISH_AUDIO_VOICE_ID` can be
+used if one model is suitable for all selected languages. The default model is
+`s2.1-pro-free`; the audio service must be configured before server narration
+is available for Cebuano/Bisaya and Hiligaynon. See
+[Fish Audio's TTS API documentation](https://docs.fish.audio/api-reference/endpoint/openapi-v1/text-to-speech)
+for API and model details.
 For Cloudinary, configure `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and
 `CLOUDINARY_API_SECRET`, or enter those credentials in API Management.
 

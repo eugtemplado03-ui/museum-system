@@ -4808,7 +4808,12 @@
           // Cancelled while waiting for response
           if (currentSeq !== _mapAudioSeq) return;
 
-          if (!resp.ok) throw new Error(`Server returned ${resp.status}`);
+          if (!resp.ok) {
+            const failure = await resp.json().catch(() => ({}));
+            const error = new Error(failure.error || `Server returned ${resp.status}`);
+            error.code = failure.code;
+            throw error;
+          }
 
           const blob = await resp.blob();
           if (currentSeq !== _mapAudioSeq) return;
@@ -4870,6 +4875,11 @@
         } catch (err) {
           if (err.name === 'AbortError') return;
           if (currentSeq === _mapAudioSeq) {
+            if (err.code === 'MULTILINGUAL_TTS_NOT_CONFIGURED' || err.code === 'MULTILINGUAL_TTS_FAILED') {
+              stopAudio();
+              if (st) st.textContent = err.message;
+              return;
+            }
             console.warn('[Map Audio] server voice request failed, using speech synthesis fallback:', err.message);
             startBrowserSpeech(text);
           }

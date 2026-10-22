@@ -53,27 +53,52 @@ describe('TTS and Translation API', () => {
     expect(text.toLowerCase()).not.toContain('mabuhay');
   }, 15000);
 
-  it('POST /api/tts/speak reports that unsupported local-language voices need a device voice', async () => {
-    const res = await request(app)
-      .post('/api/tts/speak')
-      .send({
-        text: 'Maayong pag-abot sa Museo Sang Bata sa Negros.',
-        lang: 'hil'
-      });
+  it('POST /api/tts/speak explains missing multilingual TTS configuration', async () => {
+    const envKeys = [
+      'FISH_AUDIO_API_KEY',
+      'FISH_AUDIO_VOICE_ID',
+      'FISH_AUDIO_REFERENCE_ID',
+      'FISH_AUDIO_VOICE_ID_HIL'
+    ];
+    const savedEnv = Object.fromEntries(envKeys.map(key => [key, process.env[key]]));
+    envKeys.forEach(key => { process.env[key] = ''; });
+    try {
+      const res = await request(app)
+        .post('/api/tts/speak')
+        .send({
+          text: 'Maayong pag-abot sa Museo Sang Bata sa Negros.',
+          lang: 'hil'
+        });
 
-    expect(res.status).toBe(503);
-    expect(res.body.code).toBe('DEVICE_VOICE_REQUIRED');
-    expect(res.body.language).toBe('hil');
+      expect(res.status).toBe(503);
+      expect(res.body.code).toBe('MULTILINGUAL_TTS_NOT_CONFIGURED');
+      expect(res.body.language).toBe('hil');
+      expect(res.body.error).toContain('FISH_AUDIO_VOICE_ID_HIL');
+    } finally {
+      envKeys.forEach(key => {
+        if (savedEnv[key] === undefined) delete process.env[key];
+        else process.env[key] = savedEnv[key];
+      });
+    }
   }, 15000);
 
   it.each([
     ['cb', 'Cebuano/Bisaya'],
     ['hil', 'Hiligaynon']
-  ])('POST /api/tts/speak asks for a device %s voice instead of mispronouncing it', async (lang, languageName) => {
+  ])('POST /api/tts/speak explains that %s narration needs Fish Audio setup', async (lang, languageName) => {
     const keySpy = jest.spyOn(chatApiKey, 'getGroqConfiguration')
       .mockResolvedValue({ apiKey: 'test-groq-key' });
     const originalFetch = global.fetch;
+    const envKeys = [
+      'FISH_AUDIO_API_KEY',
+      'FISH_AUDIO_VOICE_ID',
+      'FISH_AUDIO_REFERENCE_ID',
+      'FISH_AUDIO_VOICE_ID_CEB',
+      'FISH_AUDIO_VOICE_ID_HIL'
+    ];
+    const savedEnv = Object.fromEntries(envKeys.map(key => [key, process.env[key]]));
     global.fetch = jest.fn();
+    envKeys.forEach(key => { process.env[key] = ''; });
 
     try {
       const res = await request(app)
@@ -81,14 +106,90 @@ describe('TTS and Translation API', () => {
         .send({ text: `Language-specific voice test ${lang} ${Date.now()}`, lang });
 
       expect(res.status).toBe(503);
-      expect(res.body.code).toBe('DEVICE_VOICE_REQUIRED');
+      expect(res.body.code).toBe('MULTILINGUAL_TTS_NOT_CONFIGURED');
       expect(res.body.language).toBe(lang);
       expect(res.body.error).toContain(languageName);
       expect(keySpy).not.toHaveBeenCalled();
       expect(global.fetch).not.toHaveBeenCalled();
     } finally {
       global.fetch = originalFetch;
+      envKeys.forEach(key => {
+        if (savedEnv[key] === undefined) delete process.env[key];
+        else process.env[key] = savedEnv[key];
+      });
       keySpy.mockRestore();
+    }
+  });
+
+  it.each([
+    ['tl', 'FISH_AUDIO_VOICE_ID_TL'],
+    ['cb', 'FISH_AUDIO_VOICE_ID_CEB'],
+    ['hil', 'FISH_AUDIO_VOICE_ID_HIL']
+  ])('POST /api/tts/speak uses Fish Audio for %s with a language-specific voice', async (lang, voiceEnvName) => {
+    const keySpy = jest.spyOn(chatApiKey, 'getGroqConfiguration')
+      .mockResolvedValue({ apiKey: 'test-groq-key' });
+    const originalFetch = global.fetch;
+    const envKeys = ['FISH_AUDIO_API_KEY', 'FISH_AUDIO_MODEL', voiceEnvName];
+    const savedEnv = Object.fromEntries(envKeys.map(key => [key, process.env[key]]));
+    process.env.FISH_AUDIO_API_KEY = 'test-fish-key';
+    process.env.FISH_AUDIO_MODEL = 's2.1-pro-free';
+    process.env[voiceEnvName] = `test-voice-${lang}`;
+    global.fetch = jest.fn(async () => new Response(Buffer.from('test-fish-audio'), {
+      status: 200,
+      headers: { 'Content-Type': 'audio/mpeg' }
+    }));
+
+    try {
+      const res = await request(app)
+        .post('/api/tts/speak')
+        .send({ text: `Fish voice test ${lang} ${Date.now()}`, lang });
+
+      expect(res.status).toBe(200);
+      expect(res.headers['x-tts-provider']).toBe('fish-audio');
+      expect(res.headers['content-type']).toContain('audio/mpeg');
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(global.fetch.mock.calls[0][0]).toBe('https://api.fish.audio/v1/tts');
+      expect(global.fetch.mock.calls[0][1].headers.Authorization).toBe('Bearer test-fish-key');
+      expect(global.fetch.mock.calls[0][1].headers.model).toBe('s2.1-pro-free');
+      expect(JSON.parse(global.fetch.mock.calls[0][1].body)).toMatchObject({
+        text: expect.stringContaining('Fish voice test'),
+        reference_id: `test-voice-${lang}`,
+        language: { tl: 'tl', cb: 'ceb', hil: 'hil' }[lang],
+        format: 'mp3'
+      });
+      expect(keySpy).not.toHaveBeenCalled();
+    } finally {
+      global.fetch = originalFetch;
+      envKeys.forEach(key => {
+        if (savedEnv[key] === undefined) delete process.env[key];
+        else process.env[key] = savedEnv[key];
+      });
+      keySpy.mockRestore();
+    }
+  });
+
+  it('POST /api/tts/speak does not substitute a different language when Fish Audio rejects a Cebuano voice', async () => {
+    const originalFetch = global.fetch;
+    const envKeys = ['FISH_AUDIO_API_KEY', 'FISH_AUDIO_VOICE_ID_CEB'];
+    const savedEnv = Object.fromEntries(envKeys.map(key => [key, process.env[key]]));
+    process.env.FISH_AUDIO_API_KEY = 'test-fish-key';
+    process.env.FISH_AUDIO_VOICE_ID_CEB = 'test-cebuano-voice';
+    global.fetch = jest.fn(async () => new Response('unsupported test voice', { status: 400 }));
+
+    try {
+      const res = await request(app)
+        .post('/api/tts/speak')
+        .send({ text: `Unsupported voice test ${Date.now()}`, lang: 'cb' });
+
+      expect(res.status).toBe(502);
+      expect(res.body.code).toBe('MULTILINGUAL_TTS_FAILED');
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+    } finally {
+      global.fetch = originalFetch;
+      envKeys.forEach(key => {
+        if (savedEnv[key] === undefined) delete process.env[key];
+        else process.env[key] = savedEnv[key];
+      });
     }
   });
 
@@ -97,6 +198,14 @@ describe('TTS and Translation API', () => {
       .mockResolvedValue({ apiKey: 'test-groq-key' });
     const usageSpy = jest.spyOn(apiUsage, 'recordGroqUsageSafely').mockResolvedValue();
     const originalFetch = global.fetch;
+    const fishEnvKeys = [
+      'FISH_AUDIO_API_KEY',
+      'FISH_AUDIO_VOICE_ID',
+      'FISH_AUDIO_REFERENCE_ID',
+      'FISH_AUDIO_VOICE_ID_TL'
+    ];
+    const savedFishEnv = Object.fromEntries(fishEnvKeys.map(key => [key, process.env[key]]));
+    fishEnvKeys.forEach(key => { process.env[key] = ''; });
     global.fetch = jest.fn(async () => new Response(Buffer.from('test-audio'), {
       status: 200,
       headers: { 'Content-Type': 'audio/mpeg' }
@@ -115,6 +224,10 @@ describe('TTS and Translation API', () => {
       expect(keySpy).not.toHaveBeenCalled();
     } finally {
       global.fetch = originalFetch;
+      fishEnvKeys.forEach(key => {
+        if (savedFishEnv[key] === undefined) delete process.env[key];
+        else process.env[key] = savedFishEnv[key];
+      });
       keySpy.mockRestore();
       usageSpy.mockRestore();
     }

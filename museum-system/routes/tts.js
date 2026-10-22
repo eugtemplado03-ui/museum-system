@@ -67,6 +67,21 @@ function getSpeechLocale(lang) {
   return 'en';
 }
 
+function getFishAudioLanguage(lang) {
+  if (lang === 'cb') return 'ceb';
+  if (lang === 'hil') return 'hil';
+  return lang === 'tl' ? 'tl' : null;
+}
+
+function getFishAudioVoiceId(lang) {
+  const languageVoiceId = {
+    tl: process.env.FISH_AUDIO_VOICE_ID_TL,
+    cb: process.env.FISH_AUDIO_VOICE_ID_CEB,
+    hil: process.env.FISH_AUDIO_VOICE_ID_HIL
+  }[lang];
+  return (languageVoiceId || process.env.FISH_AUDIO_VOICE_ID || process.env.FISH_AUDIO_REFERENCE_ID || '').trim();
+}
+
 // Build the provider instructions for a supported translation target language.
 function getSystemPrompt(rawTargetLang) {
   const targetLang = normalizeTargetLang(rawTargetLang);
@@ -164,17 +179,24 @@ router.get('/status', async (req, res) => {
     const { apiKey } = await chatApiKey.getGroqConfiguration();
     const hasGroqKey = Boolean(apiKey);
     const hasFishKey = Boolean((process.env.FISH_AUDIO_API_KEY || '').trim());
+    const fishAudioLanguageVoices = {
+      tl: Boolean(getFishAudioVoiceId('tl')),
+      cb: Boolean(getFishAudioVoiceId('cb')),
+      hil: Boolean(getFishAudioVoiceId('hil'))
+    };
+    const fishAudioConfigured = hasFishKey && Object.values(fishAudioLanguageVoices).some(Boolean);
     res.json({
       translationConfigured: hasGroqKey,
       groqConfigured: hasGroqKey,
-      fishAudioConfigured: hasFishKey,
+      fishAudioConfigured,
+      fishAudioVoiceConfigured: Object.values(fishAudioLanguageVoices).some(Boolean),
       fishAudioModel: process.env.FISH_AUDIO_MODEL || 's2.1-pro-free',
-      fishAudioVoiceId: process.env.FISH_AUDIO_VOICE_ID || process.env.FISH_AUDIO_REFERENCE_ID || null,
+      fishAudioLanguageVoices,
       speechProviders: {
         en: hasGroqKey ? 'groq-orpheus' : 'google-tts',
-        tl: 'google-tts',
-        cb: 'device-voice-if-installed',
-        hil: 'device-voice-if-installed'
+        tl: hasFishKey && fishAudioLanguageVoices.tl ? 'fish-audio' : 'google-tts',
+        cb: hasFishKey && fishAudioLanguageVoices.cb ? 'fish-audio' : 'unconfigured',
+        hil: hasFishKey && fishAudioLanguageVoices.hil ? 'fish-audio' : 'unconfigured'
       }
     });
   } catch (err) {
@@ -300,8 +322,8 @@ router.post('/translate', async (req, res) => {
   }
 });
 
-// ── TTS endpoint (language-matched Groq / Google TTS) ──────────────
-// Use Groq's English-only Orpheus voice for English; route local languages to their own speech locale.
+// ── TTS endpoint (Groq English, Fish Audio local languages) ────────
+// Use Groq Orpheus for English and configured Fish Audio voices for local-language narration.
 router.post('/speak', async (req, res) => {
   const rawLang = (req.body && (req.body.lang || req.body.targetLang || req.body.language)) || 'tl';
   const lang = normalizeTargetLang(rawLang);
@@ -323,11 +345,70 @@ router.post('/speak', async (req, res) => {
   }
 
   const ttsLang = getSpeechLocale(lang);
-  if (!ttsLang) {
+  const fishAudioLanguage = getFishAudioLanguage(lang);
+  const fishAudioKey = (process.env.FISH_AUDIO_API_KEY || '').trim();
+  const fishAudioVoiceId = getFishAudioVoiceId(lang);
+
+  if (fishAudioLanguage && fishAudioKey && fishAudioVoiceId) {
+    let fishResponse;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    try {
+      fishResponse = await fetch('https://api.fish.audio/v1/tts', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${fishAudioKey}`,
+          'Content-Type': 'application/json',
+          'model': process.env.FISH_AUDIO_MODEL || 's2.1-pro-free'
+        },
+        body: JSON.stringify({
+          text: cleanText,
+          reference_id: fishAudioVoiceId,
+          language: fishAudioLanguage,
+          format: 'mp3'
+        }),
+        signal: controller.signal
+      });
+
+      if (fishResponse.ok) {
+        const audioBuffer = Buffer.from(await fishResponse.arrayBuffer());
+        if (audioBuffer.length) {
+          audioCache.set(cacheKey, audioBuffer);
+          audioCacheMeta.set(cacheKey, { type: 'audio/mpeg', provider: 'fish-audio' });
+          res.set('Content-Type', 'audio/mpeg');
+          res.set('Content-Length', audioBuffer.byteLength);
+          res.set('X-TTS-Provider', 'fish-audio');
+          return res.send(audioBuffer);
+        }
+      }
+
+      const errorText = fishResponse.ok ? 'empty audio response' : await fishResponse.text();
+      console.error(`[TTS] Fish Audio request failed (${fishResponse.status}): ${errorText}`);
+      if (lang !== 'tl') {
+        return res.status(502).json({
+          error: 'The multilingual voice service could not generate this narration. Check the configured voice and try again.',
+          code: 'MULTILINGUAL_TTS_FAILED',
+          language: lang
+        });
+      }
+    } catch (err) {
+      console.error('[TTS] Fish Audio request failed:', err.message);
+      if (lang !== 'tl') {
+        return res.status(502).json({
+          error: 'The multilingual voice service could not generate this narration. Check the configured voice and try again.',
+          code: 'MULTILINGUAL_TTS_FAILED',
+          language: lang
+        });
+      }
+    } finally {
+      clearTimeout(timeout);
+    }
+  } else if (fishAudioLanguage && lang !== 'tl') {
     const languageName = lang === 'cb' ? 'Cebuano/Bisaya' : 'Hiligaynon';
+    const voiceVariable = lang === 'cb' ? 'FISH_AUDIO_VOICE_ID_CEB' : 'FISH_AUDIO_VOICE_ID_HIL';
     return res.status(503).json({
-      error: `A server ${languageName} voice is not available. Try a matching voice installed on your device or select another language.`,
-      code: 'DEVICE_VOICE_REQUIRED',
+      error: `Configure FISH_AUDIO_API_KEY and ${voiceVariable} (or FISH_AUDIO_VOICE_ID) to enable ${languageName} narration.`,
+      code: 'MULTILINGUAL_TTS_NOT_CONFIGURED',
       language: lang
     });
   }
@@ -417,7 +498,7 @@ router.post('/speak', async (req, res) => {
 
     for (const chunk of chunks) {
       if (!chunk.trim()) continue;
-      const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${ttsLang}&client=tw-ob&q=${encodeURIComponent(chunk)}`;
+      const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${ttsLang || 'en'}&client=tw-ob&q=${encodeURIComponent(chunk)}`;
       const ttsResp = await fetch(googleTtsUrl, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
