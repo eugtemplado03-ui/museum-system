@@ -132,7 +132,7 @@ describe('TTS and Translation API', () => {
     }
   });
 
-  it('POST /api/tts/speak reports OpenRouter provider errors', async () => {
+  it('POST /api/tts/speak explains when OpenRouter rejects the configured API key', async () => {
     const originalFetch = global.fetch;
     const savedKey = process.env.OPENROUTER_API_KEY;
     process.env.OPENROUTER_API_KEY = 'test-openrouter-key';
@@ -145,6 +145,8 @@ describe('TTS and Translation API', () => {
 
       expect(res.status).toBe(502);
       expect(res.body.code).toBe('MULTILINGUAL_TTS_FAILED');
+      expect(res.body.error).toContain('OpenRouter rejected OPENROUTER_API_KEY');
+      expect(res.body.error).toContain('restart the app');
       expect(global.fetch).toHaveBeenCalledTimes(1);
     } finally {
       global.fetch = originalFetch;

@@ -395,8 +395,11 @@ router.post('/speak', async (req, res) => {
 
       if (!openRouterResponse.ok) {
         console.error(`[TTS] OpenRouter request failed (${openRouterResponse.status}).`);
+        const error = openRouterResponse.status === 401
+          ? 'OpenRouter rejected OPENROUTER_API_KEY. Replace it with a valid key in the server .env file and restart the app.'
+          : 'The multilingual voice service could not generate this narration. Please try again.';
         return res.status(502).json({
-          error: 'The multilingual voice service could not generate this narration. Please try again.',
+          error,
           code: 'MULTILINGUAL_TTS_FAILED',
           language: lang
         });
