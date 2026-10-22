@@ -2740,7 +2740,6 @@
           icon: '🌊',
           imagePath: 'https://museosangbata.org/wp-content/uploads/2014/11/under-the-sea-banner-260x170.jpg',
           description: 'Our flagship exhibition room dedicated to the aquatic ecosystems of Negros. Housed inside this room are five interactive exhibits exploring coral reefs, river watersheds, marine biodiversity, plastic pollution awareness, and coastal mangrove conservation.',
-          exhibitCodes: ['EX-001', 'EX-002', 'EX-007', 'EX-008', 'EX-011']
         },
         'cat_touch_play': {
           id: 'cat_touch_play',
@@ -2755,7 +2754,6 @@
           icon: '💦',
           imagePath: 'https://museosangbata.org/wp-content/uploads/2014/11/splash-banner-260x170.jpg',
           description: 'A hands-on experiential discovery room housing our live marine touch pool basin where children can gently interact with seashore creatures like sea stars, sea cucumbers, and reef fish.',
-          exhibitCodes: ['EX-003']
         },
         'cat_reading_learning': {
           id: 'cat_reading_learning',
@@ -2770,7 +2768,6 @@
           icon: '📚',
           imagePath: 'https://museosangbata.org/wp-content/uploads/2019/04/IMG_9526-260x170.jpg',
           description: 'A cozy, quiet children\'s literacy room filled with storybooks, educational reading materials, and comfortable nooks to foster a love of reading alongside museum exploration.',
-          exhibitCodes: ['EX-010']
         },
         'cat_character_heritage': {
           id: 'cat_character_heritage',
@@ -2785,7 +2782,6 @@
           icon: '🏆',
           imagePath: 'https://museosangbata.org/wp-content/uploads/2014/09/jgm-banner-260x170.jpg',
           description: 'A memorial and values-education gallery honoring late Governor Joseph G. Marañon and profiling community everyday heroes who demonstrate Filipino character, integrity, and courage.',
-          exhibitCodes: ['EX-005', 'EX-004']
         },
         'cat_toys_collections': {
           id: 'cat_toys_collections',
@@ -2800,7 +2796,6 @@
           icon: '🧸',
           imagePath: 'https://museosangbata.org/wp-content/uploads/2014/09/hampanganan-banner-260x170.jpg',
           description: 'A wonderland housing the Mara Montelibano folk toy collection from more than 50 countries, alongside vintage McDonald\'s promotional toys and a complete Beanie Babies collection.',
-          exhibitCodes: ['EX-006']
         },
         'cat_carnival_play': {
           id: 'cat_carnival_play',
@@ -2815,7 +2810,6 @@
           icon: '🎡',
           imagePath: 'https://museosangbata.org/wp-content/uploads/2019/01/image2-e1548236620227-260x170.jpeg',
           description: 'A dynamic, open-ended play laboratory built around the idea that play is learning, featuring interactive game stations, sensory puzzles, and creative hands-on exploration hubs.',
-          exhibitCodes: ['EX-009']
         }
       };
 
@@ -3082,23 +3076,51 @@
         }
       };
 
-      // Helper: Find which Category Room an exhibit belongs to
+      // Use an exhibit's floor-plan pin as the source of its room assignment.
       function findRoomForExhibit(codeOrExhibit) {
         if (!codeOrExhibit) return null;
         const code = typeof codeOrExhibit === 'object' ? codeOrExhibit.code : codeOrExhibit;
         const ex = typeof codeOrExhibit === 'object' ? codeOrExhibit : exhibitsData.find(e => e.code === code);
-        if (code) {
-          for (const room of Object.values(CATEGORY_ROOMS)) {
-            if (room.exhibitCodes.includes(code)) return room;
+        if (!ex) return null;
+
+        const floor = Number(ex.floor) === 2 ? 2 : 1;
+        const x = Number(ex.pinX);
+        const y = Number(ex.pinY);
+        if (ex.pinX !== null && ex.pinX !== undefined && ex.pinY !== null && ex.pinY !== undefined &&
+            Number.isFinite(x) && Number.isFinite(y)) {
+          let roomId = null;
+          if (floor === 2) {
+            if (x >= 13 && x <= 49 && y >= 13 && y <= 48) roomId = 'cat_toys_collections';
+            else if (x >= 50 && x <= 87 && y >= 13 && y <= 48) roomId = 'cat_carnival_play';
+          } else {
+            if (x >= 24 && x <= 76 && y >= 20 && y <= 48) roomId = 'cat_marine_nature';
+            else if (x >= 76 && x <= 90 && y >= 33 && y <= 64) roomId = 'cat_touch_play';
+            else if (x >= 6 && x <= 24 && y >= 34 && y <= 53) roomId = 'cat_reading_learning';
+            else if (x >= 6 && x <= 24 && y >= 53 && y <= 76) roomId = 'cat_character_heritage';
           }
+          if (roomId) return CATEGORY_ROOMS[roomId];
         }
-        if (ex && ex.category) {
-          const catClean = ex.category.trim().toLowerCase();
-          for (const room of Object.values(CATEGORY_ROOMS)) {
-            if (room.category.trim().toLowerCase() === catClean) return room;
-          }
+
+        const mapZoneRooms = {
+          marine_story: 'cat_marine_nature',
+          splash_zone: 'cat_touch_play',
+          reading_corner: 'cat_reading_learning',
+          maranon_heritage: 'cat_character_heritage',
+          second_floor_toys: 'cat_toys_collections',
+          second_floor_carnival: 'cat_carnival_play'
+        };
+        const mapZoneRoom = CATEGORY_ROOMS[mapZoneRooms[ex.mapZone]];
+        if (mapZoneRoom) return mapZoneRoom;
+
+        if (ex.category) {
+          const category = ex.category.trim().toLowerCase();
+          return Object.values(CATEGORY_ROOMS).find(room => room.category.toLowerCase() === category) || null;
         }
         return null;
+      }
+
+      function getExhibitsInRoom(room) {
+        return exhibitsData.filter(ex => findRoomForExhibit(ex)?.id === room.id);
       }
 
       function getRoomOffset(roomId) {
@@ -3911,16 +3933,14 @@
           if (searchQuery) {
             const q = searchQuery.toLowerCase();
             const matchRoom = room.title.toLowerCase().includes(q) || room.subtitle.toLowerCase().includes(q) || room.category.toLowerCase().includes(q);
-            const matchExhibit = room.exhibitCodes.some(code => {
-              const ex = exhibitsData.find(e => e.code === code);
-              return ex && (ex.title.toLowerCase().includes(q) || ex.code.toLowerCase().includes(q));
-            });
+            const matchExhibit = getExhibitsInRoom(room).some(ex =>
+              (ex.title || '').toLowerCase().includes(q) || (ex.code || '').toLowerCase().includes(q));
             if (!matchRoom && !matchExhibit) return;
           }
 
           const { x: posX, y: posY } = getRoomMapPosition(room);
           const color = room.color;
-          const count = room.exhibitCodes.length;
+          const count = getExhibitsInRoom(room).length;
           const countText = count === 1 ? '1 Exhibit' : `${count} Exhibits`;
 
           const pinG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -4100,7 +4120,7 @@
         if (!list) return;
 
         const roomsOnFloor = Object.values(CATEGORY_ROOMS).filter(r => r.floor === currentFloor);
-        const totalExhibits = roomsOnFloor.reduce((acc, r) => acc + r.exhibitCodes.length, 0);
+        const totalExhibits = roomsOnFloor.reduce((acc, room) => acc + getExhibitsInRoom(room).length, 0);
 
         document.getElementById('sidebarCountLabel').textContent = `${roomsOnFloor.length} Rooms • ${totalExhibits} Exhibits`;
         const mobileBadge = document.getElementById('mobileSidebarCountBadge');
@@ -4126,15 +4146,13 @@
                 <span class="cat-room-name" style="color: #ffffff !important;">${room.icon} ${escapeHtml(room.category)}</span>
               </div>
               <span class="cat-room-count-badge" style="border-color: rgba(255, 255, 255, 0.45); color: #ffffff !important; background: rgba(255, 255, 255, 0.15) !important;">
-                ${room.exhibitCodes.length} ${room.exhibitCodes.length === 1 ? 'Exhibit' : 'Exhibits'}
+                ${getExhibitsInRoom(room).length} ${getExhibitsInRoom(room).length === 1 ? 'Exhibit' : 'Exhibits'}
               </span>
             </div>
             <div class="cat-room-exhibits-list">
         `;
 
-          room.exhibitCodes.forEach(code => {
-            const ex = exhibitsData.find(e => e.code === code);
-            if (!ex) return;
+          getExhibitsInRoom(room).forEach(ex => {
             html += `
             <div class="cat-exhibit-item" data-room-id="${room.id}" data-code="${ex.code}" title="View walking directions to ${escapeHtml(ex.title)}" style="color: #ffffff !important;">
               <div class="cat-exhibit-info" style="color: #ffffff !important;">
@@ -4427,15 +4445,15 @@
         document.getElementById('roomLocation').textContent = `📍 Level ${room.floor} • ${room.subtitle}`;
         document.getElementById('roomDesc').textContent = room.description;
 
-        const exhibitsCount = room.exhibitCodes.length;
+        const roomExhibits = getExhibitsInRoom(room);
+        const exhibitsCount = roomExhibits.length;
         document.getElementById('roomExhibitsCount').textContent = exhibitsCount === 1 ? '1 Exhibit Inside' : `${exhibitsCount} Exhibits Inside`;
 
         // Render Exhibits Cards List Inside Room
         const container = document.getElementById('roomExhibitsContainer');
         container.innerHTML = '';
 
-        room.exhibitCodes.forEach(code => {
-          const ex = exhibitsData.find(e => e.code === code) || { code, title: code, description: '' };
+        roomExhibits.forEach(ex => {
           const card = document.createElement('div');
           card.className = 'room-exhibit-card';
           card.setAttribute('role', 'button');
