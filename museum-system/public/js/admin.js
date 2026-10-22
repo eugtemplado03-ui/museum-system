@@ -2065,9 +2065,10 @@ function openEditModal(id, defaultCategory){
         <textarea id="ex-desc_tl" rows="2" placeholder="Paglalarawan sa Tagalog">${ex?escapeHtml(ex.description_tl):''}</textarea>
       </div>
       <div class="form-field full">
-        <label>Description (Cebuano)</label>
+        <label>Description (Bisaya / Cebuano)</label>
         <textarea id="ex-desc_cb" rows="2" placeholder="Paglalarawan sa Cebuano">${ex?escapeHtml(ex.description_cb):''}</textarea>
       </div>
+      <div class="form-field full" id="exTranslationStatus" role="status" aria-live="polite" style="font-size:12px; color:var(--ink-soft);"></div>
       <div class="form-error" id="exError"></div>
     </div>
     <div class="modal-actions">
@@ -2416,8 +2417,66 @@ function openEditModal(id, defaultCategory){
   }
 
   document.getElementById('exCancel').addEventListener('click', closeModal);
+  const descriptionInput = document.getElementById('ex-desc');
+  const descriptionTlInput = document.getElementById('ex-desc_tl');
+  const descriptionCbInput = document.getElementById('ex-desc_cb');
+  const translationStatus = document.getElementById('exTranslationStatus');
+  const initialTranslations = {
+    tl: descriptionTlInput.value.trim(),
+    cb: descriptionCbInput.value.trim()
+  };
+  let lastGeneratedTranslations = { tl: '', cb: '' };
+  let lastRequestedDescription = '';
+  let translationRequestId = 0;
+  let translationTimer = null;
+  let activeTranslation = Promise.resolve();
+
+  async function translateExhibitDescription(text) {
+    const requestId = ++translationRequestId;
+    lastRequestedDescription = text;
+    translationStatus.textContent = 'Translating description to Tagalog and Bisaya…';
+    try {
+      const translations = await Promise.all([
+        Api.translateText(text, 'tl'),
+        Api.translateText(text, 'cb')
+      ]);
+      if (requestId !== translationRequestId) return;
+
+      if (!descriptionTlInput.value.trim() || descriptionTlInput.value.trim() === initialTranslations.tl || descriptionTlInput.value.trim() === lastGeneratedTranslations.tl) {
+        descriptionTlInput.value = translations[0].translatedText;
+        lastGeneratedTranslations.tl = translations[0].translatedText;
+      }
+      if (!descriptionCbInput.value.trim() || descriptionCbInput.value.trim() === initialTranslations.cb || descriptionCbInput.value.trim() === lastGeneratedTranslations.cb) {
+        descriptionCbInput.value = translations[1].translatedText;
+        lastGeneratedTranslations.cb = translations[1].translatedText;
+      }
+      translationStatus.textContent = 'Tagalog and Bisaya translations are ready.';
+    } catch (err) {
+      if (requestId === translationRequestId) {
+        translationStatus.textContent = `Translation failed: ${err.message}`;
+      }
+      throw err;
+    }
+  }
+
+  descriptionInput.addEventListener('input', () => {
+    clearTimeout(translationTimer);
+    const text = descriptionInput.value.trim();
+    if (!text) {
+      translationRequestId++;
+      lastRequestedDescription = '';
+      translationStatus.textContent = '';
+      return;
+    }
+    translationTimer = setTimeout(() => {
+      activeTranslation = translateExhibitDescription(text);
+      activeTranslation.catch(() => {});
+    }, 700);
+  });
+
   document.getElementById('exSave').addEventListener('click', async ()=>{
     const errorEl = document.getElementById('exError');
+    errorEl.textContent = '';
     const title = document.getElementById('ex-title').value.trim();
     if(!title){ errorEl.textContent = 'Title is required.'; return; }
     const category = document.getElementById('ex-category').value;
@@ -2451,6 +2510,17 @@ function openEditModal(id, defaultCategory){
     };
 
     try{
+      clearTimeout(translationTimer);
+      if (payload.description && (
+        payload.description !== lastRequestedDescription ||
+        !payload.description_tl ||
+        !payload.description_cb
+      )) {
+        activeTranslation = translateExhibitDescription(payload.description);
+      }
+      await activeTranslation;
+      payload.description_tl = descriptionTlInput.value.trim();
+      payload.description_cb = descriptionCbInput.value.trim();
       if(isEdit){
         await Api.updateExhibit(ex.id, payload);
         toast('Exhibit updated');

@@ -128,6 +128,7 @@ const Api = (() => {
     listExhibits: () => request('/api/exhibits'),
     listRecommendedExhibits: (limit = 6) => request('/api/exhibits/recommended?limit=' + limit),
     getExhibit: (code) => request('/api/exhibits/' + encodeURIComponent(code)),
+    translateText: (text, targetLang) => request('/api/tts/translate', { method: 'POST', body: JSON.stringify({ text, targetLang }) }),
     createExhibit: (payload) => request('/api/exhibits', { method: 'POST', body: JSON.stringify(payload) }),
     updateExhibit: (id, payload) => request('/api/exhibits/' + id, { method: 'PUT', body: JSON.stringify(payload) }),
     deleteExhibit: (id) => request('/api/exhibits/' + id, { method: 'DELETE' }),

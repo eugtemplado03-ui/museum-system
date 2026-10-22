@@ -268,8 +268,8 @@ router.post('/translate', async (req, res) => {
     }
 
     if (!translatedText) {
-      console.warn('[Translation] Empty response from Groq, returning original text.');
-      return res.json({ translatedText: trimmedText });
+      console.error('[Translation] Groq returned an empty translation.');
+      return res.status(502).json({ error: 'Translation service returned an empty result. Please try again.' });
     }
 
     translationCache.set(cacheKey, translatedText);
