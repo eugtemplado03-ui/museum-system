@@ -36,7 +36,7 @@ const exhibitSchema = new mongoose.Schema({
 const Exhibit = mongoose.models.Exhibit || mongoose.model('Exhibit', exhibitSchema);
 
 const DEFAULT_CATEGORIES = [
-  'Marine & Nature', 'Touch & Play', 'Toys & Collections',
+  'Marine & Nature', 'Aquarium & Live Reef Systems', 'Touch & Play', 'Toys & Collections',
   'Character & Heritage', 'Environmental', 'Reading & Learning', 'Other'
 ];
 
@@ -75,6 +75,12 @@ async function ensureCategories() {
       await Category.updateOne({ name: name }, { name: name }, { upsert: true });
     }
   }
+  const aquariumCategory = 'Aquarium & Live Reef Systems';
+  await Category.updateOne(
+    { name: aquariumCategory },
+    { $setOnInsert: { name: aquariumCategory } },
+    { upsert: true }
+  );
 }
 
 const KNOWN_EXHIBIT_DIRECTIONS = {

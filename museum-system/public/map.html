@@ -2468,6 +2468,7 @@
         <div class="chips-row" role="tablist" aria-label="Filter Rooms by Category">
           <button class="chip active" data-cat="all" style="color: #ffffff !important;">All Category Rooms</button>
           <button class="chip" data-cat="Marine &amp; Nature" style="color: #ffffff !important;">🌊 Marine &amp; Nature (5)</button>
+          <button class="chip" data-cat="Aquarium &amp; Live Reef Systems" style="color: #ffffff !important;">🐠 Aquarium &amp; Live Reef Systems</button>
           <button class="chip" data-cat="Touch &amp; Play" style="color: #ffffff !important;">💦 Touch &amp; Play (1)</button>
           <button class="chip" data-cat="Reading &amp; Learning" style="color: #ffffff !important;">📚 Reading &amp; Learning (1)</button>
           <button class="chip" data-cat="Character &amp; Heritage" style="color: #ffffff !important;">🏆 Character &amp; Heritage (2)</button>
@@ -2741,6 +2742,20 @@
           imagePath: 'https://museosangbata.org/wp-content/uploads/2014/11/under-the-sea-banner-260x170.jpg',
           description: 'Our flagship exhibition room dedicated to the aquatic ecosystems of Negros. Housed inside this room are five interactive exhibits exploring coral reefs, river watersheds, marine biodiversity, plastic pollution awareness, and coastal mangrove conservation.',
         },
+        'cat_aquarium_live_reef': {
+          id: 'cat_aquarium_live_reef',
+          zoneId: 'zone_aquarium',
+          category: 'Aquarium & Live Reef Systems',
+          title: 'Aquarium & Live Reef Systems',
+          subtitle: 'Tropical Saltwater Tanks & Coral Habitats',
+          floor: 1,
+          pinX: 50,
+          pinY: 15,
+          color: '#38bdf8',
+          icon: '🐠',
+          imagePath: 'https://museosangbata.org/wp-content/uploads/2014/11/under-the-sea-banner-260x170.jpg',
+          description: 'Live tropical saltwater aquarium tanks and coral reef habitats.',
+        },
         'cat_touch_play': {
           id: 'cat_touch_play',
           zoneId: 'zone_splash_zone',
@@ -3008,6 +3023,17 @@
 
       // Turn-by-Turn Wayfinding Routes Definitions (Direct to Category Rooms)
       const WAYFINDING_ROUTES = {
+        'cat_aquarium_live_reef': {
+          floor: 1,
+          title: 'Aquarium & Live Reef Systems',
+          pathD: 'M 500 1140 L 500 620 L 580 620 L 580 265 L 500 200',
+          steps: [
+            'Enter through the Main Entrance into the reception foyer.',
+            'Walk straight across the Central Function Hall toward the Marine & Nature wing.',
+            'Continue through the Marine & Nature gallery to the Aquarium & Live Reef Systems at the north end.',
+            'You have arrived at the tropical saltwater tanks and coral habitats.'
+          ]
+        },
         'cat_marine_nature': {
           floor: 1,
           title: "Marine & Nature Room",
@@ -3093,7 +3119,8 @@
             if (x >= 13 && x <= 49 && y >= 13 && y <= 48) roomId = 'cat_toys_collections';
             else if (x >= 50 && x <= 87 && y >= 13 && y <= 48) roomId = 'cat_carnival_play';
           } else {
-            if (x >= 24 && x <= 76 && y >= 20 && y <= 48) roomId = 'cat_marine_nature';
+            if (x >= 24 && x <= 76 && y >= 10 && y <= 20) roomId = 'cat_aquarium_live_reef';
+            else if (x >= 24 && x <= 76 && y >= 20 && y <= 48) roomId = 'cat_marine_nature';
             else if (x >= 76 && x <= 90 && y >= 33 && y <= 64) roomId = 'cat_touch_play';
             else if (x >= 6 && x <= 24 && y >= 34 && y <= 53) roomId = 'cat_reading_learning';
             else if (x >= 6 && x <= 24 && y >= 53 && y <= 76) roomId = 'cat_character_heritage';
@@ -3102,6 +3129,7 @@
         }
 
         const mapZoneRooms = {
+          aquarium_live_reef: 'cat_aquarium_live_reef',
           marine_story: 'cat_marine_nature',
           splash_zone: 'cat_touch_play',
           reading_corner: 'cat_reading_learning',
@@ -3651,7 +3679,7 @@
         <text x="500" y="108" text-anchor="middle" class="cad-dimension">EXISTING CONCRETE GUTTER</text>
 
         <!-- AQUARIUM & TROPICAL REEF WING -->
-        <g id="zone_aquarium" class="room-poly">
+        <g id="zone_aquarium" class="room-poly" data-cat-id="cat_aquarium_live_reef">
           <polygon points="240,135 760,135 760,265 240,265" fill="#032c3d" stroke="#00f0ff" stroke-width="4.5" />
           <!-- Partition tanks from drawing -->
           <line x1="320" y1="135" x2="320" y2="205" stroke="#00f0ff" stroke-width="3.5" />
@@ -4338,6 +4366,7 @@
       // Setup Room Polygon Click Listeners with Drag Gate
       function setupRoomClicks() {
         const roomZoneMap = {
+          'zone_aquarium': 'cat_aquarium_live_reef',
           'zone_marine_story': 'cat_marine_nature',
           'zone_splash_zone': 'cat_touch_play',
           'zone_reading_corner': 'cat_reading_learning',
@@ -4376,7 +4405,6 @@
           'zone_function_hall': { title: '🏛️ Central Function Hall', desc: 'Main assembly hall for student orientations, workshops, storytelling sessions, and assemblies.' },
           'zone_stairs': { title: '🪜 Staircase to Level 2', desc: 'Direct access staircase leading to the Second Floor (Toys & Carnival).', actionLabel: 'Go to Second Floor 🪜', action: () => switchFloor(2) },
           'zone_stairs_landing': { title: '🪜 Stairs Down to Ground Floor', desc: 'Upper landing staircase descending to the Ground Floor Function Hall.', actionLabel: 'Go to Ground Floor 📍', action: () => switchFloor(1) },
-          'zone_aquarium': { title: '🐠 Aquarium & Live Reef Systems', desc: 'Live tropical saltwater aquarium tanks displaying coral reef marine life.' },
           'zone_mezzanine_void': { title: '👀 Mezzanine Void Balcony', desc: 'Open architectural balcony overlooking the Ground Floor Central Function Hall.' }
         };
 

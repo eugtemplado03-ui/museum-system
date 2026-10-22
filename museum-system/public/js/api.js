@@ -42,7 +42,7 @@ const Api = (() => {
 
     // Route matching for static fallback
     if (path === '/api/exhibits') return { exhibits: db.exhibits || [] };
-    if (path.startsWith('/api/exhibits/categories')) return { categories: db.categories || ['Marine & Nature', 'Touch & Play', 'Toys & Collections', 'Character & Heritage', 'Environmental', 'Reading & Learning', 'Other'] };
+    if (path.startsWith('/api/exhibits/categories')) return { categories: db.categories || ['Marine & Nature', 'Aquarium & Live Reef Systems', 'Touch & Play', 'Toys & Collections', 'Character & Heritage', 'Environmental', 'Reading & Learning', 'Other'] };
     if (path.startsWith('/api/exhibits/')) {
       const code = decodeURIComponent(path.replace('/api/exhibits/', '').split('?')[0]);
       if (code && !code.includes('/')) {

@@ -1,7 +1,7 @@
 // Staff portal UI for authentication, museum content, collections, and visitor operations.
-const CATEGORIES = ['Marine & Nature','Touch & Play','Toys & Collections','Character & Heritage','Environmental','Reading & Learning','Other'];
+const CATEGORIES = ['Marine & Nature','Aquarium & Live Reef Systems','Touch & Play','Toys & Collections','Character & Heritage','Environmental','Reading & Learning','Other'];
 const CATEGORY_ICON = {
-  'Marine & Nature':'&#128031;','Touch & Play':'&#9995;','Toys & Collections':'&#129692;',
+  'Marine & Nature':'&#128031;','Aquarium & Live Reef Systems':'&#128032;','Touch & Play':'&#9995;','Toys & Collections':'&#129692;',
   'Character & Heritage':'&#127942;','Environmental':'&#9851;','Reading & Learning':'&#128214;','Other':'&#10022;'
 };
 
@@ -1572,7 +1572,7 @@ function detectRoomFromCoords(floor, pinX, pinY) {
     if (x >= 14 && x <= 86 && y >= 48 && y <= 87) return 'Mezzanine Balcony Void';
     return 'Second Floor (Mezzanine Level)';
   } else {
-    if (x >= 24 && x <= 76 && y >= 10 && y <= 20) return 'Aquarium & Reef Systems';
+    if (x >= 24 && x <= 76 && y >= 10 && y <= 20) return 'Aquarium & Live Reef Systems';
     if (x >= 24 && x <= 76 && y >= 20 && y <= 48) return 'Marine & Nature Room (The Marine Story)';
     if (x >= 76 && x <= 90 && y >= 33 && y <= 64) return 'Touch & Play Room (Splash Zone)';
     if (x >= 6 && x <= 24 && y >= 34 && y <= 53) return 'Reading & Learning Room (Franco\'s Corner)';
@@ -1596,6 +1596,7 @@ function detectRoomZone(floor, pinX, pinY) {
     if (x >= 50 && x <= 87 && y >= 13 && y <= 48) return 'second_floor_carnival';
     return 'second_floor';
   } else {
+    if (x >= 24 && x <= 76 && y >= 10 && y <= 20) return 'aquarium_live_reef';
     if (x >= 24 && x <= 76 && y >= 20 && y <= 48) return 'marine_story';
     if (x >= 76 && x <= 90 && y >= 33 && y <= 64) return 'splash_zone';
     if (x >= 6 && x <= 24 && y >= 34 && y <= 53) return 'reading_corner';
@@ -1610,6 +1611,9 @@ function detectRoomZone(floor, pinX, pinY) {
 // Suggest a default floor-plan pin for a new exhibit's category.
 function getRoomCenterForCategory(cat) {
   const c = String(cat || '').toLowerCase();
+  if (c.includes('aquarium') || c.includes('live reef')) {
+    return { floor: 1, pinX: 50, pinY: 15, name: 'Aquarium & Live Reef Systems' };
+  }
   if (c.includes('toy')) {
     return { floor: 2, pinX: 31, pinY: 30, name: 'Toys & Collections Room' };
   }
