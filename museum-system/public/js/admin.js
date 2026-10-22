@@ -5179,13 +5179,13 @@ async function renderApiManagementTab(contentEl) {
     ? new Date(usageRateLimits.observedAt).toLocaleString()
     : '';
 
-  // Explain whether a provider uses managed credentials, environment config, or fallback.
+  // Explain whether a provider uses managed credentials or environment config.
   const describeSource = (current, service) => {
     if (current.source === 'dashboard') return 'Dashboard-managed credentials are active and encrypted at rest.';
     if (current.source === 'environment') return `Using server environment credentials${service === 'groq' ? ' (GROQ_API_KEY)' : ''}.`;
     if (current.source === 'disabled') return 'This provider has been disabled in API Management.';
     return service === 'groq'
-      ? 'Not configured. Chatbot uses its local response engine; translation and speech use their fallback behavior.'
+      ? 'Not configured. Chatbot, translation, and Groq-supported speech require a Groq API key.'
       : 'Not configured. File uploads use local server storage and cloud backup is unavailable.';
   };
 
@@ -5198,7 +5198,7 @@ async function renderApiManagementTab(contentEl) {
           <div>
             <h3 style="margin:0 0 6px;">Groq usage &amp; limits</h3>
             <p style="margin:0;color:#64748b;">This museum app's recorded usage for the last 30 days.</p>
-            <small style="display:block;margin-top:8px;color:#64748b;">Failed counts are failed Groq API calls, not failed visitor requests. Chat may still answer using its local fallback, and speech may fall back to Google TTS. Older counts may include failures recorded before tracking was corrected.</small>
+            <small style="display:block;margin-top:8px;color:#64748b;">Failed counts are failed Groq API calls, not failed visitor requests. Chat, translation, and supported speech return an error when Groq is unavailable. Groq Orpheus currently supports English and Saudi Arabic speech only.</small>
           </div>
           <button type="button" id="refreshApiUsage" class="btn btn-secondary btn-small">Refresh usage</button>
         </div>

@@ -423,7 +423,7 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
   }, activeLang);
 }
 
-// Use Groq for a visitor question when configured, then fall back to local museum knowledge.
+// Answer visitor questions with Groq; return explicit errors instead of local fallbacks.
 router.post('/', chatLimiter, async (req, res) => {
   let apiKey;
   try {
@@ -432,7 +432,7 @@ router.post('/', chatLimiter, async (req, res) => {
     console.error('Failed to load Groq chatbot settings:', err.message);
     return res.status(500).json({ error: 'Failed to load chatbot settings.' });
   }
-  const model = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+  const model = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
 
   const { message, history, language } = req.body || {};
   if (!message || typeof message !== 'string' || !message.trim()) {
@@ -440,6 +440,12 @@ router.post('/', chatLimiter, async (req, res) => {
   }
   if (message.length > MAX_MESSAGE_LENGTH) {
     return res.status(400).json({ error: `Message is too long (max ${MAX_MESSAGE_LENGTH} characters).` });
+  }
+  if (!apiKey) {
+    return res.status(503).json({
+      error: 'The Groq chatbot is not configured. Add a Groq API key in API Management or the server environment.',
+      code: 'GROQ_CHAT_NOT_CONFIGURED'
+    });
   }
 
   // Sanitize incoming history
@@ -451,7 +457,7 @@ router.post('/', chatLimiter, async (req, res) => {
       .map(m => ({ role: m.role, content: m.content.slice(0, MAX_MESSAGE_LENGTH) }));
   }
 
-  // Fetch full museum context for both LLM prompt and fallback engine
+  // Fetch museum records to ground the Groq response.
   const context = await getFullMuseumContext();
   const responseLanguage = detectChatLanguage(message, language);
 
@@ -479,7 +485,7 @@ router.post('/', chatLimiter, async (req, res) => {
         },
         body: JSON.stringify({
           model,
-          max_tokens: 650,
+          max_completion_tokens: 650,
           temperature: 0.5,
           messages
         }),
@@ -506,7 +512,15 @@ router.post('/', chatLimiter, async (req, res) => {
         await apiUsage.recordGroqUsageSafely({ service: 'chat', model, response });
         usageRecorded = true;
         console.warn('Groq non-OK status:', response.status);
+        return res.status(502).json({
+          error: `Groq chatbot request failed (HTTP ${response.status}). Please try again.`,
+          code: 'GROQ_CHAT_FAILED'
+        });
       }
+      return res.status(502).json({
+        error: 'Groq returned an empty chatbot response. Please try again.',
+        code: 'GROQ_CHAT_FAILED'
+      });
     } catch (err) {
       clearTimeout(timeoutId);
       if (!usageRecorded) {
@@ -516,13 +530,19 @@ router.post('/', chatLimiter, async (req, res) => {
           response: groqResponse
         });
       }
-      console.warn('Groq request exception, engaging local AI engine:', err.message);
+      console.warn('Groq chatbot request failed:', err.message);
+      const timedOut = err.name === 'AbortError';
+      return res.status(timedOut ? 504 : 502).json({
+        error: timedOut ? 'Groq chatbot request timed out. Please try again.' : 'Groq chatbot request failed. Please try again.',
+        code: 'GROQ_CHAT_FAILED'
+      });
     }
   }
 
-  // Resilient Local Knowledge & Translation Engine: Answers & translates reliably!
-  const localReply = generateLocalFallbackReply(message.trim(), context, responseLanguage);
-  res.json({ reply: localReply });
+  return res.status(502).json({
+    error: 'Groq chatbot request failed. Please try again.',
+    code: 'GROQ_CHAT_FAILED'
+  });
 });
 
 module.exports = router;

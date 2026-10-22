@@ -118,7 +118,7 @@ function getGroqApiKeyStatus(configuration) {
     configured: Boolean(configuration.apiKey),
     source: configuration.source,
     environmentConfigured: configuration.environmentConfigured,
-    model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'
+    model: process.env.GROQ_MODEL || 'openai/gpt-oss-120b'
   };
 }
 

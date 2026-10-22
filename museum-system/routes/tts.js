@@ -1,4 +1,4 @@
-// Translation and speech endpoints with provider status reporting and fallback audio generation.
+// Groq-backed translation and speech endpoints.
 const express = require('express');
 const chatApiKey = require('../db/chat-api-key');
 const apiUsage = require('../db/api-usage');
@@ -13,38 +13,32 @@ const audioCacheMeta = new Map();
 // Groq API base URL
 const GROQ_API_BASE = 'https://api.groq.com/openai/v1';
 
-// Split long speech text at sentence/word boundaries to fit the fallback TTS request limit.
-function splitIntoChunks(str, maxLen = 140) {
+// Groq Orpheus accepts at most 200 characters per speech request.
+function splitIntoChunks(str, maxLen = 200) {
   const clean = str.replace(/[\r\n]+/g, ' ').trim();
-  const sentences = clean.match(/[^.!?—–;]+[.!?—–;]+|[^.!?—–;]+$/g) || [clean];
   const chunks = [];
   let current = '';
 
-  for (const s of sentences) {
-    const trimmed = s.trim();
-    if (!trimmed) continue;
-    if ((current ? current + ' ' + trimmed : trimmed).length <= maxLen) {
-      current = current ? current + ' ' + trimmed : trimmed;
-    } else {
+  for (const word of clean.split(/\s+/)) {
+    if (!word) continue;
+    if (word.length > maxLen) {
       if (current) chunks.push(current);
-      if (trimmed.length > maxLen) {
-        const words = trimmed.split(' ');
-        let sub = '';
-        for (const w of words) {
-          if ((sub ? sub + ' ' + w : w).length <= maxLen) {
-            sub = sub ? sub + ' ' + w : w;
-          } else {
-            if (sub) chunks.push(sub);
-            sub = w;
-          }
-        }
-        if (sub) current = sub;
-        else current = '';
-      } else {
-        current = trimmed;
+      current = '';
+      for (let offset = 0; offset < word.length; offset += maxLen) {
+        chunks.push(word.slice(offset, offset + maxLen));
       }
+      continue;
+    }
+
+    const next = current ? `${current} ${word}` : word;
+    if (next.length <= maxLen) {
+      current = next;
+    } else {
+      chunks.push(current);
+      current = word;
     }
   }
+
   if (current) chunks.push(current);
   return chunks.length ? chunks : [clean.slice(0, maxLen)];
 }
@@ -53,6 +47,7 @@ function splitIntoChunks(str, maxLen = 140) {
 function normalizeTargetLang(raw) {
   if (!raw) return 'en';
   const l = String(raw).toLowerCase().trim();
+  if (l === 'ar' || l === 'arabic' || l === 'ar-sa' || l.startsWith('ar-')) return 'ar';
   if (l === 'hil' || l === 'hiligaynon' || l === 'ilonggo' || l === 'ilo' || l.startsWith('hil') || l.includes('ilonggo') || l.includes('hiligaynon')) return 'hil';
   if (l === 'cb' || l === 'ceb' || l === 'cebuano' || l === 'bisaya' || l === 'binisaya' || l.includes('ceb') || l.includes('bisaya')) return 'cb';
   if (l === 'tl' || l === 'tag' || l === 'tagalog' || l === 'fil' || l === 'filipino' || l.includes('tag') || l.includes('filipino')) return 'tl';
@@ -60,43 +55,76 @@ function normalizeTargetLang(raw) {
   return l;
 }
 
-function getNarrationLanguageName(lang) {
-  return {
-    tl: 'Filipino (Tagalog)',
-    cb: 'Cebuano (Bisaya)',
-    hil: 'Hiligaynon (Ilonggo)'
-  }[lang] || lang;
+function getGroqSpeechConfiguration(lang) {
+  if (lang === 'en') {
+    return {
+      model: 'canopylabs/orpheus-v1-english',
+      voice: process.env.GROQ_TTS_VOICE || 'autumn'
+    };
+  }
+  if (lang === 'ar') {
+    return {
+      model: 'canopylabs/orpheus-arabic-saudi',
+      voice: process.env.GROQ_TTS_ARABIC_VOICE || 'aisha'
+    };
+  }
+  return null;
 }
 
-function getAudioFromOpenRouterStream(streamText) {
-  const audioChunks = [];
-
-  for (const line of streamText.split(/\r?\n/)) {
-    if (!line.startsWith('data:')) continue;
-    const payload = line.slice(5).trim();
-    if (!payload || payload === '[DONE]') continue;
-
-    let event;
-    try {
-      event = JSON.parse(payload);
-    } catch (err) {
-      throw new Error('OpenRouter returned malformed audio stream data.');
-    }
-
-    if (event.error) {
-      throw new Error('OpenRouter returned an audio generation error.');
-    }
-
-    const audioData = event.choices && event.choices[0] &&
-      event.choices[0].delta && event.choices[0].delta.audio &&
-      event.choices[0].delta.audio.data;
-    if (typeof audioData === 'string') {
-      const audioChunk = Buffer.from(audioData, 'base64');
-      if (audioChunk.length) audioChunks.push(audioChunk);
-    }
+function parseWavBuffer(buffer) {
+  if (buffer.length < 12 || buffer.toString('ascii', 0, 4) !== 'RIFF' ||
+    buffer.toString('ascii', 8, 12) !== 'WAVE') {
+    throw new Error('Groq returned audio that is not a valid WAV file.');
   }
 
-  return Buffer.concat(audioChunks);
+  let formatChunk = null;
+  let audioData = null;
+  let offset = 12;
+
+  while (offset + 8 <= buffer.length) {
+    const chunkId = buffer.toString('ascii', offset, offset + 4);
+    const chunkSize = buffer.readUInt32LE(offset + 4);
+    const chunkStart = offset + 8;
+    const chunkEnd = chunkStart + chunkSize;
+    if (chunkEnd > buffer.length) {
+      throw new Error('Groq returned a truncated WAV file.');
+    }
+
+    if (chunkId === 'fmt ') {
+      formatChunk = buffer.subarray(offset, chunkEnd + (chunkSize % 2));
+    } else if (chunkId === 'data') {
+      audioData = buffer.subarray(chunkStart, chunkEnd);
+    }
+
+    offset = chunkEnd + (chunkSize % 2);
+  }
+
+  if (!formatChunk || !audioData) {
+    throw new Error('Groq returned a WAV file without format or audio data.');
+  }
+
+  return { formatChunk, audioData };
+}
+
+function combineWavBuffers(buffers) {
+  const parsed = buffers.map(parseWavBuffer);
+  const formatChunk = parsed[0].formatChunk;
+  if (parsed.some(chunk => !chunk.formatChunk.equals(formatChunk))) {
+    throw new Error('Groq returned incompatible WAV audio formats.');
+  }
+
+  const audioData = Buffer.concat(parsed.map(chunk => chunk.audioData));
+  const padding = audioData.length % 2;
+  const output = Buffer.alloc(12 + formatChunk.length + 8 + audioData.length + padding);
+  output.write('RIFF', 0, 4, 'ascii');
+  output.writeUInt32LE(output.length - 8, 4);
+  output.write('WAVE', 8, 4, 'ascii');
+  formatChunk.copy(output, 12);
+  const dataHeaderOffset = 12 + formatChunk.length;
+  output.write('data', dataHeaderOffset, 4, 'ascii');
+  output.writeUInt32LE(audioData.length, dataHeaderOffset + 4);
+  audioData.copy(output, dataHeaderOffset + 8);
+  return output;
 }
 
 // Build the provider instructions for a supported translation target language.
@@ -195,17 +223,17 @@ router.get('/status', async (req, res) => {
   try {
     const { apiKey } = await chatApiKey.getGroqConfiguration();
     const hasGroqKey = Boolean(apiKey);
-    const hasOpenRouterKey = Boolean((process.env.OPENROUTER_API_KEY || '').trim());
     res.json({
       translationConfigured: hasGroqKey,
       groqConfigured: hasGroqKey,
-      openRouterTtsConfigured: hasOpenRouterKey,
-      openRouterTtsModel: process.env.OPENROUTER_TTS_MODEL || 'openai/gpt-audio-mini',
+      groqTtsConfigured: hasGroqKey,
+      groqTtsLanguages: ['en', 'ar'],
       speechProviders: {
-        en: hasGroqKey ? 'groq-orpheus' : 'google-tts',
-        tl: hasOpenRouterKey ? 'openrouter-audio' : 'unconfigured',
-        cb: hasOpenRouterKey ? 'openrouter-audio' : 'unconfigured',
-        hil: hasOpenRouterKey ? 'openrouter-audio' : 'unconfigured'
+        en: hasGroqKey ? 'groq-orpheus' : 'unconfigured',
+        ar: hasGroqKey ? 'groq-orpheus-arabic' : 'unconfigured',
+        tl: 'unsupported-by-groq',
+        cb: 'unsupported-by-groq',
+        hil: 'unsupported-by-groq'
       }
     });
   } catch (err) {
@@ -331,8 +359,7 @@ router.post('/translate', async (req, res) => {
   }
 });
 
-// ── TTS endpoint (Groq English, OpenRouter local languages) ────────
-// Groq Orpheus is English-only; OpenRouter generates Tagalog and Visayan narration.
+// ── TTS endpoint (Groq Orpheus) ──────────────────────────────────
 router.post('/speak', async (req, res) => {
   const rawLang = (req.body && (req.body.lang || req.body.targetLang || req.body.language)) || 'tl';
   const lang = normalizeTargetLang(rawLang);
@@ -342,6 +369,36 @@ router.post('/speak', async (req, res) => {
   }
 
   const cleanText = text.slice(0, 1500).replace(/[\r\n]+/g, ' ').trim();
+  const speechConfiguration = getGroqSpeechConfiguration(lang);
+  if (!speechConfiguration) {
+    const languageNames = {
+      tl: 'Tagalog',
+      cb: 'Cebuano/Bisaya',
+      hil: 'Hiligaynon'
+    };
+    const languageName = languageNames[lang] || 'The selected language';
+    return res.status(501).json({
+      error: `Groq speech currently supports English and Saudi Arabic only; it cannot generate ${languageName} narration.`,
+      code: 'GROQ_TTS_LANGUAGE_UNSUPPORTED',
+      language: lang
+    });
+  }
+
+  let groqKey;
+  try {
+    ({ apiKey: groqKey } = await chatApiKey.getGroqConfiguration());
+  } catch (err) {
+    console.error('Failed to load Groq text-to-speech key:', err.message);
+    return res.status(500).json({ error: 'Failed to load text-to-speech settings.' });
+  }
+  if (!groqKey) {
+    return res.status(503).json({
+      error: 'Groq speech is not configured. Add a Groq API key in API Management or the server environment.',
+      code: 'GROQ_TTS_NOT_CONFIGURED',
+      language: lang
+    });
+  }
+
   const cacheKey = `${lang}:${cleanText}`;
 
   if (audioCache.has(cacheKey)) {
@@ -353,199 +410,91 @@ router.post('/speak', async (req, res) => {
     return res.send(cachedBuffer);
   }
 
-  if (['tl', 'cb', 'hil'].includes(lang)) {
-    const openRouterKey = (process.env.OPENROUTER_API_KEY || '').trim();
-    if (!openRouterKey) {
-      return res.status(503).json({
-        error: 'Configure OPENROUTER_API_KEY in the server environment to enable Tagalog, Cebuano/Bisaya, and Hiligaynon narration.',
-        code: 'MULTILINGUAL_TTS_NOT_CONFIGURED',
-        language: lang
-      });
-    }
+  const chunks = splitIntoChunks(cleanText, 200);
+  const audioBuffers = [];
+  let groqResponse;
+  let usageRecorded = false;
 
-    let openRouterResponse;
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 60000);
-    try {
-      openRouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openRouterKey}`,
-          'Content-Type': 'application/json',
-          'X-Title': 'Museum System Narration'
-        },
-        body: JSON.stringify({
-          model: process.env.OPENROUTER_TTS_MODEL || 'openai/gpt-audio-mini',
-          modalities: ['text', 'audio'],
-          audio: {
-            voice: process.env.OPENROUTER_TTS_VOICE || 'alloy',
-            format: 'wav'
+  try {
+    for (const chunk of chunks) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30000);
+      try {
+        groqResponse = await fetch(`${GROQ_API_BASE}/audio/speech`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${groqKey.trim()}`
           },
-          messages: [
-            {
-              role: 'system',
-              content: `Speak the provided narration naturally in ${getNarrationLanguageName(lang)}. Read it as written; do not translate, summarize, or add words.`
-            },
-            { role: 'user', content: cleanText }
-          ],
-          stream: true
-        }),
-        signal: controller.signal
-      });
+          body: JSON.stringify({
+            model: speechConfiguration.model,
+            voice: speechConfiguration.voice,
+            response_format: 'wav',
+            input: chunk
+          }),
+          signal: controller.signal
+        });
+      } finally {
+        clearTimeout(timeout);
+      }
 
-      if (!openRouterResponse.ok) {
-        console.error(`[TTS] OpenRouter request failed (${openRouterResponse.status}).`);
-        const error = openRouterResponse.status === 401
-          ? 'OpenRouter rejected OPENROUTER_API_KEY. Replace it with a valid key in the server .env file and restart the app.'
-          : 'The multilingual voice service could not generate this narration. Please try again.';
+      await apiUsage.recordGroqUsageSafely({
+        service: 'speech',
+        model: speechConfiguration.model,
+        response: groqResponse,
+        audioCharacters: chunk.length
+      });
+      usageRecorded = true;
+
+      if (!groqResponse.ok) {
+        console.error(`[TTS] Groq speech request failed (${groqResponse.status}).`);
+        const error = groqResponse.status === 401
+          ? 'Groq rejected the configured API key. Update GROQ_API_KEY in the server environment or API Management.'
+          : `Groq speech generation failed (HTTP ${groqResponse.status}). Please try again.`;
         return res.status(502).json({
           error,
-          code: 'MULTILINGUAL_TTS_FAILED',
+          code: 'GROQ_TTS_FAILED',
           language: lang
         });
       }
 
-      const audioBuffer = getAudioFromOpenRouterStream(await openRouterResponse.text());
+      const audioBuffer = Buffer.from(await groqResponse.arrayBuffer());
       if (!audioBuffer.length) {
-        console.error('[TTS] OpenRouter returned no audio chunks.');
+        console.error('[TTS] Groq returned an empty audio response.');
         return res.status(502).json({
-          error: 'The multilingual voice service returned no audio. Please try again.',
-          code: 'MULTILINGUAL_TTS_FAILED',
+          error: 'Groq returned empty speech audio. Please try again.',
+          code: 'GROQ_TTS_FAILED',
           language: lang
         });
       }
-
-      audioCache.set(cacheKey, audioBuffer);
-      audioCacheMeta.set(cacheKey, { type: 'audio/wav', provider: 'openrouter-audio' });
-      res.set('Content-Type', 'audio/wav');
-      res.set('Content-Length', audioBuffer.byteLength);
-      res.set('X-TTS-Provider', 'openrouter-audio');
-      return res.send(audioBuffer);
-    } catch (err) {
-      console.error('[TTS] OpenRouter request failed:', err.message);
-      return res.status(502).json({
-        error: 'The multilingual voice service could not generate this narration. Please try again.',
-        code: 'MULTILINGUAL_TTS_FAILED',
-        language: lang
-      });
-    } finally {
-      clearTimeout(timeout);
-    }
-  }
-
-  // Groq Orpheus is an English voice; don't use it to read Tagalog or Visayan text.
-  if (lang === 'en') {
-    let groqKey;
-    try {
-      ({ apiKey: groqKey } = await chatApiKey.getGroqConfiguration());
-    } catch (err) {
-      console.error('Failed to load Groq text-to-speech key:', err.message);
-      return res.status(500).json({ error: 'Failed to load text-to-speech settings.' });
+      audioBuffers.push(audioBuffer);
+      usageRecorded = false;
     }
 
-    if (groqKey && groqKey.trim()) {
-      let groqResponse;
-      let usageRecorded = false;
-      try {
-        console.log('[TTS] Generating English speech with Groq Orpheus (canopylabs/orpheus-v1-english)...');
-
-        const controller = new AbortController();
-        const groqTimeout = setTimeout(() => controller.abort(), 20000);
-
-        try {
-          groqResponse = await fetch(`${GROQ_API_BASE}/audio/speech`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + groqKey.trim()
-            },
-            body: JSON.stringify({
-              model: 'canopylabs/orpheus-v1-english',
-              voice: 'autumn',
-              response_format: 'wav',
-              input: cleanText
-            }),
-            signal: controller.signal
-          });
-        } finally {
-          clearTimeout(groqTimeout);
-        }
-
-        await apiUsage.recordGroqUsageSafely({
-          service: 'speech',
-          model: 'canopylabs/orpheus-v1-english',
-          response: groqResponse,
-          audioCharacters: cleanText.length
-        });
-        usageRecorded = true;
-
-        if (groqResponse.ok) {
-          const audioBuffer = await groqResponse.arrayBuffer();
-          const buf = Buffer.from(audioBuffer);
-          audioCache.set(cacheKey, buf);
-          audioCacheMeta.set(cacheKey, { type: 'audio/wav', provider: 'groq-orpheus' });
-          res.set('Content-Type', 'audio/wav');
-          res.set('Content-Length', buf.byteLength);
-          res.set('X-TTS-Provider', 'groq-orpheus');
-          console.log(`[TTS] Groq Orpheus audio generated (${buf.byteLength} bytes, WAV).`);
-          return res.send(buf);
-        } else {
-          const errText = await groqResponse.text();
-          console.warn(`[TTS] Groq Orpheus returned status ${groqResponse.status}: ${errText}. Falling back to Google TTS.`);
-        }
-      } catch (err) {
-        if (!usageRecorded) {
-          await apiUsage.recordGroqUsageSafely({
-            service: 'speech',
-            model: 'canopylabs/orpheus-v1-english',
-            response: groqResponse,
-            audioCharacters: cleanText.length
-          });
-        }
-        if (err.name === 'AbortError') {
-          console.warn('[TTS] Groq Orpheus request timed out. Falling back to Google TTS.');
-        } else {
-          console.error('[TTS] Groq Orpheus request error:', err.message, '- Falling back to Google TTS.');
-        }
-      }
-    }
-  }
-
-  // Keep the existing English Google TTS fallback when Orpheus is unavailable.
-  try {
-    const chunks = splitIntoChunks(cleanText, 140);
-    const audioBuffers = [];
-
-    for (const chunk of chunks) {
-      if (!chunk.trim()) continue;
-      const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=en&client=tw-ob&q=${encodeURIComponent(chunk)}`;
-      const ttsResp = await fetch(googleTtsUrl, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
-        }
-      });
-
-      if (ttsResp.ok) {
-        const ab = await ttsResp.arrayBuffer();
-        audioBuffers.push(Buffer.from(ab));
-      }
-    }
-
-    if (audioBuffers.length === 0) {
-      return res.status(502).json({ error: 'Voice audio service error.' });
-    }
-
-    const combinedBuffer = Buffer.concat(audioBuffers);
+    usageRecorded = true;
+    const combinedBuffer = combineWavBuffers(audioBuffers);
     audioCache.set(cacheKey, combinedBuffer);
-    audioCacheMeta.set(cacheKey, { type: 'audio/mpeg', provider: 'google-tts' });
-
-    res.set('Content-Type', 'audio/mpeg');
+    audioCacheMeta.set(cacheKey, { type: 'audio/wav', provider: 'groq-orpheus' });
+    res.set('Content-Type', 'audio/wav');
     res.set('Content-Length', combinedBuffer.byteLength);
-    res.set('X-TTS-Provider', 'google-tts');
-    res.send(combinedBuffer);
+    res.set('X-TTS-Provider', speechConfiguration.model.endsWith('arabic-saudi') ? 'groq-orpheus-arabic' : 'groq-orpheus');
+    return res.send(combinedBuffer);
   } catch (err) {
-    console.error('[TTS] Voice audio request failed:', err);
-    res.status(502).json({ error: 'Voice audio failed.' });
+    if (!usageRecorded) {
+      await apiUsage.recordGroqUsageSafely({
+        service: 'speech',
+        model: speechConfiguration.model,
+        response: groqResponse,
+        audioCharacters: chunks[audioBuffers.length] ? chunks[audioBuffers.length].length : 0
+      });
+    }
+    console.error('[TTS] Groq speech request failed:', err.message);
+    const timedOut = err.name === 'AbortError';
+    return res.status(timedOut ? 504 : 502).json({
+      error: timedOut ? 'Groq speech generation timed out. Please try again.' : 'Groq speech generation failed. Please try again.',
+      code: 'GROQ_TTS_FAILED',
+      language: lang
+    });
   }
 });
 

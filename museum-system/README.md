@@ -131,39 +131,37 @@ reflect other apps using the same organization. Usage history is retained for
 up to 90 days; tracking requires MongoDB. This is not an account-wide billing
 report, and the dashboard does not estimate cost.
 
-Groq is used by the museum chat, description translation, and English
-narration. Tagalog, Cebuano/Bisaya, and Hiligaynon narration use OpenRouter's
-audio-output model. Cloudinary is used for remote image/video uploads and
-database backups. Groq and Cloudinary can use server environment variables or
-dashboard-managed credentials; OpenRouter narration uses server environment
-variables.
+Groq is the only AI provider used for the museum chat, description
+translation, and server-generated speech. Cloudinary is used for remote
+image/video uploads and database backups.
 
 For Groq, set the optional `GROQ_API_KEY` and `GROQ_MODEL` environment
 variables, or enter a key from
 [console.groq.com/keys](https://console.groq.com/keys) in API Management.
-For local-language exhibit narration, set `OPENROUTER_API_KEY` in the server
-environment. The default audio model is `openai/gpt-audio-mini`; optionally
-override it with `OPENROUTER_TTS_MODEL` and select a supported voice with
-`OPENROUTER_TTS_VOICE` (default `alloy`). The selected model must support
-streaming audio output. Audio quality and language coverage depend on that
-model, so test Tagalog, Cebuano/Bisaya, and Hiligaynon samples before
-publishing. See
-[OpenRouter's audio guide](https://openrouter.ai/docs/guides/overview/multimodal/audio)
-for audio-output request details.
+Groq Orpheus speech currently supports English and Saudi Arabic only.
+`GROQ_TTS_VOICE` (default `autumn`) and `GROQ_TTS_ARABIC_VOICE` (default
+`aisha`) select voices for those languages. Groq does not currently provide
+speech generation for Tagalog, Cebuano/Bisaya, or Hiligaynon; the app reports
+those languages as unsupported instead of sending their speech to another
+provider. Translation and chatbot responses in those languages continue to
+use Groq text models.
 For Cloudinary, configure `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and
 `CLOUDINARY_API_SECRET`, or enter those credentials in API Management.
 
 Managed credentials are encrypted in MongoDB using a key derived from
 `JWT_SECRET`. Keep `JWT_SECRET` stable; if it is rotated, re-enter the
-dashboard-managed credentials. Without an active Groq key, the chatbot uses
-its local response engine.
+dashboard-managed credentials. The chatbot, translations, and supported
+speech languages require an active Groq key and return an error if Groq is
+unavailable.
 
 ## Museum chat assistant
 
 The visitor pages include a chat widget that answers museum questions using
 the live exhibit, program, and event catalogs together with museum information.
-When configured, it calls Groq; otherwise it uses the local response engine.
-The Groq key is shared by chat, translation, and English narration.
+The assistant always uses Groq; without an active key or when Groq is
+unavailable, the endpoint returns an error rather than using a local
+response engine. The Groq key is shared by chat, translation, and supported
+speech generation.
 
 **If a key ever gets pasted somewhere it shouldn't (chat, a public repo,
 etc.), treat it as compromised and rotate it immediately at
@@ -174,7 +172,7 @@ Notes:
   basic per-IP rate limit (30 messages / 10 minutes) baked in, but for a
   public kiosk you may want a stricter limit or a budget alert.
 - The chatbot model is set by `GROQ_MODEL` in `.env` (defaults to
-  `llama-3.3-70b-versatile`).
+  `openai/gpt-oss-120b`).
 - To change what the assistant knows, edit `db/museum-info.js` (hours,
   fees, address) — exhibit, program, and event facts come straight from
   their respective catalogs, so editing them in the admin dashboard updates

@@ -357,7 +357,7 @@
                   <option value="hil">Hiligaynon (Ilonggo)</option>
                 </select>
               </div>
-              <div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">Narration uses the selected language when a matching speech voice is available.</div>
+              <div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">Groq voice narration currently supports English only; text translation supports Tagalog and Bisaya.</div>
               <div class="plaque-cat-detail">Category: <strong>${escapeHtml(exhibit.category)}</strong></div>
               <div class="plaque-desc" id="plaqueDesc" data-desc-original="${escapeHtml(exhibit.description||'')||''}" data-desc-tl="${escapeHtml(exhibit.description_tl||'')||''}" data-desc-cb="${escapeHtml(exhibit.description_cb||'')||''}" data-desc-hil="${escapeHtml(exhibit.description_hil||'')||''}">
                 ${escapeHtml(exhibit.description||'No description on file yet.')}
@@ -509,7 +509,7 @@
       }
     }
 
-    // ── Walking directions voice guidance (server TTS with browser fallback) ──
+    // ── Walking directions voice guidance (Groq server TTS) ──
     let _dirAudioEl = null;
     let _dirAudioUrl = null;
     let _dirVoiceSeq = 0;
@@ -532,9 +532,6 @@
       if (_dirAudioUrl) {
         try { URL.revokeObjectURL(_dirAudioUrl); } catch (e) {}
         _dirAudioUrl = null;
-      }
-      if ('speechSynthesis' in window) {
-        try { window.speechSynthesis.cancel(); } catch (e) {}
       }
       const playBtn = document.getElementById('dirVoicePlayBtn');
       const stopBtn = document.getElementById('dirVoiceStopBtn');
@@ -695,15 +692,12 @@
           try { URL.revokeObjectURL(_audioUrl); } catch (e) {}
           _audioUrl = null;
         }
-        if ('speechSynthesis' in window) {
-          try { window.speechSynthesis.cancel(); } catch (e) {}
-        }
         setStatus('', false);
       }
 
       window.stopExhibitDescAudio = stopAudio;
 
-      // ── Translate via OpenRouter or use pre-stored curated translation ──
+      // ── Translate via Groq or use pre-stored curated translation ──
       async function fetchTranslation(targetLang) {
         if (_cache[targetLang] && _cache[targetLang].trim()) {
           return _cache[targetLang].trim();

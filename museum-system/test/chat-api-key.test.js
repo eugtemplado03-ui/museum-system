@@ -43,7 +43,7 @@ test('Groq API key settings are admin-only, encrypted, and removable', async () 
       configured: true,
       source: 'environment',
       environmentConfigured: true,
-      model: 'llama-3.3-70b-versatile'
+      model: 'openai/gpt-oss-120b'
     });
 
     const invalid = await request(app)

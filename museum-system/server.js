@@ -66,8 +66,6 @@ app.use(helmet({
       ],
       connectSrc: [
         "'self'",
-        "https://openrouter.ai",
-        "https://api.fish.audio",
         "https://*.tile.openstreetmap.org",
         "https://nominatim.openstreetmap.org",
         "https://www.youtube.com",
