@@ -349,7 +349,7 @@
                 <div><span>Location</span><b>${escapeHtml(exhibit.location||'—')}</b></div>
               </div>
               <div style="display:flex; gap:8px; align-items:center; margin-top:6px;">
-                <label for="langSelect" style="font-size:13px; font-weight:700;">Language:</label>
+                <label for="langSelect" style="font-size:13px; font-weight:700;">Text &amp; voice language:</label>
                 <select id="langSelect" style="padding:6px 8px; font-size:14px;">
                   <option value="original">Original (English)</option>
                   <option value="tl">Tagalog (Filipino)</option>
@@ -357,6 +357,7 @@
                   <option value="hil">Hiligaynon (Ilonggo)</option>
                 </select>
               </div>
+              <div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">Narration uses the selected language when a matching speech voice is available.</div>
               <div class="plaque-cat-detail">Category: <strong>${escapeHtml(exhibit.category)}</strong></div>
               <div class="plaque-desc" id="plaqueDesc" data-desc-original="${escapeHtml(exhibit.description||'')||''}" data-desc-tl="${escapeHtml(exhibit.description_tl||'')||''}" data-desc-cb="${escapeHtml(exhibit.description_cb||'')||''}" data-desc-hil="${escapeHtml(exhibit.description_hil||'')||''}">
                 ${escapeHtml(exhibit.description||'No description on file yet.')}
@@ -669,6 +670,7 @@
       let _audioUrl = null;
       let _ttsSeq = 0;
       let _ttsAbortCtrl = null;
+      let _speechUtterance = null;
 
       function setStatus(msg, isLoading) {
         statusEl.textContent = msg;
@@ -697,6 +699,7 @@
         if ('speechSynthesis' in window) {
           try { window.speechSynthesis.cancel(); } catch (e) {}
         }
+        _speechUtterance = null;
         setStatus('', false);
       }
 
@@ -744,6 +747,57 @@
         try {
           setStatus('⏳ Generating audio…', true);
           const currentLang = (langSelect && langSelect.value !== 'original') ? langSelect.value : 'en';
+          if (currentLang === 'cb' || currentLang === 'hil') {
+            if (!('speechSynthesis' in window)) {
+              throw new Error('This device does not support local speech voices. Select English or Tagalog.');
+            }
+
+            const synth = window.speechSynthesis;
+            let voices = synth.getVoices();
+            if (!voices.length) {
+              voices = await new Promise(resolve => {
+                let timer;
+                const onVoicesChanged = () => finish(synth.getVoices());
+                const finish = result => {
+                  clearTimeout(timer);
+                  synth.removeEventListener('voiceschanged', onVoicesChanged);
+                  resolve(result);
+                };
+                synth.addEventListener('voiceschanged', onVoicesChanged);
+                timer = setTimeout(() => finish(synth.getVoices()), 1000);
+              });
+            }
+
+            const localePrefix = currentLang === 'cb' ? 'ceb' : 'hil';
+            const voice = voices.find(item => item.lang.toLowerCase().split('-')[0] === localePrefix);
+            if (!voice) {
+              const languageName = currentLang === 'cb' ? 'Cebuano/Bisaya' : 'Hiligaynon';
+              throw new Error(`No ${languageName} voice is installed on this device. Try Tagalog or English narration.`);
+            }
+
+            const utterance = new SpeechSynthesisUtterance(textToSpeak);
+            utterance.voice = voice;
+            utterance.lang = voice.lang;
+            utterance.onstart = () => {
+              if (currentSeq === _ttsSeq) setStatus('🔊 Playing with device voice…', true);
+            };
+            utterance.onend = () => {
+              if (currentSeq === _ttsSeq) {
+                stopAudio();
+                setStatus('Finished reading.', false);
+              }
+            };
+            utterance.onerror = event => {
+              if (currentSeq === _ttsSeq) {
+                stopAudio();
+                setStatus(`Device voice failed${event.error ? `: ${event.error}` : '.'}`, false);
+              }
+            };
+            _speechUtterance = utterance;
+            synth.speak(utterance);
+            return;
+          }
+
           const resp = await fetch('/api/tts/speak', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -776,7 +830,7 @@
           if (currentSeq === _ttsSeq) {
             console.warn('[TTS speak] server TTS failed:', e);
             stopAudio();
-            setStatus('Audio unavailable — check connection.', false);
+            setStatus(e.message || 'Audio unavailable — check connection.', false);
           }
         }
       }

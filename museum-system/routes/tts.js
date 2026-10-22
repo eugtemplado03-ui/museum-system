@@ -60,6 +60,13 @@ function normalizeTargetLang(raw) {
   return l;
 }
 
+// Map narration languages to the speech locale expected by Google Translate TTS.
+function getSpeechLocale(lang) {
+  if (lang === 'cb' || lang === 'hil') return null;
+  if (lang === 'tl') return 'tl';
+  return 'en';
+}
+
 // Build the provider instructions for a supported translation target language.
 function getSystemPrompt(rawTargetLang) {
   const targetLang = normalizeTargetLang(rawTargetLang);
@@ -163,7 +170,12 @@ router.get('/status', async (req, res) => {
       fishAudioConfigured: hasFishKey,
       fishAudioModel: process.env.FISH_AUDIO_MODEL || 's2.1-pro-free',
       fishAudioVoiceId: process.env.FISH_AUDIO_VOICE_ID || process.env.FISH_AUDIO_REFERENCE_ID || null,
-      ttsProvider: hasGroqKey ? 'groq-orpheus' : 'google-tts-fallback'
+      speechProviders: {
+        en: hasGroqKey ? 'groq-orpheus' : 'google-tts',
+        tl: 'google-tts',
+        cb: 'device-voice-if-installed',
+        hil: 'device-voice-if-installed'
+      }
     });
   } catch (err) {
     console.error('Failed to load Groq service status:', err.message);
@@ -288,8 +300,8 @@ router.post('/translate', async (req, res) => {
   }
 });
 
-// ── TTS endpoint (Groq Orpheus primary → Google TTS fallback) ─────
-// Generate cached speech with Groq Orpheus first and Google TTS as the fallback.
+// ── TTS endpoint (language-matched Groq / Google TTS) ──────────────
+// Use Groq's English-only Orpheus voice for English; route local languages to their own speech locale.
 router.post('/speak', async (req, res) => {
   const rawLang = (req.body && (req.body.lang || req.body.targetLang || req.body.language)) || 'tl';
   const lang = normalizeTargetLang(rawLang);
@@ -310,81 +322,96 @@ router.post('/speak', async (req, res) => {
     return res.send(cachedBuffer);
   }
 
-  // ── 1. Groq Orpheus TTS ───────────────────────────────────────────
-  let groqKey;
-  try {
-    ({ apiKey: groqKey } = await chatApiKey.getGroqConfiguration());
-  } catch (err) {
-    console.error('Failed to load Groq text-to-speech key:', err.message);
-    return res.status(500).json({ error: 'Failed to load text-to-speech settings.' });
+  const ttsLang = getSpeechLocale(lang);
+  if (!ttsLang) {
+    const languageName = lang === 'cb' ? 'Cebuano/Bisaya' : 'Hiligaynon';
+    return res.status(503).json({
+      error: `A server ${languageName} voice is not available. Try a matching voice installed on your device or select another language.`,
+      code: 'DEVICE_VOICE_REQUIRED',
+      language: lang
+    });
   }
-  if (groqKey && groqKey.trim()) {
-    let groqResponse;
-    let usageRecorded = false;
+
+  // Groq Orpheus is an English voice; don't use it to read Tagalog or Visayan text.
+  if (lang === 'en') {
+    let groqKey;
     try {
-      console.log(`[TTS] Generating speech with Groq Orpheus (canopylabs/orpheus-v1-english)...`);
-
-      const controller = new AbortController();
-      const groqTimeout = setTimeout(() => controller.abort(), 20000);
-
-      groqResponse = await fetch(`${GROQ_API_BASE}/audio/speech`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + groqKey.trim()
-        },
-        body: JSON.stringify({
-          model: 'canopylabs/orpheus-v1-english',
-          voice: 'autumn',
-          response_format: 'wav',
-          input: cleanText
-        }),
-        signal: controller.signal
-      });
-      clearTimeout(groqTimeout);
-
-      await apiUsage.recordGroqUsageSafely({
-        service: 'speech',
-        model: 'canopylabs/orpheus-v1-english',
-        response: groqResponse,
-        audioCharacters: cleanText.length
-      });
-      usageRecorded = true;
-
-      if (groqResponse.ok) {
-        const audioBuffer = await groqResponse.arrayBuffer();
-        const buf = Buffer.from(audioBuffer);
-        audioCache.set(cacheKey, buf);
-        audioCacheMeta.set(cacheKey, { type: 'audio/wav', provider: 'groq-orpheus' });
-        res.set('Content-Type', 'audio/wav');
-        res.set('Content-Length', buf.byteLength);
-        res.set('X-TTS-Provider', 'groq-orpheus');
-        console.log(`[TTS] Groq Orpheus audio generated (${buf.byteLength} bytes, WAV).`);
-        return res.send(buf);
-      } else {
-        const errText = await groqResponse.text();
-        console.warn(`[TTS] Groq Orpheus returned status ${groqResponse.status}: ${errText}. Falling back to Google TTS.`);
-      }
+      ({ apiKey: groqKey } = await chatApiKey.getGroqConfiguration());
     } catch (err) {
-      if (!usageRecorded) {
+      console.error('Failed to load Groq text-to-speech key:', err.message);
+      return res.status(500).json({ error: 'Failed to load text-to-speech settings.' });
+    }
+
+    if (groqKey && groqKey.trim()) {
+      let groqResponse;
+      let usageRecorded = false;
+      try {
+        console.log('[TTS] Generating English speech with Groq Orpheus (canopylabs/orpheus-v1-english)...');
+
+        const controller = new AbortController();
+        const groqTimeout = setTimeout(() => controller.abort(), 20000);
+
+        try {
+          groqResponse = await fetch(`${GROQ_API_BASE}/audio/speech`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + groqKey.trim()
+            },
+            body: JSON.stringify({
+              model: 'canopylabs/orpheus-v1-english',
+              voice: 'autumn',
+              response_format: 'wav',
+              input: cleanText
+            }),
+            signal: controller.signal
+          });
+        } finally {
+          clearTimeout(groqTimeout);
+        }
+
         await apiUsage.recordGroqUsageSafely({
           service: 'speech',
           model: 'canopylabs/orpheus-v1-english',
           response: groqResponse,
           audioCharacters: cleanText.length
         });
-      }
-      if (err.name === 'AbortError') {
-        console.warn('[TTS] Groq Orpheus request timed out. Falling back to Google TTS.');
-      } else {
-        console.error('[TTS] Groq Orpheus request error:', err.message, '- Falling back to Google TTS.');
+        usageRecorded = true;
+
+        if (groqResponse.ok) {
+          const audioBuffer = await groqResponse.arrayBuffer();
+          const buf = Buffer.from(audioBuffer);
+          audioCache.set(cacheKey, buf);
+          audioCacheMeta.set(cacheKey, { type: 'audio/wav', provider: 'groq-orpheus' });
+          res.set('Content-Type', 'audio/wav');
+          res.set('Content-Length', buf.byteLength);
+          res.set('X-TTS-Provider', 'groq-orpheus');
+          console.log(`[TTS] Groq Orpheus audio generated (${buf.byteLength} bytes, WAV).`);
+          return res.send(buf);
+        } else {
+          const errText = await groqResponse.text();
+          console.warn(`[TTS] Groq Orpheus returned status ${groqResponse.status}: ${errText}. Falling back to Google TTS.`);
+        }
+      } catch (err) {
+        if (!usageRecorded) {
+          await apiUsage.recordGroqUsageSafely({
+            service: 'speech',
+            model: 'canopylabs/orpheus-v1-english',
+            response: groqResponse,
+            audioCharacters: cleanText.length
+          });
+        }
+        if (err.name === 'AbortError') {
+          console.warn('[TTS] Groq Orpheus request timed out. Falling back to Google TTS.');
+        } else {
+          console.error('[TTS] Groq Orpheus request error:', err.message, '- Falling back to Google TTS.');
+        }
       }
     }
   }
 
-  // ── 2. Google TTS Fallback ────────────────────────────────────────
+  // Use a language-matched voice for Tagalog, Cebuano, and Hiligaynon.
   try {
-    const ttsLang = (lang === 'cb' || lang === 'tl' || lang === 'hil') ? 'tl' : 'en';
     const chunks = splitIntoChunks(cleanText, 140);
     const audioBuffers = [];
 
@@ -413,7 +440,7 @@ router.post('/speak', async (req, res) => {
 
     res.set('Content-Type', 'audio/mpeg');
     res.set('Content-Length', combinedBuffer.byteLength);
-    res.set('X-TTS-Provider', 'google-tts-fallback');
+    res.set('X-TTS-Provider', 'google-tts');
     res.send(combinedBuffer);
   } catch (err) {
     console.error('[TTS] Voice audio request failed:', err);
