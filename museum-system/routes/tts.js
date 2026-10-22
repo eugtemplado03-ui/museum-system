@@ -60,26 +60,43 @@ function normalizeTargetLang(raw) {
   return l;
 }
 
-// Map narration languages to the speech locale expected by Google Translate TTS.
-function getSpeechLocale(lang) {
-  if (lang === 'cb' || lang === 'hil') return null;
-  if (lang === 'tl') return 'tl';
-  return 'en';
+function getNarrationLanguageName(lang) {
+  return {
+    tl: 'Filipino (Tagalog)',
+    cb: 'Cebuano (Bisaya)',
+    hil: 'Hiligaynon (Ilonggo)'
+  }[lang] || lang;
 }
 
-function getFishAudioLanguage(lang) {
-  if (lang === 'cb') return 'ceb';
-  if (lang === 'hil') return 'hil';
-  return lang === 'tl' ? 'tl' : null;
-}
+function getAudioFromOpenRouterStream(streamText) {
+  const audioChunks = [];
 
-function getFishAudioVoiceId(lang) {
-  const languageVoiceId = {
-    tl: process.env.FISH_AUDIO_VOICE_ID_TL,
-    cb: process.env.FISH_AUDIO_VOICE_ID_CEB,
-    hil: process.env.FISH_AUDIO_VOICE_ID_HIL
-  }[lang];
-  return (languageVoiceId || process.env.FISH_AUDIO_VOICE_ID || process.env.FISH_AUDIO_REFERENCE_ID || '').trim();
+  for (const line of streamText.split(/\r?\n/)) {
+    if (!line.startsWith('data:')) continue;
+    const payload = line.slice(5).trim();
+    if (!payload || payload === '[DONE]') continue;
+
+    let event;
+    try {
+      event = JSON.parse(payload);
+    } catch (err) {
+      throw new Error('OpenRouter returned malformed audio stream data.');
+    }
+
+    if (event.error) {
+      throw new Error('OpenRouter returned an audio generation error.');
+    }
+
+    const audioData = event.choices && event.choices[0] &&
+      event.choices[0].delta && event.choices[0].delta.audio &&
+      event.choices[0].delta.audio.data;
+    if (typeof audioData === 'string') {
+      const audioChunk = Buffer.from(audioData, 'base64');
+      if (audioChunk.length) audioChunks.push(audioChunk);
+    }
+  }
+
+  return Buffer.concat(audioChunks);
 }
 
 // Build the provider instructions for a supported translation target language.
@@ -178,25 +195,17 @@ router.get('/status', async (req, res) => {
   try {
     const { apiKey } = await chatApiKey.getGroqConfiguration();
     const hasGroqKey = Boolean(apiKey);
-    const hasFishKey = Boolean((process.env.FISH_AUDIO_API_KEY || '').trim());
-    const fishAudioLanguageVoices = {
-      tl: Boolean(getFishAudioVoiceId('tl')),
-      cb: Boolean(getFishAudioVoiceId('cb')),
-      hil: Boolean(getFishAudioVoiceId('hil'))
-    };
-    const fishAudioConfigured = hasFishKey && Object.values(fishAudioLanguageVoices).some(Boolean);
+    const hasOpenRouterKey = Boolean((process.env.OPENROUTER_API_KEY || '').trim());
     res.json({
       translationConfigured: hasGroqKey,
       groqConfigured: hasGroqKey,
-      fishAudioConfigured,
-      fishAudioVoiceConfigured: Object.values(fishAudioLanguageVoices).some(Boolean),
-      fishAudioModel: process.env.FISH_AUDIO_MODEL || 's2.1-pro-free',
-      fishAudioLanguageVoices,
+      openRouterTtsConfigured: hasOpenRouterKey,
+      openRouterTtsModel: process.env.OPENROUTER_TTS_MODEL || 'openai/gpt-audio-mini',
       speechProviders: {
         en: hasGroqKey ? 'groq-orpheus' : 'google-tts',
-        tl: hasFishKey && fishAudioLanguageVoices.tl ? 'fish-audio' : 'google-tts',
-        cb: hasFishKey && fishAudioLanguageVoices.cb ? 'fish-audio' : 'unconfigured',
-        hil: hasFishKey && fishAudioLanguageVoices.hil ? 'fish-audio' : 'unconfigured'
+        tl: hasOpenRouterKey ? 'openrouter-audio' : 'unconfigured',
+        cb: hasOpenRouterKey ? 'openrouter-audio' : 'unconfigured',
+        hil: hasOpenRouterKey ? 'openrouter-audio' : 'unconfigured'
       }
     });
   } catch (err) {
@@ -322,8 +331,8 @@ router.post('/translate', async (req, res) => {
   }
 });
 
-// ── TTS endpoint (Groq English, Fish Audio local languages) ────────
-// Use Groq Orpheus for English and configured Fish Audio voices for local-language narration.
+// ── TTS endpoint (Groq English, OpenRouter local languages) ────────
+// Groq Orpheus is English-only; OpenRouter generates Tagalog and Visayan narration.
 router.post('/speak', async (req, res) => {
   const rawLang = (req.body && (req.body.lang || req.body.targetLang || req.body.language)) || 'tl';
   const lang = normalizeTargetLang(rawLang);
@@ -344,73 +353,81 @@ router.post('/speak', async (req, res) => {
     return res.send(cachedBuffer);
   }
 
-  const ttsLang = getSpeechLocale(lang);
-  const fishAudioLanguage = getFishAudioLanguage(lang);
-  const fishAudioKey = (process.env.FISH_AUDIO_API_KEY || '').trim();
-  const fishAudioVoiceId = getFishAudioVoiceId(lang);
+  if (['tl', 'cb', 'hil'].includes(lang)) {
+    const openRouterKey = (process.env.OPENROUTER_API_KEY || '').trim();
+    if (!openRouterKey) {
+      return res.status(503).json({
+        error: 'Configure OPENROUTER_API_KEY in the server environment to enable Tagalog, Cebuano/Bisaya, and Hiligaynon narration.',
+        code: 'MULTILINGUAL_TTS_NOT_CONFIGURED',
+        language: lang
+      });
+    }
 
-  if (fishAudioLanguage && fishAudioKey && fishAudioVoiceId) {
-    let fishResponse;
+    let openRouterResponse;
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30000);
+    const timeout = setTimeout(() => controller.abort(), 60000);
     try {
-      fishResponse = await fetch('https://api.fish.audio/v1/tts', {
+      openRouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${fishAudioKey}`,
+          'Authorization': `Bearer ${openRouterKey}`,
           'Content-Type': 'application/json',
-          'model': process.env.FISH_AUDIO_MODEL || 's2.1-pro-free'
+          'X-Title': 'Museum System Narration'
         },
         body: JSON.stringify({
-          text: cleanText,
-          reference_id: fishAudioVoiceId,
-          language: fishAudioLanguage,
-          format: 'mp3'
+          model: process.env.OPENROUTER_TTS_MODEL || 'openai/gpt-audio-mini',
+          modalities: ['text', 'audio'],
+          audio: {
+            voice: process.env.OPENROUTER_TTS_VOICE || 'alloy',
+            format: 'wav'
+          },
+          messages: [
+            {
+              role: 'system',
+              content: `Speak the provided narration naturally in ${getNarrationLanguageName(lang)}. Read it as written; do not translate, summarize, or add words.`
+            },
+            { role: 'user', content: cleanText }
+          ],
+          stream: true
         }),
         signal: controller.signal
       });
 
-      if (fishResponse.ok) {
-        const audioBuffer = Buffer.from(await fishResponse.arrayBuffer());
-        if (audioBuffer.length) {
-          audioCache.set(cacheKey, audioBuffer);
-          audioCacheMeta.set(cacheKey, { type: 'audio/mpeg', provider: 'fish-audio' });
-          res.set('Content-Type', 'audio/mpeg');
-          res.set('Content-Length', audioBuffer.byteLength);
-          res.set('X-TTS-Provider', 'fish-audio');
-          return res.send(audioBuffer);
-        }
+      if (!openRouterResponse.ok) {
+        console.error(`[TTS] OpenRouter request failed (${openRouterResponse.status}).`);
+        return res.status(502).json({
+          error: 'The multilingual voice service could not generate this narration. Please try again.',
+          code: 'MULTILINGUAL_TTS_FAILED',
+          language: lang
+        });
       }
 
-      const errorText = fishResponse.ok ? 'empty audio response' : await fishResponse.text();
-      console.error(`[TTS] Fish Audio request failed (${fishResponse.status}): ${errorText}`);
-      if (lang !== 'tl') {
+      const audioBuffer = getAudioFromOpenRouterStream(await openRouterResponse.text());
+      if (!audioBuffer.length) {
+        console.error('[TTS] OpenRouter returned no audio chunks.');
         return res.status(502).json({
-          error: 'The multilingual voice service could not generate this narration. Check the configured voice and try again.',
+          error: 'The multilingual voice service returned no audio. Please try again.',
           code: 'MULTILINGUAL_TTS_FAILED',
           language: lang
         });
       }
+
+      audioCache.set(cacheKey, audioBuffer);
+      audioCacheMeta.set(cacheKey, { type: 'audio/wav', provider: 'openrouter-audio' });
+      res.set('Content-Type', 'audio/wav');
+      res.set('Content-Length', audioBuffer.byteLength);
+      res.set('X-TTS-Provider', 'openrouter-audio');
+      return res.send(audioBuffer);
     } catch (err) {
-      console.error('[TTS] Fish Audio request failed:', err.message);
-      if (lang !== 'tl') {
-        return res.status(502).json({
-          error: 'The multilingual voice service could not generate this narration. Check the configured voice and try again.',
-          code: 'MULTILINGUAL_TTS_FAILED',
-          language: lang
-        });
-      }
+      console.error('[TTS] OpenRouter request failed:', err.message);
+      return res.status(502).json({
+        error: 'The multilingual voice service could not generate this narration. Please try again.',
+        code: 'MULTILINGUAL_TTS_FAILED',
+        language: lang
+      });
     } finally {
       clearTimeout(timeout);
     }
-  } else if (fishAudioLanguage && lang !== 'tl') {
-    const languageName = lang === 'cb' ? 'Cebuano/Bisaya' : 'Hiligaynon';
-    const voiceVariable = lang === 'cb' ? 'FISH_AUDIO_VOICE_ID_CEB' : 'FISH_AUDIO_VOICE_ID_HIL';
-    return res.status(503).json({
-      error: `Configure FISH_AUDIO_API_KEY and ${voiceVariable} (or FISH_AUDIO_VOICE_ID) to enable ${languageName} narration.`,
-      code: 'MULTILINGUAL_TTS_NOT_CONFIGURED',
-      language: lang
-    });
   }
 
   // Groq Orpheus is an English voice; don't use it to read Tagalog or Visayan text.
@@ -491,14 +508,14 @@ router.post('/speak', async (req, res) => {
     }
   }
 
-  // Use a language-matched voice for Tagalog, Cebuano, and Hiligaynon.
+  // Keep the existing English Google TTS fallback when Orpheus is unavailable.
   try {
     const chunks = splitIntoChunks(cleanText, 140);
     const audioBuffers = [];
 
     for (const chunk of chunks) {
       if (!chunk.trim()) continue;
-      const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${ttsLang || 'en'}&client=tw-ob&q=${encodeURIComponent(chunk)}`;
+      const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=en&client=tw-ob&q=${encodeURIComponent(chunk)}`;
       const ttsResp = await fetch(googleTtsUrl, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'

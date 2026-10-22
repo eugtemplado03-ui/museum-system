@@ -4664,7 +4664,7 @@
         }
       }
 
-      // Audio Narration (Powered by Fish Audio / Server Natural Voice with Instant Browser Fallback)
+      // Audio narration (server TTS with browser speech fallback)
       async function playAudio(text, lang = 'en', source = 'drawer') {
         if (!text || !text.trim()) return;
 
@@ -5313,7 +5313,7 @@
           });
         }
 
-        // Voice directions read aloud (Powered by Fish Audio / Natural TTS with Browser Fallback)
+        // Voice directions read aloud through server TTS with browser speech fallback
         const dirVoiceBtn = document.getElementById('dirVoiceBtn');
         if (dirVoiceBtn) {
           dirVoiceBtn.addEventListener('click', (e) => {
