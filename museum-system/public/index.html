@@ -815,20 +815,15 @@
       line-height: 1.55;
       margin: 0 0 16px;
       flex: 1;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      overflow: hidden;
     }
 
-    .exhibit-locked-features {
-      background: #ffffff;
-      border: 1.5px dashed var(--blue-box-border-strong);
-      border-radius: 10px;
-      padding: 8px 12px;
-      margin-bottom: 14px;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-black);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    #exhibitsSection .exhibit-locked-features {
+      display: none;
     }
 
     .btn-checkin-direct {
@@ -2187,7 +2182,7 @@
               <span>🗺️ Map Pin</span>
             </div>
             <button type="button" class="btn-checkin-direct" onclick="directToCheckin('EX-001', 'Under the Sea')">
-              <span>🎫</span> Check In to View All Details &rarr;
+              <span>🎫</span> Explore Exhibit &rarr;
             </button>
           </div>
         </article>
@@ -2210,7 +2205,7 @@
               <span>🗺️ Map Pin</span>
             </div>
             <button type="button" class="btn-checkin-direct" onclick="directToCheckin('EX-002', 'The River')">
-              <span>🎫</span> Check In to View All Details &rarr;
+              <span>🎫</span> Explore Exhibit &rarr;
             </button>
           </div>
         </article>
@@ -2233,7 +2228,7 @@
               <span>🗺️ Map Pin</span>
             </div>
             <button type="button" class="btn-checkin-direct" onclick="directToCheckin('EX-003', 'Splash Zone')">
-              <span>🎫</span> Check In to View All Details &rarr;
+              <span>🎫</span> Explore Exhibit &rarr;
             </button>
           </div>
         </article>
@@ -2256,7 +2251,7 @@
               <span>🗺️ Map Pin</span>
             </div>
             <button type="button" class="btn-checkin-direct" onclick="directToCheckin('EX-004', 'Everyday Heroes')">
-              <span>🎫</span> Check In to View All Details &rarr;
+              <span>🎫</span> Explore Exhibit &rarr;
             </button>
           </div>
         </article>
@@ -2279,7 +2274,7 @@
               <span>🗺️ Map Pin</span>
             </div>
             <button type="button" class="btn-checkin-direct" onclick="directToCheckin('EX-006', 'Hampanganan')">
-              <span>🎫</span> Check In to View All Details &rarr;
+              <span>🎫</span> Explore Exhibit &rarr;
             </button>
           </div>
         </article>
@@ -2302,7 +2297,7 @@
               <span>🗺️ Map Pin</span>
             </div>
             <button type="button" class="btn-checkin-direct" onclick="directToCheckin('EX-011', 'Mangrove Walk')">
-              <span>🎫</span> Check In to View All Details &rarr;
+              <span>🎫</span> Explore Exhibit &rarr;
             </button>
           </div>
         </article>
@@ -2923,13 +2918,8 @@
               <div class="exhibit-card-body">
                 <h3 class="exhibit-card-title">${escapeHtml(exhibit.title)}</h3>
                 <p class="exhibit-card-desc">${escapeHtml(description)}</p>
-                <div class="exhibit-locked-features">
-                  <span>🔒 Full Plaque &amp; Details</span>
-                  <span>🎧 Audio Tour</span>
-                  <span>🗺️ Map Pin</span>
-                </div>
                 <button type="button" class="btn-checkin-direct" data-featured-code="${escapeHtml(exhibit.code)}" data-featured-title="${escapeHtml(exhibit.title)}">
-                  <span>🎫</span> Check In to View All Details &rarr;
+                  <span>🎫</span> Explore Exhibit &rarr;
                 </button>
               </div>
             </article>
