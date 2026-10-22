@@ -63,6 +63,50 @@ router.get('/recommended', async (req, res) => {
   }
 });
 
+router.get('/featured', async (req, res) => {
+  const requestedLimit = parseInt(req.query.limit, 10) || 6;
+  const limit = Math.max(1, Math.min(requestedLimit, 12));
+  try {
+    const [allExhibits, popularity] = await Promise.all([
+      exhibits.all(),
+      analytics.popularityByExhibit(30)
+    ]);
+    const popularityById = new Map(popularity.map(item => [item._id, item]));
+    const defaultOrder = ['EX-001', 'EX-002', 'EX-003', 'EX-004', 'EX-006', 'EX-011'];
+    allExhibits.sort((a, b) => {
+      const aPopularity = popularityById.get(a.id);
+      const bPopularity = popularityById.get(b.id);
+      if ((aPopularity?.total || 0) !== (bPopularity?.total || 0)) {
+        return (bPopularity?.total || 0) - (aPopularity?.total || 0);
+      }
+      if ((aPopularity?.scans || 0) !== (bPopularity?.scans || 0)) {
+        return (bPopularity?.scans || 0) - (aPopularity?.scans || 0);
+      }
+      const aDefault = defaultOrder.indexOf(a.code);
+      const bDefault = defaultOrder.indexOf(b.code);
+      if (aDefault !== bDefault) {
+        return (aDefault === -1 ? Number.MAX_SAFE_INTEGER : aDefault) -
+          (bDefault === -1 ? Number.MAX_SAFE_INTEGER : bDefault);
+      }
+      return a.code.localeCompare(b.code);
+    });
+
+    const featured = allExhibits.slice(0, limit).map(ex => {
+      const stats = popularityById.get(ex.id);
+      return {
+        ...ex,
+        analyticsInteractions: stats?.total || 0,
+        analyticsScans: stats?.scans || 0,
+        analyticsViews: stats?.views || 0
+      };
+    });
+    res.json({ exhibits: featured, periodDays: 30 });
+  } catch (err) {
+    console.error('Error fetching analytics-based featured exhibits:', err);
+    res.status(500).json({ error: 'Failed to fetch featured exhibits.' });
+  }
+});
+
 router.get('/categories', async (req, res) => {
   try {
     res.json({ categories: await exhibits.categories() });

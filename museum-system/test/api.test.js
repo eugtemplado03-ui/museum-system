@@ -6,6 +6,7 @@ const exhibitsRoutes = require('../routes/exhibits');
 const visitorsRoutes = require('../routes/visitors');
 const { Exhibit } = require('../db/exhibits');
 const { Visitor } = require('../db/visitors');
+const { ScanEvent } = require('../db/analytics');
 
 let mongoServer;
 const app = express();
@@ -54,6 +55,31 @@ describe('Exhibits API', () => {
     const response = await request(app).get('/api/exhibits/EX-999');
     expect(response.status).toBe(200);
     expect(response.body.exhibit.title).toBe('Test Exhibit');
+  });
+
+  it('ranks featured exhibits by views and scans from the last 30 days', async () => {
+    const lessPopular = new Exhibit({ title: 'Less Popular', code: 'EX-998', category: 'Testing' });
+    const popular = new Exhibit({ title: 'Popular Exhibit', code: 'EX-999', category: 'Testing' });
+    const outdated = new Exhibit({ title: 'Outdated Popular Exhibit', code: 'EX-997', category: 'Testing' });
+    await Promise.all([lessPopular.save(), popular.save(), outdated.save()]);
+
+    await request(app).post('/api/exhibits/EX-998/track').send({ source: 'view' });
+    await request(app).post('/api/exhibits/EX-999/track').send({ source: 'view' });
+    await request(app).post('/api/exhibits/EX-999/track').send({ source: 'scan' });
+    await request(app).post('/api/exhibits/EX-999/track').send({ source: 'view' });
+    await ScanEvent.create({
+      exhibitId: outdated.id,
+      source: 'scan',
+      at: new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString()
+    });
+
+    const response = await request(app).get('/api/exhibits/featured?limit=2');
+    expect(response.status).toBe(200);
+    expect(response.body.periodDays).toBe(30);
+    expect(response.body.exhibits.map(exhibit => exhibit.code)).toEqual(['EX-999', 'EX-998']);
+    expect(response.body.exhibits[0].analyticsInteractions).toBe(3);
+    expect(response.body.exhibits[0].analyticsScans).toBe(1);
+    expect(response.body.exhibits.some(exhibit => exhibit.code === 'EX-997')).toBe(false);
   });
 });
 

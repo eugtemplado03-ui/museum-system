@@ -50,6 +50,23 @@ async function summaryByExhibit() {
   return Array.from(map.values()).sort((a, b) => b.total - a.total);
 }
 
+// Rank exhibits by recorded scans and views during a rolling period.
+async function popularityByExhibit(days = 30) {
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+  return ScanEvent.aggregate([
+    { $match: { at: { $gte: since } } },
+    {
+      $group: {
+        _id: '$exhibitId',
+        total: { $sum: 1 },
+        scans: { $sum: { $cond: [{ $eq: ['$source', 'scan'] }, 1, 0] } },
+        views: { $sum: { $cond: [{ $eq: ['$source', 'view'] }, 1, 0] } }
+      }
+    },
+    { $sort: { total: -1, scans: -1, _id: 1 } }
+  ]);
+}
+
 // Return the newest interaction records, defaulting to the latest 25.
 async function recent(limit) {
   const events = await ScanEvent.find({}).sort({ _id: -1 }).limit(Math.max(1, limit || 25)).lean();
@@ -92,4 +109,4 @@ async function totals() {
   return { allTime: events.length, last7Days: last7.length, last24Hours: last24h.length };
 }
 
-module.exports = { record, all, summaryByExhibit, recent, totals, dailyStats, ScanEvent };
+module.exports = { record, all, summaryByExhibit, popularityByExhibit, recent, totals, dailyStats, ScanEvent };

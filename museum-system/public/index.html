@@ -2168,7 +2168,7 @@
         </p>
       </div>
 
-      <div class="exhibits-grid">
+      <div class="exhibits-grid" id="featuredExhibitsGrid">
         <!-- Exhibit 1 -->
         <article class="exhibit-card">
           <div class="exhibit-card-img">
@@ -2900,6 +2900,74 @@
     function escapeHtml(str) {
       return String(str == null ? '' : str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
     }
+
+    // Refresh the welcome-page exhibit cards using the most-viewed exhibits from the last 30 days.
+    (function initAnalyticsFeaturedExhibits() {
+      const grid = document.getElementById('featuredExhibitsGrid');
+      if (!grid || typeof Api === 'undefined' || typeof Api.listFeaturedExhibits !== 'function') return;
+      const refreshInterval = 5 * 60 * 1000;
+      let refreshTimer = null;
+
+      function renderFeaturedExhibits(exhibits) {
+        grid.innerHTML = exhibits.map(exhibit => {
+          const imagePath = (Array.isArray(exhibit.imagePaths) && exhibit.imagePaths.find(Boolean)) ||
+            exhibit.imagePath || exhibit.optimizedImagePath || '/uploads/ex1.jpeg';
+          const description = exhibit.description || 'Discover this featured museum exhibit.';
+          return `
+            <article class="exhibit-card">
+              <div class="exhibit-card-img">
+                <img src="${escapeHtml(imagePath)}" alt="${escapeHtml(exhibit.title)}" loading="lazy">
+                <span class="exhibit-badge">${escapeHtml(exhibit.code)}</span>
+                <span class="exhibit-category">${escapeHtml(exhibit.category || 'Museum Exhibit')}</span>
+              </div>
+              <div class="exhibit-card-body">
+                <h3 class="exhibit-card-title">${escapeHtml(exhibit.title)}</h3>
+                <p class="exhibit-card-desc">${escapeHtml(description)}</p>
+                <div class="exhibit-locked-features">
+                  <span>🔒 Full Plaque &amp; Details</span>
+                  <span>🎧 Audio Tour</span>
+                  <span>🗺️ Map Pin</span>
+                </div>
+                <button type="button" class="btn-checkin-direct" data-featured-code="${escapeHtml(exhibit.code)}" data-featured-title="${escapeHtml(exhibit.title)}">
+                  <span>🎫</span> Check In to View All Details &rarr;
+                </button>
+              </div>
+            </article>
+          `;
+        }).join('');
+
+        grid.querySelectorAll('[data-featured-code]').forEach(button => {
+          button.addEventListener('click', () => {
+            directToCheckin(button.dataset.featuredCode, button.dataset.featuredTitle);
+          });
+        });
+      }
+
+      async function refresh() {
+        try {
+          const result = await Api.listFeaturedExhibits(6);
+          if (Array.isArray(result.exhibits) && result.exhibits.length) {
+            renderFeaturedExhibits(result.exhibits);
+          }
+        } catch (error) {
+          console.warn('Could not refresh analytics-based featured exhibits:', error.message);
+        }
+      }
+
+      function scheduleRefresh() {
+        clearInterval(refreshTimer);
+        if (document.visibilityState === 'visible') {
+          refreshTimer = setInterval(refresh, refreshInterval);
+        }
+      }
+
+      refresh();
+      scheduleRefresh();
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') refresh();
+        scheduleRefresh();
+      });
+    })();
 
     // ── Mobile Menu Toggle ─────────────────────────────────────────
     const welcomeMenuToggle = document.getElementById('welcomeMenuToggle');

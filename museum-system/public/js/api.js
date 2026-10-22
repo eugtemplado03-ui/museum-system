@@ -42,6 +42,19 @@ const Api = (() => {
 
     // Route matching for static fallback
     if (path === '/api/exhibits') return { exhibits: db.exhibits || [] };
+    if (path.startsWith('/api/exhibits/featured')) {
+      const limitMatch = path.match(/[?&]limit=(\d+)/);
+      const limit = limitMatch ? Math.max(1, Math.min(parseInt(limitMatch[1], 10), 12)) : 6;
+      const fallbackOrder = ['EX-001', 'EX-002', 'EX-003', 'EX-004', 'EX-006', 'EX-011'];
+      const fallbackExhibits = (db.exhibits || []).slice().sort((a, b) => {
+        const aIndex = fallbackOrder.indexOf(a.code);
+        const bIndex = fallbackOrder.indexOf(b.code);
+        const aRank = aIndex === -1 ? Number.MAX_SAFE_INTEGER : aIndex;
+        const bRank = bIndex === -1 ? Number.MAX_SAFE_INTEGER : bIndex;
+        return aRank - bRank || String(a.code || '').localeCompare(String(b.code || ''));
+      });
+      return { exhibits: fallbackExhibits.slice(0, limit), periodDays: 30 };
+    }
     if (path.startsWith('/api/exhibits/categories')) return { categories: db.categories || ['Marine & Nature', 'Aquarium & Live Reef Systems', 'Touch & Play', 'Toys & Collections', 'Character & Heritage', 'Environmental', 'Reading & Learning', 'Other'] };
     if (path.startsWith('/api/exhibits/')) {
       const code = decodeURIComponent(path.replace('/api/exhibits/', '').split('?')[0]);
@@ -127,6 +140,7 @@ const Api = (() => {
     me: () => request('/api/auth/me'),
     listExhibits: () => request('/api/exhibits'),
     listRecommendedExhibits: (limit = 6) => request('/api/exhibits/recommended?limit=' + limit),
+    listFeaturedExhibits: (limit = 6) => request('/api/exhibits/featured?limit=' + encodeURIComponent(limit)),
     getExhibit: (code) => request('/api/exhibits/' + encodeURIComponent(code)),
     translateText: (text, targetLang) => request('/api/tts/translate', { method: 'POST', body: JSON.stringify({ text, targetLang }) }),
     createExhibit: (payload) => request('/api/exhibits', { method: 'POST', body: JSON.stringify(payload) }),
