@@ -4,6 +4,7 @@ const request = require('supertest');
 const express = require('express');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
+const QRCode = require('qrcode');
 const visitorsRoutes = require('../routes/visitors');
 
 test('Visitors API - Digital Pass and Quick Check-in Routes', async (t) => {
@@ -45,8 +46,18 @@ test('Visitors API - Digital Pass and Quick Check-in Routes', async (t) => {
 
     await t.test('GET /api/visitors/pass/:code returns pass metadata and QR', async () => {
       assert.ok(createdVisitorCode);
-      const res = await request(app)
-        .get(`/api/visitors/pass/${createdVisitorCode}`);
+      const originalToDataURL = QRCode.toDataURL;
+      let encodedPayload = '';
+      QRCode.toDataURL = async (payload, ...options) => {
+        encodedPayload = payload;
+        return originalToDataURL.call(QRCode, payload, ...options);
+      };
+      let res;
+      try {
+        res = await request(app).get(`/api/visitors/pass/${createdVisitorCode}`);
+      } finally {
+        QRCode.toDataURL = originalToDataURL;
+      }
 
       assert.equal(res.status, 200);
       assert.equal(res.body.success, true);
@@ -54,6 +65,10 @@ test('Visitors API - Digital Pass and Quick Check-in Routes', async (t) => {
       assert.equal(res.body.pass.visitorName, 'Maria Santos');
       assert.ok(res.body.qrCodeDataUrl);
       assert.match(res.body.qrCodeDataUrl, /^data:image\/png;base64,/);
+      const passQrUrl = new URL(encodedPayload);
+      assert.equal(passQrUrl.pathname, '/checkin.html');
+      assert.equal(passQrUrl.searchParams.get('tab'), 'returning');
+      assert.equal(passQrUrl.searchParams.get('visitorCode'), createdVisitorCode);
     });
 
     await t.test('GET /api/visitors/pass/:code/qr returns PNG stream', async () => {
@@ -93,6 +108,19 @@ test('Visitors API - Digital Pass and Quick Check-in Routes', async (t) => {
       const res = await request(app)
         .post('/api/visitors/quick-checkin')
         .send({ visitorCode: qrPayload });
+
+      assert.equal(res.status, 200);
+      assert.equal(res.body.success, true);
+      assert.equal(res.body.visitorCode, createdVisitorCode);
+      assert.equal(res.body.visitor.visitorName, 'Maria Santos');
+    });
+
+    await t.test('POST /api/visitors/quick-checkin handles pass QR URL', async () => {
+      assert.ok(createdVisitorCode);
+      const qrUrl = `https://museum.example/checkin.html?tab=returning&visitorCode=${encodeURIComponent(createdVisitorCode)}`;
+      const res = await request(app)
+        .post('/api/visitors/quick-checkin')
+        .send({ visitorCode: qrUrl });
 
       assert.equal(res.status, 200);
       assert.equal(res.body.success, true);

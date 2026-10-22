@@ -3581,6 +3581,55 @@
       }
     }
 
+    function visitorPassCodeFromQr(rawText) {
+      const decoded = String(rawText || '').trim();
+      if (!decoded) return '';
+
+      try {
+        const payload = JSON.parse(decoded);
+        if (payload && typeof payload === 'object') {
+          const code = payload.pass || payload.visitorCode || payload.code || payload.id;
+          if (typeof code === 'string' && code.trim()) return code.trim();
+        }
+      } catch (e) {}
+
+      try {
+        const parsed = new URL(decoded, window.location.origin);
+        const code = parsed.searchParams.get('visitorCode')
+          || parsed.searchParams.get('pass')
+          || parsed.searchParams.get('code')
+          || parsed.searchParams.get('id');
+        if (code) return code.trim();
+      } catch (e) {}
+
+      return decoded;
+    }
+
+    function isVisitorCheckinQr(rawText) {
+      try {
+        const parsed = new URL(String(rawText || '').trim(), window.location.origin);
+        return /\/checkin(?:\.html)?\/?$/i.test(parsed.pathname)
+          && !parsed.searchParams.has('visitorCode')
+          && !parsed.searchParams.has('pass')
+          && !parsed.searchParams.has('code')
+          && !parsed.searchParams.has('id');
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function handleVisitorPassQr(rawText, triggerBtn) {
+      if (isVisitorCheckinQr(rawText)) {
+        stopQrScanner();
+        switchTab('visitor');
+        document.getElementById('checkinSection')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+
+      const passCode = visitorPassCodeFromQr(rawText);
+      executeQuickCheckin(passCode, triggerBtn);
+    }
+
     // Fast Pass Code Input Form
     const fastPassForm = document.getElementById('fastPassForm');
     const visitorPassCodeInput = document.getElementById('visitorPassCodeInput');
@@ -3628,7 +3677,7 @@
           { fps: 10, qrbox: { width: 250, height: 250 } },
           (decodedText) => {
             stopQrScanner();
-            executeQuickCheckin(decodedText, btnStartQrCamera);
+            handleVisitorPassQr(decodedText, btnStartQrCamera);
           },
           () => {}
         );
@@ -3656,7 +3705,7 @@
       try {
         const html5QrCode = new Html5Qrcode("qrReader");
         const decodedText = await html5QrCode.scanFile(file, true);
-        executeQuickCheckin(decodedText, null);
+        handleVisitorPassQr(decodedText, null);
       } catch (err) {
         if (errorEl) {
           errorEl.textContent = 'Could not detect a valid museum QR code in the uploaded image. Please ensure the QR is clear and well-lit, or enter your visitor pass code manually.';
@@ -3666,6 +3715,13 @@
         qrFileInput.value = '';
       }
     });
+
+    const passCodeFromUrl = urlParams.get('visitorCode') || urlParams.get('pass');
+    if (passCodeFromUrl) {
+      if (visitorPassCodeInput) visitorPassCodeInput.value = passCodeFromUrl;
+      window.history.replaceState({}, document.title, `${window.location.pathname}?tab=returning`);
+      executeQuickCheckin(passCodeFromUrl, btnFastPassSubmit);
+    }
 
     // Copy Pass Code button
     const btnCopyPassCode = document.getElementById('btnCopyPassCode');

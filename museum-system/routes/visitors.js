@@ -15,6 +15,17 @@ const checkinLimiter = rateLimit({
   legacyHeaders: false
 });
 
+function visitorPassQrPayload(req, visitorCode) {
+  const rawProto = req.headers['x-forwarded-proto'] || req.protocol;
+  const protocol = (typeof rawProto === 'string' && rawProto.includes(',')) ? rawProto.split(',')[0].trim() : rawProto;
+  const host = req.headers['x-forwarded-host'] || req.get('host');
+  const base = (process.env.SITE_URL || `${protocol}://${host}`).replace(/\/+$/, '');
+  const url = new URL('/checkin.html', base);
+  url.searchParams.set('tab', 'returning');
+  url.searchParams.set('visitorCode', visitorCode);
+  return url.toString();
+}
+
 // Public check-in endpoint with strict input validation
 // Validate public check-in details and field lengths before creating a visitor pass.
 function validateCheckin(body) {
@@ -89,7 +100,7 @@ router.post('/checkin', checkinLimiter, async (req, res) => {
     const visitorCode = visitor.visitorCode || visitor.id;
     let qrCodeDataUrl = '';
     try {
-      const qrPayload = JSON.stringify({ pass: visitorCode, name: visitor.visitorName, id: visitor.id });
+      const qrPayload = visitorPassQrPayload(req, visitorCode);
       qrCodeDataUrl = await QRCode.toDataURL(qrPayload, {
         width: 320,
         margin: 1,
@@ -120,14 +131,21 @@ router.post('/quick-checkin', checkinLimiter, async (req, res) => {
   }
 
   let targetCode = code.trim();
-  // Handle QR payload encoded as JSON: e.g. {"pass":"MSBN-XXXXXX"}
-  if (targetCode.startsWith('{') && targetCode.endsWith('}')) {
+  try {
+    const parsed = JSON.parse(targetCode);
+    if (parsed && typeof parsed === 'object') {
+      const payloadCode = parsed.pass || parsed.visitorCode || parsed.code || parsed.id;
+      if (typeof payloadCode === 'string' && payloadCode.trim()) targetCode = payloadCode.trim();
+    }
+  } catch (e) {
     try {
-      const parsed = JSON.parse(targetCode);
-      if (parsed.pass) targetCode = parsed.pass;
-      else if (parsed.code) targetCode = parsed.code;
-      else if (parsed.id) targetCode = parsed.id;
-    } catch (e) {}
+      const parsedUrl = new URL(targetCode);
+      const payloadCode = parsedUrl.searchParams.get('visitorCode')
+        || parsedUrl.searchParams.get('pass')
+        || parsedUrl.searchParams.get('code')
+        || parsedUrl.searchParams.get('id');
+      if (payloadCode) targetCode = payloadCode.trim();
+    } catch (urlErr) {}
   }
 
   try {
@@ -139,7 +157,7 @@ router.post('/quick-checkin', checkinLimiter, async (req, res) => {
     const visitorCode = visitor.visitorCode || visitor.id;
     let qrCodeDataUrl = '';
     try {
-      const qrPayload = JSON.stringify({ pass: visitorCode, name: visitor.visitorName, id: visitor.id });
+      const qrPayload = visitorPassQrPayload(req, visitorCode);
       qrCodeDataUrl = await QRCode.toDataURL(qrPayload, {
         width: 320,
         margin: 1,
@@ -169,7 +187,7 @@ router.get('/pass/:code', async (req, res) => {
     const visitorCode = visitor.visitorCode || visitor.id;
     let qrCodeDataUrl = '';
     try {
-      const qrPayload = JSON.stringify({ pass: visitorCode, name: visitor.visitorName, id: visitor.id });
+      const qrPayload = visitorPassQrPayload(req, visitorCode);
       qrCodeDataUrl = await QRCode.toDataURL(qrPayload, {
         width: 320,
         margin: 1,
@@ -204,7 +222,7 @@ router.get('/pass/:code/qr', async (req, res) => {
     if (!visitor) return res.status(404).json({ error: 'Visitor pass not found.' });
 
     const visitorCode = visitor.visitorCode || visitor.id;
-    const qrPayload = JSON.stringify({ pass: visitorCode, name: visitor.visitorName, id: visitor.id });
+    const qrPayload = visitorPassQrPayload(req, visitorCode);
     const png = await QRCode.toBuffer(qrPayload, {
       width: 380,
       margin: 1,
