@@ -436,7 +436,7 @@
                   <option value="hil">Hiligaynon (Ilonggo)</option>
                 </select>
               </div>
-              <div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">Voice narration reads the current language text aloud. Groq natural voice supports English; other languages use device text-to-speech.</div>
+              <div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">Voice narration reads the text aloud. English uses Groq natural voice; Bisaya, Hiligaynon, and Tagalog use Fish Audio / OpenRouter voice narration.</div>
               <div class="plaque-cat-detail">Category: <strong>${escapeHtml(exhibit.category)}</strong></div>
               <div class="plaque-desc" id="plaqueDesc" data-desc-original="${escapeHtml(exhibit.description||'')||''}" data-desc-tl="${escapeHtml(exhibit.description_tl||'')||''}" data-desc-cb="${escapeHtml(exhibit.description_cb||'')||''}" data-desc-hil="${escapeHtml(exhibit.description_hil||'')||''}">
                 ${escapeHtml(exhibit.description||'No description on file yet.')}
@@ -873,10 +873,7 @@
         }
         const currentSeq = ++_ttsSeq;
         _ttsAbortCtrl = new AbortController();
-        // For Groq TTS: send with 'en' for non-Arabic languages since Groq only supports en/ar.
-        // The text is already translated so English voice reads the translated content.
         const currentLang = (langSelect && langSelect.value !== 'original') ? langSelect.value : 'en';
-        const groqLang = (currentLang === 'ar') ? 'ar' : 'en';
         const deviceLocale = getLangLocale(currentLang);
 
         try {
@@ -884,7 +881,7 @@
           const resp = await fetch('/api/tts/speak', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: textToSpeak, lang: groqLang }),
+            body: JSON.stringify({ text: textToSpeak, lang: currentLang }),
             signal: _ttsAbortCtrl.signal
           });
           if (currentSeq !== _ttsSeq) return;

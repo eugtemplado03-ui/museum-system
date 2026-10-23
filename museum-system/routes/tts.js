@@ -117,6 +117,32 @@ function getGroqSpeechConfiguration(lang) {
   return null;
 }
 
+function getFishAudioLanguage(lang) {
+  if (lang === 'cb') return 'ceb';
+  if (lang === 'hil') return 'hil';
+  if (lang === 'tl') return 'tl';
+  return null;
+}
+
+function getFishAudioVoiceId(lang) {
+  const languageVoiceId = {
+    tl: process.env.FISH_AUDIO_VOICE_ID_TL,
+    cb: process.env.FISH_AUDIO_VOICE_ID_CEB,
+    hil: process.env.FISH_AUDIO_VOICE_ID_HIL
+  }[lang];
+  return (languageVoiceId || process.env.FISH_AUDIO_VOICE_ID || process.env.FISH_AUDIO_REFERENCE_ID || '').trim();
+}
+
+function getLanguageDisplayName(lang) {
+  return {
+    en: 'English',
+    ar: 'Saudi Arabic',
+    tl: 'Filipino (Tagalog)',
+    cb: 'Cebuano (Bisaya)',
+    hil: 'Hiligaynon (Ilonggo)'
+  }[lang] || lang;
+}
+
 function parseWavBuffer(buffer) {
   if (buffer.length < 12 || buffer.toString('ascii', 0, 4) !== 'RIFF' ||
     buffer.toString('ascii', 8, 12) !== 'WAVE') {
@@ -282,17 +308,21 @@ router.get('/status', async (req, res) => {
   try {
     const { apiKey } = await chatApiKey.getGroqConfiguration();
     const hasGroqKey = Boolean(apiKey);
+    const hasFishKey = Boolean((process.env.FISH_AUDIO_API_KEY || '').trim());
+    const hasOpenRouterKey = Boolean((process.env.OPENROUTER_API_KEY || '').trim());
+    const localProvider = hasFishKey ? 'fish-audio' : (hasOpenRouterKey ? 'openrouter' : 'unsupported-by-groq');
     res.json({
       translationConfigured: hasGroqKey,
       groqConfigured: hasGroqKey,
       groqTtsConfigured: hasGroqKey,
       groqTtsLanguages: ['en', 'ar'],
+      fishAudioConfigured: hasFishKey,
       speechProviders: {
         en: hasGroqKey ? 'groq-orpheus' : 'unconfigured',
         ar: hasGroqKey ? 'groq-orpheus-arabic' : 'unconfigured',
-        tl: 'unsupported-by-groq',
-        cb: 'unsupported-by-groq',
-        hil: 'unsupported-by-groq'
+        tl: localProvider,
+        cb: localProvider,
+        hil: localProvider
       }
     });
   } catch (err) {
@@ -418,7 +448,148 @@ router.post('/translate', async (req, res) => {
   }
 });
 
-// ── TTS endpoint (Groq Orpheus) ──────────────────────────────────
+// ── Fish Audio TTS (for Bisaya, Hiligaynon, Tagalog) ─────────────────
+async function tryFishAudio({ text, lang }) {
+  const fishKey = (process.env.FISH_AUDIO_API_KEY || '').trim();
+  if (!fishKey) return null;
+
+  const fishLang = getFishAudioLanguage(lang) || 'tl';
+  const voiceId = getFishAudioVoiceId(lang);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 20000);
+
+  try {
+    console.log(`[TTS] Attempting Fish Audio speech for ${lang} (${fishLang})...`);
+    const payload = {
+      text,
+      language: fishLang,
+      format: 'mp3',
+      latency: 'balanced',
+      prosody: { speed: 1.0, volume: 0 }
+    };
+    if (voiceId) payload.reference_id = voiceId;
+
+    const resp = await fetch('https://api.fish.audio/v1/tts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${fishKey}`,
+        'model': process.env.FISH_AUDIO_MODEL || 's2.1-pro-free'
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    });
+
+    if (resp.ok) {
+      const buffer = Buffer.from(await resp.arrayBuffer());
+      if (buffer.length > 0) {
+        console.log(`[TTS] Fish Audio speech succeeded (${buffer.length} bytes, MP3).`);
+        return { buffer, contentType: 'audio/mpeg', provider: 'fish-audio' };
+      }
+    }
+    const errText = await resp.text().catch(() => '');
+    console.warn(`[TTS] Fish Audio returned ${resp.status}: ${errText.slice(0, 100)}. Falling back to OpenRouter...`);
+    return null;
+  } catch (err) {
+    console.warn(`[TTS] Fish Audio error: ${err.message}. Falling back to OpenRouter...`);
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+// ── OpenRouter Audio TTS Fallback ────────────────────────────────────
+async function tryOpenRouterAudio({ text, lang }) {
+  const openRouterKey = (process.env.OPENROUTER_API_KEY || '').trim();
+  if (!openRouterKey) return null;
+
+  const langName = getLanguageDisplayName(lang);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 25000);
+
+  try {
+    console.log(`[TTS] Attempting OpenRouter audio speech for ${lang} (${langName})...`);
+    const model = process.env.OPENROUTER_TTS_MODEL || 'openai/gpt-audio-mini';
+    const voice = process.env.OPENROUTER_TTS_VOICE || 'alloy';
+
+    const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openRouterKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': process.env.SITE_URL || 'http://localhost:3000',
+        'X-Title': process.env.SITE_NAME || 'Museo Sang Bata sa Negros'
+      },
+      body: JSON.stringify({
+        model,
+        modalities: ['text', 'audio'],
+        audio: { voice, format: 'mp3' },
+        messages: [
+          {
+            role: 'system',
+            content: `Speak the provided narration naturally in ${langName}. Read it as written; do not translate, summarize, or add extra words.`
+          },
+          { role: 'user', content: text }
+        ],
+        stream: false
+      }),
+      signal: controller.signal
+    });
+
+    if (resp.ok) {
+      const data = await resp.json();
+      const audioData = data.choices?.[0]?.message?.audio?.data;
+      if (audioData) {
+        const buffer = Buffer.from(audioData, 'base64');
+        console.log(`[TTS] OpenRouter audio speech succeeded (${buffer.length} bytes).`);
+        return { buffer, contentType: 'audio/mpeg', provider: 'openrouter-audio' };
+      }
+    }
+    const errText = await resp.text().catch(() => '');
+    console.warn(`[TTS] OpenRouter returned ${resp.status}: ${errText.slice(0, 150)}. Falling back to Google TTS...`);
+    return null;
+  } catch (err) {
+    console.warn(`[TTS] OpenRouter error: ${err.message}. Falling back to Google TTS...`);
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+// ── Google TTS Stream Fallback ───────────────────────────────────────
+async function tryGoogleTts({ text, lang }) {
+  try {
+    const chunks = splitIntoChunks(text, 140);
+    const audioBuffers = [];
+    const ttsLang = (lang === 'cb' || lang === 'hil' || lang === 'tl') ? 'tl' : 'en';
+
+    for (const chunk of chunks) {
+      if (!chunk.trim()) continue;
+      const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${ttsLang}&client=tw-ob&q=${encodeURIComponent(chunk)}`;
+      const resp = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+        }
+      });
+      if (resp.ok) {
+        const ab = await resp.arrayBuffer();
+        audioBuffers.push(Buffer.from(ab));
+      }
+    }
+
+    if (audioBuffers.length > 0) {
+      const combined = Buffer.concat(audioBuffers);
+      console.log(`[TTS] Google TTS speech generated (${combined.length} bytes, MP3).`);
+      return { buffer: combined, contentType: 'audio/mpeg', provider: 'google-tts-fallback' };
+    }
+    return null;
+  } catch (err) {
+    console.warn(`[TTS] Google TTS error: ${err.message}`);
+    return null;
+  }
+}
+
+// ── TTS endpoint (Groq English, Fish Audio / OpenRouter local languages) ──
 router.post('/speak', async (req, res) => {
   const rawLang = (req.body && (req.body.lang || req.body.targetLang || req.body.language)) || 'tl';
   const lang = normalizeTargetLang(rawLang);
@@ -428,14 +599,64 @@ router.post('/speak', async (req, res) => {
   }
 
   const cleanText = text.slice(0, 1500).replace(/[\r\n]+/g, ' ').trim();
+  const cacheKey = `${lang}:${cleanText}`;
+
+  if (audioCache.has(cacheKey)) {
+    const cachedBuffer = audioCache.get(cacheKey);
+    const cachedMeta = audioCacheMeta.get(cacheKey) || { type: 'audio/wav', provider: 'cached' };
+    res.set('Content-Type', cachedMeta.type);
+    res.set('Content-Length', cachedBuffer.byteLength);
+    res.set('X-TTS-Provider', 'cached');
+    return res.send(cachedBuffer);
+  }
+
+  // 1. Local Philippine languages: Bisaya (cb), Hiligaynon (hil), Tagalog (tl)
+  if (['tl', 'cb', 'hil'].includes(lang)) {
+    const hasFishKey = Boolean((process.env.FISH_AUDIO_API_KEY || '').trim());
+    const hasOpenRouterKey = Boolean((process.env.OPENROUTER_API_KEY || '').trim());
+
+    if (!hasFishKey && !hasOpenRouterKey) {
+      const languageName = getLanguageDisplayName(lang);
+      return res.status(501).json({
+        error: `Groq speech currently supports English and Saudi Arabic only; it cannot generate ${languageName} narration.`,
+        code: 'GROQ_TTS_LANGUAGE_UNSUPPORTED',
+        language: lang
+      });
+    }
+
+    // Step A: Fish Audio if possible
+    let result = await tryFishAudio({ text: cleanText, lang });
+
+    // Step B: If Fish Audio is not okay, use OpenRouter
+    if (!result) {
+      result = await tryOpenRouterAudio({ text: cleanText, lang });
+    }
+
+    // Step C: If both Fish Audio and OpenRouter are not okay, fall back to Google TTS
+    if (!result) {
+      result = await tryGoogleTts({ text: cleanText, lang });
+    }
+
+    if (result) {
+      audioCache.set(cacheKey, result.buffer);
+      audioCacheMeta.set(cacheKey, { type: result.contentType, provider: result.provider });
+      res.set('Content-Type', result.contentType);
+      res.set('Content-Length', result.buffer.byteLength);
+      res.set('X-TTS-Provider', result.provider);
+      return res.send(result.buffer);
+    }
+
+    return res.status(502).json({
+      error: `Voice narration for ${getLanguageDisplayName(lang)} is temporarily unavailable.`,
+      code: 'MULTILINGUAL_TTS_FAILED',
+      language: lang
+    });
+  }
+
+  // 2. English (en) and Saudi Arabic (ar): Use Groq Orpheus API
   const speechConfiguration = getGroqSpeechConfiguration(lang);
   if (!speechConfiguration) {
-    const languageNames = {
-      tl: 'Tagalog',
-      cb: 'Cebuano/Bisaya',
-      hil: 'Hiligaynon'
-    };
-    const languageName = languageNames[lang] || 'The selected language';
+    const languageName = getLanguageDisplayName(lang);
     return res.status(501).json({
       error: `Groq speech currently supports English and Saudi Arabic only; it cannot generate ${languageName} narration.`,
       code: 'GROQ_TTS_LANGUAGE_UNSUPPORTED',
@@ -456,17 +677,6 @@ router.post('/speak', async (req, res) => {
       code: 'GROQ_TTS_NOT_CONFIGURED',
       language: lang
     });
-  }
-
-  const cacheKey = `${lang}:${cleanText}`;
-
-  if (audioCache.has(cacheKey)) {
-    const cachedBuffer = audioCache.get(cacheKey);
-    const cachedMeta = audioCacheMeta.get(cacheKey) || { type: 'audio/wav', provider: 'cached' };
-    res.set('Content-Type', cachedMeta.type);
-    res.set('Content-Length', cachedBuffer.byteLength);
-    res.set('X-TTS-Provider', 'cached');
-    return res.send(cachedBuffer);
   }
 
   const chunks = splitIntoChunks(cleanText, 200);

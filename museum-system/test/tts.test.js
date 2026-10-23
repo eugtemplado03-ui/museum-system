@@ -83,29 +83,40 @@ describe('Groq chat, translation, and speech API', () => {
   });
 
   it('GET /api/tts/status reports Groq-only providers and supported speech languages', async () => {
+    const envKeys = ['FISH_AUDIO_API_KEY', 'OPENROUTER_API_KEY'];
+    const savedEnv = Object.fromEntries(envKeys.map(k => [k, process.env[k]]));
+    envKeys.forEach(k => { process.env[k] = ''; });
+
     const keySpy = jest.spyOn(chatApiKey, 'getGroqConfiguration')
       .mockResolvedValue({ apiKey: 'test-groq-key' });
-    const res = await request(app).get('/api/tts/status');
 
-    expect(res.status).toBe(200);
-    expect(res.body.translationConfigured).toBe(true);
-    expect(res.body.groqTtsConfigured).toBe(true);
-    expect(res.body.groqTtsLanguages).toEqual(['en', 'ar']);
-    expect(res.body.speechProviders).toMatchObject({
-      en: 'groq-orpheus',
-      ar: 'groq-orpheus-arabic',
-      tl: 'unsupported-by-groq',
-      cb: 'unsupported-by-groq',
-      hil: 'unsupported-by-groq'
-    });
-    expect(res.body).not.toHaveProperty('openRouterTtsConfigured');
-    expect(keySpy).toHaveBeenCalledTimes(1);
+    try {
+      const res = await request(app).get('/api/tts/status');
+
+      expect(res.status).toBe(200);
+      expect(res.body.translationConfigured).toBe(true);
+      expect(res.body.groqTtsConfigured).toBe(true);
+      expect(res.body.groqTtsLanguages).toEqual(['en', 'ar']);
+      expect(res.body.speechProviders).toMatchObject({
+        en: 'groq-orpheus',
+        ar: 'groq-orpheus-arabic',
+        tl: 'unsupported-by-groq',
+        cb: 'unsupported-by-groq',
+        hil: 'unsupported-by-groq'
+      });
+      expect(keySpy).toHaveBeenCalledTimes(1);
+    } finally {
+      envKeys.forEach(k => { process.env[k] = savedEnv[k]; });
+    }
   });
 
   it.each(['tl', 'cb', 'hil'])('POST /api/tts/speak reports Groq %s speech as unsupported without another provider', async lang => {
     const originalFetch = global.fetch;
     global.fetch = jest.fn();
     const keySpy = jest.spyOn(chatApiKey, 'getGroqConfiguration');
+    const envKeys = ['FISH_AUDIO_API_KEY', 'OPENROUTER_API_KEY'];
+    const savedEnv = Object.fromEntries(envKeys.map(k => [k, process.env[k]]));
+    envKeys.forEach(k => { process.env[k] = ''; });
 
     try {
       const res = await request(app)
@@ -119,6 +130,118 @@ describe('Groq chat, translation, and speech API', () => {
       expect(keySpy).not.toHaveBeenCalled();
     } finally {
       global.fetch = originalFetch;
+      envKeys.forEach(k => { process.env[k] = savedEnv[k]; });
+    }
+  });
+
+  it.each(['tl', 'cb', 'hil'])('POST /api/tts/speak uses Fish Audio for %s when configured', async lang => {
+    const originalFetch = global.fetch;
+    const envKeys = ['FISH_AUDIO_API_KEY', 'OPENROUTER_API_KEY'];
+    const savedEnv = Object.fromEntries(envKeys.map(k => [k, process.env[k]]));
+    process.env.FISH_AUDIO_API_KEY = 'test-fish-key';
+    process.env.OPENROUTER_API_KEY = '';
+
+    global.fetch = jest.fn(async url => {
+      if (url === 'https://api.fish.audio/v1/tts') {
+        return new Response(Buffer.from('fake-fish-audio-mp3'), {
+          status: 200,
+          headers: { 'Content-Type': 'audio/mpeg' }
+        });
+      }
+      return new Response('Not found', { status: 404 });
+    });
+
+    try {
+      const res = await request(app)
+        .post('/api/tts/speak')
+        .send({ text: `Test Fish Audio speech ${lang} ${Date.now()}`, lang });
+
+      expect(res.status).toBe(200);
+      expect(res.headers['x-tts-provider']).toBe('fish-audio');
+      expect(res.headers['content-type']).toContain('audio/mpeg');
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(global.fetch.mock.calls[0][0]).toBe('https://api.fish.audio/v1/tts');
+      const body = JSON.parse(global.fetch.mock.calls[0][1].body);
+      expect(body.format).toBe('mp3');
+      const expectedLang = { tl: 'tl', cb: 'ceb', hil: 'hil' }[lang];
+      expect(body.language).toBe(expectedLang);
+    } finally {
+      global.fetch = originalFetch;
+      envKeys.forEach(k => { process.env[k] = savedEnv[k]; });
+    }
+  });
+
+  it.each(['tl', 'cb', 'hil'])('POST /api/tts/speak falls back to OpenRouter when Fish Audio fails', async lang => {
+    const originalFetch = global.fetch;
+    const envKeys = ['FISH_AUDIO_API_KEY', 'OPENROUTER_API_KEY'];
+    const savedEnv = Object.fromEntries(envKeys.map(k => [k, process.env[k]]));
+    process.env.FISH_AUDIO_API_KEY = 'test-fish-key';
+    process.env.OPENROUTER_API_KEY = 'test-openrouter-key';
+
+    global.fetch = jest.fn(async url => {
+      if (url === 'https://api.fish.audio/v1/tts') {
+        return new Response(JSON.stringify({ error: 'Fish audio failed' }), { status: 500 });
+      }
+      if (url === 'https://openrouter.ai/api/v1/chat/completions') {
+        const audioBase64 = Buffer.from('fake-openrouter-audio').toString('base64');
+        return new Response(JSON.stringify({
+          choices: [{ message: { audio: { data: audioBase64 } } }]
+        }), { status: 200 });
+      }
+      return new Response('Not found', { status: 404 });
+    });
+
+    try {
+      const res = await request(app)
+        .post('/api/tts/speak')
+        .send({ text: `Test OpenRouter fallback ${lang} ${Date.now()}`, lang });
+
+      expect(res.status).toBe(200);
+      expect(res.headers['x-tts-provider']).toBe('openrouter-audio');
+      expect(res.headers['content-type']).toContain('audio/mpeg');
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(global.fetch.mock.calls[0][0]).toBe('https://api.fish.audio/v1/tts');
+      expect(global.fetch.mock.calls[1][0]).toBe('https://openrouter.ai/api/v1/chat/completions');
+    } finally {
+      global.fetch = originalFetch;
+      envKeys.forEach(k => { process.env[k] = savedEnv[k]; });
+    }
+  });
+
+  it.each(['tl', 'cb', 'hil'])('POST /api/tts/speak falls back to Google TTS when both Fish Audio and OpenRouter fail', async lang => {
+    const originalFetch = global.fetch;
+    const envKeys = ['FISH_AUDIO_API_KEY', 'OPENROUTER_API_KEY'];
+    const savedEnv = Object.fromEntries(envKeys.map(k => [k, process.env[k]]));
+    process.env.FISH_AUDIO_API_KEY = 'test-fish-key';
+    process.env.OPENROUTER_API_KEY = 'test-openrouter-key';
+
+    global.fetch = jest.fn(async url => {
+      if (url === 'https://api.fish.audio/v1/tts') {
+        return new Response(JSON.stringify({ error: 'Fish audio failed' }), { status: 500 });
+      }
+      if (url === 'https://openrouter.ai/api/v1/chat/completions') {
+        return new Response(JSON.stringify({ error: 'OpenRouter insufficient credits' }), { status: 402 });
+      }
+      if (typeof url === 'string' && url.includes('translate.google.com/translate_tts')) {
+        return new Response(Buffer.from('fake-google-audio-mp3'), {
+          status: 200,
+          headers: { 'Content-Type': 'audio/mpeg' }
+        });
+      }
+      return new Response('Not found', { status: 404 });
+    });
+
+    try {
+      const res = await request(app)
+        .post('/api/tts/speak')
+        .send({ text: `Test Google fallback ${lang} ${Date.now()}`, lang });
+
+      expect(res.status).toBe(200);
+      expect(res.headers['x-tts-provider']).toBe('google-tts-fallback');
+      expect(res.headers['content-type']).toContain('audio/mpeg');
+    } finally {
+      global.fetch = originalFetch;
+      envKeys.forEach(k => { process.env[k] = savedEnv[k]; });
     }
   });
 
