@@ -436,7 +436,7 @@
                   <option value="hil">Hiligaynon (Ilonggo)</option>
                 </select>
               </div>
-              <div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">Voice narration is available in English only. Tagalog, Bisaya, and Hiligaynon translations remain available as text.</div>
+              <div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">Voice narration reads the current language text aloud. Groq natural voice supports English; other languages use device text-to-speech.</div>
               <div class="plaque-cat-detail">Category: <strong>${escapeHtml(exhibit.category)}</strong></div>
               <div class="plaque-desc" id="plaqueDesc" data-desc-original="${escapeHtml(exhibit.description||'')||''}" data-desc-tl="${escapeHtml(exhibit.description_tl||'')||''}" data-desc-cb="${escapeHtml(exhibit.description_cb||'')||''}" data-desc-hil="${escapeHtml(exhibit.description_hil||'')||''}">
                 ${escapeHtml(exhibit.description||'No description on file yet.')}
@@ -796,15 +796,11 @@
       let _ttsSeq = 0;
       let _ttsAbortCtrl = null;
 
-      function isSpeechLanguageSupported() {
-        return !langSelect || langSelect.value === 'original';
-      }
 
       function setStatus(msg, isLoading) {
         statusEl.textContent = msg;
-        playBtn.disabled  = isLoading || !isSpeechLanguageSupported();
+        playBtn.disabled  = isLoading;
         stopBtn.disabled  = !isLoading;
-        playBtn.title = isSpeechLanguageSupported() ? '' : 'Groq voice narration is available in English only.';
       }
 
       function stopAudio() {
@@ -860,9 +856,14 @@
         }
       }
 
+      // Map language code to a Web Speech API locale for device TTS fallback
+      function getLangLocale(lang) {
+        const map = { en: 'en-US', ar: 'ar-SA', tl: 'fil-PH', cb: 'fil-PH', hil: 'fil-PH' };
+        return map[lang] || 'en-US';
+      }
+
       // ── Speak text using high-fidelity natural voice streaming ──────────
       async function speakCurrent() {
-        if (!isSpeechLanguageSupported()) return;
         stopDirVoice();
         stopAudio();
         const textToSpeak = _currentText || _cache.original;
@@ -872,14 +873,18 @@
         }
         const currentSeq = ++_ttsSeq;
         _ttsAbortCtrl = new AbortController();
+        // For Groq TTS: send with 'en' for non-Arabic languages since Groq only supports en/ar.
+        // The text is already translated so English voice reads the translated content.
+        const currentLang = (langSelect && langSelect.value !== 'original') ? langSelect.value : 'en';
+        const groqLang = (currentLang === 'ar') ? 'ar' : 'en';
+        const deviceLocale = getLangLocale(currentLang);
 
         try {
           setStatus('⏳ Generating audio…', true);
-          const currentLang = (langSelect && langSelect.value !== 'original') ? langSelect.value : 'en';
           const resp = await fetch('/api/tts/speak', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: textToSpeak, lang: currentLang }),
+            body: JSON.stringify({ text: textToSpeak, lang: groqLang }),
             signal: _ttsAbortCtrl.signal
           });
           if (currentSeq !== _ttsSeq) return;
@@ -916,7 +921,7 @@
               try {
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(textToSpeak);
-                utterance.lang = currentLang === 'ar' ? 'ar-SA' : 'en-US';
+                utterance.lang = deviceLocale;
                 utterance.rate = 0.95;
                 utterance.onstart = () => {
                   if (currentSeq !== _ttsSeq) {
