@@ -32,7 +32,7 @@
       "mapZone": "marine_story",
       "pinX": 62,
       "pinY": 34,
-      "directions": "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located in the center and right side, by the coral reef displays."
+      "directions": "From the Main Entrance, walk straight across the central Function Hall and enter through the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located on the right side by the Under the Sea coral reef displays."
     },
     {
       "id": "eHOuUiCTyI",
@@ -57,7 +57,7 @@
       "mapZone": "marine_story",
       "pinX": 42,
       "pinY": 28,
-      "directions": "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located along the left wall by the freshwater river basin."
+      "directions": "From the Main Entrance, walk straight across the central Function Hall and enter through the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located along the left wall by the freshwater river basin section."
     },
     {
       "id": "kvsizqpXcT",
@@ -77,7 +77,7 @@
       "mapZone": "splash_zone",
       "pinX": 84,
       "pinY": 52,
-      "directions": "From the Main Entrance, turn right into the East Wing corridor and enter the first door on the right into the Touch & Play Room (Ground Floor). You will find the live touch pool basin in the center."
+      "directions": "From the Main Entrance, walk forward into the central Function Hall and turn right into the East Wing corridor. Enter the Touch & Play Room (Ground Floor) to find the interactive live touch pool basin."
     },
     {
       "id": "4Kgu3oMucu",
@@ -97,7 +97,7 @@
       "mapZone": "office_extension",
       "pinX": 20,
       "pinY": 76,
-      "directions": "From the Main Entrance, turn left down the corridor into the Library Extension wing, and enter the Character & Heritage Room (Ground Floor). Located along the wall gallery of community heroes."
+      "directions": "From the Main Entrance, turn left down the corridor into the Library Extension wing (Ground Floor). Enter the Character & Heritage Room (beside the Staff Office) to find the community everyday heroes showcase."
     },
     {
       "id": "R61RQcd-Ag",
@@ -117,7 +117,7 @@
       "mapZone": "office_extension",
       "pinX": 18,
       "pinY": 66,
-      "directions": "From the Main Entrance, turn left down the corridor into the Library Extension wing, and enter the Character & Heritage Room (Ground Floor, beside the Staff Office). Located in the memorial gallery section."
+      "directions": "From the Main Entrance, turn left down the corridor into the Library Extension wing (Ground Floor). Enter the Character & Heritage Room (beside the Staff Office) to find the Governor Joseph G. Marañon memorial section."
     },
     {
       "id": "FNV2fFLZMU",
@@ -137,7 +137,7 @@
       "mapZone": "second_floor_toys",
       "pinX": 32,
       "pinY": 48,
-      "directions": "From the Main Entrance, take the main staircase on the left (above the Staff Office) up to Level 2 (Second Floor). Turn left through the first door into the Toys & Collections Room."
+      "directions": "From the Main Entrance, take the staircase on the left (above the Staff Office) up to Level 2 (Second Floor). Turn left through the doorway into the Toys & Collections Room (Hampanganan)."
     },
     {
       "id": "ZowcFn9Udh",
@@ -157,7 +157,7 @@
       "mapZone": "marine_story",
       "pinX": 52,
       "pinY": 22,
-      "directions": "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located along the rear species wall."
+      "directions": "From the Main Entrance, walk straight across the central Function Hall and enter through the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located along the left wall by the freshwater river basin section."
     },
     {
       "id": "kTe0pYLkzk",
@@ -177,7 +177,7 @@
       "mapZone": "marine_story",
       "pinX": 70,
       "pinY": 24,
-      "directions": "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located in the eco-conservation corner beside the fishing net art installation."
+      "directions": "From the Main Entrance, walk straight across the central Function Hall and enter through the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located on the right side by the Under the Sea coral reef displays."
     },
     {
       "id": "BE29m8zPmZ",
@@ -197,7 +197,7 @@
       "mapZone": "second_floor_carnival",
       "pinX": 62,
       "pinY": 48,
-      "directions": "From the Main Entrance, take the staircase on the left up to Level 2 (Second Floor). Cross the upper corridor walkway overlooking the central hall to the right wing into the Carnival & Discovery Room."
+      "directions": "From the Main Entrance, take the staircase on the left up to Level 2 (Second Floor). Walk across the upper walkway overlooking the central hall to the right wing into the Carnival & Discovery Room."
     },
     {
       "id": "L8FAkDqEAr",
@@ -217,7 +217,7 @@
       "mapZone": "office_extension",
       "pinX": 20,
       "pinY": 58,
-      "directions": "From the Main Entrance, turn left down the corridor, and enter the first door on the left into the Library Extension to find Franco's Reading Corner (Ground Floor)."
+      "directions": "From the Main Entrance, turn left down the corridor into the Library Extension wing (Ground Floor). Enter the Reading & Learning Room to find Franco's Reading Corner."
     },
     {
       "id": "elWEKuJBSJ",
@@ -237,7 +237,7 @@
       "mapZone": "marine_story",
       "pinX": 50,
       "pinY": 8,
-      "directions": "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located in the coastal mangrove habitat section."
+      "directions": "Exit through the Main Entrance and follow the path around to the back of the museum building. The outdoor exhibit is located in the garden area behind the main structure."
     }
   ],
   "favorites": [],

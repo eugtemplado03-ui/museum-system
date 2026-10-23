@@ -21,7 +21,7 @@ async function syncDirections() {
         const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
         if (Array.isArray(data.exhibits)) {
           data.exhibits.forEach(ex => {
-            ex.directions = KNOWN_EXHIBIT_DIRECTIONS[ex.code.toUpperCase()] || computeDefaultDirections(ex);
+            ex.directions = computeDefaultDirections(ex);
           });
           fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
           console.log(`Updated directions in ${filePath}`);
@@ -41,9 +41,9 @@ async function syncDirections() {
 
       const exhibits = await Exhibit.find({});
       for (const ex of exhibits) {
-        const dir = KNOWN_EXHIBIT_DIRECTIONS[ex.code.toUpperCase()] || computeDefaultDirections(ex);
+        const dir = computeDefaultDirections(ex);
         await Exhibit.updateOne({ _id: ex._id }, { $set: { directions: dir } });
-        console.log(`Updated directions for ${ex.code} (${ex.title}) in MongoDB.`);
+        console.log(`Updated directions for ${ex.code} (${ex.title}) in MongoDB -> ${dir}`);
       }
       console.log('MongoDB exhibits synchronized successfully.');
     } catch (err) {

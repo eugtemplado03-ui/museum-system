@@ -317,13 +317,92 @@
         document.title = exhibit.title + ' — Museo Sang Bata sa Negros';
         Api.trackView(code, src);
         const images = getAllImages(exhibit);
-        const directionsText = exhibit.directions || (
-          exhibit.code === 'EX-003'
-            ? 'From the Main Entrance, turn right into the East Wing corridor and enter the first door on the right into the Touch & Play Room. You will find the live touch pool basin in the center.'
-            : (exhibit.floor === 2
-                ? 'From the Main Entrance, take the staircase on the left up to Level 2 (Second Floor).'
-                : 'From the Main Entrance, proceed through the central Function Hall into the main gallery.')
-        );
+        function computeAccurateDirections(ex) {
+          const floor = Number(ex.floor) === 2 ? 2 : 1;
+          const x = Number(ex.pinX);
+          const y = Number(ex.pinY);
+          const cat = String(ex.category || '').toLowerCase();
+          const zone = String(ex.mapZone || '').toLowerCase();
+          const loc = String(ex.location || '').toLowerCase();
+          const title = String(ex.title || '').toLowerCase();
+
+          // Check for outdoor exhibit before any other logic
+          if (loc.includes('outdoor') || loc.includes('behind') || title.includes('mangrove walk') || title.includes('outdoor')) {
+            return "Exit through the Main Entrance and follow the path around to the back of the museum building. The Mangrove Walk outdoor exhibit is located in the garden area and pathway behind the main structure.";
+          }
+
+          // Check high-confidence title/category before pin coords (avoid mismapped pins)
+          if (cat.includes('reading') || loc.includes('reading corner') || loc.includes('reading nook') ||
+              title.includes('reading corner') || title.includes('franco') || title.includes('reading nook')) {
+            return "From the Main Entrance, turn left down the corridor into the Library Extension wing (Ground Floor). Enter the Reading & Learning Room to find Franco's Reading Corner.";
+          }
+
+          let roomId = null;
+          if (Number.isFinite(x) && Number.isFinite(y)) {
+            if (floor === 2) {
+              roomId = x <= 49 ? 'cat_toys_collections' : 'cat_carnival_play';
+            } else {
+              if (x >= 76) roomId = 'cat_touch_play';
+              else if (x <= 24 && y >= 53) roomId = 'cat_character_heritage';
+              else if (x <= 24 && y < 53) roomId = 'cat_reading_learning';
+              else if (y <= 20) roomId = 'cat_aquarium_live_reef';
+              else roomId = 'cat_marine_nature';
+            }
+          }
+          if (!roomId) {
+            if (zone.includes('splash') || zone.includes('touch') || cat.includes('splash') || cat.includes('touch') || loc.includes('touch')) roomId = 'cat_touch_play';
+            else if (zone.includes('aquarium') || cat.includes('aquarium') || loc.includes('aquarium') || title.includes('tetra') || title.includes('angelfish') || title.includes('turtle')) roomId = 'cat_aquarium_live_reef';
+            else if (zone.includes('marine') || cat.includes('marine') || cat.includes('sea') || cat.includes('river') || loc.includes('marine')) roomId = 'cat_marine_nature';
+            else if (zone.includes('reading') || cat.includes('reading') || loc.includes('library') || title.includes('library') || title.includes('reading')) roomId = 'cat_reading_learning';
+            else if (zone.includes('heritage') || cat.includes('heritage') || cat.includes('character') || loc.includes('memorial') || title.includes('marañon') || title.includes('maranon')) roomId = 'cat_character_heritage';
+            else if (zone.includes('toys') || cat.includes('toys') || loc.includes('toy') || title.includes('toy') || title.includes('lego')) roomId = 'cat_toys_collections';
+            else if (zone.includes('carnival') || cat.includes('carnival') || loc.includes('carnival') || title.includes('carnival') || title.includes('food stall')) roomId = 'cat_carnival_play';
+            else roomId = floor === 2 ? 'cat_toys_collections' : 'cat_marine_nature';
+          }
+
+          switch (roomId) {
+            case 'cat_touch_play':
+              return "From the Main Entrance, walk forward into the central Function Hall and turn right into the East Wing corridor. Enter the Touch & Play Room (Ground Floor) to find the interactive live touch pool basin.";
+            case 'cat_aquarium_live_reef':
+              return "From the Main Entrance, walk straight across the central Function Hall through the double arched doorway into the Marine & Nature Room. Continue straight to the north end into the Aquarium & Live Reef Systems gallery (Ground Floor) featuring tropical saltwater tanks and live habitats.";
+            case 'cat_marine_nature':
+              if (Number.isFinite(x) && x > 55) {
+                return "From the Main Entrance, walk straight across the central Function Hall and enter through the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located on the right side by the Under the Sea coral reef displays.";
+              }
+              if (Number.isFinite(x) && x <= 55) {
+                return "From the Main Entrance, walk straight across the central Function Hall and enter through the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located along the left wall by the freshwater river basin section.";
+              }
+              return "From the Main Entrance, walk straight across the central Function Hall and enter through the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor).";
+            case 'cat_reading_learning':
+              return "From the Main Entrance, turn left down the corridor into the Library Extension wing (Ground Floor). Enter the Reading & Learning Room to find Franco's Reading Corner.";
+            case 'cat_character_heritage':
+              if (loc.includes('memorial') || title.includes('marañon') || title.includes('maranon')) {
+                return "From the Main Entrance, turn left down the corridor into the Library Extension wing (Ground Floor). Enter the Character & Heritage Room (beside the Staff Office) to find the Governor Joseph G. Marañon memorial section.";
+              }
+              return "From the Main Entrance, turn left down the corridor into the Library Extension wing (Ground Floor). Enter the Character & Heritage Room (beside the Staff Office) to find the community everyday heroes showcase.";
+            case 'cat_toys_collections':
+              return "From the Main Entrance, take the staircase on the left (above the Staff Office) up to Level 2 (Second Floor). Turn left through the doorway into the Toys & Collections Room (Hampanganan).";
+            case 'cat_carnival_play':
+              return "From the Main Entrance, take the staircase on the left up to Level 2 (Second Floor). Walk across the upper walkway overlooking the central hall to the right wing into the Carnival & Discovery Room.";
+            default:
+              return floor === 2
+                ? "From the Main Entrance, take the staircase on the left up to Level 2 (Second Floor)."
+                : "From the Main Entrance, walk straight across the central Function Hall into the main gallery.";
+          }
+        }
+
+        const isDirMismatched = (dir, ex) => {
+          if (!dir || typeof dir !== 'string' || !dir.trim()) return true;
+          const d = dir.toLowerCase();
+          const floor = Number(ex.floor) === 2 ? 2 : 1;
+          if (floor === 1 && (d.includes('level 2') || d.includes('second floor') || d.includes('staircase on the left') || d.includes('stairs up'))) return true;
+          if (floor === 2 && !d.includes('level 2') && !d.includes('second floor') && !d.includes('stair')) return true;
+          return false;
+        };
+
+        const directionsText = (exhibit.directions && !isDirMismatched(exhibit.directions, exhibit))
+          ? exhibit.directions
+          : computeAccurateDirections(exhibit);
         const dirSteps = directionsText.split(/(?<=[.?!])\s+/).filter(Boolean);
 
         content.innerHTML = `

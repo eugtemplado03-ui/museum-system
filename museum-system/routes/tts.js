@@ -146,7 +146,9 @@ function parseWavBuffer(buffer) {
 
     const chunkEnd = chunkStart + chunkSize;
     if (chunkEnd > buffer.length) {
-      throw new Error('Groq returned a truncated WAV file.');
+      // A non-data chunk whose declared size exceeds the buffer is a Lavf/FFmpeg streaming
+      // artifact (inflated metadata sizes). Stop parsing here; if we already found fmt+data, use them.
+      break;
     }
 
     if (chunkId === 'fmt ') {

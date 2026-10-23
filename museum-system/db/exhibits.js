@@ -83,52 +83,166 @@ async function ensureCategories() {
   );
 }
 
+// Resolves the architectural room of an exhibit based on its floor plan pin coordinates and metadata.
+function resolveExhibitRoom(item) {
+  if (!item) return null;
+  const floor = Number(item.floor) === 2 ? 2 : 1;
+  const x = Number(item.pinX);
+  const y = Number(item.pinY);
+  const cat = String(item.category || '').toLowerCase();
+  const zone = String(item.mapZone || '').toLowerCase();
+  const loc = String(item.location || '').toLowerCase();
+  const title = String(item.title || '').toLowerCase();
+
+  // 0. Outdoor exhibits — these are behind/outside the building, not on the floor plan
+  if (loc.includes('outdoor') || loc.includes('behind') || title.includes('mangrove walk') || title.includes('outdoor')) {
+    return 'cat_outdoor';
+  }
+
+  // 1. High-confidence title/category/location checks (before pin, to avoid mismapped pins)
+  if (cat.includes('reading') || loc.includes('reading corner') || loc.includes('reading nook') ||
+      title.includes('reading corner') || title.includes('franco') || title.includes('reading nook')) {
+    return 'cat_reading_learning';
+  }
+
+  // 2. Precise blueprint coordinates (matching public/map.html CAD floor plan)
+  if (Number.isFinite(x) && Number.isFinite(y)) {
+    if (floor === 2) {
+      if (x <= 49) return 'cat_toys_collections';
+      return 'cat_carnival_play';
+    } else {
+      if (x >= 76) return 'cat_touch_play'; // East Wing (Touch & Play / Splash Zone)
+      if (x <= 24 && y >= 53) return 'cat_character_heritage'; // West Wing South (Character & Heritage)
+      if (x <= 24 && y < 53) return 'cat_reading_learning'; // West Wing North (Reading & Learning)
+      if (y <= 20) return 'cat_aquarium_live_reef'; // North Wing (Aquarium & Live Reef)
+      return 'cat_marine_nature'; // Central North Wing (Marine & Nature / Under the Sea)
+    }
+  }
+
+  // 3. Map zone identifier
+  if (zone.includes('splash') || zone.includes('touch')) return 'cat_touch_play';
+  if (zone.includes('aquarium')) return 'cat_aquarium_live_reef';
+  if (zone.includes('marine')) return 'cat_marine_nature';
+  if (zone.includes('reading')) return 'cat_reading_learning';
+  if (zone.includes('heritage') || zone.includes('maranon')) return 'cat_character_heritage';
+  if (zone.includes('toys')) return 'cat_toys_collections';
+  if (zone.includes('carnival')) return 'cat_carnival_play';
+
+  // 4. Category, location, or title
+  if (cat.includes('splash') || cat.includes('touch') || loc.includes('touch') || loc.includes('splash')) return 'cat_touch_play';
+  if (cat.includes('aquarium') || loc.includes('aquarium') || title.includes('aquarium') || title.includes('tetra') || title.includes('turtle') || title.includes('angelfish')) return 'cat_aquarium_live_reef';
+  if (cat.includes('marine') || cat.includes('sea') || cat.includes('river') || loc.includes('marine') || loc.includes('river')) return 'cat_marine_nature';
+  if (loc.includes('library') || title.includes('library')) return 'cat_reading_learning';
+  if (cat.includes('character') || cat.includes('heritage') || loc.includes('heritage') || loc.includes('memorial') || loc.includes('marañon') || loc.includes('maranon') || title.includes('marañon') || title.includes('maranon') || title.includes('hero')) return 'cat_character_heritage';
+  if (cat.includes('toy') || loc.includes('toy') || loc.includes('hampanganan') || title.includes('toy') || title.includes('lego') || title.includes('plushie')) return 'cat_toys_collections';
+  if (cat.includes('carnival') || cat.includes('discovery') || cat.includes('environmental') || loc.includes('carnival') || loc.includes('discovery') || title.includes('carnival') || title.includes('food stall')) return 'cat_carnival_play';
+
+  if (floor === 2) return 'cat_toys_collections';
+  return 'cat_marine_nature';
+}
+
+function isDirectionsMismatched(item) {
+  if (!item || !item.directions || typeof item.directions !== 'string' || !item.directions.trim()) return true;
+  const dir = item.directions.toLowerCase();
+  const floor = Number(item.floor) === 2 ? 2 : 1;
+  const expectedRoom = resolveExhibitRoom(item);
+
+  // Floor mismatch: Ground floor exhibit pointing to Level 2
+  if (floor === 1 && (dir.includes('level 2') || dir.includes('second floor') || dir.includes('staircase on the left') || dir.includes('stairs up'))) {
+    return true;
+  }
+  // Floor mismatch: Level 2 exhibit not mentioning Level 2 or stairs
+  if (floor === 2 && !dir.includes('level 2') && !dir.includes('second floor') && !dir.includes('stair')) {
+    return true;
+  }
+
+  // Room mismatches
+  if (expectedRoom === 'cat_touch_play') {
+    if (dir.includes('library extension') || dir.includes('character & heritage') || dir.includes('toys & collections') || dir.includes('carnival & discovery') || dir.includes('marine & nature')) {
+      return true;
+    }
+  } else if (expectedRoom === 'cat_aquarium_live_reef') {
+    if (dir.includes('east wing') || dir.includes('library extension') || dir.includes('character & heritage') || dir.includes('toys & collections') || dir.includes('carnival & discovery')) {
+      return true;
+    }
+  } else if (expectedRoom === 'cat_marine_nature') {
+    if (dir.includes('east wing') || dir.includes('library extension') || dir.includes('character & heritage') || dir.includes('toys & collections') || dir.includes('carnival & discovery')) {
+      return true;
+    }
+  } else if (expectedRoom === 'cat_reading_learning' || expectedRoom === 'cat_character_heritage') {
+    if (dir.includes('east wing') || dir.includes('marine & nature') || dir.includes('toys & collections') || dir.includes('carnival & discovery')) {
+      return true;
+    }
+  } else if (expectedRoom === 'cat_toys_collections') {
+    if (dir.includes('carnival & discovery') || dir.includes('east wing') || dir.includes('ground floor')) {
+      return true;
+    }
+  } else if (expectedRoom === 'cat_carnival_play') {
+    if (dir.includes('toys & collections') || dir.includes('ground floor')) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 const KNOWN_EXHIBIT_DIRECTIONS = {
   'EX-001': "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located in the center and right side, by the coral reef displays.",
   'EX-002': "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located along the left wall by the freshwater river basin.",
-  'EX-003': "From the Main Entrance, turn right into the East Wing corridor and enter the first door on the right into the Touch & Play Room (Ground Floor). You will find the live touch pool basin in the center.",
-  'EX-004': "From the Main Entrance, turn left down the corridor into the Library Extension wing, and enter the Character & Heritage Room (Ground Floor). Located along the wall gallery of community heroes.",
-  'EX-005': "From the Main Entrance, turn left down the corridor into the Library Extension wing, and enter the Character & Heritage Room (Ground Floor, beside the Staff Office). Located in the memorial gallery section.",
-  'EX-006': "From the Main Entrance, take the main staircase on the left (above the Staff Office) up to Level 2 (Second Floor). Turn left through the first door into the Toys & Collections Room.",
-  'EX-007': "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located along the rear species wall.",
-  'EX-008': "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located in the eco-conservation corner beside the fishing net art installation.",
-  'EX-009': "From the Main Entrance, take the staircase on the left up to Level 2 (Second Floor). Cross the upper corridor walkway overlooking the central hall to the right wing into the Carnival & Discovery Room.",
-  'EX-010': "From the Main Entrance, turn left down the corridor, and enter the first door on the left into the Library Extension to find Franco's Reading Corner (Ground Floor).",
-  'EX-011': "From the Main Entrance, walk straight across the central Function Hall and enter the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located in the coastal mangrove habitat section."
+  'EX-003': "From the Main Entrance, turn right into the East Wing corridor and enter the first door on the right into the Touch & Play Room (Ground Floor). You will find the live touch pool basin in the center."
 };
 
-// Supply museum-specific walking directions when an exhibit has none saved.
+// Supply museum-specific walking directions based on the exhibit's true location on the blueprint map.
 function computeDefaultDirections(item) {
   if (!item) return '';
-  if (item.code && KNOWN_EXHIBIT_DIRECTIONS[item.code.toUpperCase()]) {
-    return KNOWN_EXHIBIT_DIRECTIONS[item.code.toUpperCase()];
-  }
-  const cat = String(item.category || '').toLowerCase();
-  const zone = String(item.mapZone || '').toLowerCase();
-  const floor = item.floor === 2 ? 2 : 1;
+  const roomId = resolveExhibitRoom(item);
+  const x = Number(item.pinX);
+  const loc = String(item.location || '').toLowerCase();
+  const title = String(item.title || '').toLowerCase();
 
-  if (cat.includes('marine') || zone === 'marine_story') {
-    return "From the Main Entrance, walk straight across the central Function Hall through the double arched doorway into the Marine & Nature Room (Ground Floor).";
+  switch (roomId) {
+    case 'cat_outdoor':
+      return "Exit through the Main Entrance and follow the path around to the back of the museum building. The outdoor exhibit is located in the garden area behind the main structure.";
+
+    case 'cat_touch_play':
+      return "From the Main Entrance, walk forward into the central Function Hall and turn right into the East Wing corridor. Enter the Touch & Play Room (Ground Floor) to find the interactive live touch pool basin.";
+
+    case 'cat_aquarium_live_reef':
+      return "From the Main Entrance, walk straight across the central Function Hall through the double arched doorway into the Marine & Nature Room. Continue straight to the north end into the Aquarium & Live Reef Systems gallery (Ground Floor) featuring tropical saltwater tanks and live habitats.";
+
+    case 'cat_marine_nature':
+      if (Number.isFinite(x) && x > 55) {
+        return "From the Main Entrance, walk straight across the central Function Hall and enter through the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located on the right side by the Under the Sea coral reef displays.";
+      }
+      if (Number.isFinite(x) && x <= 55) {
+        return "From the Main Entrance, walk straight across the central Function Hall and enter through the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located along the left wall by the freshwater river basin section.";
+      }
+      if (loc.includes('river') || title.includes('river')) {
+        return "From the Main Entrance, walk straight across the central Function Hall and enter through the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor). Located along the left wall by the freshwater river basin section.";
+      }
+      return "From the Main Entrance, walk straight across the central Function Hall and enter through the double arched doorway directly ahead into the Marine & Nature Room (Ground Floor).";
+
+    case 'cat_reading_learning':
+      return "From the Main Entrance, turn left down the corridor into the Library Extension wing (Ground Floor). Enter the Reading & Learning Room to find Franco's Reading Corner.";
+
+    case 'cat_character_heritage':
+      if (loc.includes('memorial') || title.includes('marañon') || title.includes('maranon')) {
+        return "From the Main Entrance, turn left down the corridor into the Library Extension wing (Ground Floor). Enter the Character & Heritage Room (beside the Staff Office) to find the Governor Joseph G. Marañon memorial section.";
+      }
+      return "From the Main Entrance, turn left down the corridor into the Library Extension wing (Ground Floor). Enter the Character & Heritage Room (beside the Staff Office) to find the community everyday heroes showcase.";
+
+    case 'cat_toys_collections':
+      return "From the Main Entrance, take the staircase on the left (above the Staff Office) up to Level 2 (Second Floor). Turn left through the doorway into the Toys & Collections Room (Hampanganan).";
+
+    case 'cat_carnival_play':
+      return "From the Main Entrance, take the staircase on the left up to Level 2 (Second Floor). Walk across the upper walkway overlooking the central hall to the right wing into the Carnival & Discovery Room.";
+
+    default:
+      if (Number(item.floor) === 2) {
+        return "From the Main Entrance, take the staircase on the left up to Level 2 (Second Floor).";
+      }
+      return "From the Main Entrance, walk straight across the central Function Hall into the main gallery.";
   }
-  if (cat.includes('touch') || zone === 'splash_zone') {
-    return "From the Main Entrance, turn right into the East Wing corridor and enter the first door on the right into the Touch & Play Room (Ground Floor).";
-  }
-  if (cat.includes('reading') || zone === 'office_extension') {
-    return "From the Main Entrance, turn left down the corridor and enter the first door on the left into the Library Extension (Ground Floor).";
-  }
-  if (cat.includes('character') || cat.includes('heritage')) {
-    return "From the Main Entrance, turn left down the corridor into the Library Extension, and enter the Character & Heritage Room (Ground Floor).";
-  }
-  if (cat.includes('toy') || zone === 'second_floor_toys') {
-    return "From the Main Entrance, take the stairs on the left up to Level 2, turn left through the first door into the Toys & Collections Room (Second Floor).";
-  }
-  if (cat.includes('carnival') || zone === 'second_floor_carnival') {
-    return "From the Main Entrance, take the stairs on the left up to Level 2, cross the upper walkway to the right wing into the Carnival & Discovery Room (Second Floor).";
-  }
-  if (floor === 2) {
-    return "From the Main Entrance, take the staircase on the left up to Level 2 (Second Floor).";
-  }
-  return "From the Main Entrance, proceed through the reception foyer into the main gallery.";
 }
 
 let curatedData = null;
@@ -136,11 +250,11 @@ try {
   curatedData = require('./data.json');
 } catch (e) {}
 
-// Convert a Mongoose/plain record and fill missing directions or curated translations.
+// Convert a Mongoose/plain record and fill missing or mismatched directions or curated translations.
 function enrichExhibit(doc) {
   if (!doc) return doc;
   const obj = typeof doc.toObject === 'function' ? doc.toObject() : { ...doc };
-  if (!obj.directions) {
+  if (!obj.directions || isDirectionsMismatched(obj)) {
     obj.directions = computeDefaultDirections(obj);
   }
   if ((!obj.description_tl || !obj.description_cb) && curatedData && Array.isArray(curatedData.exhibits)) {
@@ -360,4 +474,4 @@ async function countDocuments() {
   return await Exhibit.countDocuments();
 }
 
-module.exports = { all, findByCode, findById, create, update, remove, categories, addCategory, updateCategory, deleteCategory, assignExhibitsToCategory, Exhibit, Category, countDocuments, computeDefaultDirections, KNOWN_EXHIBIT_DIRECTIONS };
+module.exports = { all, findByCode, findById, create, update, remove, categories, addCategory, updateCategory, deleteCategory, assignExhibitsToCategory, Exhibit, Category, countDocuments, computeDefaultDirections, resolveExhibitRoom, isDirectionsMismatched, KNOWN_EXHIBIT_DIRECTIONS };
