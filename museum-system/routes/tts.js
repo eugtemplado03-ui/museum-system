@@ -131,6 +131,19 @@ function parseWavBuffer(buffer) {
     const chunkId = buffer.toString('ascii', offset, offset + 4);
     const chunkSize = buffer.readUInt32LE(offset + 4);
     const chunkStart = offset + 8;
+
+    if (chunkId === 'data') {
+      // In streaming WAV files (e.g. Lavf / FFmpeg used by Groq), data chunkSize is 0xFFFFFFFF (-1)
+      // or exceeds the received buffer length. In that case, audio data extends to EOF.
+      if (chunkSize === 0xFFFFFFFF || chunkStart + chunkSize > buffer.length) {
+        audioData = buffer.subarray(chunkStart, buffer.length);
+        break;
+      }
+      audioData = buffer.subarray(chunkStart, chunkStart + chunkSize);
+      offset = chunkStart + chunkSize + (chunkSize % 2);
+      continue;
+    }
+
     const chunkEnd = chunkStart + chunkSize;
     if (chunkEnd > buffer.length) {
       throw new Error('Groq returned a truncated WAV file.');
@@ -138,8 +151,6 @@ function parseWavBuffer(buffer) {
 
     if (chunkId === 'fmt ') {
       formatChunk = buffer.subarray(offset, chunkEnd + (chunkSize % 2));
-    } else if (chunkId === 'data') {
-      audioData = buffer.subarray(chunkStart, chunkEnd);
     }
 
     offset = chunkEnd + (chunkSize % 2);

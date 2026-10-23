@@ -46,6 +46,26 @@ function makeWavBuffer(payload) {
   return wav;
 }
 
+function makeStreamingWavBuffer(payload) {
+  // Simulates Groq/Lavf streaming output: 0xFFFFFFFF for RIFF and data chunk size
+  const wav = Buffer.alloc(44 + payload.length);
+  wav.write('RIFF', 0, 4, 'ascii');
+  wav.writeUInt32LE(0xFFFFFFFF, 4);
+  wav.write('WAVE', 8, 4, 'ascii');
+  wav.write('fmt ', 12, 4, 'ascii');
+  wav.writeUInt32LE(16, 16);
+  wav.writeUInt16LE(1, 20);
+  wav.writeUInt16LE(1, 22);
+  wav.writeUInt32LE(24000, 24);
+  wav.writeUInt32LE(48000, 28);
+  wav.writeUInt16LE(2, 32);
+  wav.writeUInt16LE(16, 34);
+  wav.write('data', 36, 4, 'ascii');
+  wav.writeUInt32LE(0xFFFFFFFF, 40);
+  payload.copy(wav, 44);
+  return wav;
+}
+
 function getWavData(wav) {
   let offset = 12;
   while (offset + 8 <= wav.length) {
@@ -147,6 +167,33 @@ describe('Groq chat, translation, and speech API', () => {
         if (savedEnv[key] === undefined) delete process.env[key];
         else process.env[key] = savedEnv[key];
       });
+    }
+  });
+
+  it('POST /api/tts/speak handles Groq streaming WAV chunks with 0xFFFFFFFF data lengths', async () => {
+    const originalFetch = global.fetch;
+    jest.spyOn(chatApiKey, 'getGroqConfiguration')
+      .mockResolvedValue({ apiKey: 'test-groq-key' });
+    jest.spyOn(apiUsage, 'recordGroqUsageSafely').mockResolvedValue();
+    const payloads = [Buffer.from([10, 20]), Buffer.from([30, 40])];
+    let idx = 0;
+    global.fetch = jest.fn(async () => new Response(
+      makeStreamingWavBuffer(payloads[idx++]),
+      { status: 200, headers: { 'Content-Type': 'audio/wav' } }
+    ));
+
+    try {
+      const res = await request(app)
+        .post('/api/tts/speak')
+        .send({ text: 'A'.repeat(250), lang: 'en' });
+
+      expect(res.status).toBe(200);
+      expect(res.headers['x-tts-provider']).toBe('groq-orpheus');
+      expect(res.headers['content-type']).toContain('audio/wav');
+      expect(res.body.subarray(0, 4).toString()).toBe('RIFF');
+      expect(getWavData(res.body)).toEqual(Buffer.concat(payloads));
+    } finally {
+      global.fetch = originalFetch;
     }
   });
 

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <!-- Interactive floor map for locating exhibits and planning routes through the museum. -->
 <html lang="en">
 
@@ -4638,6 +4638,9 @@
           try { _mapAudioAbortCtrl.abort(); } catch (e) { }
           _mapAudioAbortCtrl = null;
         }
+        if (typeof window !== 'undefined' && window.speechSynthesis) {
+          try { window.speechSynthesis.cancel(); } catch (e) { }
+        }
 
         // Detach handlers BEFORE pausing/clearing to avoid firing error events
         if (_mapAudioEl) {
@@ -4799,6 +4802,58 @@
           if (err.name === 'AbortError') return;
           if (currentSeq === _mapAudioSeq) {
             console.warn('[Map Audio] Groq speech request failed:', err.message);
+
+            if (typeof window !== 'undefined' && 'speechSynthesis' in window && window.SpeechSynthesisUtterance) {
+              try {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = lang === 'ar' ? 'ar-SA' : 'en-US';
+                utterance.rate = 0.95;
+                utterance.onstart = () => {
+                  if (currentSeq !== _mapAudioSeq) {
+                    window.speechSynthesis.cancel();
+                    return;
+                  }
+                  if (source === 'dir') {
+                    if (dirBtn) {
+                      dirBtn.textContent = '■ Stop Directions';
+                      dirBtn.disabled = false;
+                      dirBtn.classList.add('playing');
+                    }
+                  } else {
+                    if (drawerBtn) {
+                      drawerBtn.textContent = '■ Stop';
+                      drawerBtn.disabled = false;
+                    }
+                    if (st) st.textContent = '🔊 Playing voice narration (device voice)…';
+                  }
+                };
+                utterance.onend = () => {
+                  if (currentSeq === _mapAudioSeq) {
+                    stopAudio();
+                    if (source === 'drawer' && st) {
+                      st.textContent = 'Finished audio narration';
+                      setTimeout(() => {
+                        if (st && st.textContent === 'Finished audio narration') {
+                          st.textContent = 'Listen to exhibit narration';
+                        }
+                      }, 2500);
+                    }
+                  }
+                };
+                utterance.onerror = () => {
+                  if (currentSeq === _mapAudioSeq) {
+                    stopAudio();
+                    if (st) st.textContent = err.message || 'Groq voice audio is unavailable.';
+                  }
+                };
+                window.speechSynthesis.speak(utterance);
+                return;
+              } catch (fallbackErr) {
+                console.warn('[Map Audio] speech synthesis fallback error:', fallbackErr);
+              }
+            }
+
             stopAudio();
             if (st) st.textContent = err.message || 'Groq voice audio is unavailable.';
           }

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <!-- Individual exhibit details, visitor reviews, and floor-map directions. -->
 <html lang="en">
 <head>
@@ -521,6 +521,9 @@
         try { _dirVoiceAbortCtrl.abort(); } catch (e) {}
         _dirVoiceAbortCtrl = null;
       }
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        try { window.speechSynthesis.cancel(); } catch (e) {}
+      }
       if (_dirAudioEl) {
         _dirAudioEl.onplay = null;
         _dirAudioEl.onended = null;
@@ -541,7 +544,7 @@
         playBtn.disabled = false;
       }
       if (stopBtn) stopBtn.style.display = 'none';
-      if (statusEl) statusEl.textContent = '';
+      if (statusEl && !statusEl.textContent.startsWith('Finished')) statusEl.textContent = '';
     }
 
     function wireDirectionVoice(text) {
@@ -572,7 +575,13 @@
           // Aborted or superseded while waiting
           if (currentSeq !== _dirVoiceSeq) return;
 
-          if (!resp.ok) throw new Error(`Server returned ${resp.status}`);
+          if (!resp.ok) {
+            const failure = await resp.json().catch(() => ({}));
+            const err = new Error(failure.error || `Server returned ${resp.status}`);
+            err.status = resp.status;
+            err.code = failure.code;
+            throw err;
+          }
 
           const audioBlob = await resp.blob();
           if (currentSeq !== _dirVoiceSeq) return;
@@ -614,8 +623,48 @@
           if (err.name === 'AbortError') return;
           if (currentSeq === _dirVoiceSeq) {
             console.warn('[Direction Voice] request failed:', err.message);
+
+            // Attempt device speech synthesis fallback
+            if (typeof window !== 'undefined' && 'speechSynthesis' in window && window.SpeechSynthesisUtterance) {
+              try {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.95;
+                utterance.onstart = () => {
+                  if (currentSeq !== _dirVoiceSeq) {
+                    window.speechSynthesis.cancel();
+                    return;
+                  }
+                  playBtn.style.display = 'none';
+                  playBtn.disabled = false;
+                  stopBtn.style.display = 'inline-flex';
+                  if (statusEl) statusEl.textContent = '🔊 Playing voice directions (device voice)…';
+                };
+                utterance.onend = () => {
+                  if (currentSeq === _dirVoiceSeq) {
+                    stopDirVoice();
+                    if (statusEl) {
+                      statusEl.textContent = 'Finished directions';
+                      setTimeout(() => { if (statusEl && statusEl.textContent === 'Finished directions') statusEl.textContent = ''; }, 2500);
+                    }
+                  }
+                };
+                utterance.onerror = () => {
+                  if (currentSeq === _dirVoiceSeq) {
+                    stopDirVoice();
+                    if (statusEl) statusEl.textContent = err.message || 'Voice audio unavailable.';
+                  }
+                };
+                window.speechSynthesis.speak(utterance);
+                return;
+              } catch (fallbackErr) {
+                console.warn('[Direction Voice] speech synthesis fallback failed:', fallbackErr);
+              }
+            }
+
             stopDirVoice();
-            if (statusEl) statusEl.textContent = 'Voice audio unavailable.';
+            if (statusEl) statusEl.textContent = err.message || 'Voice audio unavailable.';
           }
         }
       });
@@ -684,6 +733,9 @@
         if (_ttsAbortCtrl) {
           try { _ttsAbortCtrl.abort(); } catch (e) {}
           _ttsAbortCtrl = null;
+        }
+        if (typeof window !== 'undefined' && window.speechSynthesis) {
+          try { window.speechSynthesis.cancel(); } catch (e) {}
         }
         if (_audioEl) {
           _audioEl.onplay = null;
@@ -779,6 +831,37 @@
           if (e.name === 'AbortError') return;
           if (currentSeq === _ttsSeq) {
             console.warn('[TTS speak] server TTS failed:', e);
+
+            // Attempt device speech synthesis fallback
+            if (typeof window !== 'undefined' && 'speechSynthesis' in window && window.SpeechSynthesisUtterance) {
+              try {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                utterance.lang = currentLang === 'ar' ? 'ar-SA' : 'en-US';
+                utterance.rate = 0.95;
+                utterance.onstart = () => {
+                  if (currentSeq !== _ttsSeq) {
+                    window.speechSynthesis.cancel();
+                    return;
+                  }
+                  setStatus('🔊 Playing narration (device voice)…', true);
+                };
+                utterance.onend = () => {
+                  if (currentSeq === _ttsSeq) stopAudio();
+                };
+                utterance.onerror = () => {
+                  if (currentSeq === _ttsSeq) {
+                    stopAudio();
+                    setStatus(e.message || 'Audio unavailable — check connection.', false);
+                  }
+                };
+                window.speechSynthesis.speak(utterance);
+                return;
+              } catch (fallbackErr) {
+                console.warn('[TTS speak] speech synthesis fallback failed:', fallbackErr);
+              }
+            }
+
             stopAudio();
             setStatus(e.message || 'Audio unavailable — check connection.', false);
           }
