@@ -448,10 +448,25 @@ router.post('/translate', async (req, res) => {
   }
 });
 
+function resolveOpenRouterFishModel() {
+  const model = (process.env.OPENROUTER_FISH_AUDIO_MODEL || process.env.FISH_AUDIO_MODEL || '').trim();
+  if (!model) return 'fish-audio/s2.1-pro';
+  if (model.startsWith('fish-audio/')) return model;
+  if (model === 's2.1-pro-free' || model === 's2.1-pro' || model === 's2-pro') return 'fish-audio/s2.1-pro';
+  if (model === 's1') return 'fish-audio/s1';
+  if (model === 'drama-3') return 'fish-audio/drama-3';
+  return `fish-audio/${model}`;
+}
+
 // ── Fish Audio TTS (for Bisaya, Hiligaynon, Tagalog) ─────────────────
 async function tryFishAudio({ text, lang }) {
   const fishKey = (process.env.FISH_AUDIO_API_KEY || '').trim();
   if (!fishKey) return null;
+
+  // If the user's Fish Audio key is an OpenRouter key (sk-or-...), route to OpenRouter's Fish Audio model
+  if (fishKey.startsWith('sk-or-')) {
+    return tryOpenRouterAudio({ text, lang, apiKeyOverride: fishKey });
+  }
 
   const fishLang = getFishAudioLanguage(lang) || 'tl';
   const voiceId = getFishAudioVoiceId(lang);
@@ -459,7 +474,7 @@ async function tryFishAudio({ text, lang }) {
   const timeout = setTimeout(() => controller.abort(), 20000);
 
   try {
-    console.log(`[TTS] Attempting Fish Audio speech for ${lang} (${fishLang})...`);
+    console.log(`[TTS] Attempting direct Fish Audio speech for ${lang} (${fishLang})...`);
     const payload = {
       text,
       language: fishLang,
@@ -483,36 +498,35 @@ async function tryFishAudio({ text, lang }) {
     if (resp.ok) {
       const buffer = Buffer.from(await resp.arrayBuffer());
       if (buffer.length > 0) {
-        console.log(`[TTS] Fish Audio speech succeeded (${buffer.length} bytes, MP3).`);
+        console.log(`[TTS] Direct Fish Audio speech succeeded (${buffer.length} bytes, MP3).`);
         return { buffer, contentType: 'audio/mpeg', provider: 'fish-audio' };
       }
     }
     const errText = await resp.text().catch(() => '');
-    console.warn(`[TTS] Fish Audio returned ${resp.status}: ${errText.slice(0, 100)}. Falling back to OpenRouter...`);
+    console.warn(`[TTS] Direct Fish Audio returned ${resp.status}: ${errText.slice(0, 100)}. Falling back to OpenRouter...`);
     return null;
   } catch (err) {
-    console.warn(`[TTS] Fish Audio error: ${err.message}. Falling back to OpenRouter...`);
+    console.warn(`[TTS] Direct Fish Audio error: ${err.message}. Falling back to OpenRouter...`);
     return null;
   } finally {
     clearTimeout(timeout);
   }
 }
 
-// ── OpenRouter Audio TTS Fallback ────────────────────────────────────
-async function tryOpenRouterAudio({ text, lang }) {
-  const openRouterKey = (process.env.OPENROUTER_API_KEY || '').trim();
+// ── OpenRouter Audio TTS (Fish Audio model: fish-audio/s2.1-pro) ─────
+async function tryOpenRouterAudio({ text, lang, apiKeyOverride }) {
+  const openRouterKey = apiKeyOverride || (process.env.OPENROUTER_API_KEY || '').trim();
   if (!openRouterKey) return null;
 
-  const langName = getLanguageDisplayName(lang);
+  const fishModel = resolveOpenRouterFishModel();
+  const voice = process.env.OPENROUTER_TTS_VOICE || 'alloy';
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 25000);
 
+  // 1. Try OpenRouter native audio/speech endpoint with Fish Audio model
   try {
-    console.log(`[TTS] Attempting OpenRouter audio speech for ${lang} (${langName})...`);
-    const model = process.env.OPENROUTER_TTS_MODEL || 'openai/gpt-audio-mini';
-    const voice = process.env.OPENROUTER_TTS_VOICE || 'alloy';
-
-    const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    console.log(`[TTS] Attempting OpenRouter Fish Audio model (${fishModel}) for ${lang}...`);
+    const resp = await fetch('https://openrouter.ai/api/v1/audio/speech', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openRouterKey}`,
@@ -521,39 +535,77 @@ async function tryOpenRouterAudio({ text, lang }) {
         'X-Title': process.env.SITE_NAME || 'Museo Sang Bata sa Negros'
       },
       body: JSON.stringify({
-        model,
-        modalities: ['text', 'audio'],
-        audio: { voice, format: 'mp3' },
-        messages: [
-          {
-            role: 'system',
-            content: `Speak the provided narration naturally in ${langName}. Read it as written; do not translate, summarize, or add extra words.`
-          },
-          { role: 'user', content: text }
-        ],
-        stream: false
+        model: fishModel,
+        input: text,
+        voice,
+        response_format: 'mp3'
       }),
       signal: controller.signal
     });
 
     if (resp.ok) {
-      const data = await resp.json();
-      const audioData = data.choices?.[0]?.message?.audio?.data;
-      if (audioData) {
-        const buffer = Buffer.from(audioData, 'base64');
-        console.log(`[TTS] OpenRouter audio speech succeeded (${buffer.length} bytes).`);
-        return { buffer, contentType: 'audio/mpeg', provider: 'openrouter-audio' };
+      const buffer = Buffer.from(await resp.arrayBuffer());
+      if (buffer.length > 0) {
+        console.log(`[TTS] OpenRouter Fish Audio (${fishModel}) succeeded (${buffer.length} bytes, MP3).`);
+        return { buffer, contentType: 'audio/mpeg', provider: 'openrouter-fish-audio' };
       }
     }
-    const errText = await resp.text().catch(() => '');
-    console.warn(`[TTS] OpenRouter returned ${resp.status}: ${errText.slice(0, 150)}. Falling back to Google TTS...`);
-    return null;
+
+    const errData = await resp.json().catch(() => ({}));
+    const errMsg = errData.error?.message || `HTTP ${resp.status}`;
+    console.warn(`[TTS] OpenRouter Fish Audio (${fishModel}) returned: ${errMsg.slice(0, 150)}`);
   } catch (err) {
-    console.warn(`[TTS] OpenRouter error: ${err.message}. Falling back to Google TTS...`);
-    return null;
+    console.warn(`[TTS] OpenRouter Fish Audio speech error: ${err.message}`);
   } finally {
     clearTimeout(timeout);
   }
+
+  // 2. Fallback to OpenRouter chat completions audio if configured with a specific chat model
+  if (process.env.OPENROUTER_TTS_MODEL && process.env.OPENROUTER_TTS_MODEL !== fishModel) {
+    const chatController = new AbortController();
+    const chatTimeout = setTimeout(() => chatController.abort(), 25000);
+    try {
+      const langName = getLanguageDisplayName(lang);
+      const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openRouterKey}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': process.env.SITE_URL || 'http://localhost:3000',
+          'X-Title': process.env.SITE_NAME || 'Museo Sang Bata sa Negros'
+        },
+        body: JSON.stringify({
+          model: process.env.OPENROUTER_TTS_MODEL,
+          modalities: ['text', 'audio'],
+          audio: { voice, format: 'mp3' },
+          messages: [
+            {
+              role: 'system',
+              content: `Speak the provided narration naturally in ${langName}. Read it as written; do not translate, summarize, or add extra words.`
+            },
+            { role: 'user', content: text }
+          ],
+          stream: false
+        }),
+        signal: chatController.signal
+      });
+
+      if (resp.ok) {
+        const data = await resp.json();
+        const audioData = data.choices?.[0]?.message?.audio?.data;
+        if (audioData) {
+          const buffer = Buffer.from(audioData, 'base64');
+          return { buffer, contentType: 'audio/mpeg', provider: 'openrouter-audio' };
+        }
+      }
+    } catch (chatErr) {
+      console.warn(`[TTS] OpenRouter chat audio error: ${chatErr.message}`);
+    } finally {
+      clearTimeout(chatTimeout);
+    }
+  }
+
+  return null;
 }
 
 // ── Google TTS Stream Fallback ───────────────────────────────────────
