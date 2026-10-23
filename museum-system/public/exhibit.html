@@ -588,6 +588,54 @@
       }
     }
 
+    // ── Female voice selector for device SpeechSynthesis across all languages ──
+    function getFemaleVoice(locale) {
+      if (typeof window === 'undefined' || !window.speechSynthesis) return null;
+      const voices = window.speechSynthesis.getVoices();
+      if (!voices || !voices.length) return null;
+
+      const target = (locale || 'en-US').toLowerCase();
+      const prefix = target.split('-')[0];
+
+      const femaleKeywords = [
+        'female', 'woman', 'zira', 'jenny', 'samantha', 'victoria', 'karen', 'susan',
+        'tessa', 'fiona', 'moira', 'hazel', 'blessica', 'rosa', 'hoda', 'laila', 'muna',
+        'fatima', 'salma', 'yasmin', 'zeina', 'mariam', 'ava', 'allison', 'serena', 'natural'
+      ];
+      const maleKeywords = ['david', 'george', 'mark', 'richard', 'james', 'guy', 'male'];
+
+      const langVoices = voices.filter(v => {
+        const l = (v.lang || '').toLowerCase();
+        return l === target || l.startsWith(prefix);
+      });
+
+      const femaleLangVoice = langVoices.find(v => {
+        const n = (v.name || '').toLowerCase();
+        return femaleKeywords.some(kw => n.includes(kw));
+      });
+      if (femaleLangVoice) return femaleLangVoice;
+
+      const nonMaleLangVoice = langVoices.find(v => {
+        const n = (v.name || '').toLowerCase();
+        return !maleKeywords.some(kw => n.includes(kw));
+      });
+      if (nonMaleLangVoice) return nonMaleLangVoice;
+
+      if (langVoices.length > 0) return langVoices[0];
+
+      const globalFemale = voices.find(v => {
+        const n = (v.name || '').toLowerCase();
+        return femaleKeywords.some(kw => n.includes(kw));
+      });
+      return globalFemale || null;
+    }
+
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.onvoiceschanged = () => {
+        try { window.speechSynthesis.getVoices(); } catch (e) {}
+      };
+    }
+
     // ── Walking directions voice guidance (Groq server TTS) ──
     let _dirAudioEl = null;
     let _dirAudioUrl = null;
@@ -709,6 +757,8 @@
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'en-US';
+                const femaleVoice = getFemaleVoice('en-US');
+                if (femaleVoice) utterance.voice = femaleVoice;
                 utterance.rate = 0.95;
                 utterance.onstart = () => {
                   if (currentSeq !== _dirVoiceSeq) {
@@ -919,6 +969,8 @@
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(textToSpeak);
                 utterance.lang = deviceLocale;
+                const femaleVoice = getFemaleVoice(deviceLocale);
+                if (femaleVoice) utterance.voice = femaleVoice;
                 utterance.rate = 0.95;
                 utterance.onstart = () => {
                   if (currentSeq !== _ttsSeq) {

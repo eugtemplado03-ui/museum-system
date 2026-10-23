@@ -105,7 +105,7 @@ function getGroqSpeechConfiguration(lang) {
   if (lang === 'en') {
     return {
       model: 'canopylabs/orpheus-v1-english',
-      voice: process.env.GROQ_TTS_VOICE || 'autumn'
+      voice: process.env.GROQ_TTS_VOICE || 'diana'
     };
   }
   if (lang === 'ar') {
@@ -519,7 +519,7 @@ async function tryOpenRouterAudio({ text, lang, apiKeyOverride }) {
   if (!openRouterKey) return null;
 
   const fishModel = resolveOpenRouterFishModel();
-  const voice = process.env.OPENROUTER_TTS_VOICE || 'alloy';
+  const voice = process.env.OPENROUTER_TTS_VOICE || 'shimmer';
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 25000);
 

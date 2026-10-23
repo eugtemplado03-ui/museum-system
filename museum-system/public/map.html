@@ -4682,6 +4682,48 @@
         }
       }
 
+      // ── Female voice selector for device SpeechSynthesis across all languages ──
+      function getFemaleVoice(locale) {
+        if (typeof window === 'undefined' || !window.speechSynthesis) return null;
+        const voices = window.speechSynthesis.getVoices();
+        if (!voices || !voices.length) return null;
+
+        const target = (locale || 'en-US').toLowerCase();
+        const prefix = target.split('-')[0];
+
+        const femaleKeywords = [
+          'female', 'woman', 'zira', 'jenny', 'samantha', 'victoria', 'karen', 'susan',
+          'tessa', 'fiona', 'moira', 'hazel', 'blessica', 'rosa', 'hoda', 'laila', 'muna',
+          'fatima', 'salma', 'yasmin', 'zeina', 'mariam', 'ava', 'allison', 'serena', 'natural'
+        ];
+        const maleKeywords = ['david', 'george', 'mark', 'richard', 'james', 'guy', 'male'];
+
+        const langVoices = voices.filter(v => {
+          const l = (v.lang || '').toLowerCase();
+          return l === target || l.startsWith(prefix);
+        });
+
+        const femaleLangVoice = langVoices.find(v => {
+          const n = (v.name || '').toLowerCase();
+          return femaleKeywords.some(kw => n.includes(kw));
+        });
+        if (femaleLangVoice) return femaleLangVoice;
+
+        const nonMaleLangVoice = langVoices.find(v => {
+          const n = (v.name || '').toLowerCase();
+          return !maleKeywords.some(kw => n.includes(kw));
+        });
+        if (nonMaleLangVoice) return nonMaleLangVoice;
+
+        if (langVoices.length > 0) return langVoices[0];
+
+        const globalFemale = voices.find(v => {
+          const n = (v.name || '').toLowerCase();
+          return femaleKeywords.some(kw => n.includes(kw));
+        });
+        return globalFemale || null;
+      }
+
       // Audio narration uses Groq-generated server audio only.
       async function playAudio(text, lang = 'en', source = 'drawer') {
         if (!text || !text.trim()) return;
@@ -4807,7 +4849,10 @@
               try {
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = lang === 'ar' ? 'ar-SA' : 'en-US';
+                const speechLocale = (lang === 'ar') ? 'ar-SA' : (['tl', 'cb', 'hil'].includes(lang) ? 'fil-PH' : 'en-US');
+                utterance.lang = speechLocale;
+                const femaleVoice = getFemaleVoice(speechLocale);
+                if (femaleVoice) utterance.voice = femaleVoice;
                 utterance.rate = 0.95;
                 utterance.onstart = () => {
                   if (currentSeq !== _mapAudioSeq) {
