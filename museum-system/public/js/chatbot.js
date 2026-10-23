@@ -227,7 +227,16 @@
       const data = await res.json();
       setTyping(false);
       if(!res.ok){
-        addMessage('error', data.error || 'Something went wrong. Please try again.');
+        let errMsg = data.error || 'Something went wrong. Please try again.';
+        // Server sets askInEnglish:true for overload, 429, and empty-reply errors.
+        const needsEnglish = data.askInEnglish
+          || res.status === 429
+          || (errMsg && (errMsg.includes('429') || errMsg.toLowerCase().includes('overloaded') || errMsg.toLowerCase().includes('model output')));
+        if (needsEnglish) {
+          errMsg = (data.error || 'The AI model is busy right now.')
+            + '\n\n💡 **Tip:** Try asking in **English** for the best results.';
+        }
+        addMessage('error', errMsg);
       } else {
         addMessage('bot', data.reply);
         state.history.push({ role: 'assistant', content: data.reply });

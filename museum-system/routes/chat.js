@@ -508,19 +508,42 @@ router.post('/', chatLimiter, async (req, res) => {
         if (reply) {
           return res.json({ reply });
         }
+        // Empty reply — model output error (e.g. "model output must contain either output text or tool calls")
+        console.warn('Groq returned an empty reply — model output error. Prompting user to ask in English.');
+        return res.status(502).json({
+          error: 'The AI model returned an empty response. Please try again or ask in English for best results.',
+          code: 'GROQ_CHAT_FAILED',
+          askInEnglish: true
+        });
       } else {
+        // Read the Groq error body to surface a meaningful message.
+        let groqErrBody = {};
+        try { groqErrBody = await response.json(); } catch (_) {}
+        const groqErrMsg = (groqErrBody.error && (groqErrBody.error.message || groqErrBody.error)) || '';
         await apiUsage.recordGroqUsageSafely({ service: 'chat', model, response });
         usageRecorded = true;
-        console.warn('Groq non-OK status:', response.status);
+        console.warn('Groq non-OK status:', response.status, groqErrMsg);
+
+        // 429 rate-limit or model overloaded / empty output errors → ask in English hint
+        const isOverloaded = response.status === 429
+          || (typeof groqErrMsg === 'string' && (
+            groqErrMsg.toLowerCase().includes('overloaded')
+            || groqErrMsg.toLowerCase().includes('rate limit')
+            || groqErrMsg.toLowerCase().includes('model output')
+          ));
+
+        if (isOverloaded) {
+          return res.status(502).json({
+            error: 'The AI model is currently overloaded or rate-limited. Please try again or ask in English for best results.',
+            code: 'GROQ_CHAT_FAILED',
+            askInEnglish: true
+          });
+        }
         return res.status(502).json({
           error: `Groq chatbot request failed (HTTP ${response.status}). Please try again.`,
           code: 'GROQ_CHAT_FAILED'
         });
       }
-      return res.status(502).json({
-        error: 'Groq returned an empty chatbot response. Please try again.',
-        code: 'GROQ_CHAT_FAILED'
-      });
     } catch (err) {
       clearTimeout(timeoutId);
       if (!usageRecorded) {
