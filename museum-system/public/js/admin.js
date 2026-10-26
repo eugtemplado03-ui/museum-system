@@ -1457,11 +1457,11 @@ function openTagModal(code){
   const qrUrl = `/api/exhibits/${encodeURIComponent(ex.code)}/qr`;
 
   openModal(`
-    <div style="text-align: center; max-width: 480px; margin: 0 auto; position: relative;">
+    <div class="tag-modal-content" style="text-align: center; max-width: 480px; margin: 0 auto; position: relative;">
       <!-- Corner close button -->
       <button type="button" id="closeTagModalCornerBtn" aria-label="Close modal" style="position: absolute; top: -14px; right: -14px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: #fff; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer; transition: all 0.15s ease;">✕</button>
 
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-right: 24px;">
+      <div class="tag-modal-meta" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-right: 24px;">
         <span class="cat-pill" style="font-size: 12px;">${escapeHtml(ex.category || 'Exhibit')}</span>
         <span class="mono" style="font-size: 13px; font-weight: 700; color: var(--teal);">${escapeHtml(ex.code)}</span>
       </div>
@@ -1475,13 +1475,13 @@ function openTagModal(code){
         <div style="font-family: 'Nunito', sans-serif; font-size: 21px; font-weight: 900; color: #0f172a; margin-bottom: 16px; line-height: 1.25;">${escapeHtml(ex.title)}</div>
 
         <!-- Big QR Code Frame -->
-        <div style="background: #f8fafc; padding: 14px; border-radius: 18px; display: inline-block; border: 2px solid #e2e8f0; box-shadow: 0 4px 16px rgba(0,0,0,0.05);">
-          <img src="${qrUrl}" alt="QR Tag for ${escapeHtml(ex.code)}" width="270" height="270" style="display: block; border-radius: 8px; margin: 0 auto;">
+        <div class="tag-modal-qr-frame" style="background: #f8fafc; padding: 14px; border-radius: 18px; display: inline-block; border: 2px solid #e2e8f0; box-shadow: 0 4px 16px rgba(0,0,0,0.05);">
+          <img class="tag-modal-qr-image" src="${qrUrl}" alt="QR Tag for ${escapeHtml(ex.code)}" width="270" height="270" style="display: block; border-radius: 8px; margin: 0 auto;">
         </div>
       </div>
 
       <!-- Action Buttons -->
-      <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+      <div class="tag-modal-actions" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
         <a class="btn btn-primary" id="downloadTagBtn" href="${qrUrl}" download="Exhibit-${escapeHtml(ex.code)}-Placard.png" style="flex: 1; min-width: 180px; text-align: center; text-decoration: none; justify-content: center; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
           ⬇ Download Tag Placard (PNG)
         </a>
@@ -1490,7 +1490,7 @@ function openTagModal(code){
         </button>
       </div>
 
-      <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+      <div class="tag-modal-footer" style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
         <a href="${qrUrl}" download="Exhibit-${escapeHtml(ex.code)}-QR-Only.png" style="font-size: 11.5px; color: #94a3b8; text-decoration: underline;">
           Download QR code only
         </a>
@@ -1498,6 +1498,8 @@ function openTagModal(code){
       </div>
     </div>
   `);
+  document.getElementById('modalOverlay')?.classList.add('tag-modal-overlay');
+  document.querySelector('#modalOverlay .modal')?.classList.add('tag-modal');
 
   document.getElementById('closeTagModalCornerBtn')?.addEventListener('click', (e) => {
     e.preventDefault();

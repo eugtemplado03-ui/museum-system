@@ -1270,6 +1270,74 @@
   .info-link-href {
     display: none !important;
   }
+  .modal.tag-modal {
+    width: min(520px, calc(100vw - 32px)) !important;
+    max-height: calc(100dvh - 32px) !important;
+  }
+  .tag-modal-content {
+    width: 100%;
+    min-width: 0;
+  }
+  .tag-modal-qr-frame {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .tag-modal-qr-image {
+    width: min(270px, 65vw) !important;
+    max-width: 100%;
+    height: auto !important;
+    aspect-ratio: 1;
+    object-fit: contain;
+  }
+  @media (max-width: 480px) {
+    .modal-overlay.tag-modal-overlay {
+      padding: 10px !important;
+    }
+    .modal.tag-modal {
+      width: calc(100vw - 20px) !important;
+      max-height: calc(100dvh - 20px) !important;
+      padding: 18px 14px !important;
+    }
+    .tag-modal-meta {
+      align-items: flex-start !important;
+      gap: 8px;
+      padding-right: 28px !important;
+    }
+    .tag-modal-meta .cat-pill {
+      max-width: 100%;
+      white-space: normal;
+      text-align: left;
+    }
+    .tag-modal-content > h2 {
+      overflow-wrap: anywhere;
+      padding-bottom: 8px !important;
+      margin-bottom: 10px !important;
+    }
+    #printableQrTag {
+      padding: 18px 12px !important;
+      margin-bottom: 14px !important;
+    }
+    #printableQrTag > div:nth-child(2) {
+      font-size: 18px !important;
+      overflow-wrap: anywhere;
+    }
+    .tag-modal-actions {
+      flex-direction: column;
+    }
+    .tag-modal-actions > * {
+      width: 100%;
+      min-width: 0 !important;
+    }
+    .tag-modal-footer {
+      align-items: flex-start !important;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    #closeTagModalCornerBtn {
+      top: -8px !important;
+      right: -6px !important;
+    }
+  }
 </style>
 </head>
 <body class="admin-portal-body">
