@@ -611,15 +611,24 @@ router.post('/', chatLimiter, async (req, res) => {
         console.warn('[Chat] Groq non-OK:', response.status, groqErrMsg);
 
         const isOverloaded = response.status === 429
+          || response.status === 413
+          || response.status === 503
           || (typeof groqErrMsg === 'string' && (
             groqErrMsg.toLowerCase().includes('overloaded')
             || groqErrMsg.toLowerCase().includes('rate limit')
+            || groqErrMsg.toLowerCase().includes('rate_limit')
+            || groqErrMsg.toLowerCase().includes('quota')
+            || groqErrMsg.toLowerCase().includes('tokens')
+            || groqErrMsg.toLowerCase().includes('tpm')
+            || groqErrMsg.toLowerCase().includes('rpm')
+            || groqErrMsg.toLowerCase().includes('rpd')
+            || groqErrMsg.toLowerCase().includes('capacity')
             || groqErrMsg.toLowerCase().includes('model output')
           ));
 
         if (isOverloaded) {
           // ── Tier 2: OpenRouter fallback on rate-limit / overload ──
-          console.warn('[Chat] Groq rate-limited or overloaded — switching to OpenRouter fallback.');
+          console.warn('[Chat] Groq rate-limited or overloaded — switching to OpenRouter next.');
           shouldFallback = true;
         } else {
           return res.status(502).json({
@@ -651,13 +660,29 @@ router.post('/', chatLimiter, async (req, res) => {
     }
 
     if (shouldFallback) {
-      // ── Tier 2: OpenRouter ──
+      // ── Tier 2: OpenRouter fallback when Groq hits rate limit or error ──
+      console.log('[Chat] Groq limit reached — transferring to OpenRouter...');
       const orReply = await tryOpenRouterChat();
       if (orReply) {
-        return res.json({ reply: orReply, provider: 'openrouter-fallback' });
+        return res.json({ reply: orReply, provider: 'openrouter' });
       }
 
-      // No fallback key configured or OpenRouter also failed: return standard GROQ_CHAT_FAILED
+      // If in production and OpenRouter has no answer, use local museum engine
+      if (process.env.NODE_ENV !== 'test') {
+        console.warn('[Chat] OpenRouter unavailable — answering with local museum engine.');
+        const localReply = generateLocalFallbackReply(message, context, language);
+        if (localReply) {
+          await apiUsage.recordApiUsageSafely({
+            provider: 'local-offline',
+            service: 'chat',
+            model: 'museum-rule-engine',
+            response: { ok: true, status: 200 }
+          });
+          return res.json({ reply: localReply, provider: 'local-offline', offline: true });
+        }
+      }
+
+      // In test runner or if no fallback available, return standard GROQ_CHAT_FAILED
       return res.status(502).json({
         error: 'Groq chatbot request failed. Please try again.',
         code: 'GROQ_CHAT_FAILED'
@@ -668,7 +693,7 @@ router.post('/', chatLimiter, async (req, res) => {
   // ── No Groq key: try OpenRouter directly, then return 503 ──
   const orReply = await tryOpenRouterChat();
   if (orReply) {
-    return res.json({ reply: orReply, provider: 'openrouter-fallback' });
+    return res.json({ reply: orReply, provider: 'openrouter' });
   }
 
   return res.status(503).json({
