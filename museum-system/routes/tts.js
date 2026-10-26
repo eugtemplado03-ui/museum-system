@@ -498,10 +498,23 @@ async function tryFishAudio({ text, lang }) {
     if (resp.ok) {
       const buffer = Buffer.from(await resp.arrayBuffer());
       if (buffer.length > 0) {
+        await apiUsage.recordApiUsageSafely({
+          provider: 'fish-audio',
+          service: 'speech',
+          model: process.env.FISH_AUDIO_MODEL || 's2.1-pro-free',
+          response: resp,
+          audioCharacters: text.length
+        });
         console.log(`[TTS] Direct Fish Audio speech succeeded (${buffer.length} bytes, MP3).`);
         return { buffer, contentType: 'audio/mpeg', provider: 'fish-audio' };
       }
     }
+    await apiUsage.recordApiUsageSafely({
+      provider: 'fish-audio',
+      service: 'speech',
+      model: process.env.FISH_AUDIO_MODEL || 's2.1-pro-free',
+      response: resp
+    });
     const errText = await resp.text().catch(() => '');
     console.warn(`[TTS] Direct Fish Audio returned ${resp.status}: ${errText.slice(0, 100)}. Falling back to OpenRouter...`);
     return null;
@@ -546,10 +559,24 @@ async function tryOpenRouterAudio({ text, lang, apiKeyOverride }) {
     if (resp.ok) {
       const buffer = Buffer.from(await resp.arrayBuffer());
       if (buffer.length > 0) {
+        await apiUsage.recordApiUsageSafely({
+          provider: 'openrouter',
+          service: 'speech',
+          model: fishModel,
+          response: resp,
+          audioCharacters: text.length
+        });
         console.log(`[TTS] OpenRouter Fish Audio (${fishModel}) succeeded (${buffer.length} bytes, MP3).`);
         return { buffer, contentType: 'audio/mpeg', provider: 'openrouter-fish-audio' };
       }
     }
+
+    await apiUsage.recordApiUsageSafely({
+      provider: 'openrouter',
+      service: 'speech',
+      model: fishModel,
+      response: resp
+    });
 
     const errData = await resp.json().catch(() => ({}));
     const errMsg = errData.error?.message || `HTTP ${resp.status}`;
@@ -594,10 +621,24 @@ async function tryOpenRouterAudio({ text, lang, apiKeyOverride }) {
         const data = await resp.json();
         const audioData = data.choices?.[0]?.message?.audio?.data;
         if (audioData) {
+          await apiUsage.recordApiUsageSafely({
+            provider: 'openrouter',
+            service: 'speech',
+            model: process.env.OPENROUTER_TTS_MODEL,
+            response: resp,
+            usage: data.usage,
+            audioCharacters: text.length
+          });
           const buffer = Buffer.from(audioData, 'base64');
           return { buffer, contentType: 'audio/mpeg', provider: 'openrouter-audio' };
         }
       }
+      await apiUsage.recordApiUsageSafely({
+        provider: 'openrouter',
+        service: 'speech',
+        model: process.env.OPENROUTER_TTS_MODEL,
+        response: resp
+      });
     } catch (chatErr) {
       console.warn(`[TTS] OpenRouter chat audio error: ${chatErr.message}`);
     } finally {
@@ -631,6 +672,13 @@ async function tryGoogleTts({ text, lang }) {
 
     if (audioBuffers.length > 0) {
       const combined = Buffer.concat(audioBuffers);
+      await apiUsage.recordApiUsageSafely({
+        provider: 'google-tts',
+        service: 'speech',
+        model: 'translate_tts',
+        response: { ok: true, status: 200 },
+        audioCharacters: text.length
+      });
       console.log(`[TTS] Google TTS speech generated (${combined.length} bytes, MP3).`);
       return { buffer: combined, contentType: 'audio/mpeg', provider: 'google-tts-fallback' };
     }

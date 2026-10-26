@@ -59,7 +59,7 @@ router.get('/api-management/usage', requireAdmin, async (req, res) => {
     return res.status(400).json({ error: 'Usage period must be between 1 and 90 days.' });
   }
   try {
-    res.json({ usage: await apiUsage.getGroqUsage(days || 30) });
+    res.json({ usage: await apiUsage.getApiUsage(days || 30) });
   } catch (err) {
     console.error('Failed to fetch API usage:', err.message);
     res.status(503).json({ error: err.message });

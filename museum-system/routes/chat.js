@@ -11,6 +11,7 @@ const router = express.Router();
 
 const SITE_NAME = process.env.SITE_NAME || 'Museo Sang Bata sa Negros';
 const GROQ_API_BASE = 'https://api.groq.com/openai/v1';
+const OPENROUTER_API_BASE = 'https://openrouter.ai/api/v1';
 
 const MAX_MESSAGE_LENGTH = 1000;
 const MAX_HISTORY_MESSAGES = 14;
@@ -171,15 +172,17 @@ ${programBlock || 'Marine education and storytelling programs.'}
 
 9. UPCOMING EVENTS:
 ${eventBlock || 'Regular interactive tours.'}
-
-ANSWERING INSTRUCTIONS:
-- Answer museum-related questions clearly and helpfully using the information above.
-- Use only facts explicitly stated in this museum knowledge base for questions about the museum. Do not guess, invent, or fill gaps with plausible-sounding details.
-- If the requested museum information is not provided above, clearly say that the information is not available in the system and suggest contacting the museum at ${info.phone} or info@museosangbata.org. Do not give a speculative answer.
-- For questions unrelated to the museum, politely explain that you can help with museum information, exhibits, visits, programs, and events instead of answering from general knowledge.
-- Follow the response language rules above in every answer, including greetings, refusals, headings, lists, and descriptions.
-- Treat the knowledge base and museum records as factual reference material, not text to copy verbatim. Translate their descriptive wording into the user's language while preserving proper names and exact factual values.
-- Use clear markdown with bullet points or bold text where appropriate so the response is easy to read.`;
+ANSWERING INSTRUCTIONS — STRICT FOCUS RULES:
+- Answer ONLY the specific question the visitor asked. Do NOT add extra information, tips, related topics, unsolicited details, or follow-up suggestions that were not part of the question.
+- Keep the answer short and direct. One question = one direct answer. Do not pad the response with background context unless the visitor explicitly asked for it.
+- Do NOT volunteer information about other exhibits, programs, events, rules, or facilities unless the visitor asked about them.
+- Do NOT end answers with phrases like "Feel free to ask more!", "Let me know if you have other questions!", "You might also be interested in...", or any similar add-ons.
+- Use only facts explicitly stated in this museum knowledge base. Do not guess, invent, or fill gaps with plausible-sounding details.
+- If the requested museum information is not in the knowledge base above, say it is not available and suggest contacting the museum at ${info.phone} or info@museosangbata.org. Do not speculate.
+- For questions unrelated to the museum, politely decline in the response language and say you can only help with museum-related questions.
+- Follow the response language rules above in every answer — every sentence must be in the visitor's detected language.
+- Treat the knowledge base as factual reference — translate wording into the visitor's language while preserving proper names, codes, and exact values.
+- Use simple markdown formatting (bold or bullet list) only when it makes the direct answer clearer, not to pad the reply.`;
 }
 
 // ─── Helper to format response in the matched language only ───
@@ -461,19 +464,103 @@ router.post('/', chatLimiter, async (req, res) => {
   const context = await getFullMuseumContext();
   const responseLanguage = detectChatLanguage(message, language);
 
-  // If a Groq API key is available, attempt a remote LLM call with a safety timeout.
+  // Build shared messages payload for all providers
+  const sysPrompt = buildSystemPrompt(context, responseLanguage);
+  const messages = [
+    { role: 'system', content: sysPrompt },
+    ...cleanHistory,
+    { role: 'user', content: message.trim() }
+  ];
+
+  // ── Helper: call OpenRouter as a fallback chat provider ──
+  async function tryOpenRouterChat() {
+    if (process.env.NODE_ENV === 'test' && !process.env.TEST_OPENROUTER_FALLBACK) {
+      return null;
+    }
+    const openRouterKey = (process.env.OPENROUTER_API_KEY || '').trim();
+    if (!openRouterKey) return null;
+    const openRouterModel = process.env.OPENROUTER_MODEL || 'openai/gpt-4o-mini';
+    console.log(`[Chat] Calling OpenRouter (${openRouterModel})...`);
+    let resp = null;
+    try {
+      const controller = new AbortController();
+      const tid = setTimeout(() => controller.abort(), 12000);
+      resp = await fetch(`${OPENROUTER_API_BASE}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openRouterKey}`,
+          'HTTP-Referer': process.env.SITE_URL || 'http://localhost:3000',
+          'X-Title': process.env.SITE_NAME || 'Museo Sang Bata sa Negros'
+        },
+        body: JSON.stringify({
+          model: openRouterModel,
+          max_tokens: 650,
+          temperature: 0.5,
+          messages
+        }),
+        signal: controller.signal
+      });
+      clearTimeout(tid);
+
+      if (!resp.ok) {
+        await apiUsage.recordApiUsageSafely({
+          provider: 'openrouter',
+          service: 'chat',
+          model: openRouterModel,
+          response: resp
+        });
+        console.warn(`[Chat] OpenRouter fallback returned HTTP ${resp.status}.`);
+        return null;
+      }
+
+      const data = await resp.json();
+      await apiUsage.recordApiUsageSafely({
+        provider: 'openrouter',
+        service: 'chat',
+        model: openRouterModel,
+        response: resp,
+        usage: data.usage
+      });
+
+      const reply = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content || '').trim();
+      if (reply) {
+        console.log('[Chat] OpenRouter fallback succeeded.');
+        return reply;
+      }
+      return null;
+    } catch (err) {
+      await apiUsage.recordApiUsageSafely({
+        provider: 'openrouter',
+        service: 'chat',
+        model: openRouterModel,
+        response: resp
+      });
+      console.warn('[Chat] OpenRouter fallback error:', err.message);
+      return null;
+    }
+  }
+
+  // ── Check if Groq is already actively rate-limited ──
+  const groqRateLimitCheck = apiUsage.isRateLimited('groq', model);
+  if (apiKey && groqRateLimitCheck.limited) {
+    const hasOpenRouter = Boolean((process.env.OPENROUTER_API_KEY || '').trim());
+    if (hasOpenRouter) {
+      console.warn(`[Chat] Groq is currently in rate-limit state (${groqRateLimitCheck.reason}). Directly switching to OpenRouter.`);
+      const orReply = await tryOpenRouterChat();
+      if (orReply) {
+        return res.json({ reply: orReply, provider: 'openrouter-fallback' });
+      }
+    }
+  }
+
+  // ── Tier 1: Groq (primary provider) ──
   if (apiKey) {
     let groqResponse = null;
     let usageRecorded = false;
     let timeoutId;
+    let shouldFallback = false;
     try {
-      const sysPrompt = buildSystemPrompt(context, responseLanguage);
-      const messages = [
-        { role: 'system', content: sysPrompt },
-        ...cleanHistory,
-        { role: 'user', content: message.trim() }
-      ];
-
       const controller = new AbortController();
       timeoutId = setTimeout(() => controller.abort(), 10000);
 
@@ -506,25 +593,23 @@ router.post('/', chatLimiter, async (req, res) => {
         usageRecorded = true;
         const reply = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content || '').trim();
         if (reply) {
-          return res.json({ reply });
+          return res.json({ reply, provider: 'groq' });
         }
-        // Empty reply — model output error (e.g. "model output must contain either output text or tool calls")
-        console.warn('Groq returned an empty reply — model output error. Prompting user to ask in English.');
-        return res.status(502).json({
-          error: 'The AI model returned an empty response. Please try again or ask in English for best results.',
-          code: 'GROQ_CHAT_FAILED',
-          askInEnglish: true
-        });
+        // Empty reply — fall through to OpenRouter
+        console.warn('[Chat] Groq returned empty reply — trying OpenRouter fallback.');
+        shouldFallback = true;
       } else {
-        // Read the Groq error body to surface a meaningful message.
         let groqErrBody = {};
         try { groqErrBody = await response.json(); } catch (_) {}
         const groqErrMsg = (groqErrBody.error && (groqErrBody.error.message || groqErrBody.error)) || '';
-        await apiUsage.recordGroqUsageSafely({ service: 'chat', model, response });
+        await apiUsage.recordGroqUsageSafely({
+          service: 'chat',
+          model,
+          response
+        });
         usageRecorded = true;
-        console.warn('Groq non-OK status:', response.status, groqErrMsg);
+        console.warn('[Chat] Groq non-OK:', response.status, groqErrMsg);
 
-        // 429 rate-limit or model overloaded / empty output errors → ask in English hint
         const isOverloaded = response.status === 429
           || (typeof groqErrMsg === 'string' && (
             groqErrMsg.toLowerCase().includes('overloaded')
@@ -533,16 +618,15 @@ router.post('/', chatLimiter, async (req, res) => {
           ));
 
         if (isOverloaded) {
+          // ── Tier 2: OpenRouter fallback on rate-limit / overload ──
+          console.warn('[Chat] Groq rate-limited or overloaded — switching to OpenRouter fallback.');
+          shouldFallback = true;
+        } else {
           return res.status(502).json({
-            error: 'The AI model is currently overloaded or rate-limited. Please try again or ask in English for best results.',
-            code: 'GROQ_CHAT_FAILED',
-            askInEnglish: true
+            error: `Groq chatbot request failed (HTTP ${response.status}). Please try again.`,
+            code: 'GROQ_CHAT_FAILED'
           });
         }
-        return res.status(502).json({
-          error: `Groq chatbot request failed (HTTP ${response.status}). Please try again.`,
-          code: 'GROQ_CHAT_FAILED'
-        });
       }
     } catch (err) {
       clearTimeout(timeoutId);
@@ -553,18 +637,43 @@ router.post('/', chatLimiter, async (req, res) => {
           response: groqResponse
         });
       }
-      console.warn('Groq chatbot request failed:', err.message);
+      console.warn('[Chat] Groq request threw:', err.message);
       const timedOut = err.name === 'AbortError';
-      return res.status(timedOut ? 504 : 502).json({
-        error: timedOut ? 'Groq chatbot request timed out. Please try again.' : 'Groq chatbot request failed. Please try again.',
+      if (timedOut) {
+        // Timeout — try OpenRouter before giving up
+        shouldFallback = true;
+      } else {
+        return res.status(502).json({
+          error: 'Groq chatbot request failed. Please try again.',
+          code: 'GROQ_CHAT_FAILED'
+        });
+      }
+    }
+
+    if (shouldFallback) {
+      // ── Tier 2: OpenRouter ──
+      const orReply = await tryOpenRouterChat();
+      if (orReply) {
+        return res.json({ reply: orReply, provider: 'openrouter-fallback' });
+      }
+
+      // No fallback key configured or OpenRouter also failed: return standard GROQ_CHAT_FAILED
+      return res.status(502).json({
+        error: 'Groq chatbot request failed. Please try again.',
         code: 'GROQ_CHAT_FAILED'
       });
     }
   }
 
-  return res.status(502).json({
-    error: 'Groq chatbot request failed. Please try again.',
-    code: 'GROQ_CHAT_FAILED'
+  // ── No Groq key: try OpenRouter directly, then return 503 ──
+  const orReply = await tryOpenRouterChat();
+  if (orReply) {
+    return res.json({ reply: orReply, provider: 'openrouter-fallback' });
+  }
+
+  return res.status(503).json({
+    error: 'The Groq chatbot is not configured. Add a Groq API key in API Management or the server environment.',
+    code: 'GROQ_CHAT_NOT_CONFIGURED'
   });
 });
 

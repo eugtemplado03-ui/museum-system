@@ -5174,10 +5174,11 @@ async function renderApiManagementTab(contentEl) {
 
   const usageNumber = value => Number(value || 0).toLocaleString();
   const usageTotals = usage?.totals || {};
-  const usageRateLimits = usage?.rateLimits;
-  const usageUpdatedAt = usageRateLimits?.observedAt
-    ? new Date(usageRateLimits.observedAt).toLocaleString()
-    : '';
+  const rateLimitList = Array.isArray(usage?.rateLimits)
+    ? usage.rateLimits
+    : (Array.isArray(usage?.allRateLimits) ? usage.allRateLimits : (usage?.rateLimits ? [usage.rateLimits] : []));
+  const byModelList = Array.isArray(usage?.byModel) ? usage.byModel : [];
+  const byProviderList = Array.isArray(usage?.byProvider) ? usage.byProvider : [];
 
   // Explain whether a provider uses managed credentials or environment config.
   const describeSource = (current, service) => {
@@ -5189,64 +5190,132 @@ async function renderApiManagementTab(contentEl) {
       : 'Not configured. File uploads use local server storage and cloud backup is unavailable.';
   };
 
+  const getProviderBadge = p => {
+    const name = String(p || '').toLowerCase();
+    if (name === 'groq') return '<span style="background:#f97316;color:#fff;font-weight:700;padding:2px 8px;border-radius:6px;font-size:11px;letter-spacing:0.5px;">GROQ</span>';
+    if (name === 'openrouter') return '<span style="background:#6366f1;color:#fff;font-weight:700;padding:2px 8px;border-radius:6px;font-size:11px;letter-spacing:0.5px;">OPENROUTER</span>';
+    if (name === 'fish-audio') return '<span style="background:#0ea5e9;color:#fff;font-weight:700;padding:2px 8px;border-radius:6px;font-size:11px;letter-spacing:0.5px;">FISH AUDIO</span>';
+    if (name === 'google-tts') return '<span style="background:#10b981;color:#fff;font-weight:700;padding:2px 8px;border-radius:6px;font-size:11px;letter-spacing:0.5px;">GOOGLE TTS</span>';
+    if (name === 'local-offline') return '<span style="background:#64748b;color:#fff;font-weight:700;padding:2px 8px;border-radius:6px;font-size:11px;letter-spacing:0.5px;">LOCAL OFFLINE</span>';
+    return `<span style="background:#475569;color:#fff;font-weight:700;padding:2px 8px;border-radius:6px;font-size:11px;">${escapeHtml(String(p).toUpperCase())}</span>`;
+  };
+
   contentEl.innerHTML = `
-    <div style="max-width:1100px;padding:24px;">
-      <h2 style="margin:0 0 8px;">🔐 API Management</h2>
-      <p style="margin:0 0 22px;color:#64748b;">Add, replace, and remove provider credentials. Built-in integrations take effect immediately. Secrets are encrypted and never shown after saving.</p>
+    <div style="max-width:1150px;padding:24px;">
+      <h2 style="margin:0 0 8px;">🔐 API Management &amp; Rate Limits</h2>
+      <p style="margin:0 0 22px;color:#64748b;">Monitor real-time token counts, request quotas, and rate limits across all providers (Groq, OpenRouter, Fish Audio, and Local Engine). Manage credentials securely below.</p>
       <section style="margin-bottom:20px;padding:22px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 8px 24px rgba(15,23,42,.06);">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
           <div>
-            <h3 style="margin:0 0 6px;">Groq usage &amp; limits</h3>
-            <p style="margin:0;color:#64748b;">This museum app's recorded usage for the last 30 days.</p>
-            <small style="display:block;margin-top:8px;color:#64748b;">Failed counts are failed Groq API calls, not failed visitor requests. Chat, translation, and supported speech return an error when Groq is unavailable. Groq Orpheus currently supports English and Saudi Arabic speech only.</small>
+            <h3 style="margin:0 0 6px;">Provider &amp; Model Usage Overview</h3>
+            <p style="margin:0;color:#64748b;">Accurate usage metrics and live rate-limit quotas recorded for the last 30 days.</p>
+            <small style="display:block;margin-top:6px;color:#64748b;">Automatic fallback triggers on 429 rate limits or timeouts, shifting requests to the next provider while tracking token consumption accurately.</small>
           </div>
-          <button type="button" id="refreshApiUsage" class="btn btn-secondary btn-small">Refresh usage</button>
+          <button type="button" id="refreshApiUsage" class="btn btn-secondary btn-small">Refresh usage &amp; limits</button>
         </div>
         ${usageError
           ? `<p role="alert" style="color:#b91c1c;margin:14px 0 0;">Usage unavailable: ${escapeHtml(usageError)}</p>`
           : `
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:12px;margin-top:18px;">
-              <div style="padding:14px;background:#f8fafc;border-radius:10px;"><strong>${usageNumber(usageTotals.requests)}</strong><div>Requests</div></div>
-              <div style="padding:14px;background:#f8fafc;border-radius:10px;"><strong>${usageNumber(usageTotals.totalTokens)}</strong><div>Reported tokens</div></div>
-              <div style="padding:14px;background:#f8fafc;border-radius:10px;"><strong>${usageNumber(usageTotals.inputTokens)}</strong><div>Input tokens</div></div>
-              <div style="padding:14px;background:#f8fafc;border-radius:10px;"><strong>${usageNumber(usageTotals.outputTokens)}</strong><div>Output tokens</div></div>
-              <div style="padding:14px;background:#f8fafc;border-radius:10px;"><strong>${usageNumber(usageTotals.failed)}</strong><div>Failed Groq calls</div></div>
-              <div style="padding:14px;background:#f8fafc;border-radius:10px;"><strong>${usageNumber(usageTotals.audioRequests)}</strong><div>Speech requests</div></div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-top:18px;">
+              <div style="padding:14px;background:#f8fafc;border-radius:10px;border-left:3px solid #3b82f6;"><strong>${usageNumber(usageTotals.requests)}</strong><div style="font-size:12px;color:#64748b;">Total Requests</div></div>
+              <div style="padding:14px;background:#f8fafc;border-radius:10px;border-left:3px solid #10b981;"><strong>${usageNumber(usageTotals.succeeded)}</strong><div style="font-size:12px;color:#64748b;">Succeeded</div></div>
+              <div style="padding:14px;background:#f8fafc;border-radius:10px;border-left:3px solid #ef4444;"><strong>${usageNumber(usageTotals.failed)}</strong><div style="font-size:12px;color:#64748b;">Failed / 429s</div></div>
+              <div style="padding:14px;background:#f8fafc;border-radius:10px;border-left:3px solid #6366f1;"><strong>${usageNumber(usageTotals.totalTokens)}</strong><div style="font-size:12px;color:#64748b;">Reported Tokens</div></div>
+              <div style="padding:14px;background:#f8fafc;border-radius:10px;border-left:3px solid #8b5cf6;"><strong>${usageNumber(usageTotals.inputTokens)}</strong><div style="font-size:12px;color:#64748b;">Input Tokens</div></div>
+              <div style="padding:14px;background:#f8fafc;border-radius:10px;border-left:3px solid #a855f7;"><strong>${usageNumber(usageTotals.outputTokens)}</strong><div style="font-size:12px;color:#64748b;">Output Tokens</div></div>
+              <div style="padding:14px;background:#f8fafc;border-radius:10px;border-left:3px solid #06b6d4;"><strong>${usageNumber(usageTotals.audioCharacters)}</strong><div style="font-size:12px;color:#64748b;">Speech Chars</div></div>
             </div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:16px;">
-              <div style="padding:14px;border:1px solid #e2e8f0;border-radius:10px;">
-                <strong>Requests per day (RPD)</strong>
-                <div>Limit: ${usageRateLimits?.requestLimit == null ? 'Not yet reported' : usageNumber(usageRateLimits.requestLimit)}</div>
-                <div>Remaining: ${usageRateLimits?.remainingRequests == null ? 'Not yet reported' : usageNumber(usageRateLimits.remainingRequests)}</div>
-                <div>Reset: ${escapeHtml(usageRateLimits?.resetRequests || 'Not reported')}</div>
-              </div>
-              <div style="padding:14px;border:1px solid #e2e8f0;border-radius:10px;">
-                <strong>Tokens per minute (TPM)</strong>
-                <div>Limit: ${usageRateLimits?.tokenLimit == null ? 'Not yet reported' : usageNumber(usageRateLimits.tokenLimit)}</div>
-                <div>Remaining: ${usageRateLimits?.remainingTokens == null ? 'Not yet reported' : usageNumber(usageRateLimits.remainingTokens)}</div>
-                <div>Reset: ${escapeHtml(usageRateLimits?.resetTokens || 'Not reported')}</div>
-              </div>
+
+            <div style="margin-top:20px;">
+              <h4 style="margin:0 0 10px;font-size:14px;color:#334155;text-transform:uppercase;letter-spacing:0.5px;">⚡ Live Provider &amp; Model Rate Limits</h4>
+              ${rateLimitList.length
+                ? `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;">
+                    ${rateLimitList.map(limit => {
+                      const obs = limit.observedAt ? new Date(limit.observedAt).toLocaleTimeString() : '';
+                      const isLimited = limit.httpStatus === 429 || limit.remainingRequests === 0 || (limit.remainingTokens !== null && limit.remainingTokens < 50);
+                      const statusColor = isLimited ? '#ef4444' : '#10b981';
+                      return `
+                        <div style="padding:14px;border:1px solid #e2e8f0;border-radius:12px;background:#ffffff;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+                          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                            <div>${getProviderBadge(limit.provider)} <strong style="font-size:13px;margin-left:4px;">${escapeHtml(limit.service)}</strong></div>
+                            <span style="font-size:11px;font-weight:700;color:${statusColor};background:${isLimited ? '#fef2f2' : '#f0fdf4'};padding:2px 8px;border-radius:99px;border:1px solid ${statusColor}40;">
+                              ${isLimited ? 'RATE LIMITED' : 'ACTIVE / OK'}
+                            </span>
+                          </div>
+                          <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#475569;margin-bottom:10px;word-break:break-all;">
+                            ${escapeHtml(limit.model || 'unknown')}
+                          </div>
+                          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;background:#f8fafc;padding:10px;border-radius:8px;">
+                            <div>
+                              <div style="color:#64748b;font-size:11px;">Requests (RPD)</div>
+                              <div><strong>${limit.remainingRequests == null ? '—' : usageNumber(limit.remainingRequests)}</strong> / ${limit.requestLimit == null ? '—' : usageNumber(limit.requestLimit)}</div>
+                              <small style="color:#94a3b8;font-size:10px;">Reset: ${escapeHtml(limit.resetRequests || '—')}</small>
+                            </div>
+                            <div>
+                              <div style="color:#64748b;font-size:11px;">Tokens (TPM)</div>
+                              <div><strong>${limit.remainingTokens == null ? '—' : usageNumber(limit.remainingTokens)}</strong> / ${limit.tokenLimit == null ? '—' : usageNumber(limit.tokenLimit)}</div>
+                              <small style="color:#94a3b8;font-size:10px;">Reset: ${escapeHtml(limit.resetTokens || '—')}</small>
+                            </div>
+                          </div>
+                          <div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;margin-top:8px;">
+                            <span>HTTP: ${limit.httpStatus || 200}${limit.retryAfter ? ` (retry: ${escapeHtml(limit.retryAfter)})` : ''}</span>
+                            <span>Observed: ${escapeHtml(obs)}</span>
+                          </div>
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>`
+                : '<p style="color:#64748b;font-size:13px;margin:8px 0;">Rate limit headers will appear here as soon as API requests are sent to providers.</p>'}
             </div>
-            ${usageRateLimits
-              ? `<small style="display:block;margin-top:10px;color:#64748b;">Latest headers: ${escapeHtml(usageRateLimits.service)} / ${escapeHtml(usageRateLimits.model)}; HTTP ${usageRateLimits.httpStatus == null ? 'unknown' : usageRateLimits.httpStatus}${usageRateLimits.retryAfter ? `; retry after ${escapeHtml(usageRateLimits.retryAfter)}` : ''}${usageUpdatedAt ? `; observed ${escapeHtml(usageUpdatedAt)}` : ''}.</small>`
-              : '<small style="display:block;margin-top:10px;color:#64748b;">Rate limits appear after the next Groq API response.</small>'}
-            <small style="display:block;margin-top:8px;color:#64748b;">Groq rate limits are organization-wide and may be shared with other apps. Usage totals here include only requests from this museum app; speech requests are counted separately because token usage is not returned for audio.</small>
-            <div style="overflow:auto;margin-top:16px;">
-              <table class="ledger api-usage-table" style="width:100%;">
-                <thead><tr><th>Service</th><th>Requests</th><th>Input tokens</th><th>Output tokens</th><th>Total tokens</th><th>Speech characters</th></tr></thead>
-                <tbody>
-                  ${usage.byService.length
-                    ? usage.byService.map(service => `<tr>
-                        <td data-label="Service">${escapeHtml(service.service)}</td>
-                        <td data-label="Requests">${usageNumber(service.requests)}</td>
-                        <td data-label="Input tokens">${usageNumber(service.inputTokens)}</td>
-                        <td data-label="Output tokens">${usageNumber(service.outputTokens)}</td>
-                        <td data-label="Total tokens">${usageNumber(service.totalTokens)}</td>
-                        <td data-label="Speech characters">${usageNumber(service.audioCharacters)}</td>
-                      </tr>`).join('')
-                    : '<tr><td colspan="6">No Groq requests recorded in this period.</td></tr>'}
-                </tbody>
-              </table>
+
+            <div style="margin-top:22px;">
+              <h4 style="margin:0 0 10px;font-size:14px;color:#334155;text-transform:uppercase;letter-spacing:0.5px;">📊 Detailed Token &amp; Request Ledger By Model</h4>
+              <div style="overflow-x:auto;">
+                <table class="ledger api-usage-table" style="width:100%;">
+                  <thead>
+                    <tr>
+                      <th>Provider</th>
+                      <th>Model</th>
+                      <th>Service</th>
+                      <th>Requests</th>
+                      <th>Success / Fail</th>
+                      <th>Input Tokens</th>
+                      <th>Output Tokens</th>
+                      <th>Total Tokens</th>
+                      <th>Speech Chars</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${byModelList.length
+                      ? byModelList.map(m => `
+                        <tr>
+                          <td data-label="Provider">${getProviderBadge(m.provider)}</td>
+                          <td data-label="Model" style="font-family:'IBM Plex Mono',monospace;font-size:12px;"><strong>${escapeHtml(m.model)}</strong></td>
+                          <td data-label="Service">${escapeHtml(m.service)}</td>
+                          <td data-label="Requests">${usageNumber(m.requests)}</td>
+                          <td data-label="Success/Fail"><span style="color:#10b981;">${usageNumber(m.succeeded)}</span> / <span style="color:#ef4444;">${usageNumber(m.failed)}</span></td>
+                          <td data-label="Input tokens">${usageNumber(m.inputTokens)}</td>
+                          <td data-label="Output tokens">${usageNumber(m.outputTokens)}</td>
+                          <td data-label="Total tokens"><strong>${usageNumber(m.totalTokens)}</strong></td>
+                          <td data-label="Speech characters">${usageNumber(m.audioCharacters)}</td>
+                        </tr>
+                      `).join('')
+                      : (usage.byService && usage.byService.length
+                        ? usage.byService.map(service => `<tr>
+                            <td data-label="Provider">${getProviderBadge('groq')}</td>
+                            <td data-label="Model"><em>default</em></td>
+                            <td data-label="Service">${escapeHtml(service.service)}</td>
+                            <td data-label="Requests">${usageNumber(service.requests)}</td>
+                            <td data-label="Success/Fail">${usageNumber(service.succeeded)} / ${usageNumber(service.failed)}</td>
+                            <td data-label="Input tokens">${usageNumber(service.inputTokens)}</td>
+                            <td data-label="Output tokens">${usageNumber(service.outputTokens)}</td>
+                            <td data-label="Total tokens">${usageNumber(service.totalTokens)}</td>
+                            <td data-label="Speech characters">${usageNumber(service.audioCharacters)}</td>
+                          </tr>`).join('')
+                        : '<tr><td colspan="9">No API requests recorded in this period.</td></tr>')}
+                  </tbody>
+                </table>
+              </div>
             </div>
           `}
       </section>

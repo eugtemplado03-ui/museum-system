@@ -1,4 +1,4 @@
-// Records daily Groq usage and the most recently observed provider rate limits.
+// Records daily API usage and the most recently observed provider & model rate limits.
 const mongoose = require('mongoose');
 
 const dailyUsageSchema = new mongoose.Schema({
@@ -19,7 +19,8 @@ const dailyUsageSchema = new mongoose.Schema({
 }, { versionKey: false });
 
 const rateLimitSchema = new mongoose.Schema({
-  provider: { type: String, required: true, unique: true },
+  _id: { type: String }, // Format: `${provider}|${model}`
+  provider: { type: String, required: true },
   service: { type: String, required: true },
   model: { type: String, required: true },
   requestLimit: Number,
@@ -38,6 +39,14 @@ const DailyUsage = mongoose.models.ApiDailyUsage ||
 const RateLimit = mongoose.models.ApiRateLimit ||
   mongoose.model('ApiRateLimit', rateLimitSchema);
 
+// Safely drop any legacy single-provider unique index in the background
+if (mongoose.connection) {
+  RateLimit.collection?.dropIndex('provider_1').catch(() => {});
+}
+
+// In-memory cache of rate limits and cool-offs for immediate routing decisions
+const memoryRateLimits = new Map();
+
 // Read a header from either Fetch Headers or a plain response-header object.
 function header(response, name) {
   if (!response?.headers) return null;
@@ -52,17 +61,39 @@ function finiteUsage(value) {
   return Number.isFinite(Number(value)) && Number(value) >= 0 ? Math.floor(Number(value)) : 0;
 }
 
-// Extract valid rate-limit headers, returning null when the response has none.
+// Extract valid rate-limit headers across Groq, OpenRouter, and standard providers.
 function rateLimitSnapshot(response) {
+  if (!response) return null;
+
+  const requestLimitRaw = header(response, 'x-ratelimit-limit-requests') ||
+    header(response, 'ratelimit-limit-requests') ||
+    header(response, 'ratelimit-limit');
+  const remainingRequestsRaw = header(response, 'x-ratelimit-remaining-requests') ||
+    header(response, 'ratelimit-remaining-requests') ||
+    header(response, 'ratelimit-remaining');
+  const resetRequestsRaw = header(response, 'x-ratelimit-reset-requests') ||
+    header(response, 'ratelimit-reset-requests') ||
+    header(response, 'ratelimit-reset');
+
+  const tokenLimitRaw = header(response, 'x-ratelimit-limit-tokens') ||
+    header(response, 'ratelimit-limit-tokens');
+  const remainingTokensRaw = header(response, 'x-ratelimit-remaining-tokens') ||
+    header(response, 'ratelimit-remaining-tokens');
+  const resetTokensRaw = header(response, 'x-ratelimit-reset-tokens') ||
+    header(response, 'ratelimit-reset-tokens');
+
+  const retryAfterRaw = header(response, 'retry-after');
+
   const values = {
-    requestLimit: header(response, 'x-ratelimit-limit-requests'),
-    remainingRequests: header(response, 'x-ratelimit-remaining-requests'),
-    resetRequests: header(response, 'x-ratelimit-reset-requests'),
-    tokenLimit: header(response, 'x-ratelimit-limit-tokens'),
-    remainingTokens: header(response, 'x-ratelimit-remaining-tokens'),
-    resetTokens: header(response, 'x-ratelimit-reset-tokens'),
-    retryAfter: header(response, 'retry-after')
+    requestLimit: requestLimitRaw !== null ? Number(requestLimitRaw) : null,
+    remainingRequests: remainingRequestsRaw !== null ? Number(remainingRequestsRaw) : null,
+    resetRequests: resetRequestsRaw,
+    tokenLimit: tokenLimitRaw !== null ? Number(tokenLimitRaw) : null,
+    remainingTokens: remainingTokensRaw !== null ? Number(remainingTokensRaw) : null,
+    resetTokens: resetTokensRaw,
+    retryAfter: retryAfterRaw
   };
+
   const numberFields = ['requestLimit', 'remainingRequests', 'tokenLimit', 'remainingTokens'];
   for (const field of numberFields) {
     if (values[field] !== null) {
@@ -70,37 +101,116 @@ function rateLimitSnapshot(response) {
       values[field] = Number.isFinite(numeric) && numeric >= 0 ? numeric : null;
     }
   }
-  return Object.values(values).some(value => value !== null) ? values : null;
+
+  // If status is 429, ensure retryAfter or status flag is recorded
+  if (response.status === 429 && !values.retryAfter) {
+    values.retryAfter = 'rate_limited';
+  }
+
+  return (Object.values(values).some(v => v !== null) || response.status === 429) ? values : null;
 }
 
-// Increment the UTC daily usage bucket and refresh the latest Groq rate-limit snapshot.
-async function recordGroqUsage({ service, model, response = null, usage = null, audioCharacters = 0 }) {
-  if (mongoose.connection.readyState !== 1) {
-    throw new Error('API usage cannot be recorded while MongoDB is disconnected.');
+// Parse retry-after header value into milliseconds
+function parseRetryAfterMs(retryAfterStr) {
+  if (!retryAfterStr) return 0;
+  const num = Number(retryAfterStr);
+  if (Number.isFinite(num) && num > 0) return num * 1000;
+  const parsedDate = Date.parse(retryAfterStr);
+  if (!Number.isNaN(parsedDate)) {
+    return Math.max(0, parsedDate - Date.now());
   }
+  return 30000; // Default 30s backoff when unparseable
+}
+
+// Check if a specific provider/model is currently known to be rate limited
+function isRateLimited(provider, model = null) {
+  const now = Date.now();
+  for (const [key, entry] of memoryRateLimits.entries()) {
+    if (entry.provider !== provider) continue;
+    if (model && entry.model !== model) continue;
+
+    // If active 429 cool-off
+    if (entry.blockedUntil && entry.blockedUntil > now) {
+      return { limited: true, reason: 'active_429', remainingMs: entry.blockedUntil - now };
+    }
+    // If remaining requests is 0
+    if (entry.remainingRequests === 0) {
+      return { limited: true, reason: 'requests_exhausted', reset: entry.resetRequests };
+    }
+    // If remaining tokens is critically low (< 50)
+    if (entry.remainingTokens !== null && entry.remainingTokens < 50) {
+      return { limited: true, reason: 'tokens_exhausted', reset: entry.resetTokens };
+    }
+  }
+  return { limited: false };
+}
+
+// Increment the UTC daily usage bucket and refresh rate-limit snapshots for any provider/model
+async function recordUsage({
+  provider = 'groq',
+  service = 'chat',
+  model = 'unknown',
+  response = null,
+  usage = null,
+  audioCharacters = 0
+}) {
+  const safeProvider = String(provider || 'unknown').toLowerCase().slice(0, 40);
+  const safeService = String(service || 'unknown').toLowerCase().slice(0, 40);
+  const safeModel = String(model || 'unknown').slice(0, 120);
+
+  const promptTokens = finiteUsage(usage?.prompt_tokens ?? usage?.input_tokens);
+  const completionTokens = finiteUsage(usage?.completion_tokens ?? usage?.output_tokens);
+  const totalTokens = finiteUsage(usage?.total_tokens) || (promptTokens + completionTokens);
+
+  const isOk = Boolean(response?.ok);
+  const isFailed = response ? !response.ok : false;
+  const httpStatus = response?.status || null;
 
   const now = new Date();
   const day = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-  const safeService = String(service || 'unknown').slice(0, 40);
-  const safeModel = String(model || 'unknown').slice(0, 120);
-  const promptTokens = finiteUsage(usage?.prompt_tokens ?? usage?.input_tokens);
-  const completionTokens = finiteUsage(usage?.completion_tokens ?? usage?.output_tokens);
-  const totalTokens = finiteUsage(usage?.total_tokens) || promptTokens + completionTokens;
-  const recordId = `groq|${safeService}|${safeModel}|${day.toISOString().slice(0, 10)}`;
+  const recordId = `${safeProvider}|${safeService}|${safeModel}|${day.toISOString().slice(0, 10)}`;
+
+  // Update in-memory rate-limit state
+  const limits = rateLimitSnapshot(response);
+  const memKey = `${safeProvider}|${safeModel}`;
+  const existingMem = memoryRateLimits.get(memKey) || { provider: safeProvider, model: safeModel };
+
+  let blockedUntil = null;
+  if (httpStatus === 429) {
+    const delayMs = limits?.retryAfter ? parseRetryAfterMs(limits.retryAfter) : 20000;
+    blockedUntil = Date.now() + Math.max(5000, delayMs);
+  } else if (isOk) {
+    blockedUntil = null;
+  }
+
+  memoryRateLimits.set(memKey, {
+    ...existingMem,
+    ...(limits || {}),
+    provider: safeProvider,
+    service: safeService,
+    model: safeModel,
+    httpStatus,
+    blockedUntil,
+    observedAt: now
+  });
+
+  if (mongoose.connection.readyState !== 1) {
+    return; // Don't crash if DB is offline; in-memory tracking remains operational
+  }
 
   await DailyUsage.updateOne(
     { _id: recordId },
     {
       $setOnInsert: {
-        provider: 'groq',
+        provider: safeProvider,
         service: safeService,
         model: safeModel,
         date: day
       },
       $inc: {
         requests: 1,
-        succeeded: response?.ok ? 1 : 0,
-        failed: response ? (response.ok ? 0 : 1) : 1,
+        succeeded: isOk ? 1 : 0,
+        failed: isFailed ? 1 : 0,
         inputTokens: promptTokens,
         outputTokens: completionTokens,
         totalTokens,
@@ -112,16 +222,17 @@ async function recordGroqUsage({ service, model, response = null, usage = null, 
     { upsert: true }
   );
 
-  const limits = rateLimitSnapshot(response);
-  if (limits) {
+  if (limits || httpStatus === 429) {
+    const rateLimitId = `${safeProvider}|${safeModel}`;
     await RateLimit.findOneAndUpdate(
-      { provider: 'groq' },
+      { _id: rateLimitId },
       {
         $set: {
-          ...limits,
+          provider: safeProvider,
           service: safeService,
           model: safeModel,
-          httpStatus: response?.status || null,
+          ...(limits || {}),
+          httpStatus,
           observedAt: now
         }
       },
@@ -130,8 +241,27 @@ async function recordGroqUsage({ service, model, response = null, usage = null, 
   }
 }
 
-// Aggregate recent daily usage by service and include the latest rate-limit metadata.
-async function getGroqUsage(days = 30) {
+// Backward-compatible Groq recorder
+async function recordGroqUsage(entry) {
+  return recordUsage({ provider: 'groq', ...entry });
+}
+
+// Safe recorder that never crashes the caller
+async function recordApiUsageSafely(entry) {
+  try {
+    await recordUsage(entry);
+  } catch (err) {
+    console.error(`[API Usage] Failed to record ${entry.provider || 'API'} ${entry.service || ''} usage:`, err.message);
+  }
+}
+
+// Backward-compatible Groq safe recorder
+async function recordGroqUsageSafely(entry) {
+  return recordApiUsageSafely({ provider: 'groq', ...entry });
+}
+
+// Aggregate recent daily usage across ALL providers and models
+async function getApiUsage(days = 30) {
   if (mongoose.connection.readyState !== 1) {
     throw new Error('API usage is unavailable while MongoDB is disconnected.');
   }
@@ -140,9 +270,9 @@ async function getGroqUsage(days = 30) {
   startDate.setUTCHours(0, 0, 0, 0);
   startDate.setUTCDate(startDate.getUTCDate() - periodDays + 1);
 
-  const [byService, rateLimits] = await Promise.all([
+  const [byServiceRaw, byModelRaw, byProviderRaw, rateLimitsDocs] = await Promise.all([
     DailyUsage.aggregate([
-      { $match: { provider: 'groq', date: { $gte: startDate } } },
+      { $match: { date: { $gte: startDate } } },
       {
         $group: {
           _id: '$service',
@@ -158,15 +288,49 @@ async function getGroqUsage(days = 30) {
       },
       { $sort: { _id: 1 } }
     ]),
-    RateLimit.findOne({ provider: 'groq' }).lean()
+    DailyUsage.aggregate([
+      { $match: { date: { $gte: startDate } } },
+      {
+        $group: {
+          _id: { provider: '$provider', service: '$service', model: '$model' },
+          requests: { $sum: '$requests' },
+          succeeded: { $sum: '$succeeded' },
+          failed: { $sum: '$failed' },
+          inputTokens: { $sum: '$inputTokens' },
+          outputTokens: { $sum: '$outputTokens' },
+          totalTokens: { $sum: '$totalTokens' },
+          audioRequests: { $sum: '$audioRequests' },
+          audioCharacters: { $sum: '$audioCharacters' }
+        }
+      },
+      { $sort: { '_id.provider': 1, '_id.model': 1 } }
+    ]),
+    DailyUsage.aggregate([
+      { $match: { date: { $gte: startDate } } },
+      {
+        $group: {
+          _id: '$provider',
+          requests: { $sum: '$requests' },
+          succeeded: { $sum: '$succeeded' },
+          failed: { $sum: '$failed' },
+          inputTokens: { $sum: '$inputTokens' },
+          outputTokens: { $sum: '$outputTokens' },
+          totalTokens: { $sum: '$totalTokens' },
+          audioRequests: { $sum: '$audioRequests' },
+          audioCharacters: { $sum: '$audioCharacters' }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]),
+    RateLimit.find({}).lean()
   ]);
 
-  const totals = byService.reduce((sum, service) => {
+  const totals = byProviderRaw.reduce((sum, item) => {
     for (const field of [
       'requests', 'succeeded', 'failed', 'inputTokens', 'outputTokens',
       'totalTokens', 'audioRequests', 'audioCharacters'
     ]) {
-      sum[field] += service[field] || 0;
+      sum[field] += item[field] || 0;
     }
     return sum;
   }, {
@@ -180,40 +344,98 @@ async function getGroqUsage(days = 30) {
     audioCharacters: 0
   });
 
+  const byModel = byModelRaw.map(item => ({
+    provider: item._id.provider,
+    service: item._id.service,
+    model: item._id.model,
+    requests: item.requests,
+    succeeded: item.succeeded,
+    failed: item.failed,
+    inputTokens: item.inputTokens,
+    outputTokens: item.outputTokens,
+    totalTokens: item.totalTokens,
+    audioRequests: item.audioRequests,
+    audioCharacters: item.audioCharacters
+  }));
+
+  const byProvider = byProviderRaw.map(item => ({
+    provider: item._id,
+    requests: item.requests,
+    succeeded: item.succeeded,
+    failed: item.failed,
+    inputTokens: item.inputTokens,
+    outputTokens: item.outputTokens,
+    totalTokens: item.totalTokens,
+    audioRequests: item.audioRequests,
+    audioCharacters: item.audioCharacters
+  }));
+
+  const byService = byServiceRaw.map(item => ({
+    service: item._id,
+    requests: item.requests,
+    succeeded: item.succeeded,
+    failed: item.failed,
+    inputTokens: item.inputTokens,
+    outputTokens: item.outputTokens,
+    totalTokens: item.totalTokens,
+    audioRequests: item.audioRequests,
+    audioCharacters: item.audioCharacters
+  }));
+
+  const rateLimits = rateLimitsDocs.map(r => ({
+    provider: r.provider,
+    service: r.service,
+    model: r.model,
+    requestLimit: r.requestLimit ?? null,
+    remainingRequests: r.remainingRequests ?? null,
+    resetRequests: r.resetRequests ?? null,
+    tokenLimit: r.tokenLimit ?? null,
+    remainingTokens: r.remainingTokens ?? null,
+    resetTokens: r.resetTokens ?? null,
+    retryAfter: r.retryAfter ?? null,
+    httpStatus: r.httpStatus ?? null,
+    observedAt: r.observedAt
+  }));
+
+  // Primary rate limit for backward compatibility (prefer Groq, else first)
+  const primaryRateLimit = rateLimits.find(r => r.provider === 'groq') || rateLimits[0] || null;
+
   return {
     periodDays,
     startDate: startDate.toISOString(),
     totals,
-    byService: byService.map(({ _id, ...service }) => ({ service: _id, ...service })),
-    rateLimits: rateLimits ? {
-      service: rateLimits.service,
-      model: rateLimits.model,
-      requestLimit: rateLimits.requestLimit ?? null,
-      remainingRequests: rateLimits.remainingRequests ?? null,
-      resetRequests: rateLimits.resetRequests ?? null,
-      tokenLimit: rateLimits.tokenLimit ?? null,
-      remainingTokens: rateLimits.remainingTokens ?? null,
-      resetTokens: rateLimits.resetTokens ?? null,
-      retryAfter: rateLimits.retryAfter ?? null,
-      httpStatus: rateLimits.httpStatus ?? null,
-      observedAt: rateLimits.observedAt
-    } : null
+    byProvider,
+    byModel,
+    byService,
+    rateLimits,
+    rateLimit: primaryRateLimit // Backwards compatibility for single-provider views
   };
 }
 
-// Record usage without allowing telemetry failures to affect the API request.
-async function recordGroqUsageSafely(entry) {
-  try {
-    await recordGroqUsage(entry);
-  } catch (err) {
-    console.error(`[API Usage] Failed to record Groq ${entry.service} usage:`, err.message);
-  }
+// Backward-compatible Groq-specific getter
+async function getGroqUsage(days = 30) {
+  const full = await getApiUsage(days);
+  return {
+    periodDays: full.periodDays,
+    startDate: full.startDate,
+    totals: full.totals,
+    byService: full.byService,
+    byModel: full.byModel,
+    byProvider: full.byProvider,
+    rateLimits: full.rateLimit,
+    allRateLimits: full.rateLimits
+  };
 }
 
 module.exports = {
   DailyUsage,
   RateLimit,
+  recordUsage,
+  recordApiUsageSafely,
   recordGroqUsage,
   recordGroqUsageSafely,
-  getGroqUsage
+  getApiUsage,
+  getGroqUsage,
+  isRateLimited,
+  rateLimitSnapshot
 };
