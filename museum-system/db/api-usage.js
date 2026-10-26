@@ -102,12 +102,12 @@ function rateLimitSnapshot(response) {
     }
   }
 
-  // If status is 429, ensure retryAfter or status flag is recorded
-  if (response.status === 429 && !values.retryAfter) {
-    values.retryAfter = 'rate_limited';
+  // If status is 429 or 402, ensure retryAfter or status flag is recorded
+  if ((response.status === 429 || response.status === 402) && !values.retryAfter) {
+    values.retryAfter = response.status === 402 ? 'insufficient_credits' : 'rate_limited';
   }
 
-  return (Object.values(values).some(v => v !== null) || response.status === 429) ? values : null;
+  return (Object.values(values).some(v => v !== null) || response.status === 429 || response.status === 402) ? values : null;
 }
 
 // Parse retry-after header value into milliseconds
@@ -129,9 +129,13 @@ function isRateLimited(provider, model = null) {
     if (entry.provider !== provider) continue;
     if (model && entry.model !== model) continue;
 
-    // If active 429 cool-off
+    // If active 429 / 402 cool-off
     if (entry.blockedUntil && entry.blockedUntil > now) {
-      return { limited: true, reason: 'active_429', remainingMs: entry.blockedUntil - now };
+      return {
+        limited: true,
+        reason: entry.httpStatus === 402 ? 'credits_exhausted' : 'active_429',
+        remainingMs: entry.blockedUntil - now
+      };
     }
     // If remaining requests is 0
     if (entry.remainingRequests === 0) {
@@ -176,8 +180,8 @@ async function recordUsage({
   const existingMem = memoryRateLimits.get(memKey) || { provider: safeProvider, model: safeModel };
 
   let blockedUntil = null;
-  if (httpStatus === 429) {
-    const delayMs = limits?.retryAfter ? parseRetryAfterMs(limits.retryAfter) : 20000;
+  if (httpStatus === 429 || httpStatus === 402) {
+    const delayMs = limits?.retryAfter ? parseRetryAfterMs(limits.retryAfter) : (httpStatus === 402 ? 60000 : 20000);
     blockedUntil = Date.now() + Math.max(5000, delayMs);
   } else if (isOk) {
     blockedUntil = null;

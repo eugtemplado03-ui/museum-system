@@ -310,7 +310,7 @@ router.get('/status', async (req, res) => {
     const hasGroqKey = Boolean(apiKey);
     const hasFishKey = Boolean((process.env.FISH_AUDIO_API_KEY || '').trim());
     const hasOpenRouterKey = Boolean((process.env.OPENROUTER_API_KEY || '').trim());
-    const localProvider = hasFishKey ? 'fish-audio' : (hasOpenRouterKey ? 'openrouter' : 'unsupported-by-groq');
+    const localProvider = hasOpenRouterKey ? 'openrouter' : (hasFishKey ? 'fish-audio' : 'unsupported-by-groq');
     res.json({
       translationConfigured: hasGroqKey,
       groqConfigured: hasGroqKey,
@@ -330,6 +330,66 @@ router.get('/status', async (req, res) => {
     res.status(500).json({ error: 'Failed to load AI service status.' });
   }
 });
+
+// ── OpenRouter Translation Fallback ──────────────────────────────
+async function tryOpenRouterTranslation({ text, targetLang, systemPrompt }) {
+  const openRouterKey = (process.env.OPENROUTER_API_KEY || '').trim();
+  if (!openRouterKey) return null;
+  const model = process.env.OPENROUTER_MODEL || 'openai/gpt-4o-mini';
+  try {
+    console.log(`[Translation] Calling OpenRouter fallback (${model}) for ${targetLang}...`);
+    const controller = new AbortController();
+    const tid = setTimeout(() => controller.abort(), 12000);
+    const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${openRouterKey}`,
+        'HTTP-Referer': process.env.SITE_URL || 'http://localhost:3000',
+        'X-Title': process.env.SITE_NAME || 'Museo Sang Bata sa Negros'
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: text }
+        ],
+        temperature: 0.3,
+        max_tokens: 2048
+      }),
+      signal: controller.signal
+    });
+    clearTimeout(tid);
+    if (!resp.ok) {
+      await apiUsage.recordApiUsageSafely({
+        provider: 'openrouter',
+        service: 'translation',
+        model,
+        response: resp
+      });
+      return null;
+    }
+    const data = await resp.json();
+    await apiUsage.recordApiUsageSafely({
+      provider: 'openrouter',
+      service: 'translation',
+      model,
+      response: resp,
+      usage: data.usage
+    });
+    let translated = (data.choices?.[0]?.message?.content || '').trim();
+    if (
+      (translated.startsWith('"') && translated.endsWith('"')) ||
+      (translated.startsWith("'") && translated.endsWith("'"))
+    ) {
+      translated = translated.slice(1, -1).trim();
+    }
+    return translated || null;
+  } catch (err) {
+    console.warn('[Translation] OpenRouter fallback error:', err.message);
+    return null;
+  }
+}
 
 // ── Translation endpoint (Groq openai/gpt-oss-120b) ──────────────
 // Translate text through Groq, using a cache and returning English unchanged.
@@ -364,11 +424,17 @@ router.post('/translate', async (req, res) => {
     return res.json({ translatedText: translationCache.get(cacheKey) });
   }
 
+  const systemPrompt = getSystemPrompt(targetLang);
+
   if (!groqKey) {
+    // Attempt OpenRouter fallback if Groq key is missing
+    const orText = await tryOpenRouterTranslation({ text: trimmedText, targetLang, systemPrompt });
+    if (orText) {
+      translationCache.set(cacheKey, orText);
+      return res.json({ translatedText: orText, provider: 'openrouter-fallback' });
+    }
     return res.status(503).json({ error: 'Translation service is not configured. Add a Groq key in the admin dashboard or server environment.' });
   }
-
-  const systemPrompt = getSystemPrompt(targetLang);
 
   let groqResponse;
   let usageRecorded = false;
@@ -404,6 +470,14 @@ router.post('/translate', async (req, res) => {
       usageRecorded = true;
       const errBody = await groqResponse.text();
       console.error('[Translation] Groq API error:', groqResponse.status, errBody);
+
+      // Fallback to OpenRouter if Groq is rate-limited or unavailable
+      const orText = await tryOpenRouterTranslation({ text: trimmedText, targetLang, systemPrompt });
+      if (orText) {
+        translationCache.set(cacheKey, orText);
+        return res.json({ translatedText: orText, provider: 'openrouter-fallback' });
+      }
+
       return res.status(502).json({ error: 'Translation service error: ' + groqResponse.status });
     }
 
@@ -429,6 +503,11 @@ router.post('/translate', async (req, res) => {
 
     if (!translatedText) {
       console.error('[Translation] Groq returned an empty translation.');
+      const orText = await tryOpenRouterTranslation({ text: trimmedText, targetLang, systemPrompt });
+      if (orText) {
+        translationCache.set(cacheKey, orText);
+        return res.json({ translatedText: orText, provider: 'openrouter-fallback' });
+      }
       return res.status(502).json({ error: 'Translation service returned an empty result. Please try again.' });
     }
 
@@ -444,6 +523,13 @@ router.post('/translate', async (req, res) => {
       });
     }
     console.error('[Translation] Groq request threw:', err.message);
+
+    const orText = await tryOpenRouterTranslation({ text: trimmedText, targetLang, systemPrompt });
+    if (orText) {
+      translationCache.set(cacheKey, orText);
+      return res.json({ translatedText: orText, provider: 'openrouter-fallback' });
+    }
+
     res.status(502).json({ error: 'Translation failed: ' + err.message });
   }
 });
@@ -714,6 +800,7 @@ router.post('/speak', async (req, res) => {
   if (['tl', 'cb', 'hil'].includes(lang)) {
     const hasFishKey = Boolean((process.env.FISH_AUDIO_API_KEY || '').trim());
     const hasOpenRouterKey = Boolean((process.env.OPENROUTER_API_KEY || '').trim());
+    const fishKey = (process.env.FISH_AUDIO_API_KEY || '').trim();
 
     if (!hasFishKey && !hasOpenRouterKey) {
       const languageName = getLanguageDisplayName(lang);
@@ -724,16 +811,24 @@ router.post('/speak', async (req, res) => {
       });
     }
 
-    // Step A: Fish Audio if possible
-    let result = await tryFishAudio({ text: cleanText, lang });
+    let result = null;
 
-    // Step B: If Fish Audio is not okay, use OpenRouter
-    if (!result) {
+    // Step A: Primary for regional languages — OpenRouter Audio
+    const openRouterLimit = apiUsage.isRateLimited('openrouter');
+    if (hasOpenRouterKey && !openRouterLimit.limited) {
       result = await tryOpenRouterAudio({ text: cleanText, lang });
+    } else if (hasOpenRouterKey && openRouterLimit.limited) {
+      console.warn(`[TTS] OpenRouter is rate-limited (${openRouterLimit.reason}) — falling back directly to Google TTS.`);
     }
 
-    // Step C: If both Fish Audio and OpenRouter are not okay, fall back to Google TTS
+    // Step B: Optional direct Fish Audio (if configured with a native Fish Audio key and OpenRouter did not succeed)
+    if (!result && hasFishKey && !fishKey.startsWith('sk-or-')) {
+      result = await tryFishAudio({ text: cleanText, lang });
+    }
+
+    // Step C: Fallback to Google TTS when OpenRouter hits limits, errors, or fails
     if (!result) {
+      console.log(`[TTS] Falling back to Google TTS for ${lang}...`);
       result = await tryGoogleTts({ text: cleanText, lang });
     }
 
