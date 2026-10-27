@@ -14,7 +14,7 @@
 
   // Map the current route to the sidebar item that should appear active.
   function getActiveNavKey() {
-    if (currentPath === '/' || currentPath.endsWith('/index.html') || currentPath === '') return 'home';
+    if (currentPath === '/' || currentPath.endsWith('/index.html') || currentPath.endsWith('/dashboard.html') || currentPath === '') return 'home';
     if (currentPath.includes('map')) return 'map';
     if (currentPath.includes('exhibit')) return 'exhibits';
     if (currentPath.includes('program')) return 'programs';
@@ -173,6 +173,37 @@
     let toggleBtn = document.getElementById('sidebarToggleBtn');
 
     const isAdmin = activeKey === 'admin';
+    if (!isAdmin && !document.getElementById('mobileBottomNav')) {
+      const nav = document.createElement('nav');
+      nav.id = 'mobileBottomNav';
+      nav.className = 'mobile-bottom-nav';
+      nav.setAttribute('aria-label', 'Mobile navigation');
+      nav.innerHTML = `
+        <a class="mobile-bottom-nav-link ${activeKey === 'home' && window.location.hash !== '#scannerSection' ? 'active' : ''}" href="/dashboard.html" aria-label="Home">
+          <span class="mobile-bottom-nav-icon" aria-hidden="true">🏠</span>
+          <span>Home</span>
+        </a>
+        <a class="mobile-bottom-nav-link ${activeKey === 'exhibits' && new URLSearchParams(window.location.search).get('favorites') !== 'true' ? 'active' : ''}" href="/exhibits.html" aria-label="Exhibits">
+          <span class="mobile-bottom-nav-icon" aria-hidden="true">🏛️</span>
+          <span>Exhibits</span>
+        </a>
+        <a class="mobile-bottom-nav-link mobile-bottom-nav-scan ${window.location.pathname.toLowerCase().endsWith('/dashboard.html') && window.location.hash === '#scannerSection' ? 'active' : ''}" href="/dashboard.html#scannerSection" aria-label="Scan exhibits">
+          <span class="mobile-bottom-nav-icon" aria-hidden="true">📷</span>
+          <span>Scan</span>
+        </a>
+        <a class="mobile-bottom-nav-link ${activeKey === 'map' ? 'active' : ''}" href="/map.html" aria-label="Floor map">
+          <span class="mobile-bottom-nav-icon" aria-hidden="true">🗺️</span>
+          <span>Map</span>
+        </a>
+        <a class="mobile-bottom-nav-link ${activeKey === 'exhibits' && new URLSearchParams(window.location.search).get('favorites') === 'true' ? 'active' : ''}" href="/exhibits.html?favorites=true" aria-label="Saved exhibits">
+          <span class="mobile-bottom-nav-icon" aria-hidden="true">♡</span>
+          <span>Saved</span>
+        </a>
+      `;
+      document.body.appendChild(nav);
+      document.body.classList.add('has-mobile-bottom-nav');
+    }
+
     if (!toggleBtn && (topbarLeft || topbar)) {
       toggleBtn = document.createElement('button');
       toggleBtn.type = 'button';

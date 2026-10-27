@@ -413,7 +413,7 @@
     let allExhibits = [];
     let allCategories = [];
     let favoriteIds = new Set();
-    let showFavoritesOnly = false;
+    let showFavoritesOnly = new URLSearchParams(window.location.search).get('favorites') === 'true';
     let activeCategory = 'All';
     let searchQuery = '';
     let sortOption = 'code-asc';
