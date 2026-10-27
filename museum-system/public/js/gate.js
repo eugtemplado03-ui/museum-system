@@ -273,6 +273,12 @@ const Gate = (() => {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @media (max-width: 768px) {
+          .admin-public-dock {
+            display: none !important;
+          }
+        }
+
         @media (max-width: 480px) {
           .admin-public-dock {
             bottom: 8px;

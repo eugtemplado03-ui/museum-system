@@ -3875,6 +3875,14 @@ select#langSelect:focus { outline: none; border-color: var(--teal); }
     pointer-events: auto !important;
     visibility: visible !important;
   }
+  body.has-mobile-bottom-nav .chat-toggle {
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    z-index: 650;
+  }
+  body.has-mobile-bottom-nav .chat-panel {
+    bottom: calc(72px + env(safe-area-inset-bottom)) !important;
+    max-height: calc(100dvh - 96px - env(safe-area-inset-bottom)) !important;
+  }
   .chat-head {
     padding: 10px 12px;
     border-radius: 18px 18px 0 0;
