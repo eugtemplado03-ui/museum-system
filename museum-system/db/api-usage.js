@@ -122,6 +122,24 @@ function parseRetryAfterMs(retryAfterStr) {
   return 30000; // Default 30s backoff when unparseable
 }
 
+function parseResetAt(resetValue, now = Date.now()) {
+  if (!resetValue) return null;
+  const value = String(resetValue).trim();
+  const durationParts = [...value.matchAll(/(\d+(?:\.\d+)?)\s*(ms|s|m|h|d)/gi)];
+  if (durationParts.length) {
+    const durationMs = durationParts.reduce((total, [, amount, unit]) => {
+      const multipliers = { ms: 1, s: 1000, m: 60000, h: 3600000, d: 86400000 };
+      return total + Number(amount) * multipliers[unit.toLowerCase()];
+    }, 0);
+    return now + durationMs;
+  }
+
+  const numeric = Number(value);
+  if (Number.isFinite(numeric) && numeric > 0) return now + numeric * 1000;
+  const parsedDate = Date.parse(value);
+  return Number.isNaN(parsedDate) ? null : parsedDate;
+}
+
 // Check if a specific provider/model is currently known to be rate limited
 function isRateLimited(provider, model = null) {
   const now = Date.now();
@@ -137,13 +155,24 @@ function isRateLimited(provider, model = null) {
         remainingMs: entry.blockedUntil - now
       };
     }
+    if (entry.blockedUntil && entry.blockedUntil <= now) {
+      entry.blockedUntil = null;
+    }
     // If remaining requests is 0
     if (entry.remainingRequests === 0) {
-      return { limited: true, reason: 'requests_exhausted', reset: entry.resetRequests };
+      if (entry.resetRequestsAt && entry.resetRequestsAt > now) {
+        return { limited: true, reason: 'requests_exhausted', reset: entry.resetRequests };
+      }
+      entry.remainingRequests = null;
+      entry.resetRequestsAt = null;
     }
     // If remaining tokens is critically low (< 50)
     if (entry.remainingTokens !== null && entry.remainingTokens < 50) {
-      return { limited: true, reason: 'tokens_exhausted', reset: entry.resetTokens };
+      if (entry.resetTokensAt && entry.resetTokensAt > now) {
+        return { limited: true, reason: 'tokens_exhausted', reset: entry.resetTokens };
+      }
+      entry.remainingTokens = null;
+      entry.resetTokensAt = null;
     }
   }
   return { limited: false };
@@ -178,16 +207,17 @@ async function recordUsage({
   const limits = rateLimitSnapshot(response);
   const memKey = `${safeProvider}|${safeModel}`;
   const existingMem = memoryRateLimits.get(memKey) || { provider: safeProvider, model: safeModel };
+  const observedAt = Date.now();
 
   let blockedUntil = null;
   if (httpStatus === 429 || httpStatus === 402) {
     const delayMs = limits?.retryAfter ? parseRetryAfterMs(limits.retryAfter) : (httpStatus === 402 ? 60000 : 20000);
-    blockedUntil = Date.now() + Math.max(5000, delayMs);
+    blockedUntil = observedAt + Math.max(5000, delayMs);
   } else if (isOk) {
     blockedUntil = null;
   }
 
-  memoryRateLimits.set(memKey, {
+  const nextMem = {
     ...existingMem,
     ...(limits || {}),
     provider: safeProvider,
@@ -196,7 +226,33 @@ async function recordUsage({
     httpStatus,
     blockedUntil,
     observedAt: now
-  });
+  };
+  if (limits?.remainingRequests === 0 || httpStatus === 429) {
+    nextMem.resetRequestsAt = parseResetAt(limits?.resetRequests, observedAt)
+      || blockedUntil
+      || observedAt + 30000;
+  } else if (limits?.remainingRequests !== null && limits?.remainingRequests !== undefined) {
+    nextMem.resetRequestsAt = null;
+  } else if (isOk) {
+    nextMem.remainingRequests = null;
+    nextMem.resetRequestsAt = null;
+  }
+  if (limits?.remainingTokens !== null && limits?.remainingTokens !== undefined && limits.remainingTokens < 50) {
+    nextMem.resetTokensAt = parseResetAt(limits.resetTokens, observedAt) || observedAt + 30000;
+  } else if (limits?.remainingTokens !== null && limits?.remainingTokens !== undefined) {
+    nextMem.resetTokensAt = null;
+  } else if (isOk) {
+    nextMem.remainingTokens = null;
+    nextMem.resetTokensAt = null;
+  }
+  if (httpStatus === 429 && !limits?.remainingRequests) {
+    nextMem.resetRequestsAt = blockedUntil || observedAt + 30000;
+  }
+  if (httpStatus === 429 && (limits?.remainingTokens === null || limits?.remainingTokens === undefined)) {
+    nextMem.remainingTokens = null;
+    nextMem.resetTokensAt = null;
+  }
+  memoryRateLimits.set(memKey, nextMem);
 
   if (mongoose.connection.readyState !== 1) {
     return; // Don't crash if DB is offline; in-memory tracking remains operational

@@ -525,6 +525,111 @@ describe('Groq chat, translation, and speech API', () => {
     }
   });
 
+  it('POST /api/chat uses OpenRouter during a Groq limit and returns to Groq after it clears', async () => {
+    const originalFetch = global.fetch;
+    const envKeys = ['OPENROUTER_API_KEY', 'TEST_OPENROUTER_FALLBACK'];
+    const savedEnv = Object.fromEntries(envKeys.map(key => [key, process.env[key]]));
+    process.env.OPENROUTER_API_KEY = 'test-openrouter-key';
+    process.env.TEST_OPENROUTER_FALLBACK = '1';
+    jest.spyOn(chatApiKey, 'getGroqConfiguration')
+      .mockResolvedValue({ apiKey: 'test-groq-key' });
+    jest.spyOn(apiUsage, 'isRateLimited')
+      .mockReturnValueOnce({ limited: true, reason: 'active_429' })
+      .mockReturnValueOnce({ limited: false });
+    jest.spyOn(apiUsage, 'recordGroqUsageSafely').mockResolvedValue();
+    jest.spyOn(apiUsage, 'recordApiUsageSafely').mockResolvedValue();
+    mockMuseumContext();
+    global.fetch = jest.fn(async url => new Response(JSON.stringify({
+      choices: [{ message: { content: url.includes('openrouter.ai') ? 'OpenRouter reply' : 'Groq reply' } }]
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    }));
+
+    try {
+      const limitedResponse = await request(app)
+        .post('/api/chat')
+        .send({ message: `Chat during Groq limit ${Date.now()}`, language: 'en' });
+      expect(limitedResponse.status).toBe(200);
+      expect(limitedResponse.body.reply).toBe('OpenRouter reply');
+      expect(limitedResponse.body.provider).toBe('openrouter-fallback');
+
+      const recoveredResponse = await request(app)
+        .post('/api/chat')
+        .send({ message: `Chat after Groq reset ${Date.now()}`, language: 'en' });
+      expect(recoveredResponse.status).toBe(200);
+      expect(recoveredResponse.body.reply).toBe('Groq reply');
+      expect(recoveredResponse.body.provider).toBe('groq');
+      expect(global.fetch.mock.calls.map(([url]) => url)).toEqual([
+        'https://openrouter.ai/api/v1/chat/completions',
+        'https://api.groq.com/openai/v1/chat/completions'
+      ]);
+    } finally {
+      global.fetch = originalFetch;
+      envKeys.forEach(key => {
+        if (savedEnv[key] === undefined) delete process.env[key];
+        else process.env[key] = savedEnv[key];
+      });
+    }
+  });
+
+  it('POST /api/chat does not retry Groq while its limit is active if OpenRouter fails', async () => {
+    const originalFetch = global.fetch;
+    const envKeys = ['OPENROUTER_API_KEY', 'TEST_OPENROUTER_FALLBACK'];
+    const savedEnv = Object.fromEntries(envKeys.map(key => [key, process.env[key]]));
+    process.env.OPENROUTER_API_KEY = 'test-openrouter-key';
+    process.env.TEST_OPENROUTER_FALLBACK = '1';
+    jest.spyOn(chatApiKey, 'getGroqConfiguration')
+      .mockResolvedValue({ apiKey: 'test-groq-key' });
+    jest.spyOn(apiUsage, 'isRateLimited')
+      .mockReturnValue({ limited: true, reason: 'active_429' });
+    jest.spyOn(apiUsage, 'recordApiUsageSafely').mockResolvedValue();
+    mockMuseumContext();
+    global.fetch = jest.fn(async () => new Response('OpenRouter unavailable', { status: 503 }));
+
+    try {
+      const response = await request(app)
+        .post('/api/chat')
+        .send({ message: `Chat during provider outage ${Date.now()}`, language: 'en' });
+
+      expect(response.status).toBe(502);
+      expect(response.body.code).toBe('CHAT_PROVIDERS_UNAVAILABLE');
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(global.fetch.mock.calls[0][0]).toBe('https://openrouter.ai/api/v1/chat/completions');
+    } finally {
+      global.fetch = originalFetch;
+      envKeys.forEach(key => {
+        if (savedEnv[key] === undefined) delete process.env[key];
+        else process.env[key] = savedEnv[key];
+      });
+    }
+  });
+
+  it('clears exhausted Groq limits when the provider reset time passes', async () => {
+    const model = `test-reset-${Date.now()}`;
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-01-01T00:00:00Z'));
+    try {
+      await apiUsage.recordGroqUsageSafely({
+        service: 'chat',
+        model,
+        response: new Response('limit reached', {
+          status: 200,
+          headers: {
+            'x-ratelimit-remaining-requests': '0',
+            'x-ratelimit-reset-requests': '2s'
+          }
+        })
+      });
+      expect(apiUsage.isRateLimited('groq', model).limited).toBe(true);
+
+      jest.advanceTimersByTime(2001);
+      expect(apiUsage.isRateLimited('groq', model).limited).toBe(false);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('POST /api/chat returns an error instead of a local answer when Groq is not configured', async () => {
     const originalFetch = global.fetch;
     jest.spyOn(chatApiKey, 'getGroqConfiguration')

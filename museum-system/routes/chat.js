@@ -426,7 +426,7 @@ function generateLocalFallbackReply(userMessage, { info, allExhibits, allProgram
   }, activeLang);
 }
 
-// Answer visitor questions with Groq; return explicit errors instead of local fallbacks.
+// Answer visitor questions with Groq, using OpenRouter when Groq is unavailable.
 router.post('/', chatLimiter, async (req, res) => {
   let apiKey;
   try {
@@ -444,13 +444,6 @@ router.post('/', chatLimiter, async (req, res) => {
   if (message.length > MAX_MESSAGE_LENGTH) {
     return res.status(400).json({ error: `Message is too long (max ${MAX_MESSAGE_LENGTH} characters).` });
   }
-  if (!apiKey) {
-    return res.status(503).json({
-      error: 'The Groq chatbot is not configured. Add a Groq API key in API Management or the server environment.',
-      code: 'GROQ_CHAT_NOT_CONFIGURED'
-    });
-  }
-
   // Sanitize incoming history
   let cleanHistory = [];
   if (Array.isArray(history)) {
@@ -552,6 +545,10 @@ router.post('/', chatLimiter, async (req, res) => {
         return res.json({ reply: orReply, provider: 'openrouter-fallback' });
       }
     }
+    return res.status(502).json({
+      error: 'Groq is temporarily rate-limited and the OpenRouter fallback is unavailable. Please try again shortly.',
+      code: 'CHAT_PROVIDERS_UNAVAILABLE'
+    });
   }
 
   // ── Tier 1: Groq (primary provider) ──
@@ -697,8 +694,10 @@ router.post('/', chatLimiter, async (req, res) => {
   }
 
   return res.status(503).json({
-    error: 'The Groq chatbot is not configured. Add a Groq API key in API Management or the server environment.',
-    code: 'GROQ_CHAT_NOT_CONFIGURED'
+    error: apiKey
+      ? 'The Groq chatbot request failed. Please try again.'
+      : 'The chatbot is not configured. Add a Groq or OpenRouter API key.',
+    code: apiKey ? 'GROQ_CHAT_FAILED' : 'GROQ_CHAT_NOT_CONFIGURED'
   });
 });
 

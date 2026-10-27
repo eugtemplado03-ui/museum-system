@@ -131,13 +131,17 @@ reflect other apps using the same organization. Usage history is retained for
 up to 90 days; tracking requires MongoDB. This is not an account-wide billing
 report, and the dashboard does not estimate cost.
 
-Groq is the only AI provider used for the museum chat, description
-translation, and server-generated speech. Cloudinary is used for remote
-image/video uploads and database backups.
+Groq is the primary AI provider for the museum chat, description translation,
+and server-generated speech. Chat requests automatically use OpenRouter when
+Groq is rate-limited, then return to Groq after its rate limit resets.
+Cloudinary is used for remote image/video uploads and database backups.
 
-For Groq, set the optional `GROQ_API_KEY` and `GROQ_MODEL` environment
-variables, or enter a key from
+Set `GROQ_API_KEY` and `GROQ_MODEL` for Groq, or enter a key from
 [console.groq.com/keys](https://console.groq.com/keys) in API Management.
+To enable chat failover, also set `OPENROUTER_API_KEY` and optionally
+`OPENROUTER_MODEL`. Chat continues to use Groq whenever its rate limit is
+available; OpenRouter is used only while Groq is rate-limited. Translation
+and speech continue to use Groq.
 Groq Orpheus speech currently supports English and Saudi Arabic only.
 `GROQ_TTS_VOICE` (default `autumn`) and `GROQ_TTS_ARABIC_VOICE` (default
 `aisha`) select voices for those languages. Groq does not currently provide
@@ -153,18 +157,16 @@ For Cloudinary, configure `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and
 
 Managed credentials are encrypted in MongoDB using a key derived from
 `JWT_SECRET`. Keep `JWT_SECRET` stable; if it is rotated, re-enter the
-dashboard-managed credentials. The chatbot, translations, and supported
-speech languages require an active Groq key and return an error if Groq is
-unavailable.
+dashboard-managed credentials.
 
 ## Museum chat assistant
 
 The visitor pages include a chat widget that answers museum questions using
 the live exhibit, program, and event catalogs together with museum information.
-The assistant always uses Groq; without an active key or when Groq is
-unavailable, the endpoint returns an error rather than using a local
-response engine. The Groq key is shared by chat, translation, and supported
-speech generation.
+The assistant uses Groq by default and switches to OpenRouter when Groq is
+rate-limited. Once Groq's reported limit reset time passes, chat requests
+automatically try Groq again. The Groq key is shared by chat, translation,
+and supported speech generation.
 
 **If a key ever gets pasted somewhere it shouldn't (chat, a public repo,
 etc.), treat it as compromised and rotate it immediately at
