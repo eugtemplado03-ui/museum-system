@@ -2104,7 +2104,7 @@
       .directions-floating-panel {
         position: fixed;
         top: auto;
-        bottom: max(10px, env(safe-area-inset-bottom, 10px));
+        bottom: calc(76px + env(safe-area-inset-bottom));
         left: 10px;
         right: 10px;
         width: auto;
@@ -2119,7 +2119,7 @@
         background: rgba(3, 19, 28, 0.97);
         border: 1.5px solid #ffea00;
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.88), 0 0 16px rgba(255, 234, 0, 0.24);
-        z-index: 100;
+        z-index: 650;
         animation: slideUpMobile 0.24s cubic-bezier(0.16, 1, 0.3, 1);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
