@@ -140,6 +140,61 @@ function parseResetAt(resetValue, now = Date.now()) {
   return Number.isNaN(parsedDate) ? null : parsedDate;
 }
 
+function getRateLimitStatus(limit, now = Date.now()) {
+  const observedAt = limit.observedAt ? new Date(limit.observedAt).getTime() : NaN;
+  if (!Number.isFinite(observedAt)) {
+    return { isLimited: false, status: 'unknown', resetAt: null };
+  }
+
+  const hasRequestsLimit = limit.remainingRequests === 0;
+  const hasTokensLimit = limit.remainingTokens !== null
+    && limit.remainingTokens !== undefined
+    && limit.remainingTokens < 50;
+  const hasHttpRateLimit = limit.httpStatus === 429;
+  const hadLimit = hasRequestsLimit || hasTokensLimit || hasHttpRateLimit;
+  const activeResetTimes = [];
+  const requestsResetAt = limit.resetRequests
+    ? parseResetAt(limit.resetRequests, observedAt)
+    : (hasRequestsLimit ? observedAt + 30000 : null);
+  const tokensResetAt = limit.resetTokens
+    ? parseResetAt(limit.resetTokens, observedAt)
+    : (hasTokensLimit ? observedAt + 30000 : null);
+
+  if (hasRequestsLimit && requestsResetAt) activeResetTimes.push(requestsResetAt);
+  if (hasTokensLimit && tokensResetAt) activeResetTimes.push(tokensResetAt);
+  if (hasHttpRateLimit) {
+    const retryAfter = String(limit.retryAfter || '').trim();
+    let retryAt = null;
+    if (retryAfter && retryAfter !== 'rate_limited' && retryAfter !== 'insufficient_credits') {
+      const retrySeconds = Number(retryAfter);
+      retryAt = Number.isFinite(retrySeconds) && retrySeconds >= 0
+        ? observedAt + retrySeconds * 1000
+        : Date.parse(retryAfter);
+      if (!Number.isFinite(retryAt)) retryAt = null;
+    }
+    activeResetTimes.push(retryAt || observedAt + 30000);
+  }
+
+  const activeResetAt = activeResetTimes.filter(resetAt => resetAt > now);
+  if (activeResetAt.length) {
+    return {
+      isLimited: true,
+      status: 'rate_limited',
+      resetAt: new Date(Math.max(...activeResetAt)).toISOString(),
+      requestsResetAt: requestsResetAt ? new Date(requestsResetAt).toISOString() : null,
+      tokensResetAt: tokensResetAt ? new Date(tokensResetAt).toISOString() : null
+    };
+  }
+
+  return {
+    isLimited: false,
+    status: hadLimit ? 'window_ended' : 'not_limited',
+    resetAt: null,
+    requestsResetAt: requestsResetAt ? new Date(requestsResetAt).toISOString() : null,
+    tokensResetAt: tokensResetAt ? new Date(tokensResetAt).toISOString() : null
+  };
+}
+
 // Check if a specific provider/model is currently known to be rate limited
 function isRateLimited(provider, model = null) {
   const now = Date.now();
@@ -442,20 +497,23 @@ async function getApiUsage(days = 30) {
     audioCharacters: item.audioCharacters
   }));
 
-  const rateLimits = rateLimitsDocs.map(r => ({
-    provider: r.provider,
-    service: r.service,
-    model: r.model,
-    requestLimit: r.requestLimit ?? null,
-    remainingRequests: r.remainingRequests ?? null,
-    resetRequests: r.resetRequests ?? null,
-    tokenLimit: r.tokenLimit ?? null,
-    remainingTokens: r.remainingTokens ?? null,
-    resetTokens: r.resetTokens ?? null,
-    retryAfter: r.retryAfter ?? null,
-    httpStatus: r.httpStatus ?? null,
-    observedAt: r.observedAt
-  }));
+  const rateLimits = rateLimitsDocs.map(r => {
+    const limit = {
+      provider: r.provider,
+      service: r.service,
+      model: r.model,
+      requestLimit: r.requestLimit ?? null,
+      remainingRequests: r.remainingRequests ?? null,
+      resetRequests: r.resetRequests ?? null,
+      tokenLimit: r.tokenLimit ?? null,
+      remainingTokens: r.remainingTokens ?? null,
+      resetTokens: r.resetTokens ?? null,
+      retryAfter: r.retryAfter ?? null,
+      httpStatus: r.httpStatus ?? null,
+      observedAt: r.observedAt
+    };
+    return { ...limit, ...getRateLimitStatus(limit) };
+  });
 
   // Primary rate limit for backward compatibility (prefer Groq, else first)
   const primaryRateLimit = rateLimits.find(r => r.provider === 'groq') || rateLimits[0] || null;
@@ -497,5 +555,6 @@ module.exports = {
   getApiUsage,
   getGroqUsage,
   isRateLimited,
-  rateLimitSnapshot
+  rateLimitSnapshot,
+  getRateLimitStatus
 };

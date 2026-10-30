@@ -199,6 +199,20 @@ test('API Management protects, encrypts, and updates built-in and custom provide
     assert.equal(usageResponse.body.usage.rateLimits.remainingRequests, 0);
     assert.equal(usageResponse.body.usage.rateLimits.remainingTokens, 0);
     assert.equal(usageResponse.body.usage.rateLimits.retryAfter, '2');
+    assert.equal(usageResponse.body.usage.rateLimits.isLimited, true);
+    assert.equal(usageResponse.body.usage.rateLimits.status, 'rate_limited');
+
+    await apiUsage.RateLimit.updateOne(
+      { _id: 'groq|test-model' },
+      { $set: { observedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) } }
+    );
+    const expiredLimitResponse = await request(app)
+      .get('/api/admin/api-management/usage?days=30')
+      .set('Authorization', `Bearer ${adminToken}`);
+    assert.equal(expiredLimitResponse.status, 200);
+    assert.equal(expiredLimitResponse.body.usage.rateLimits.isLimited, false);
+    assert.equal(expiredLimitResponse.body.usage.rateLimits.status, 'window_ended');
+    assert.equal(expiredLimitResponse.body.usage.rateLimits.resetAt, null);
 
     const invalidCloudinary = await request(app)
       .put('/api/admin/api-management/cloudinary')

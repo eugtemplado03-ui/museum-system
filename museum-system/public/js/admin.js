@@ -5210,7 +5210,7 @@ async function renderApiManagementTab(contentEl) {
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
           <div>
             <h3 style="margin:0 0 6px;">Provider &amp; Model Usage Overview</h3>
-            <p style="margin:0;color:#64748b;">Accurate usage metrics and live rate-limit quotas recorded for the last 30 days.</p>
+            <p style="margin:0;color:#64748b;">Usage totals cover the last 30 days. Rate-limit status is based on the latest provider response and its reset window; availability is confirmed on the next API request.</p>
             <small style="display:block;margin-top:6px;color:#64748b;">Automatic fallback triggers on 429 rate limits or timeouts, shifting requests to the next provider while tracking token consumption accurately.</small>
           </div>
           <button type="button" id="refreshApiUsage" class="btn btn-secondary btn-small">Refresh usage &amp; limits</button>
@@ -5229,19 +5229,30 @@ async function renderApiManagementTab(contentEl) {
             </div>
 
             <div style="margin-top:20px;">
-              <h4 style="margin:0 0 10px;font-size:14px;color:#334155;text-transform:uppercase;letter-spacing:0.5px;">⚡ Live Provider &amp; Model Rate Limits</h4>
+              <h4 style="margin:0 0 10px;font-size:14px;color:#334155;text-transform:uppercase;letter-spacing:0.5px;">⚡ Last Reported Provider &amp; Model Limits</h4>
               ${rateLimitList.length
                 ? `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;">
                     ${rateLimitList.map(limit => {
-                      const obs = limit.observedAt ? new Date(limit.observedAt).toLocaleTimeString() : '';
-                      const isLimited = limit.httpStatus === 429 || limit.remainingRequests === 0 || (limit.remainingTokens !== null && limit.remainingTokens < 50);
-                      const statusColor = isLimited ? '#ef4444' : '#10b981';
+                      const obs = limit.observedAt ? new Date(limit.observedAt).toLocaleString() : '';
+                      const resetLabel = value => {
+                        if (!value) return '—';
+                        const reset = new Date(value);
+                        return `${reset.getTime() <= Date.now() ? 'Passed' : 'At'} ${reset.toLocaleString()}`;
+                      };
+                      const isLimited = limit.isLimited === true;
+                      const statusLabel = isLimited
+                        ? 'RATE LIMITED'
+                        : (limit.status === 'window_ended'
+                          ? 'RESET WINDOW ENDED'
+                          : (limit.status === 'not_limited' ? 'NO ACTIVE LIMIT' : 'STATUS UNKNOWN'));
+                      const statusColor = isLimited ? '#ef4444' : (limit.status === 'window_ended' ? '#d97706' : (limit.status === 'not_limited' ? '#10b981' : '#64748b'));
+                      const statusBackground = isLimited ? '#fef2f2' : (limit.status === 'window_ended' ? '#fffbeb' : (limit.status === 'not_limited' ? '#f0fdf4' : '#f1f5f9'));
                       return `
                         <div style="padding:14px;border:1px solid #e2e8f0;border-radius:12px;background:#ffffff;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
                           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
                             <div>${getProviderBadge(limit.provider)} <strong style="font-size:13px;margin-left:4px;">${escapeHtml(limit.service)}</strong></div>
-                            <span style="font-size:11px;font-weight:700;color:${statusColor};background:${isLimited ? '#fef2f2' : '#f0fdf4'};padding:2px 8px;border-radius:99px;border:1px solid ${statusColor}40;">
-                              ${isLimited ? 'RATE LIMITED' : 'ACTIVE / OK'}
+                            <span style="font-size:11px;font-weight:700;color:${statusColor};background:${statusBackground};padding:2px 8px;border-radius:99px;border:1px solid ${statusColor}40;">
+                              ${statusLabel}
                             </span>
                           </div>
                           <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#475569;margin-bottom:10px;word-break:break-all;">
@@ -5249,14 +5260,14 @@ async function renderApiManagementTab(contentEl) {
                           </div>
                           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;background:#f8fafc;padding:10px;border-radius:8px;">
                             <div>
-                              <div style="color:#64748b;font-size:11px;">Requests (RPD)</div>
+                              <div style="color:#64748b;font-size:11px;">Last reported requests (RPD)</div>
                               <div><strong>${limit.remainingRequests == null ? '—' : usageNumber(limit.remainingRequests)}</strong> / ${limit.requestLimit == null ? '—' : usageNumber(limit.requestLimit)}</div>
-                              <small style="color:#94a3b8;font-size:10px;">Reset: ${escapeHtml(limit.resetRequests || '—')}</small>
+                              <small style="color:#94a3b8;font-size:10px;">Reset: ${escapeHtml(resetLabel(limit.requestsResetAt))}</small>
                             </div>
                             <div>
-                              <div style="color:#64748b;font-size:11px;">Tokens (TPM)</div>
+                              <div style="color:#64748b;font-size:11px;">Last reported tokens (TPM)</div>
                               <div><strong>${limit.remainingTokens == null ? '—' : usageNumber(limit.remainingTokens)}</strong> / ${limit.tokenLimit == null ? '—' : usageNumber(limit.tokenLimit)}</div>
-                              <small style="color:#94a3b8;font-size:10px;">Reset: ${escapeHtml(limit.resetTokens || '—')}</small>
+                              <small style="color:#94a3b8;font-size:10px;">Reset: ${escapeHtml(resetLabel(limit.tokensResetAt))}</small>
                             </div>
                           </div>
                           <div style="display:flex;justify-content:space-between;font-size:11px;color:#64748b;margin-top:8px;">
