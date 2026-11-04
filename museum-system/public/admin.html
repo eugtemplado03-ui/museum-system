@@ -7,7 +7,7 @@
 <title>Admin — Museo Sang Bata sa Negros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Open+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=51">
+<link rel="stylesheet" href="/css/style.css?v=52">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   /* ── Dedicated Admin Navy Topbar ────────────────────────────── */
@@ -463,6 +463,19 @@
     box-shadow: 0 4px 20px rgba(91, 164, 230, 0.20) !important;
     background: #FFFFFF !important;
     overflow: hidden !important;
+  }
+  @media (min-width: 769px) {
+    .admin-table-wrap.admin-catalog-table-wrap,
+    .admin-table-wrap.admin-artifacts-table-wrap {
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      scrollbar-color: #5ba4e6 #e2e8f0;
+      scrollbar-width: thin;
+    }
+    .admin-table-wrap.admin-catalog-table-wrap table.ledger,
+    .admin-table-wrap.admin-artifacts-table-wrap table.ledger {
+      min-width: 1600px !important;
+    }
   }
   table.ledger {
     border: none !important;
@@ -1398,7 +1411,7 @@
   <script src="/js/lightbox.js"></script>
   <script src="/js/sidebar.js"></script>
   <script src="/js/carousel.js?v=2"></script>
-  <script src="/js/admin.js?v=44"></script>
+  <script src="/js/admin.js?v=45"></script>
   <script src="/js/footer.js"></script>
 </body>
 </html>

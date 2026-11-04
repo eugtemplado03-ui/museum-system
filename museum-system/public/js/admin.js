@@ -1248,7 +1248,7 @@ async function renderCatalogTab(contentEl){
         }).join('')}
       </div>
     </div>
-    <div class="admin-table-wrap" style="margin-top:12px;">
+    <div class="admin-table-wrap admin-catalog-table-wrap" role="region" aria-label="Exhibit catalog table; scroll horizontally to view all columns" tabindex="0" style="margin-top:12px;">
       <table class="ledger">
         <thead><tr><th>Tag</th><th>Code</th><th>Title</th><th>Category</th><th>Rating</th><th>♥</th><th>Location</th><th></th></tr></thead>
         <tbody id="ledgerBody"></tbody>
@@ -4217,7 +4217,7 @@ async function renderArtifactsTab(contentEl){
       </div>
     </div>
 
-    <div class="admin-table-wrap" style="margin-top:12px;">
+    <div class="admin-table-wrap admin-artifacts-table-wrap" role="region" aria-label="Artifacts inventory table; scroll horizontally to view all columns" tabindex="0" style="margin-top:12px;">
       <table class="ledger">
         <thead>
           <tr>
