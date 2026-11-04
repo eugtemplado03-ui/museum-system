@@ -185,6 +185,7 @@ const SIDEBAR_ITEMS = [
   { id: 'categories',     label: 'Categories',        icon: '🏷️', group: 'Collections' },
   { id: 'carousel',       label: 'Showcase Carousel', icon: '🎠', group: 'Collections' },
   { id: 'artifacts',      label: 'Artifacts Log',     icon: '🏺', group: 'Collections' },
+  { id: 'artifactHistory',label: 'Artifact History',  icon: '🕘', group: 'Collections' },
   { id: 'gallery',        label: 'Gallery',           icon: '🖼️', group: 'Collections' },
   { id: 'visitors',       label: 'Visitor Log',       icon: '🟢', group: 'Operations' },
   { id: 'visitorHistory', label: 'Visitor History',   icon: '📋', group: 'Operations' },
@@ -420,6 +421,7 @@ async function renderDashboard(){
   else if(activeTab === 'visitors') await renderVisitorsTab(contentEl);
   else if(activeTab === 'visitorHistory') await renderVisitorHistoryTab(contentEl);
   else if(activeTab === 'artifacts') await renderArtifactsTab(contentEl);
+  else if(activeTab === 'artifactHistory') await renderArtifactHistoryTab(contentEl);
   else if(activeTab === 'programs') await renderProgramsTab(contentEl);
   else if(activeTab === 'events') await renderEventsTab(contentEl);
   else if(activeTab === 'gallery') await renderGalleryTab(contentEl);
@@ -4102,6 +4104,73 @@ let adminArtifactsSearch = '';
 let adminArtifactsCategoryFilter = 'All';
 let adminArtifactsConditionFilter = 'All';
 let adminArtifactsStatusFilter = 'All';
+let adminArtifactHistorySearch = '';
+
+// List artifact records and link each one to its saved edit history.
+async function renderArtifactHistoryTab(contentEl){
+  contentEl.innerHTML = `<div class="empty-state" style="color:var(--ink-soft);"><p>Loading artifact history…</p></div>`;
+  try{
+    const response = await Api.listArtifactLogs();
+    artifactsCache = (response && Array.isArray(response.artifactLogs)) ? response.artifactLogs : [];
+  }catch(err){
+    contentEl.innerHTML = `<div class="empty-state"><h2>Could not load artifact history</h2><p>${escapeHtml(err.message)}</p></div>`;
+    return;
+  }
+
+  const filtered = artifactsCache.filter(artifact => {
+    const query = adminArtifactHistorySearch.toLowerCase();
+    return !query ||
+      (artifact.name || '').toLowerCase().includes(query) ||
+      (artifact.accessionNo || '').toLowerCase().includes(query);
+  });
+
+  contentEl.innerHTML = `
+    <div class="admin-toolbar-wrap">
+      <div class="admin-toolbar-row">
+        <input type="text" id="adminArtifactHistorySearch" class="admin-search-input" placeholder="Search artifact name or accession number…" value="${escapeHtml(adminArtifactHistorySearch)}">
+        <span style="font-size:13px; color:var(--ink-soft);">${filtered.length} of ${artifactsCache.length} artifacts</span>
+      </div>
+    </div>
+    <div class="admin-table-wrap" style="margin-top:12px;">
+      <table class="ledger">
+        <thead>
+          <tr><th>Artifact</th><th>Accession #</th><th>Last updated</th><th style="text-align:right;">History</th></tr>
+        </thead>
+        <tbody>
+          ${filtered.map(artifact => `
+            <tr>
+              <td data-label="Artifact">${escapeHtml(artifact.name || 'Unnamed artifact')}</td>
+              <td data-label="Accession #">${escapeHtml(artifact.accessionNo || '—')}</td>
+              <td data-label="Last updated">${escapeHtml(artifact.updatedAt ? new Date(artifact.updatedAt).toLocaleString() : '—')}</td>
+              <td data-label="History" style="text-align:right;">
+                <button class="btn btn-ghost dark btn-small" type="button" data-open-artifact-history="${escapeHtml(artifact.id)}">View history</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+    ${filtered.length === 0 ? `<div class="empty-state"><h2>${artifactsCache.length ? 'No matching artifacts' : 'No artifact records found'}</h2><p>${artifactsCache.length ? 'Try another artifact name or accession number.' : 'Artifact history will be available here after artifacts are added.'}</p></div>` : ''}
+  `;
+
+  const searchInput = document.getElementById('adminArtifactHistorySearch');
+  searchInput?.addEventListener('input', event => {
+    adminArtifactHistorySearch = event.target.value.trim();
+    renderArtifactHistoryTab(contentEl);
+    const updatedInput = document.getElementById('adminArtifactHistorySearch');
+    if(updatedInput){
+      updatedInput.focus();
+      updatedInput.setSelectionRange(updatedInput.value.length, updatedInput.value.length);
+    }
+  });
+
+  contentEl.querySelectorAll('[data-open-artifact-history]').forEach(button => {
+    button.addEventListener('click', () => {
+      const artifact = artifactsCache.find(item => item.id === button.dataset.openArtifactHistory);
+      if(artifact) openArtifactHistoryModal(artifact);
+    });
+  });
+}
 
 // Fetch artifact inventory and render its filters, records, and action controls.
 async function renderArtifactsTab(contentEl){
