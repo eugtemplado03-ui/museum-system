@@ -3547,7 +3547,7 @@ async function renderVisitorHistoryTab(contentEl){
     </div>
 
     <!-- History Table -->
-    <div class="admin-table-wrap" style="margin-top:12px;">
+    <div class="admin-table-wrap admin-visitor-history-table-wrap" role="region" aria-label="Visitor history table; scroll horizontally to view all columns" tabindex="0" style="margin-top:12px;">
       <table class="ledger">
         <thead>
           <tr>
