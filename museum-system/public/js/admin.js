@@ -4300,10 +4300,12 @@ async function renderArtifactsTab(contentEl){
             <div style="font-size:12.5px; color:var(--ink);">${escapeHtml(a.donor || 'Museum Acquisition')}</div>
             <div style="font-size:11px; color:var(--grey-400);">${escapeHtml(a.acquisitionDate || '')}</div>
           </td>
-          <td data-label="Actions" style="text-align:right; white-space:nowrap;">
-            <button class="btn btn-ghost dark btn-small" data-history-artifact="${a.id}" title="View artifact edit history">History</button>
-            <button class="btn btn-ghost dark btn-small" data-edit-artifact="${a.id}" title="Edit artifact record">Edit</button>
-            <button class="btn btn-danger btn-small" data-del-artifact="${a.id}" style="margin-left:4px;" title="Delete artifact record">Delete</button>
+          <td data-label="Actions" style="text-align:right;">
+            <div class="artifact-row-actions">
+              <button class="btn btn-ghost dark btn-small artifact-history-btn" data-history-artifact="${a.id}" title="View artifact edit history">History</button>
+              <button class="btn btn-ghost dark btn-small" data-edit-artifact="${a.id}" title="Edit artifact record">Edit</button>
+              <button class="btn btn-danger btn-small" data-del-artifact="${a.id}" title="Delete artifact record">Delete</button>
+            </div>
           </td>
         </tr>
       `;
