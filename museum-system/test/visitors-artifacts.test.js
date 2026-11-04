@@ -117,16 +117,26 @@ test('Artifacts log CRUD, auto accession numbering, and statistics workflow', as
       condition: 'Good',
       status: 'On Display',
       location: 'Heritage Toys Gallery'
-    });
+    }, 'test-admin');
     assert.equal(updated.condition, 'Good');
     assert.equal(updated.status, 'On Display');
 
-    // 5. Test stats
+    // 5. Verify the edit history preserves changed values and the admin identity.
+    const history = await artifactLogs.getHistory(a2.id);
+    assert.equal(history.length, 1);
+    assert.equal(history[0].editedBy, 'test-admin');
+    assert.ok(history[0].fields.some(change =>
+      change.field === 'condition' &&
+      change.previousValue === 'Needs Restoration' &&
+      change.newValue === 'Good'
+    ));
+
+    // 6. Test stats
     const statData = await artifactLogs.stats();
     assert.ok(statData.totalArtifacts >= 2, 'Total artifacts count should reflect items');
     assert.ok(statData.byCategory['Marine Specimen'] >= 1, 'Category stats should include Marine Specimen');
 
-    // 6. Remove artifact logs
+    // 7. Remove artifact logs
     const rem1 = await artifactLogs.remove(a1.id);
     const rem2 = await artifactLogs.remove(a2.id);
     assert.equal(rem1, true, 'Remove a1 should succeed');

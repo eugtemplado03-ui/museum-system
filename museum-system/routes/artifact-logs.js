@@ -41,6 +41,17 @@ router.get('/stats', async (req, res) => {
   }
 });
 
+// GET /api/artifact-logs/:id/history - retrieve artifact edit history
+router.get('/:id/history', async (req, res) => {
+  try {
+    const history = await artifactLogs.getHistory(req.params.id);
+    if (!history) return res.status(404).json({ error: 'Artifact log not found.' });
+    res.json({ history });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch artifact history' });
+  }
+});
+
 // GET /api/artifact-logs/:id - get single artifact log entry
 router.get('/:id', async (req, res) => {
   try {
@@ -69,7 +80,7 @@ router.put('/:id', async (req, res) => {
   const errors = validate(req.body);
   if (errors.length) return res.status(400).json({ error: errors.join(' ') });
   try {
-    const artifact = await artifactLogs.update(req.params.id, req.body);
+    const artifact = await artifactLogs.update(req.params.id, req.body, req.user.username || req.user.sub);
     if (!artifact) return res.status(404).json({ error: 'Artifact log not found.' });
     res.json({ artifact });
   } catch (err) {

@@ -4301,6 +4301,7 @@ async function renderArtifactsTab(contentEl){
             <div style="font-size:11px; color:var(--grey-400);">${escapeHtml(a.acquisitionDate || '')}</div>
           </td>
           <td data-label="Actions" style="text-align:right; white-space:nowrap;">
+            <button class="btn btn-ghost dark btn-small" data-history-artifact="${a.id}" title="View artifact edit history">History</button>
             <button class="btn btn-ghost dark btn-small" data-edit-artifact="${a.id}" title="Edit artifact record">Edit</button>
             <button class="btn btn-danger btn-small" data-del-artifact="${a.id}" style="margin-left:4px;" title="Delete artifact record">Delete</button>
           </td>
@@ -4312,6 +4313,13 @@ async function renderArtifactsTab(contentEl){
       btn.addEventListener('click', ()=>{
         const a = artifactsCache.find(item => item.id === btn.dataset.editArtifact);
         if(a) openArtifactModal(a);
+      });
+    });
+
+    tbody.querySelectorAll('[data-history-artifact]').forEach(btn => {
+      btn.addEventListener('click', ()=>{
+        const a = artifactsCache.find(item => item.id === btn.dataset.historyArtifact);
+        if(a) openArtifactHistoryModal(a);
       });
     });
 
@@ -4327,6 +4335,54 @@ async function renderArtifactsTab(contentEl){
         }catch(err){ toast(err.message, true); }
       });
     });
+  }
+}
+
+// Show the saved changes made to an artifact record.
+async function openArtifactHistoryModal(artifact){
+  openModal(`
+    <h2>Artifact edit history</h2>
+    <p style="font-size:13px; color:var(--ink-soft); margin:-8px 0 16px;">
+      ${escapeHtml(artifact.name)} · ${escapeHtml(artifact.accessionNo)}
+    </p>
+    <div id="artifactHistoryContent" class="empty-state" style="padding:20px;">
+      <p>Loading artifact history…</p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="closeArtifactHistory">Close</button>
+    </div>
+  `);
+  document.getElementById('closeArtifactHistory')?.addEventListener('click', closeModal);
+
+  const content = document.getElementById('artifactHistoryContent');
+  try{
+    const response = await Api.getArtifactLogHistory(artifact.id);
+    const history = Array.isArray(response.history) ? response.history : [];
+    if(!history.length){
+      content.innerHTML = '<p>No edits have been recorded for this artifact yet.</p>';
+      return;
+    }
+
+    content.innerHTML = history.map(entry => `
+      <div style="border:1px solid var(--grey-200); border-radius:10px; padding:14px; margin-bottom:10px; text-align:left;">
+        <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:4px; margin-bottom:10px;">
+          <strong>${escapeHtml(entry.editedBy || 'Admin')}</strong>
+          <span style="font-size:12px; color:var(--ink-soft);">${escapeHtml(new Date(entry.changedAt).toLocaleString())}</span>
+        </div>
+        <div style="display:grid; gap:8px;">
+          ${(entry.fields || []).map(change => `
+            <div style="font-size:13px;">
+              <strong>${escapeHtml(change.field)}</strong>:
+              <span style="color:var(--ink-soft);">${escapeHtml(change.previousValue || '(empty)')}</span>
+              <span aria-hidden="true"> → </span>
+              <span>${escapeHtml(change.newValue || '(empty)')}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+  }catch(err){
+    content.innerHTML = `<p>Could not load artifact history: ${escapeHtml(err.message)}</p>`;
   }
 }
 

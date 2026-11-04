@@ -2,6 +2,18 @@
 const mongoose = require('mongoose');
 const { nanoid } = require('nanoid');
 
+const artifactHistoryFieldSchema = new mongoose.Schema({
+  field: { type: String, required: true },
+  previousValue: { type: String, default: '' },
+  newValue: { type: String, default: '' }
+}, { _id: false });
+
+const artifactHistoryEntrySchema = new mongoose.Schema({
+  changedAt: { type: String, default: () => new Date().toISOString() },
+  editedBy: { type: String, default: 'Admin' },
+  fields: { type: [artifactHistoryFieldSchema], default: [] }
+}, { _id: false });
+
 const artifactLogSchema = new mongoose.Schema({
   id: { type: String, default: () => nanoid(10), unique: true },
   accessionNo: { type: String, required: true },
@@ -15,6 +27,7 @@ const artifactLogSchema = new mongoose.Schema({
   estimatedValue: { type: String, default: '' },
   description: { type: String, default: '' },
   notes: { type: String, default: '' },
+  history: { type: [artifactHistoryEntrySchema], default: [], select: false },
   createdAt: { type: String, default: () => new Date().toISOString() },
   updatedAt: { type: String, default: () => new Date().toISOString() }
 });
@@ -62,6 +75,14 @@ async function findById(id) {
   return await ArtifactLog.findOne({ id }).lean();
 }
 
+// Retrieve the edit history separately from the current inventory record.
+async function getHistory(id) {
+  const artifact = await ArtifactLog.findOne({ id }).select('+history').lean();
+  if (!artifact) return null;
+
+  return (artifact.history || []).slice().sort((a, b) => b.changedAt.localeCompare(a.changedAt));
+}
+
 // Generate the next accession number for the current calendar year.
 async function generateAccessionNo() {
   const year = new Date().getFullYear();
@@ -104,21 +125,43 @@ async function create(payload) {
 }
 
 // Apply only supplied inventory fields and refresh the record's modification time.
-async function update(id, payload) {
-  const existing = await ArtifactLog.findOne({ id });
+async function update(id, payload, editedBy = 'Admin') {
+  const existing = await ArtifactLog.findOne({ id }).select('+history');
   if (!existing) return null;
 
-  if (payload.accessionNo !== undefined) existing.accessionNo = payload.accessionNo.trim();
-  if (payload.name !== undefined) existing.name = payload.name.trim();
-  if (payload.category !== undefined) existing.category = payload.category;
-  if (payload.condition !== undefined) existing.condition = payload.condition;
-  if (payload.status !== undefined) existing.status = payload.status;
-  if (payload.location !== undefined) existing.location = payload.location.trim();
-  if (payload.acquisitionDate !== undefined) existing.acquisitionDate = payload.acquisitionDate;
-  if (payload.donor !== undefined) existing.donor = payload.donor.trim();
-  if (payload.estimatedValue !== undefined) existing.estimatedValue = payload.estimatedValue.trim();
-  if (payload.description !== undefined) existing.description = payload.description.trim();
-  if (payload.notes !== undefined) existing.notes = payload.notes.trim();
+  const changedFields = [];
+  const fields = {
+    accessionNo: value => value.trim(),
+    name: value => value.trim(),
+    category: value => value,
+    condition: value => value,
+    status: value => value,
+    location: value => value.trim(),
+    acquisitionDate: value => value,
+    donor: value => value.trim(),
+    estimatedValue: value => value.trim(),
+    description: value => value.trim(),
+    notes: value => value.trim()
+  };
+
+  for (const [field, normalize] of Object.entries(fields)) {
+    if (payload[field] === undefined) continue;
+
+    const previousValue = existing[field] || '';
+    const newValue = normalize(payload[field]);
+    if (previousValue !== newValue) {
+      changedFields.push({ field, previousValue, newValue });
+      existing[field] = newValue;
+    }
+  }
+
+  if (changedFields.length) {
+    existing.history.push({
+      changedAt: new Date().toISOString(),
+      editedBy: editedBy || 'Admin',
+      fields: changedFields
+    });
+  }
   
   existing.updatedAt = new Date().toISOString();
   
@@ -178,4 +221,4 @@ async function stats() {
   };
 }
 
-module.exports = { all, findById, create, update, remove, stats, ArtifactLog };
+module.exports = { all, findById, getHistory, create, update, remove, stats, ArtifactLog };

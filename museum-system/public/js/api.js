@@ -209,6 +209,7 @@ const Api = (() => {
     listArtifactLogs: (query = '') => request('/api/artifact-logs' + (query ? (query.startsWith('?') ? query : '?' + query) : '')),
     getArtifactLogStats: () => request('/api/artifact-logs/stats'),
     getArtifactLog: (id) => request('/api/artifact-logs/' + encodeURIComponent(id)),
+    getArtifactLogHistory: (id) => request('/api/artifact-logs/' + encodeURIComponent(id) + '/history'),
     createArtifactLog: (payload) => request('/api/artifact-logs', { method: 'POST', body: JSON.stringify(payload) }),
     updateArtifactLog: (id, payload) => request('/api/artifact-logs/' + id, { method: 'PUT', body: JSON.stringify(payload) }),
     deleteArtifactLog: (id) => request('/api/artifact-logs/' + id, { method: 'DELETE' }),
